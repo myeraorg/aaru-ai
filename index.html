@@ -3,28 +3,372 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Aaru AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0b12;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: auto;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 35px;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .logo span {
+      font-size: 13px;
+      opacity: .6;
+      margin-left: 5px;
+    }
+
+    .profile {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #29293a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      color: #a5a5b5;
+      font-size: 15px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 12px;
+      background: #1b1b27;
+      color: #aaa;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #6c4cff;
+      color: white;
+    }
+
+    .prompt {
+      background: #171722;
+      border: 1px solid #29293a;
+      border-radius: 18px;
+      padding: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 130px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 16px;
+      resize: none;
+    }
+
+    textarea::placeholder {
+      color: #77778a;
+    }
+
+    .options {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    select {
+      flex: 1;
+      background: #222231;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+    }
+
+    .generate {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: #6c4cff;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .generate:active {
+      transform: scale(.98);
+    }
+
+    .section {
+      margin-top: 35px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .section-title h2 {
+      font-size: 18px;
+    }
+
+    .section-title span {
+      color: #77778a;
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: #171722;
+      border: 1px solid #29293a;
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 120px;
+    }
+
+    .card-icon {
+      font-size: 30px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .card p {
+      color: #77778a;
+      font-size: 12px;
+    }
+
+    nav {
+      position: sticky;
+      bottom: 10px;
+      margin-top: 35px;
+      background: #171722;
+      border: 1px solid #29293a;
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-around;
+      padding: 13px 5px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #9999aa;
+      font-size: 12px;
+    }
+
+    nav button:first-child {
+      color: white;
+    }
+
+    #status {
+      text-align: center;
+      color: #8f8fa3;
+      margin-top: 15px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Aaru AI</h1>
-  <p>Your AI Creative Studio</p>
 
-  <h2>What do you want to create?</h2>
+  <div class="app">
 
-  <button>🖼️ AI Image</button>
-  <button>🎬 AI Video</button>
+    <header>
+      <div class="logo">
+        Aaru <span>AI</span>
+      </div>
 
-  <br><br>
+      <div class="profile">👤</div>
+    </header>
 
-  <textarea
-    placeholder="Describe what you want to create..."
-    rows="5"
-    cols="35">
-  </textarea>
+    <section class="hero">
+      <h1>Create Anything.</h1>
+      <p>Turn your imagination into images and videos.</p>
+    </section>
 
-  <br><br>
+    <div class="tabs">
+      <button class="tab active" onclick="selectMode('image', this)">
+        🖼️ Image
+      </button>
 
-  <button>✨ Generate</button>
+      <button class="tab" onclick="selectMode('video', this)">
+        🎬 Video
+      </button>
+    </div>
+
+    <div class="prompt">
+
+      <textarea
+        id="prompt"
+        placeholder="Describe what you want to create..."
+      ></textarea>
+
+      <div class="options">
+
+        <select id="ratio">
+          <option value="9:16">9:16 Portrait</option>
+          <option value="1:1">1:1 Square</option>
+          <option value="16:9">16:9 Landscape</option>
+        </select>
+
+        <select id="quality">
+          <option value="standard">Standard</option>
+          <option value="hd">HD</option>
+        </select>
+
+      </div>
+
+      <button class="generate" onclick="generate()">
+        ✨ Generate
+      </button>
+
+    </div>
+
+    <div id="status"></div>
+
+    <section class="section">
+
+      <div class="section-title">
+        <h2>Create with Aaru</h2>
+        <span>Explore</span>
+      </div>
+
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-icon">🎨</div>
+          <h3>AI Images</h3>
+          <p>Create stunning images</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🎥</div>
+          <h3>AI Videos</h3>
+          <p>Generate creative videos</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">✨</div>
+          <h3>Image to Video</h3>
+          <p>Animate your images</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>AI Studio</h3>
+          <p>More creative tools</p>
+        </div>
+
+      </div>
+
+    </section>
+
+    <nav>
+      <button>⌂<br>Home</button>
+      <button>＋<br>Create</button>
+      <button>▣<br>Creations</button>
+      <button>⚙<br>Settings</button>
+    </nav>
+
+  </div>
+
+  <script>
+
+    let mode = "image";
+
+    function selectMode(newMode, button) {
+
+      mode = newMode;
+
+      document.querySelectorAll(".tab")
+        .forEach(tab => tab.classList.remove("active"));
+
+      button.classList.add("active");
+
+      document.getElementById("prompt").placeholder =
+        newMode === "image"
+        ? "Describe the image you want to create..."
+        : "Describe the video you want to create...";
+    }
+
+    function generate() {
+
+      const prompt =
+        document.getElementById("prompt").value.trim();
+
+      const status =
+        document.getElementById("status");
+
+      if (!prompt) {
+        status.innerText =
+          "Please describe what you want to create.";
+        return;
+      }
+
+      status.innerText =
+        "✨ Aaru AI is preparing your " + mode + "...";
+
+    }
+
+  </script>
+
 </body>
 </html>
