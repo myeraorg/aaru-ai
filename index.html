@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Aaru AI</title>
-
-  <style>
+  <title>Aaru AI</title>  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -142,8 +138,26 @@
       cursor: pointer;
     }
 
-    .generate:active {
-      transform: scale(.98);
+    .generate:disabled {
+      opacity: .6;
+    }
+
+    #status {
+      text-align: center;
+      color: #8f8fa3;
+      margin-top: 15px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+
+    #result img {
+      width: 100%;
+      border-radius: 16px;
+      display: block;
     }
 
     .section {
@@ -216,159 +230,201 @@
     nav button:first-child {
       color: white;
     }
+  </style></head><body><div class="app">  <header>
+    <div class="logo">
+      Aaru <span>AI</span>
+    </div><div class="profile">👤</div>
 
-    #status {
-      text-align: center;
-      color: #8f8fa3;
-      margin-top: 15px;
-      font-size: 13px;
-      min-height: 18px;
-    }
-  </style>
-</head>
+  </header>  <section class="hero">
+    <h1>Create Anything.</h1>
+    <p>Turn your imagination into images and videos.</p>
+  </section>  <div class="tabs"><button class="tab active" onclick="selectMode('image', this)">
+  🖼️ Image
+</button>
 
-<body>
+<button class="tab" onclick="selectMode('video', this)">
+  🎬 Video
+</button>
 
-  <div class="app">
+  </div>  <div class="prompt"><textarea
+  id="prompt"
+  placeholder="Describe the image you want to create..."
+></textarea>
 
-    <header>
-      <div class="logo">
-        Aaru <span>AI</span>
-      </div>
+<div class="options">
 
-      <div class="profile">👤</div>
-    </header>
+  <select id="ratio">
+    <option value="9:16">9:16 Portrait</option>
+    <option value="1:1">1:1 Square</option>
+    <option value="16:9">16:9 Landscape</option>
+  </select>
 
-    <section class="hero">
-      <h1>Create Anything.</h1>
-      <p>Turn your imagination into images and videos.</p>
-    </section>
+  <select id="quality">
+    <option value="standard">Standard</option>
+    <option value="hd">HD</option>
+  </select>
 
-    <div class="tabs">
-      <button class="tab active" onclick="selectMode('image', this)">
-        🖼️ Image
-      </button>
+</div>
 
-      <button class="tab" onclick="selectMode('video', this)">
-        🎬 Video
-      </button>
-    </div>
+<button id="generateBtn" class="generate" onclick="generate()">
+  ✨ Generate
+</button>
 
-    <div class="prompt">
+  </div>  <div id="status"></div>  <div id="result"></div>  <section class="section"><div class="section-title">
+  <h2>Create with Aaru</h2>
+  <span>Explore</span>
+</div>
 
-      <textarea
-        id="prompt"
-        placeholder="Describe what you want to create..."
-      ></textarea>
+<div class="cards">
 
-      <div class="options">
-
-        <select id="ratio">
-          <option value="9:16">9:16 Portrait</option>
-          <option value="1:1">1:1 Square</option>
-          <option value="16:9">16:9 Landscape</option>
-        </select>
-
-        <select id="quality">
-          <option value="standard">Standard</option>
-          <option value="hd">HD</option>
-        </select>
-
-      </div>
-
-      <button class="generate" onclick="generate()">
-        ✨ Generate
-      </button>
-
-    </div>
-
-    <div id="status"></div>
-
-    <section class="section">
-
-      <div class="section-title">
-        <h2>Create with Aaru</h2>
-        <span>Explore</span>
-      </div>
-
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-icon">🎨</div>
-          <h3>AI Images</h3>
-          <p>Create stunning images</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">🎥</div>
-          <h3>AI Videos</h3>
-          <p>Generate creative videos</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">✨</div>
-          <h3>Image to Video</h3>
-          <p>Animate your images</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">⚡</div>
-          <h3>AI Studio</h3>
-          <p>More creative tools</p>
-        </div>
-
-      </div>
-
-    </section>
-
-    <nav>
-      <button>⌂<br>Home</button>
-      <button>＋<br>Create</button>
-      <button>▣<br>Creations</button>
-      <button>⚙<br>Settings</button>
-    </nav>
-
+  <div class="card">
+    <div class="card-icon">🎨</div>
+    <h3>AI Images</h3>
+    <p>Create stunning images</p>
   </div>
 
-  <script>
+  <div class="card">
+    <div class="card-icon">🎥</div>
+    <h3>AI Videos</h3>
+    <p>Generate creative videos</p>
+  </div>
 
-    let mode = "image";
+  <div class="card">
+    <div class="card-icon">✨</div>
+    <h3>Image to Video</h3>
+    <p>Animate your images</p>
+  </div>
 
-    function selectMode(newMode, button) {
+  <div class="card">
+    <div class="card-icon">⚡</div>
+    <h3>AI Studio</h3>
+    <p>More creative tools</p>
+  </div>
 
-      mode = newMode;
+</div>
 
-      document.querySelectorAll(".tab")
-        .forEach(tab => tab.classList.remove("active"));
+  </section>  <nav>
+    <button>⌂<br>Home</button>
+    <button>＋<br>Create</button>
+    <button>▣<br>Creations</button>
+    <button>⚙<br>Settings</button>
+  </nav></div><script>
 
-      button.classList.add("active");
+  const API_URL =
+    "https://aaru-ai-api.myera-org.workers.dev/";
 
-      document.getElementById("prompt").placeholder =
-        newMode === "image"
-        ? "Describe the image you want to create..."
-        : "Describe the video you want to create...";
-    }
+  let mode = "image";
 
-    function generate() {
+  function selectMode(newMode, button) {
 
-      const prompt =
-        document.getElementById("prompt").value.trim();
+    mode = newMode;
 
-      const status =
-        document.getElementById("status");
+    document.querySelectorAll(".tab")
+      .forEach(tab => tab.classList.remove("active"));
 
-      if (!prompt) {
-        status.innerText =
-          "Please describe what you want to create.";
-        return;
-      }
+    button.classList.add("active");
+
+    document.getElementById("prompt").placeholder =
+      newMode === "image"
+      ? "Describe the image you want to create..."
+      : "Describe the video you want to create...";
+  }
+
+  async function generate() {
+
+    const prompt =
+      document.getElementById("prompt").value.trim();
+
+    const status =
+      document.getElementById("status");
+
+    const result =
+      document.getElementById("result");
+
+    const button =
+      document.getElementById("generateBtn");
+
+    if (!prompt) {
 
       status.innerText =
-        "✨ Aaru AI is preparing your " + mode + "...";
+        "Please describe what you want to create.";
+
+      return;
+    }
+
+    if (mode !== "image") {
+
+      status.innerText =
+        "Video generation will be added soon.";
+
+      return;
+    }
+
+    button.disabled = true;
+
+    status.innerText =
+      "✨ Aaru AI is preparing your image...";
+
+    result.innerHTML = "";
+
+    try {
+
+      const response = await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          prompt: prompt
+        })
+
+      });
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Image generation failed (" +
+          response.status +
+          ")"
+        );
+
+      }
+
+      const blob =
+        await response.blob();
+
+      const imageURL =
+        URL.createObjectURL(blob);
+
+      const img =
+        document.createElement("img");
+
+      img.src = imageURL;
+
+      img.alt = prompt;
+
+      result.appendChild(img);
+
+      status.innerText =
+        "✨ Image created successfully!";
+
+    } catch (error) {
+
+      console.error(error);
+
+      status.innerText =
+        "❌ Image generation failed. Please try again.";
+
+    } finally {
+
+      button.disabled = false;
 
     }
 
-  </script>
+  }
 
-</body>
+</script></body>
 </html>
