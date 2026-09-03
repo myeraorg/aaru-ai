@@ -379,115 +379,76 @@
 
     async function generate() {
 
-      const prompt =
-        document.getElementById("prompt").value.trim();
+  const prompt =
+    document.getElementById("prompt").value.trim();
 
-      const status =
-        document.getElementById("status");
+  const status =
+    document.getElementById("status");
 
-      const result =
-        document.getElementById("result");
+  const result =
+    document.getElementById("result");
 
-      const button =
-        document.getElementById("generateBtn");
+  const button =
+    document.getElementById("generateBtn");
 
+  if (!prompt) {
+    status.innerText =
+      "Please describe what you want to create.";
+    return;
+  }
 
-      if (!prompt) {
+  if (mode !== "image") {
+    status.innerText =
+      "Video generation will be added soon.";
+    return;
+  }
 
-        status.innerText =
-          "Please describe what you want to create.";
+  button.disabled = true;
 
-        return;
-      }
+  status.innerText =
+    "✨ Aaru AI is preparing your image...";
 
+  result.innerHTML = "";
 
-      if (mode !== "image") {
+  try {
 
-        status.innerText =
-          "Video generation will be added soon.";
+    const imageRequestURL =
+      API_URL +
+      "?prompt=" +
+      encodeURIComponent(prompt);
 
-        return;
-      }
+    const img =
+      document.createElement("img");
 
+    img.src = imageRequestURL;
 
-      button.disabled = true;
+    img.alt = prompt;
+
+    img.onload = function () {
+
+      result.appendChild(img);
 
       status.innerText =
-        "✨ Aaru AI is preparing your image...";
+        "✨ Image created successfully!";
 
-      result.innerHTML = "";
+      button.disabled = false;
+    };
 
+    img.onerror = function () {
 
-      try {
+      status.innerText =
+        "❌ Image generation failed. Please try again.";
 
-        const imageRequestURL =
-          API_URL +
-          "?prompt=" +
-          encodeURIComponent(prompt);
+      button.disabled = false;
+    };
 
+  } catch (error) {
 
-        const response =
-          await fetch(imageRequestURL);
+    console.error(error);
 
+    status.innerText =
+      "❌ Image generation failed. Please try again.";
 
-        if (!response.ok) {
-
-          throw new Error(
-            "Image generation failed (" +
-            response.status +
-            ")"
-          );
-
-        }
-
-
-        const blob =
-          await response.blob();
-
-
-        const generatedImageURL =
-          URL.createObjectURL(blob);
-
-
-        const img =
-          document.createElement("img");
-
-
-        img.src =
-          generatedImageURL;
-
-        img.alt =
-          prompt;
-
-
-        result.appendChild(img);
-
-
-        status.innerText =
-          "✨ Image created successfully!";
-
-      }
-
-
-      catch (error) {
-
-        console.error(error);
-
-        status.innerText =
-          "❌ Image generation failed. Please try again.";
-
-      }
-
-
-      finally {
-
-        button.disabled = false;
-
-      }
-
-    }
-
-  </script>
-
-</body>
-</html>
+    button.disabled = false;
+  }
+}
