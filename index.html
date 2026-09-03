@@ -379,76 +379,86 @@
 
     async function generate() {
 
-  const prompt =
-    document.getElementById("prompt").value.trim();
+      const prompt =
+        document.getElementById("prompt").value.trim();
 
-  const status =
-    document.getElementById("status");
+      const status =
+        document.getElementById("status");
 
-  const result =
-    document.getElementById("result");
+      const result =
+        document.getElementById("result");
 
-  const button =
-    document.getElementById("generateBtn");
+      const button =
+        document.getElementById("generateBtn");
 
-  if (!prompt) {
-    status.innerText =
-      "Please describe what you want to create.";
-    return;
-  }
+      if (!prompt) {
 
-  if (mode !== "image") {
-    status.innerText =
-      "Video generation will be added soon.";
-    return;
-  }
+        status.innerText =
+          "Please describe what you want to create.";
 
-  button.disabled = true;
+        return;
+      }
 
-  status.innerText =
-    "✨ Aaru AI is preparing your image...";
+      if (mode !== "image") {
 
-  result.innerHTML = "";
+        status.innerText =
+          "Video generation will be added soon.";
 
-  try {
+        return;
+      }
 
-    const imageRequestURL =
-      API_URL +
-      "?prompt=" +
-      encodeURIComponent(prompt);
-
-    const img =
-      document.createElement("img");
-
-    img.src = imageRequestURL;
-
-    img.alt = prompt;
-
-    img.onload = function () {
-
-      result.appendChild(img);
+      button.disabled = true;
 
       status.innerText =
-        "✨ Image created successfully!";
+        "✨ Aaru AI is preparing your image...";
 
-      button.disabled = false;
-    };
+      result.innerHTML = "";
 
-    img.onerror = function () {
+      try {
 
-      status.innerText =
-        "❌ Image generation failed. Please try again.";
+        const imageRequestURL =
+          API_URL +
+          "?prompt=" +
+          encodeURIComponent(prompt);
 
-      button.disabled = false;
-    };
+        const img =
+          document.createElement("img");
 
-  } catch (error) {
+        img.src = imageRequestURL;
 
-    console.error(error);
+        img.alt = prompt;
 
-    status.innerText =
-      "❌ Image generation failed. Please try again.";
+        img.onload = function () {
 
-    button.disabled = false;
-  }
-}
+          result.appendChild(img);
+
+          status.innerText =
+            "✨ Image created successfully!";
+
+          button.disabled = false;
+        };
+
+        img.onerror = function () {
+
+          status.innerText =
+            "❌ Image generation failed. Please try again.";
+
+          button.disabled = false;
+        };
+
+      } catch (error) {
+
+        console.error(error);
+
+        status.innerText =
+          "❌ Image generation failed. Please try again.";
+
+        button.disabled = false;
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
