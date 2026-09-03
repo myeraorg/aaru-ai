@@ -419,7 +419,9 @@
         const imageRequestURL =
           API_URL +
           "?prompt=" +
-          encodeURIComponent(prompt);
+          encodeURIComponent(prompt) +
+          "&t=" +
+          Date.now();
 
         const img =
           document.createElement("img");
@@ -440,13 +442,16 @@
 
         img.onerror = function () {
 
-  status.innerText =
-    "❌ Image generation failed. Please try again.";
+          status.innerText =
+            "❌ Image generation failed. Please try again.";
 
-  console.error("Image failed:", imageRequestURL);
+          console.error(
+            "Image failed:",
+            imageRequestURL
+          );
 
-  button.disabled = false;
-};
+          button.disabled = false;
+        };
 
       } catch (error) {
 
