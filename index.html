@@ -440,11 +440,13 @@
 
         img.onerror = function () {
 
-          status.innerText =
-            "❌ Image generation failed. Please try again.";
+  status.innerText =
+    "❌ Image generation failed. Please try again.";
 
-          button.disabled = false;
-        };
+  console.error("Image failed:", imageRequestURL);
+
+  button.disabled = false;
+};
 
       } catch (error) {
 
