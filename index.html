@@ -505,7 +505,53 @@
       }
 
     }
+function saveToHistory(imageURL) {
+  let history = JSON.parse(localStorage.getItem("aaruHistory") || "[]");
 
+  history.unshift(imageURL);
+
+  if (history.length > 20) {
+    history = history.slice(0, 20);
+  }
+
+  localStorage.setItem("aaruHistory", JSON.stringify(history));
+
+  showHistory();
+}
+
+function showHistory() {
+  const historyList = document.getElementById("historyList");
+  const noHistory = document.getElementById("noHistory");
+
+  if (!historyList) return;
+
+  const history = JSON.parse(
+    localStorage.getItem("aaruHistory") || "[]"
+  );
+
+  historyList.innerHTML = "";
+
+  if (history.length === 0) {
+    noHistory.style.display = "block";
+    return;
+  }
+
+  noHistory.style.display = "none";
+
+  history.forEach((imageURL) => {
+    const img = document.createElement("img");
+
+    img.src = imageURL;
+
+    img.style.width = "100%";
+    img.style.borderRadius = "12px";
+    img.style.display = "block";
+
+    historyList.appendChild(img);
+  });
+}
+
+showHistory();
   </script>
   </section>
 
