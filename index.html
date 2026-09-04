@@ -1,20 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Aaru AI</title>
 
 <style>
-
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:#09090b;
   color:#fff;
 }
@@ -84,10 +80,6 @@ textarea{
   outline:none;
 }
 
-textarea:focus{
-  border-color:#71717a;
-}
-
 .options{
   display:flex;
   gap:10px;
@@ -119,12 +111,14 @@ select{
 
 .generate:disabled{
   opacity:.5;
+  cursor:not-allowed;
 }
 
 .status{
   text-align:center;
   margin:18px 0;
   color:#a1a1aa;
+  line-height:1.5;
 }
 
 .result-card{
@@ -218,21 +212,10 @@ footer{
 }
 
 @media(max-width:500px){
-
-  .hero h1{
-    font-size:30px;
-  }
-
-  .options{
-    flex-direction:column;
-  }
-
-  .features{
-    grid-template-columns:1fr;
-  }
-
+  .hero h1{font-size:30px}
+  .options{flex-direction:column}
+  .features{grid-template-columns:1fr}
 }
-
 </style>
 </head>
 
@@ -243,19 +226,13 @@ footer{
 </header>
 
 <div class="hero">
-
   <h1>Create Anything.</h1>
-
-  <p>
-    Turn your ideas into AI-generated images.
-  </p>
-
+  <p>Turn your ideas into AI-generated images.</p>
 </div>
 
 <div class="container">
 
   <div class="tabs">
-
     <button
       id="imageTab"
       class="tab active"
@@ -271,164 +248,100 @@ footer{
       onclick="selectMode('video')">
       🎬 Video
     </button>
-
   </div>
-
 
   <textarea
     id="prompt"
-    placeholder="Describe the image you want to create...">
+    placeholder="अपनी image के बारे में लिखें...">
   </textarea>
-
 
   <div class="options">
 
     <select id="ratio">
-
       <option value="9:16">9:16 Portrait</option>
-
-      <option value="1:1" selected>
-        1:1 Square
-      </option>
-
-      <option value="16:9">
-        16:9 Landscape
-      </option>
-
+      <option value="1:1" selected>1:1 Square</option>
+      <option value="16:9">16:9 Landscape</option>
     </select>
 
-
     <select id="quality">
-
-      <option value="standard" selected>
-        Standard
-      </option>
-
-      <option value="hd">
-        HD
-      </option>
-
+      <option value="standard" selected>Standard</option>
+      <option value="hd">HD</option>
     </select>
 
   </div>
-
 
   <button
     id="generateBtn"
     class="generate"
     type="button"
     onclick="generate()">
-
     ✨ Generate Image
-
   </button>
 
-
-  <div
-    id="status"
-    class="status">
-  </div>
-
+  <div id="status" class="status"></div>
 
   <div id="result"></div>
 
-
   <section id="history">
-
     <h2>🖼️ My Creations</h2>
 
     <div id="historyList"></div>
 
-    <p
-      id="noHistory"
-      style="color:#71717a;">
+    <p id="noHistory" style="color:#71717a;">
       अभी तक कोई इमेज नहीं बनाई गई है।
     </p>
-
   </section>
 
-
   <section>
-
     <h2>AI Studio</h2>
 
     <div class="features">
 
       <div class="feature">
-
         <h3>🖼️ AI Images</h3>
-
-        <p>
-          Create images from your text prompts.
-        </p>
-
+        <p>Create images from your text prompts.</p>
       </div>
 
-
       <div class="feature">
-
         <h3>🎬 AI Videos</h3>
-
-        <p>
-          AI video generation — coming soon.
-        </p>
-
+        <p>AI video generation — coming soon.</p>
       </div>
 
-
       <div class="feature">
-
         <h3>🎞️ Image to Video</h3>
-
-        <p>
-          Turn images into videos — coming soon.
-        </p>
-
+        <p>Turn images into videos — coming soon.</p>
       </div>
 
-
       <div class="feature">
-
         <h3>✨ AI Studio</h3>
-
-        <p>
-          More creative AI tools coming soon.
-        </p>
-
+        <p>More creative AI tools coming soon.</p>
       </div>
 
     </div>
-
   </section>
 
 </div>
-
 
 <footer>
   © 2026 Aaru AI
 </footer>
 
-
 <script>
 
-/* ================================
+/* =========================
    AARU AI WORKER
-================================ */
+========================= */
 
 const API_URL =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
 
-/* ================================
-   CURRENT MODE
-================================ */
-
 let mode = "image";
 
 
-/* ================================
-   SELECT IMAGE / VIDEO
-================================ */
+/* =========================
+   MODE
+========================= */
 
 function selectMode(selectedMode){
 
@@ -443,53 +356,53 @@ function selectMode(selectedMode){
   const prompt =
     document.getElementById("prompt");
 
-  const generateBtn =
+  const button =
     document.getElementById("generateBtn");
 
 
   if(mode === "image"){
 
     imageTab.classList.add("active");
-
     videoTab.classList.remove("active");
 
     prompt.placeholder =
-      "Describe the image you want to create...";
+      "अपनी image के बारे में लिखें...";
 
-    generateBtn.innerText =
+    button.innerText =
       "✨ Generate Image";
 
   }else{
 
     videoTab.classList.add("active");
-
     imageTab.classList.remove("active");
 
     prompt.placeholder =
-      "Describe the video you want to create...";
+      "अपनी video के बारे में लिखें...";
 
-    generateBtn.innerText =
+    button.innerText =
       "🎬 Generate Video";
 
   }
-
 }
 
 
-/* ================================
-   GENERATE
-================================ */
+/* =========================
+   GENERATE IMAGE
+========================= */
 
 async function generate(){
 
-  const promptElement =
-    document.getElementById("prompt");
+  const prompt =
+    document.getElementById("prompt")
+      .value.trim();
 
-  const ratioElement =
-    document.getElementById("ratio");
+  const ratio =
+    document.getElementById("ratio")
+      .value;
 
-  const qualityElement =
-    document.getElementById("quality");
+  const quality =
+    document.getElementById("quality")
+      .value;
 
   const status =
     document.getElementById("status");
@@ -497,28 +410,17 @@ async function generate(){
   const result =
     document.getElementById("result");
 
-  const generateBtn =
+  const button =
     document.getElementById("generateBtn");
-
-
-  const prompt =
-    promptElement.value.trim();
-
-  const ratio =
-    ratioElement.value;
-
-  const quality =
-    qualityElement.value;
 
 
   if(!prompt){
 
     alert("कृपया पहले prompt लिखें।");
 
-    promptElement.focus();
+    document.getElementById("prompt").focus();
 
     return;
-
   }
 
 
@@ -528,23 +430,37 @@ async function generate(){
       "🎬 Video generation जल्द उपलब्ध होगा।";
 
     return;
-
   }
 
 
   status.innerText =
-    "⏳ AI image बना रहा है...";
+    "⏳ Generating...";
 
   result.innerHTML = "";
 
-  generateBtn.disabled = true;
+  button.disabled = true;
 
-  generateBtn.innerText =
+  button.innerText =
     "⏳ Generating...";
 
 
-  try{
+  /*
+     IMPORTANT:
+     10 SECOND FRONTEND TIMEOUT
+  */
 
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(function(){
+
+      controller.abort();
+
+    },10000);
+
+
+  try{
 
     const url =
       API_URL +
@@ -559,30 +475,36 @@ async function generate(){
 
 
     const response =
-      await fetch(url);
+      await fetch(url,{
+        method:"GET",
+        signal:controller.signal,
+        cache:"no-store"
+      });
+
+
+    clearTimeout(timeout);
 
 
     if(!response.ok){
 
-      let message =
+      let errorMessage =
         "Image generation failed.";
 
       try{
 
-        const errorData =
+        const data =
           await response.json();
 
-        if(errorData.error){
+        if(data && data.error){
 
-          message =
-            errorData.error;
+          errorMessage =
+            data.error;
 
         }
 
       }catch(e){}
 
-      throw new Error(message);
-
+      throw new Error(errorMessage);
     }
 
 
@@ -596,9 +518,9 @@ async function generate(){
         await response.text();
 
       throw new Error(
-        text || "Worker did not return an image."
+        text ||
+        "Worker did not return an image."
       );
-
     }
 
 
@@ -606,55 +528,66 @@ async function generate(){
       await response.blob();
 
 
+    if(!blob || blob.size === 0){
+
+      throw new Error(
+        "Empty image received."
+      );
+    }
+
+
     const reader =
       new FileReader();
 
 
-    reader.onloadend = function(){
+    reader.onloadend =
+      function(){
 
-      const imageData =
-        reader.result;
-
-
-      result.innerHTML = `
-
-        <div class="result-card">
-
-          <img
-            src="${imageData}"
-            class="result-image"
-            alt="Aaru AI Generated Image">
-
-          <button
-            class="download-btn"
-            type="button"
-            onclick="downloadImage()">
-
-            ⬇️ Download Image
-
-          </button>
-
-        </div>
-
-      `;
+        const imageData =
+          reader.result;
 
 
-      /* Save EXACT generated image */
+        result.innerHTML = `
+          <div class="result-card">
 
-      saveToHistory(imageData);
+            <img
+              src="${imageData}"
+              class="result-image"
+              alt="Aaru AI Generated Image">
+
+            <button
+              class="download-btn"
+              type="button"
+              onclick="downloadCurrentImage()">
+              ⬇️ Download Image
+            </button>
+
+          </div>
+        `;
 
 
-      status.innerText =
-        "✅ Image ready";
+        saveToHistory(imageData);
 
 
-      generateBtn.disabled =
-        false;
+        status.innerText =
+          "✅ Image ready";
 
-      generateBtn.innerText =
-        "✨ Generate Image";
 
-    };
+        button.disabled =
+          false;
+
+        button.innerText =
+          "✨ Generate Image";
+      };
+
+
+    reader.onerror =
+      function(){
+
+        throw new Error(
+          "Could not read generated image."
+        );
+      };
 
 
     reader.readAsDataURL(blob);
@@ -662,33 +595,44 @@ async function generate(){
 
   }catch(error){
 
+    clearTimeout(timeout);
+
+
     console.error(
-      "Aaru AI Error:",
+      "Aaru AI:",
       error
     );
 
 
-    status.innerText =
-      "❌ Image generation fail: " +
-      error.message;
+    if(error.name === "AbortError"){
+
+      status.innerText =
+        "⏱️ 10 सेकंड में response नहीं मिला। फिर से कोशिश करें।";
+
+    }else{
+
+      status.innerText =
+        "❌ " +
+        (error.message ||
+        "Image generation failed.");
+
+    }
 
 
-    generateBtn.disabled =
+    button.disabled =
       false;
 
-    generateBtn.innerText =
+    button.innerText =
       "✨ Generate Image";
-
   }
-
 }
 
 
-/* ================================
+/* =========================
    DOWNLOAD CURRENT IMAGE
-================================ */
+========================= */
 
-function downloadImage(){
+function downloadCurrentImage(){
 
   const image =
     document.querySelector(
@@ -698,10 +642,11 @@ function downloadImage(){
 
   if(!image){
 
-    alert("पहले image generate करें।");
+    alert(
+      "पहले image generate करें।"
+    );
 
     return;
-
   }
 
 
@@ -721,13 +666,12 @@ function downloadImage(){
   link.click();
 
   document.body.removeChild(link);
-
 }
 
 
-/* ================================
-   SAVE HISTORY
-================================ */
+/* =========================
+   HISTORY
+========================= */
 
 function saveToHistory(imageData){
 
@@ -742,30 +686,44 @@ function saveToHistory(imageData){
   history.unshift(imageData);
 
 
-  /* Maximum 10 images */
-
   if(history.length > 10){
 
     history =
       history.slice(0,10);
-
   }
 
 
-  localStorage.setItem(
-    "aaruHistory",
-    JSON.stringify(history)
-  );
+  try{
+
+    localStorage.setItem(
+      "aaruHistory",
+      JSON.stringify(history)
+    );
+
+  }catch(error){
+
+    /*
+      If browser storage becomes full,
+      keep only the latest 5 images.
+    */
+
+    history =
+      history.slice(0,5);
+
+    localStorage.setItem(
+      "aaruHistory",
+      JSON.stringify(history)
+    );
+  }
 
 
   showHistory();
-
 }
 
 
-/* ================================
+/* =========================
    SHOW HISTORY
-================================ */
+========================= */
 
 function showHistory(){
 
@@ -783,7 +741,6 @@ function showHistory(){
   if(!list || !empty){
 
     return;
-
   }
 
 
@@ -804,7 +761,6 @@ function showHistory(){
       "block";
 
     return;
-
   }
 
 
@@ -820,7 +776,6 @@ function showHistory(){
           "div"
         );
 
-
       card.className =
         "history-card";
 
@@ -830,10 +785,8 @@ function showHistory(){
           "img"
         );
 
-
       img.src =
         image;
-
 
       img.alt =
         "Aaru AI creation";
@@ -844,7 +797,6 @@ function showHistory(){
           "div"
         );
 
-
       actions.className =
         "history-actions";
 
@@ -854,34 +806,38 @@ function showHistory(){
           "button"
         );
 
+      download.type =
+        "button";
 
       download.innerText =
         "⬇️ Download";
 
-
       download.onclick =
         function(){
 
-          downloadHistoryImage(image);
-
+          downloadHistoryImage(
+            image
+          );
         };
 
 
-      const deleteBtn =
+      const deleteButton =
         document.createElement(
           "button"
         );
 
+      deleteButton.type =
+        "button";
 
-      deleteBtn.innerText =
+      deleteButton.innerText =
         "🗑 Delete";
 
-
-      deleteBtn.onclick =
+      deleteButton.onclick =
         function(){
 
-          deleteHistory(index);
-
+          deleteHistory(
+            index
+          );
         };
 
 
@@ -890,26 +846,31 @@ function showHistory(){
       );
 
       actions.appendChild(
-        deleteBtn
+        deleteButton
       );
 
 
-      card.appendChild(img);
+      card.appendChild(
+        img
+      );
 
-      card.appendChild(actions);
+      card.appendChild(
+        actions
+      );
 
 
-      list.appendChild(card);
+      list.appendChild(
+        card
+      );
 
     }
   );
-
 }
 
 
-/* ================================
-   DOWNLOAD HISTORY IMAGE
-================================ */
+/* =========================
+   DOWNLOAD HISTORY
+========================= */
 
 function downloadHistoryImage(
   imageData
@@ -922,7 +883,6 @@ function downloadHistoryImage(
   link.href =
     imageData;
 
-
   link.download =
     "aaru-ai.png";
 
@@ -932,13 +892,12 @@ function downloadHistoryImage(
   link.click();
 
   document.body.removeChild(link);
-
 }
 
 
-/* ================================
+/* =========================
    DELETE HISTORY
-================================ */
+========================= */
 
 function deleteHistory(index){
 
@@ -950,7 +909,10 @@ function deleteHistory(index){
     );
 
 
-  history.splice(index,1);
+  history.splice(
+    index,
+    1
+  );
 
 
   localStorage.setItem(
@@ -960,13 +922,12 @@ function deleteHistory(index){
 
 
   showHistory();
-
 }
 
 
-/* ================================
-   PAGE LOAD
-================================ */
+/* =========================
+   START
+========================= */
 
 document.addEventListener(
   "DOMContentLoaded",
