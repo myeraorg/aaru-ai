@@ -130,6 +130,24 @@
       margin-top: 10px;
     }
 
+    .download-btn {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #1f1f29;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .download-btn:hover {
+      background: #2a2a35;
+    }
+
     .cards {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -170,3 +188,335 @@
       .cards {
         grid-template-columns: 1fr;
       }
+
+      .controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">
+      Aaru AI
+    </div>
+
+    <div class="hero">
+      <h1>Create Anything.</h1>
+      <p>Generate amazing images with AI.</p>
+    </div>
+
+    <div class="tabs">
+
+      <button
+        class="tab active"
+        onclick="selectMode('image', this)">
+        🖼️ Image
+      </button>
+
+      <button
+        class="tab"
+        onclick="selectMode('video', this)">
+        🎬 Video
+      </button>
+
+    </div>
+
+    <textarea
+      id="prompt"
+      placeholder="Describe the image you want to create..."></textarea>
+
+    <div class="controls">
+
+      <select id="ratio">
+
+        <option value="9:16">
+          9:16
+        </option>
+
+        <option value="1:1" selected>
+          1:1
+        </option>
+
+        <option value="16:9">
+          16:9
+        </option>
+
+      </select>
+
+      <select id="quality">
+
+        <option value="standard" selected>
+          Standard
+        </option>
+
+        <option value="hd">
+          HD
+        </option>
+
+      </select>
+
+    </div>
+
+    <button
+      class="generate"
+      id="generateBtn"
+      onclick="generate()">
+
+      Generate
+
+    </button>
+
+    <div id="status"></div>
+
+    <div id="result"></div>
+
+    <div class="cards">
+
+      <div class="card">
+        <h3>AI Images</h3>
+        <p>Create images from simple text prompts.</p>
+      </div>
+
+      <div class="card">
+        <h3>AI Videos</h3>
+        <p>Generate creative AI videos.</p>
+      </div>
+
+      <div class="card">
+        <h3>Image to Video</h3>
+        <p>Turn your images into videos.</p>
+      </div>
+
+      <div class="card">
+        <h3>AI Studio</h3>
+        <p>Create and manage your AI content.</p>
+      </div>
+
+    </div>
+
+    <div class="nav">
+
+      <span>Home</span>
+      <span>Create</span>
+      <span>Studio</span>
+      <span>Profile</span>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const API_URL =
+      "https://aaru-ai-api.myera-org.workers.dev/";
+
+    let mode = "image";
+
+
+    function selectMode(newMode, button) {
+
+      mode = newMode;
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      const promptBox =
+        document.getElementById("prompt");
+
+      if (mode === "image") {
+
+        promptBox.placeholder =
+          "Describe the image you want to create...";
+
+      } else {
+
+        promptBox.placeholder =
+          "Describe the video you want to create...";
+
+      }
+    }
+
+
+    async function generate() {
+
+      const prompt =
+        document.getElementById("prompt").value.trim();
+
+      const ratio =
+        document.getElementById("ratio").value;
+
+      const status =
+        document.getElementById("status");
+
+      const result =
+        document.getElementById("result");
+
+      const button =
+        document.getElementById("generateBtn");
+
+
+      if (!prompt) {
+
+        status.innerText =
+          "Please enter a prompt.";
+
+        return;
+      }
+
+
+      if (mode !== "image") {
+
+        status.innerText =
+          "Video generation coming soon.";
+
+        return;
+      }
+
+
+      button.disabled = true;
+
+      status.innerText =
+        "Generating image...";
+
+      result.innerHTML = "";
+
+
+      try {
+
+        const imageRequestURL =
+          API_URL +
+          "?prompt=" +
+          encodeURIComponent(prompt) +
+          "&ratio=" +
+          encodeURIComponent(ratio) +
+          "&t=" +
+          Date.now();
+
+
+        const img =
+          document.createElement("img");
+
+        img.src = imageRequestURL;
+
+
+        img.onload = function () {
+
+          result.appendChild(img);
+
+
+          const downloadButton =
+            document.createElement("button");
+
+          downloadButton.className =
+            "download-btn";
+
+          downloadButton.innerText =
+            "⬇️ Download Image";
+
+
+          downloadButton.onclick =
+            async function () {
+
+              try {
+
+                downloadButton.innerText =
+                  "Preparing download...";
+
+                const response =
+                  await fetch(imageRequestURL);
+
+                if (!response.ok) {
+                  throw new Error(
+                    "Download failed"
+                  );
+                }
+
+                const blob =
+                  await response.blob();
+
+                const blobURL =
+                  URL.createObjectURL(blob);
+
+                const link =
+                  document.createElement("a");
+
+                link.href = blobURL;
+
+                link.download =
+                  "aaru-ai-image.png";
+
+                document.body.appendChild(link);
+
+                link.click();
+
+                link.remove();
+
+                URL.revokeObjectURL(blobURL);
+
+                downloadButton.innerText =
+                  "✅ Downloaded";
+
+              } catch (error) {
+
+                console.error(error);
+
+                downloadButton.innerText =
+                  "❌ Download failed";
+
+              }
+
+            };
+
+
+          result.appendChild(
+            downloadButton
+          );
+
+
+          status.innerText =
+            "✅ Image generated successfully.";
+
+          button.disabled = false;
+
+        };
+
+
+        img.onerror = function () {
+
+          console.error(
+            "Image generation failed:",
+            imageRequestURL
+          );
+
+          status.innerText =
+            "❌ Image generation failed. Please try again.";
+
+          button.disabled = false;
+
+        };
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        status.innerText =
+          "❌ Something went wrong.";
+
+        button.disabled = false;
+
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
