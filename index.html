@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Aaru AI</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -60,6 +63,7 @@ header{
   background:#18181b;
   color:#fff;
   font-size:16px;
+  cursor:pointer;
 }
 
 .tab.active{
@@ -111,7 +115,6 @@ select{
 
 .generate:disabled{
   opacity:.5;
-  cursor:not-allowed;
 }
 
 .status{
@@ -144,6 +147,7 @@ select{
   background:#27272a;
   color:#fff;
   font-size:15px;
+  cursor:pointer;
 }
 
 section{
@@ -181,6 +185,7 @@ section h2{
   border-radius:10px;
   background:#27272a;
   color:#fff;
+  cursor:pointer;
 }
 
 .features{
@@ -212,9 +217,18 @@ footer{
 }
 
 @media(max-width:500px){
-  .hero h1{font-size:30px}
-  .options{flex-direction:column}
-  .features{grid-template-columns:1fr}
+
+  .hero h1{
+    font-size:30px;
+  }
+
+  .options{
+    flex-direction:column;
+  }
+
+  .features{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
@@ -233,6 +247,7 @@ footer{
 <div class="container">
 
   <div class="tabs">
+
     <button
       id="imageTab"
       class="tab active"
@@ -248,89 +263,131 @@ footer{
       onclick="selectMode('video')">
       🎬 Video
     </button>
+
   </div>
+
 
   <textarea
     id="prompt"
-    placeholder="अपनी image के बारे में लिखें...">
-  </textarea>
+    placeholder="अपनी image के बारे में लिखें..."></textarea>
+
 
   <div class="options">
 
     <select id="ratio">
-      <option value="9:16">9:16 Portrait</option>
-      <option value="1:1" selected>1:1 Square</option>
-      <option value="16:9">16:9 Landscape</option>
+
+      <option value="9:16">
+        9:16 Portrait
+      </option>
+
+      <option value="1:1" selected>
+        1:1 Square
+      </option>
+
+      <option value="16:9">
+        16:9 Landscape
+      </option>
+
     </select>
 
+
     <select id="quality">
-      <option value="standard" selected>Standard</option>
-      <option value="hd">HD</option>
+
+      <option value="standard" selected>
+        Standard
+      </option>
+
+      <option value="hd">
+        HD
+      </option>
+
     </select>
 
   </div>
+
 
   <button
     id="generateBtn"
     class="generate"
     type="button"
     onclick="generate()">
+
     ✨ Generate Image
+
   </button>
+
 
   <div id="status" class="status"></div>
 
   <div id="result"></div>
 
+
   <section id="history">
+
     <h2>🖼️ My Creations</h2>
 
     <div id="historyList"></div>
 
-    <p id="noHistory" style="color:#71717a;">
+    <p
+      id="noHistory"
+      style="color:#71717a;">
       अभी तक कोई इमेज नहीं बनाई गई है।
     </p>
+
   </section>
 
+
   <section>
+
     <h2>AI Studio</h2>
 
     <div class="features">
 
       <div class="feature">
         <h3>🖼️ AI Images</h3>
-        <p>Create images from your text prompts.</p>
+        <p>
+          Create images from your text prompts.
+        </p>
       </div>
 
       <div class="feature">
         <h3>🎬 AI Videos</h3>
-        <p>AI video generation — coming soon.</p>
+        <p>
+          AI video generation — coming soon.
+        </p>
       </div>
 
       <div class="feature">
         <h3>🎞️ Image to Video</h3>
-        <p>Turn images into videos — coming soon.</p>
+        <p>
+          Turn images into videos — coming soon.
+        </p>
       </div>
 
       <div class="feature">
         <h3>✨ AI Studio</h3>
-        <p>More creative AI tools coming soon.</p>
+        <p>
+          More creative AI tools coming soon.
+        </p>
       </div>
 
     </div>
+
   </section>
 
 </div>
+
 
 <footer>
   © 2026 Aaru AI
 </footer>
 
+
 <script>
 
-/* =========================
+/* =================================
    AARU AI WORKER
-========================= */
+================================= */
 
 const API_URL =
   "https://aaru-ai-api.myera-org.workers.dev/";
@@ -339,9 +396,9 @@ const API_URL =
 let mode = "image";
 
 
-/* =========================
+/* =================================
    MODE
-========================= */
+================================= */
 
 function selectMode(selectedMode){
 
@@ -381,20 +438,20 @@ function selectMode(selectedMode){
 
     button.innerText =
       "🎬 Generate Video";
-
   }
 }
 
 
-/* =========================
-   GENERATE IMAGE
-========================= */
+/* =================================
+   GENERATE
+================================= */
 
 async function generate(){
 
   const prompt =
     document.getElementById("prompt")
-      .value.trim();
+      .value
+      .trim();
 
   const ratio =
     document.getElementById("ratio")
@@ -417,8 +474,6 @@ async function generate(){
   if(!prompt){
 
     alert("कृपया पहले prompt लिखें।");
-
-    document.getElementById("prompt").focus();
 
     return;
   }
@@ -444,22 +499,6 @@ async function generate(){
     "⏳ Generating...";
 
 
-  /*
-     IMPORTANT:
-     40 SECOND FRONTEND TIMEOUT
-  */
-
-  const controller =
-    new AbortController();
-
-  const timeout =
-    setTimeout(function(){
-
-      controller.abort();
-
-    },40000);
-
-
   try{
 
     const url =
@@ -475,44 +514,76 @@ async function generate(){
 
 
     const response =
-      await fetch(url,{
+      await fetch(url, {
         method:"GET",
-        signal:controller.signal,
         cache:"no-store"
       });
 
 
-    clearTimeout(timeout);
+    const contentType =
+      response.headers.get(
+        "content-type"
+      ) || "";
 
+
+    /* =========================
+       WORKER ERROR
+    ========================= */
 
     if(!response.ok){
 
       let errorMessage =
         "Image generation failed.";
 
-      try{
+      if(
+        contentType.includes(
+          "application/json"
+        )
+      ){
 
-        const data =
-          await response.json();
+        try{
 
-        if(data && data.error){
+          const data =
+            await response.json();
 
-          errorMessage =
-            data.error;
+          if(data.error){
 
-        }
+            errorMessage =
+              data.error;
+          }
 
-      }catch(e){}
+        }catch(e){}
 
-      throw new Error(errorMessage);
+      }else{
+
+        try{
+
+          const text =
+            await response.text();
+
+          if(text){
+
+            errorMessage =
+              text;
+          }
+
+        }catch(e){}
+      }
+
+
+      throw new Error(
+        errorMessage
+      );
     }
 
 
-    const contentType =
-      response.headers.get("content-type") || "";
+    /* =========================
+       CHECK IMAGE
+    ========================= */
 
-
-    if(!contentType.includes("image")){
+    if(
+      !contentType.includes("image")
+    ){
 
       const text =
         await response.text();
@@ -523,6 +594,10 @@ async function generate(){
       );
     }
 
+
+    /* =========================
+       GET IMAGE
+    ========================= */
 
     const blob =
       await response.blob();
@@ -536,6 +611,10 @@ async function generate(){
     }
 
 
+    /* =========================
+       CONVERT TO DATA URL
+    ========================= */
+
     const reader =
       new FileReader();
 
@@ -548,6 +627,7 @@ async function generate(){
 
 
         result.innerHTML = `
+
           <div class="result-card">
 
             <img
@@ -559,14 +639,19 @@ async function generate(){
               class="download-btn"
               type="button"
               onclick="downloadCurrentImage()">
+
               ⬇️ Download Image
+
             </button>
 
           </div>
+
         `;
 
 
-        saveToHistory(imageData);
+        saveToHistory(
+          imageData
+        );
 
 
         status.innerText =
@@ -584,39 +669,36 @@ async function generate(){
     reader.onerror =
       function(){
 
-        throw new Error(
-          "Could not read generated image."
-        );
+        status.innerText =
+          "❌ Image पढ़ने में समस्या हुई।";
+
+        button.disabled =
+          false;
+
+        button.innerText =
+          "✨ Generate Image";
       };
 
 
-    reader.readAsDataURL(blob);
+    reader.readAsDataURL(
+      blob
+    );
 
 
   }catch(error){
 
-    clearTimeout(timeout);
-
-
     console.error(
-      "Aaru AI:",
+      "Aaru AI Error:",
       error
     );
 
 
-    if(error.name === "AbortError"){
-
-      status.innerText =
-        "⏱️ 40 सेकंड में response नहीं मिला। फिर से कोशिश करें।";
-
-    }else{
-
-      status.innerText =
-        "❌ " +
-        (error.message ||
-        "Image generation failed.");
-
-    }
+    status.innerText =
+      "❌ " +
+      (
+        error.message ||
+        "Image generation failed."
+      );
 
 
     button.disabled =
@@ -628,9 +710,9 @@ async function generate(){
 }
 
 
-/* =========================
+/* =================================
    DOWNLOAD CURRENT IMAGE
-========================= */
+================================= */
 
 function downloadCurrentImage(){
 
@@ -669,21 +751,34 @@ function downloadCurrentImage(){
 }
 
 
-/* =========================
-   HISTORY
-========================= */
+/* =================================
+   SAVE HISTORY
+================================= */
 
-function saveToHistory(imageData){
+function saveToHistory(
+  imageData
+){
 
-  let history =
-    JSON.parse(
-      localStorage.getItem(
-        "aaruHistory"
-      ) || "[]"
-    );
+  let history = [];
+
+  try{
+
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "aaruHistory"
+        ) || "[]"
+      );
+
+  }catch(e){
+
+    history = [];
+  }
 
 
-  history.unshift(imageData);
+  history.unshift(
+    imageData
+  );
 
 
   if(history.length > 10){
@@ -702,18 +797,17 @@ function saveToHistory(imageData){
 
   }catch(error){
 
-    /*
-      If browser storage becomes full,
-      keep only the latest 5 images.
-    */
-
     history =
       history.slice(0,5);
 
-    localStorage.setItem(
-      "aaruHistory",
-      JSON.stringify(history)
-    );
+    try{
+
+      localStorage.setItem(
+        "aaruHistory",
+        JSON.stringify(history)
+      );
+
+    }catch(e){}
   }
 
 
@@ -721,9 +815,9 @@ function saveToHistory(imageData){
 }
 
 
-/* =========================
+/* =================================
    SHOW HISTORY
-========================= */
+================================= */
 
 function showHistory(){
 
@@ -744,12 +838,21 @@ function showHistory(){
   }
 
 
-  let history =
-    JSON.parse(
-      localStorage.getItem(
-        "aaruHistory"
-      ) || "[]"
-    );
+  let history = [];
+
+  try{
+
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "aaruHistory"
+        ) || "[]"
+      );
+
+  }catch(e){
+
+    history = [];
+  }
 
 
   list.innerHTML = "";
@@ -788,9 +891,6 @@ function showHistory(){
       img.src =
         image;
 
-      img.alt =
-        "Aaru AI creation";
-
 
       const actions =
         document.createElement(
@@ -806,11 +906,12 @@ function showHistory(){
           "button"
         );
 
+      download.innerText =
+        "⬇️ Download";
+
       download.type =
         "button";
 
-      download.innerText =
-        "⬇️ Download";
 
       download.onclick =
         function(){
@@ -826,11 +927,12 @@ function showHistory(){
           "button"
         );
 
+      deleteButton.innerText =
+        "🗑 Delete";
+
       deleteButton.type =
         "button";
 
-      deleteButton.innerText =
-        "🗑 Delete";
 
       deleteButton.onclick =
         function(){
@@ -868,9 +970,9 @@ function showHistory(){
 }
 
 
-/* =========================
+/* =================================
    DOWNLOAD HISTORY
-========================= */
+================================= */
 
 function downloadHistoryImage(
   imageData
@@ -895,18 +997,27 @@ function downloadHistoryImage(
 }
 
 
-/* =========================
+/* =================================
    DELETE HISTORY
-========================= */
+================================= */
 
 function deleteHistory(index){
 
-  let history =
-    JSON.parse(
-      localStorage.getItem(
-        "aaruHistory"
-      ) || "[]"
-    );
+  let history = [];
+
+  try{
+
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "aaruHistory"
+        ) || "[]"
+      );
+
+  }catch(e){
+
+    history = [];
+  }
 
 
   history.splice(
@@ -925,9 +1036,9 @@ function deleteHistory(index){
 }
 
 
-/* =========================
-   START
-========================= */
+/* =================================
+   PAGE LOAD
+================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
