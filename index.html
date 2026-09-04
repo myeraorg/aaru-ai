@@ -232,31 +232,14 @@
     <div class="controls">
 
       <select id="ratio">
-
-        <option value="9:16">
-          9:16
-        </option>
-
-        <option value="1:1" selected>
-          1:1
-        </option>
-
-        <option value="16:9">
-          16:9
-        </option>
-
+        <option value="9:16">9:16</option>
+        <option value="1:1" selected>1:1</option>
+        <option value="16:9">16:9</option>
       </select>
 
       <select id="quality">
-
-        <option value="standard" selected>
-          Standard
-        </option>
-
-        <option value="hd">
-          HD
-        </option>
-
+        <option value="standard" selected>Standard</option>
+        <option value="hd">HD</option>
       </select>
 
     </div>
@@ -265,9 +248,7 @@
       class="generate"
       id="generateBtn"
       onclick="generate()">
-
       Generate
-
     </button>
 
     <div id="status"></div>
@@ -299,12 +280,10 @@
     </div>
 
     <div class="nav">
-
       <span>Home</span>
       <span>Create</span>
       <span>Studio</span>
       <span>Profile</span>
-
     </div>
 
   </div>
@@ -352,6 +331,9 @@
       const ratio =
         document.getElementById("ratio").value;
 
+      const quality =
+        document.getElementById("quality").value;
+
       const status =
         document.getElementById("status");
 
@@ -383,7 +365,9 @@
       button.disabled = true;
 
       status.innerText =
-        "Generating image...";
+        quality === "hd"
+          ? "Generating HD image..."
+          : "Generating image...";
 
       result.innerHTML = "";
 
@@ -396,6 +380,8 @@
           encodeURIComponent(prompt) +
           "&ratio=" +
           encodeURIComponent(ratio) +
+          "&quality=" +
+          encodeURIComponent(quality) +
           "&t=" +
           Date.now();
 
@@ -450,7 +436,9 @@
                 link.href = blobURL;
 
                 link.download =
-                  "aaru-ai-image.png";
+                  quality === "hd"
+                    ? "aaru-ai-hd-image.png"
+                    : "aaru-ai-image.png";
 
                 document.body.appendChild(link);
 
@@ -481,7 +469,9 @@
 
 
           status.innerText =
-            "✅ Image generated successfully.";
+            quality === "hd"
+              ? "✅ HD image generated successfully."
+              : "✅ Image generated successfully.";
 
           button.disabled = false;
 
