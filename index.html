@@ -1,422 +1,985 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Aaru AI</title>
+<title>Aaru AI</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b0b0f;
-      color: white;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#09090b;
+  color:#fff;
+}
 
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 20px;
-    }
+header{
+  padding:20px;
+  text-align:center;
+  border-bottom:1px solid #27272a;
+}
 
-    .hero {
-      text-align: center;
-      margin-top: 45px;
-    }
+.logo{
+  font-size:28px;
+  font-weight:bold;
+}
 
-    .hero h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
+.hero{
+  text-align:center;
+  padding:35px 20px 20px;
+}
 
-    .hero p {
-      color: #aaa;
-      font-size: 17px;
-    }
+.hero h1{
+  font-size:36px;
+  margin:0 0 10px;
+}
 
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 30px 0 15px;
-    }
+.hero p{
+  color:#a1a1aa;
+}
 
-    .tab {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background: #1a1a22;
-      color: #aaa;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
 
-    .tab.active {
-      background: white;
-      color: black;
-    }
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
 
-    textarea {
-      width: 100%;
-      min-height: 130px;
-      resize: vertical;
-      background: #15151c;
-      color: white;
-      border: 1px solid #2a2a35;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 16px;
-      outline: none;
-    }
+.tab{
+  flex:1;
+  padding:13px;
+  border:1px solid #3f3f46;
+  border-radius:12px;
+  background:#18181b;
+  color:#fff;
+  font-size:16px;
+}
 
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
+.tab.active{
+  background:#fff;
+  color:#000;
+}
 
-    select {
-      flex: 1;
-      padding: 13px;
-      border-radius: 10px;
-      background: #15151c;
-      color: white;
-      border: 1px solid #2a2a35;
-    }
+textarea{
+  width:100%;
+  min-height:140px;
+  padding:16px;
+  border-radius:14px;
+  border:1px solid #3f3f46;
+  background:#18181b;
+  color:#fff;
+  font-size:16px;
+  resize:vertical;
+  outline:none;
+}
 
-    .generate {
-      width: 100%;
-      margin-top: 15px;
-      padding: 16px;
-      border: none;
-      border-radius: 12px;
-      background: white;
-      color: black;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+textarea:focus{
+  border-color:#71717a;
+}
 
-    .generate:disabled {
-      opacity: 0.5;
-    }
+.options{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
 
-    #status {
-      text-align: center;
-      margin: 20px 0;
-      color: #aaa;
-    }
+select{
+  flex:1;
+  padding:13px;
+  border-radius:12px;
+  border:1px solid #3f3f46;
+  background:#18181b;
+  color:#fff;
+  font-size:15px;
+}
 
-    #result {
-      margin-top: 20px;
-      text-align: center;
-    }
+.generate{
+  width:100%;
+  margin-top:15px;
+  padding:16px;
+  border:0;
+  border-radius:14px;
+  background:#fff;
+  color:#000;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    #result img {
-      max-width: 100%;
-      border-radius: 15px;
-      margin-top: 10px;
-    }
+.generate:disabled{
+  opacity:.5;
+}
 
-    .download-btn {
-      display: block;
-      width: 100%;
-      margin-top: 12px;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background: #1f1f29;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.status{
+  text-align:center;
+  margin:18px 0;
+  color:#a1a1aa;
+}
 
-    .download-btn:hover {
-      background: #2a2a35;
-    }
+.result-card{
+  margin-top:15px;
+  padding:12px;
+  border:1px solid #27272a;
+  border-radius:16px;
+  background:#111113;
+}
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 40px;
-    }
+.result-image{
+  width:100%;
+  display:block;
+  border-radius:12px;
+}
 
-    .card {
-      background: #15151c;
-      padding: 20px;
-      border-radius: 14px;
-      border: 1px solid #24242e;
-    }
+.download-btn{
+  width:100%;
+  margin-top:10px;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  background:#27272a;
+  color:#fff;
+  font-size:15px;
+}
 
-    .card h3 {
-      margin-top: 0;
-    }
+section{
+  margin-top:40px;
+}
 
-    .card p {
-      color: #999;
-      font-size: 14px;
-    }
+section h2{
+  font-size:22px;
+}
 
-    .nav {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 40px;
-      padding: 15px 0;
-      border-top: 1px solid #222;
-      color: #999;
-    }
+.history-card{
+  margin-top:15px;
+  padding:10px;
+  background:#111113;
+  border:1px solid #27272a;
+  border-radius:15px;
+}
 
-    #history {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #222;
-    }
+.history-card img{
+  width:100%;
+  display:block;
+  border-radius:10px;
+}
 
-    #history h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.history-actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
 
-    #historyList {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+.history-actions button{
+  flex:1;
+  padding:11px;
+  border:0;
+  border-radius:10px;
+  background:#27272a;
+  color:#fff;
+}
 
-    .history-item {
-      background: #15151c;
-      padding: 8px;
-      border-radius: 12px;
-      border: 1px solid #24242e;
-    }
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
 
-    .history-item img {
-      width: 100%;
-      display: block;
-      border-radius: 8px;
-    }
+.feature{
+  padding:18px;
+  border:1px solid #27272a;
+  border-radius:14px;
+  background:#111113;
+}
 
-    .history-download {
-      width: 100%;
-      margin-top: 8px;
-      padding: 9px;
-      border: none;
-      border-radius: 8px;
-      background: #24242e;
-      color: white;
-      cursor: pointer;
-    }
+.feature h3{
+  margin-top:0;
+}
 
-    .history-delete {
-      width: 100%;
-      margin-top: 6px;
-      padding: 9px;
-      border: none;
-      border-radius: 8px;
-      background: #1f1f29;
-      color: #aaa;
-      cursor: pointer;
-    }
+.feature p{
+  color:#a1a1aa;
+  font-size:14px;
+}
 
-    #noHistory {
-      text-align: center;
-      color: #888;
-    }
+footer{
+  text-align:center;
+  padding:40px 20px;
+  color:#71717a;
+}
 
-    @media (max-width: 600px) {
+@media(max-width:500px){
 
-      .hero h1 {
-        font-size: 34px;
-      }
+  .hero h1{
+    font-size:30px;
+  }
 
-      .cards {
-        grid-template-columns: 1fr;
-      }
+  .options{
+    flex-direction:column;
+  }
 
-      .controls {
-        flex-direction: column;
-      }
+  .features{
+    grid-template-columns:1fr;
+  }
 
-      #historyList {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  </style>
+}
+
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<header>
+  <div class="logo">✨ Aaru AI</div>
+</header>
 
-    <div class="logo">
-      Aaru AI
-    </div>
+<div class="hero">
 
-    <div class="hero">
-      <h1>Create Anything.</h1>
-      <p>Generate amazing images with AI.</p>
-    </div>
+  <h1>Create Anything.</h1>
 
-    <div class="tabs">
+  <p>
+    Turn your ideas into AI-generated images.
+  </p>
 
-      <button
-        class="tab active"
-        onclick="selectMode('image', this)">
-        🖼️ Image
-      </button>
+</div>
 
-      <button
-        class="tab"
-        onclick="selectMode('video', this)">
-        🎬 Video
-      </button>
+<div class="container">
 
-    </div>
-
-    <textarea
-      id="prompt"
-      placeholder="Describe the image you want to create..."></textarea>
-
-    <div class="controls">
-
-      <select id="ratio">
-        <option value="9:16">9:16</option>
-        <option value="1:1" selected>1:1</option>
-        <option value="16:9">16:9</option>
-      </select>
-
-      <select id="quality">
-        <option value="standard" selected>Standard</option>
-        <option value="hd">HD</option>
-      </select>
-
-    </div>
+  <div class="tabs">
 
     <button
-      class="generate"
-      id="generateBtn"
-      onclick="generate()">
-      Generate
+      id="imageTab"
+      class="tab active"
+      type="button"
+      onclick="selectMode('image')">
+      🖼️ Image
     </button>
 
-    <div id="status"></div>
-
-    <div id="result"></div>
-
-    <div class="cards">
-
-      <div class="card">
-        <h3>AI Images</h3>
-        <p>Create images from simple text prompts.</p>
-      </div>
-
-      <div class="card">
-        <h3>AI Videos</h3>
-        <p>Generate creative AI videos.</p>
-      </div>
-
-      <div class="card">
-        <h3>Image to Video</h3>
-        <p>Turn your images into videos.</p>
-      </div>
-
-      <div class="card">
-        <h3>AI Studio</h3>
-        <p>Create and manage your AI content.</p>
-      </div>
-
-    </div>
-
-    <section id="history">
-
-      <h2>🖼️ My Creations</h2>
-
-      <div id="historyList"></div>
-
-      <p id="noHistory">
-        अभी तक कोई इमेज नहीं बनाई गई है।
-      </p>
-
-    </section>
-
-    <div class="nav">
-      <span>Home</span>
-      <span>Create</span>
-      <span>Studio</span>
-      <span>Profile</span>
-    </div>
+    <button
+      id="videoTab"
+      class="tab"
+      type="button"
+      onclick="selectMode('video')">
+      🎬 Video
+    </button>
 
   </div>
 
 
-  <script>
-
-    const API_URL =
-      "https://aaru-ai-api.myera-org.workers.dev/";
-
-    let mode = "image";
+  <textarea
+    id="prompt"
+    placeholder="Describe the image you want to create...">
+  </textarea>
 
 
-    function selectMode(newMode, button) {
+  <div class="options">
 
-      mode = newMode;
+    <select id="ratio">
 
-      document.querySelectorAll(".tab").forEach(tab => {
-        tab.classList.remove("active");
-      });
+      <option value="9:16">9:16 Portrait</option>
 
-      button.classList.add("active");
+      <option value="1:1" selected>
+        1:1 Square
+      </option>
 
-      const promptBox =
-        document.getElementById("prompt");
+      <option value="16:9">
+        16:9 Landscape
+      </option>
 
-      if (mode === "image") {
+    </select>
 
-        promptBox.placeholder =
-          "Describe the image you want to create...";
 
-      } else {
+    <select id="quality">
 
-        promptBox.placeholder =
-          "Describe the video you want to create...";
+      <option value="standard" selected>
+        Standard
+      </option>
 
-      }
+      <option value="hd">
+        HD
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <button
+    id="generateBtn"
+    class="generate"
+    type="button"
+    onclick="generate()">
+
+    ✨ Generate Image
+
+  </button>
+
+
+  <div
+    id="status"
+    class="status">
+  </div>
+
+
+  <div id="result"></div>
+
+
+  <section id="history">
+
+    <h2>🖼️ My Creations</h2>
+
+    <div id="historyList"></div>
+
+    <p
+      id="noHistory"
+      style="color:#71717a;">
+      अभी तक कोई इमेज नहीं बनाई गई है।
+    </p>
+
+  </section>
+
+
+  <section>
+
+    <h2>AI Studio</h2>
+
+    <div class="features">
+
+      <div class="feature">
+
+        <h3>🖼️ AI Images</h3>
+
+        <p>
+          Create images from your text prompts.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <h3>🎬 AI Videos</h3>
+
+        <p>
+          AI video generation — coming soon.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <h3>🎞️ Image to Video</h3>
+
+        <p>
+          Turn images into videos — coming soon.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <h3>✨ AI Studio</h3>
+
+        <p>
+          More creative AI tools coming soon.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<footer>
+  © 2026 Aaru AI
+</footer>
+
+
+<script>
+
+/* ================================
+   AARU AI WORKER
+================================ */
+
+const API_URL =
+  "https://aaru-ai-api.myera-org.workers.dev/";
+
+
+/* ================================
+   CURRENT MODE
+================================ */
+
+let mode = "image";
+
+
+/* ================================
+   SELECT IMAGE / VIDEO
+================================ */
+
+function selectMode(selectedMode){
+
+  mode = selectedMode;
+
+  const imageTab =
+    document.getElementById("imageTab");
+
+  const videoTab =
+    document.getElementById("videoTab");
+
+  const prompt =
+    document.getElementById("prompt");
+
+  const generateBtn =
+    document.getElementById("generateBtn");
+
+
+  if(mode === "image"){
+
+    imageTab.classList.add("active");
+
+    videoTab.classList.remove("active");
+
+    prompt.placeholder =
+      "Describe the image you want to create...";
+
+    generateBtn.innerText =
+      "✨ Generate Image";
+
+  }else{
+
+    videoTab.classList.add("active");
+
+    imageTab.classList.remove("active");
+
+    prompt.placeholder =
+      "Describe the video you want to create...";
+
+    generateBtn.innerText =
+      "🎬 Generate Video";
+
+  }
+
+}
+
+
+/* ================================
+   GENERATE
+================================ */
+
+async function generate(){
+
+  const promptElement =
+    document.getElementById("prompt");
+
+  const ratioElement =
+    document.getElementById("ratio");
+
+  const qualityElement =
+    document.getElementById("quality");
+
+  const status =
+    document.getElementById("status");
+
+  const result =
+    document.getElementById("result");
+
+  const generateBtn =
+    document.getElementById("generateBtn");
+
+
+  const prompt =
+    promptElement.value.trim();
+
+  const ratio =
+    ratioElement.value;
+
+  const quality =
+    qualityElement.value;
+
+
+  if(!prompt){
+
+    alert("कृपया पहले prompt लिखें।");
+
+    promptElement.focus();
+
+    return;
+
+  }
+
+
+  if(mode !== "image"){
+
+    status.innerText =
+      "🎬 Video generation जल्द उपलब्ध होगा।";
+
+    return;
+
+  }
+
+
+  status.innerText =
+    "⏳ AI image बना रहा है...";
+
+  result.innerHTML = "";
+
+  generateBtn.disabled = true;
+
+  generateBtn.innerText =
+    "⏳ Generating...";
+
+
+  try{
+
+
+    const url =
+      API_URL +
+      "?prompt=" +
+      encodeURIComponent(prompt) +
+      "&ratio=" +
+      encodeURIComponent(ratio) +
+      "&quality=" +
+      encodeURIComponent(quality) +
+      "&t=" +
+      Date.now();
+
+
+    const response =
+      await fetch(url);
+
+
+    if(!response.ok){
+
+      let message =
+        "Image generation failed.";
+
+      try{
+
+        const errorData =
+          await response.json();
+
+        if(errorData.error){
+
+          message =
+            errorData.error;
+
+        }
+
+      }catch(e){}
+
+      throw new Error(message);
+
     }
 
 
-    async function generate() {
-
-      const prompt =
-        document.getElementById("prompt").value.trim();
-
-      const ratio =
-        document.getElementById("ratio").value;
-
-      const quality =
-        document.getElementById("quality").value;
-
-      const status =
-        document.getElementById("status");
-
-      const result =
-        document.getElementById("result");
-
-      const button =
-        document.getElementById("generateBtn");
+    const contentType =
+      response.headers.get("content-type") || "";
 
 
-      if (!prompt
+    if(!contentType.includes("image")){
+
+      const text =
+        await response.text();
+
+      throw new Error(
+        text || "Worker did not return an image."
+      );
+
+    }
+
+
+    const blob =
+      await response.blob();
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onloadend = function(){
+
+      const imageData =
+        reader.result;
+
+
+      result.innerHTML = `
+
+        <div class="result-card">
+
+          <img
+            src="${imageData}"
+            class="result-image"
+            alt="Aaru AI Generated Image">
+
+          <button
+            class="download-btn"
+            type="button"
+            onclick="downloadImage()">
+
+            ⬇️ Download Image
+
+          </button>
+
+        </div>
+
+      `;
+
+
+      /* Save EXACT generated image */
+
+      saveToHistory(imageData);
+
+
+      status.innerText =
+        "✅ Image ready";
+
+
+      generateBtn.disabled =
+        false;
+
+      generateBtn.innerText =
+        "✨ Generate Image";
+
+    };
+
+
+    reader.readAsDataURL(blob);
+
+
+  }catch(error){
+
+    console.error(
+      "Aaru AI Error:",
+      error
+    );
+
+
+    status.innerText =
+      "❌ Image generation fail: " +
+      error.message;
+
+
+    generateBtn.disabled =
+      false;
+
+    generateBtn.innerText =
+      "✨ Generate Image";
+
+  }
+
+}
+
+
+/* ================================
+   DOWNLOAD CURRENT IMAGE
+================================ */
+
+function downloadImage(){
+
+  const image =
+    document.querySelector(
+      ".result-image"
+    );
+
+
+  if(!image){
+
+    alert("पहले image generate करें।");
+
+    return;
+
+  }
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    image.src;
+
+  link.download =
+    "aaru-ai.png";
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+}
+
+
+/* ================================
+   SAVE HISTORY
+================================ */
+
+function saveToHistory(imageData){
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  history.unshift(imageData);
+
+
+  /* Maximum 10 images */
+
+  if(history.length > 10){
+
+    history =
+      history.slice(0,10);
+
+  }
+
+
+  localStorage.setItem(
+    "aaruHistory",
+    JSON.stringify(history)
+  );
+
+
+  showHistory();
+
+}
+
+
+/* ================================
+   SHOW HISTORY
+================================ */
+
+function showHistory(){
+
+  const list =
+    document.getElementById(
+      "historyList"
+    );
+
+  const empty =
+    document.getElementById(
+      "noHistory"
+    );
+
+
+  if(!list || !empty){
+
+    return;
+
+  }
+
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  list.innerHTML = "";
+
+
+  if(history.length === 0){
+
+    empty.style.display =
+      "block";
+
+    return;
+
+  }
+
+
+  empty.style.display =
+    "none";
+
+
+  history.forEach(
+    function(image,index){
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "history-card";
+
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+
+      img.src =
+        image;
+
+
+      img.alt =
+        "Aaru AI creation";
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "history-actions";
+
+
+      const download =
+        document.createElement(
+          "button"
+        );
+
+
+      download.innerText =
+        "⬇️ Download";
+
+
+      download.onclick =
+        function(){
+
+          downloadHistoryImage(image);
+
+        };
+
+
+      const deleteBtn =
+        document.createElement(
+          "button"
+        );
+
+
+      deleteBtn.innerText =
+        "🗑 Delete";
+
+
+      deleteBtn.onclick =
+        function(){
+
+          deleteHistory(index);
+
+        };
+
+
+      actions.appendChild(
+        download
+      );
+
+      actions.appendChild(
+        deleteBtn
+      );
+
+
+      card.appendChild(img);
+
+      card.appendChild(actions);
+
+
+      list.appendChild(card);
+
+    }
+  );
+
+}
+
+
+/* ================================
+   DOWNLOAD HISTORY IMAGE
+================================ */
+
+function downloadHistoryImage(
+  imageData
+){
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    imageData;
+
+
+  link.download =
+    "aaru-ai.png";
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+}
+
+
+/* ================================
+   DELETE HISTORY
+================================ */
+
+function deleteHistory(index){
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  history.splice(index,1);
+
+
+  localStorage.setItem(
+    "aaruHistory",
+    JSON.stringify(history)
+  );
+
+
+  showHistory();
+
+}
+
+
+/* ================================
+   PAGE LOAD
+================================ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    showHistory();
+
+    selectMode("image");
+
+  }
+);
+
+</script>
+
+</body>
+</html>
