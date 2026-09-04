@@ -1,341 +1,946 @@
-export default {
-  async fetch(request, env) {
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aaru AI</title>
 
-    const cors = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    };
+<style>
+*{box-sizing:border-box}
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        headers: cors
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#09090b;
+  color:#fff;
+}
+
+header{
+  padding:20px;
+  text-align:center;
+  border-bottom:1px solid #27272a;
+}
+
+.logo{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.hero{
+  text-align:center;
+  padding:35px 20px 20px;
+}
+
+.hero h1{
+  font-size:36px;
+  margin:0 0 10px;
+}
+
+.hero p{
+  color:#a1a1aa;
+}
+
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.tab{
+  flex:1;
+  padding:13px;
+  border:1px solid #3f3f46;
+  border-radius:12px;
+  background:#18181b;
+  color:#fff;
+  font-size:16px;
+}
+
+.tab.active{
+  background:#fff;
+  color:#000;
+}
+
+textarea{
+  width:100%;
+  min-height:140px;
+  padding:16px;
+  border-radius:14px;
+  border:1px solid #3f3f46;
+  background:#18181b;
+  color:#fff;
+  font-size:16px;
+  resize:vertical;
+  outline:none;
+}
+
+.options{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+select{
+  flex:1;
+  padding:13px;
+  border-radius:12px;
+  border:1px solid #3f3f46;
+  background:#18181b;
+  color:#fff;
+  font-size:15px;
+}
+
+.generate{
+  width:100%;
+  margin-top:15px;
+  padding:16px;
+  border:0;
+  border-radius:14px;
+  background:#fff;
+  color:#000;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.generate:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.status{
+  text-align:center;
+  margin:18px 0;
+  color:#a1a1aa;
+  line-height:1.5;
+}
+
+.result-card{
+  margin-top:15px;
+  padding:12px;
+  border:1px solid #27272a;
+  border-radius:16px;
+  background:#111113;
+}
+
+.result-image{
+  width:100%;
+  display:block;
+  border-radius:12px;
+}
+
+.download-btn{
+  width:100%;
+  margin-top:10px;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  background:#27272a;
+  color:#fff;
+  font-size:15px;
+}
+
+section{
+  margin-top:40px;
+}
+
+section h2{
+  font-size:22px;
+}
+
+.history-card{
+  margin-top:15px;
+  padding:10px;
+  background:#111113;
+  border:1px solid #27272a;
+  border-radius:15px;
+}
+
+.history-card img{
+  width:100%;
+  display:block;
+  border-radius:10px;
+}
+
+.history-actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+
+.history-actions button{
+  flex:1;
+  padding:11px;
+  border:0;
+  border-radius:10px;
+  background:#27272a;
+  color:#fff;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.feature{
+  padding:18px;
+  border:1px solid #27272a;
+  border-radius:14px;
+  background:#111113;
+}
+
+.feature h3{
+  margin-top:0;
+}
+
+.feature p{
+  color:#a1a1aa;
+  font-size:14px;
+}
+
+footer{
+  text-align:center;
+  padding:40px 20px;
+  color:#71717a;
+}
+
+@media(max-width:500px){
+  .hero h1{font-size:30px}
+  .options{flex-direction:column}
+  .features{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">✨ Aaru AI</div>
+</header>
+
+<div class="hero">
+  <h1>Create Anything.</h1>
+  <p>Turn your ideas into AI-generated images.</p>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button
+      id="imageTab"
+      class="tab active"
+      type="button"
+      onclick="selectMode('image')">
+      🖼️ Image
+    </button>
+
+    <button
+      id="videoTab"
+      class="tab"
+      type="button"
+      onclick="selectMode('video')">
+      🎬 Video
+    </button>
+  </div>
+
+  <textarea
+    id="prompt"
+    placeholder="अपनी image के बारे में लिखें...">
+  </textarea>
+
+  <div class="options">
+
+    <select id="ratio">
+      <option value="9:16">9:16 Portrait</option>
+      <option value="1:1" selected>1:1 Square</option>
+      <option value="16:9">16:9 Landscape</option>
+    </select>
+
+    <select id="quality">
+      <option value="standard" selected>Standard</option>
+      <option value="hd">HD</option>
+    </select>
+
+  </div>
+
+  <button
+    id="generateBtn"
+    class="generate"
+    type="button"
+    onclick="generate()">
+    ✨ Generate Image
+  </button>
+
+  <div id="status" class="status"></div>
+
+  <div id="result"></div>
+
+  <section id="history">
+    <h2>🖼️ My Creations</h2>
+
+    <div id="historyList"></div>
+
+    <p id="noHistory" style="color:#71717a;">
+      अभी तक कोई इमेज नहीं बनाई गई है।
+    </p>
+  </section>
+
+  <section>
+    <h2>AI Studio</h2>
+
+    <div class="features">
+
+      <div class="feature">
+        <h3>🖼️ AI Images</h3>
+        <p>Create images from your text prompts.</p>
+      </div>
+
+      <div class="feature">
+        <h3>🎬 AI Videos</h3>
+        <p>AI video generation — coming soon.</p>
+      </div>
+
+      <div class="feature">
+        <h3>🎞️ Image to Video</h3>
+        <p>Turn images into videos — coming soon.</p>
+      </div>
+
+      <div class="feature">
+        <h3>✨ AI Studio</h3>
+        <p>More creative AI tools coming soon.</p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  © 2026 Aaru AI
+</footer>
+
+<script>
+
+/* =========================
+   AARU AI WORKER
+========================= */
+
+const API_URL =
+  "https://aaru-ai-api.myera-org.workers.dev/";
+
+
+let mode = "image";
+
+
+/* =========================
+   MODE
+========================= */
+
+function selectMode(selectedMode){
+
+  mode = selectedMode;
+
+  const imageTab =
+    document.getElementById("imageTab");
+
+  const videoTab =
+    document.getElementById("videoTab");
+
+  const prompt =
+    document.getElementById("prompt");
+
+  const button =
+    document.getElementById("generateBtn");
+
+
+  if(mode === "image"){
+
+    imageTab.classList.add("active");
+    videoTab.classList.remove("active");
+
+    prompt.placeholder =
+      "अपनी image के बारे में लिखें...";
+
+    button.innerText =
+      "✨ Generate Image";
+
+  }else{
+
+    videoTab.classList.add("active");
+    imageTab.classList.remove("active");
+
+    prompt.placeholder =
+      "अपनी video के बारे में लिखें...";
+
+    button.innerText =
+      "🎬 Generate Video";
+
+  }
+}
+
+
+/* =========================
+   GENERATE IMAGE
+========================= */
+
+async function generate(){
+
+  const prompt =
+    document.getElementById("prompt")
+      .value.trim();
+
+  const ratio =
+    document.getElementById("ratio")
+      .value;
+
+  const quality =
+    document.getElementById("quality")
+      .value;
+
+  const status =
+    document.getElementById("status");
+
+  const result =
+    document.getElementById("result");
+
+  const button =
+    document.getElementById("generateBtn");
+
+
+  if(!prompt){
+
+    alert("कृपया पहले prompt लिखें।");
+
+    document.getElementById("prompt").focus();
+
+    return;
+  }
+
+
+  if(mode !== "image"){
+
+    status.innerText =
+      "🎬 Video generation जल्द उपलब्ध होगा।";
+
+    return;
+  }
+
+
+  status.innerText =
+    "⏳ Generating...";
+
+  result.innerHTML = "";
+
+  button.disabled = true;
+
+  button.innerText =
+    "⏳ Generating...";
+
+
+  /*
+     IMPORTANT:
+     10 SECOND FRONTEND TIMEOUT
+  */
+
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(function(){
+
+      controller.abort();
+
+    },10000);
+
+
+  try{
+
+    const url =
+      API_URL +
+      "?prompt=" +
+      encodeURIComponent(prompt) +
+      "&ratio=" +
+      encodeURIComponent(ratio) +
+      "&quality=" +
+      encodeURIComponent(quality) +
+      "&t=" +
+      Date.now();
+
+
+    const response =
+      await fetch(url,{
+        method:"GET",
+        signal:controller.signal,
+        cache:"no-store"
       });
-    }
-
-    try {
-
-      let prompt = "";
-      let ratio = "1:1";
-      let quality = "standard";
-
-      /* =========================
-         GET REQUEST
-      ========================= */
-
-      if (request.method === "GET") {
-
-        const url = new URL(request.url);
-
-        prompt =
-          url.searchParams.get("prompt") || "";
-
-        ratio =
-          url.searchParams.get("ratio") || "1:1";
-
-        quality =
-          url.searchParams.get("quality") || "standard";
-      }
 
 
-      /* =========================
-         POST REQUEST
-      ========================= */
+    clearTimeout(timeout);
 
-      if (request.method === "POST") {
+
+    if(!response.ok){
+
+      let errorMessage =
+        "Image generation failed.";
+
+      try{
 
         const data =
-          await request.json();
+          await response.json();
 
-        prompt =
-          data.prompt || "";
+        if(data && data.error){
 
-        ratio =
-          data.ratio || "1:1";
-
-        quality =
-          data.quality || "standard";
-      }
-
-
-      /* =========================
-         VALIDATE PROMPT
-      ========================= */
-
-      if (!prompt.trim()) {
-
-        return new Response(
-          JSON.stringify({
-            error: "Prompt is required"
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-              ...cors
-            }
-          }
-        );
-      }
-
-
-      /* =========================
-         MULTILINGUAL AI
-      ========================= */
-
-      const messages = [
-
-        {
-          role: "system",
-
-          content: `
-You are the multilingual prompt engine for an AI image generator.
-
-The user may write in ANY language.
-
-Understand the user's exact meaning, including:
-- Hindi
-- English
-- Bengali
-- Tamil
-- Telugu
-- Marathi
-- Gujarati
-- Urdu
-- Arabic
-- Japanese
-- Korean
-- Chinese
-- French
-- German
-- Spanish
-- Portuguese
-- Russian
-- and other languages.
-
-Your job is NOT to answer the user.
-
-Your job is to convert the user's request into ONE clear,
-detailed English prompt for an image-generation model.
-
-Preserve the user's requested:
-- objects
-- people
-- animals
-- colors
-- clothing
-- location
-- environment
-- actions
-- lighting
-- camera angle
-- style
-- mood
-- composition
-- quantity
-
-Do not change the user's intended subject.
-
-If the user gives a short prompt,
-expand it naturally into a useful image prompt
-without inventing important objects.
-
-Return ONLY the final English image prompt.
-
-Do NOT include explanations.
-Do NOT include quotation marks.
-Do NOT say that you translated the prompt.
-`
-        },
-
-        {
-          role: "user",
-
-          content: prompt
-        }
-
-      ];
-
-
-      /* =========================
-         CALL GLM
-      ========================= */
-
-      const aiResponse =
-        await env.AI.run(
-          "@cf/zai-org/glm-4.7-flash",
-          {
-            messages: messages,
-            temperature: 0.2,
-            max_tokens: 512
-          }
-        );
-
-
-      /* =========================
-         EXTRACT GLM RESPONSE
-      ========================= */
-
-      let imagePrompt = "";
-
-
-      if (
-        aiResponse &&
-        aiResponse.choices &&
-        aiResponse.choices.length > 0
-      ) {
-
-        const choice =
-          aiResponse.choices[0];
-
-        if (
-          choice.message &&
-          typeof choice.message.content === "string"
-        ) {
-
-          imagePrompt =
-            choice.message.content.trim();
+          errorMessage =
+            data.error;
 
         }
 
-      }
+      }catch(e){}
+
+      throw new Error(errorMessage);
+    }
 
 
-      /* Fallback */
-
-      if (
-        !imagePrompt &&
-        aiResponse &&
-        typeof aiResponse.response === "string"
-      ) {
-
-        imagePrompt =
-          aiResponse.response.trim();
-
-      }
+    const contentType =
+      response.headers.get("content-type") || "";
 
 
-      /* =========================
-         GLM FAILURE
-      ========================= */
+    if(!contentType.includes("image")){
 
-      if (!imagePrompt) {
+      const text =
+        await response.text();
 
-        console.error(
-          "GLM response:",
-          JSON.stringify(aiResponse)
-        );
-
-        return new Response(
-          JSON.stringify({
-            error:
-              "Multilingual prompt processing failed."
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json",
-              ...cors
-            }
-          }
-        );
-      }
-
-
-      /* =========================
-         IMAGE SIZE
-      ========================= */
-
-      let width = 1024;
-      let height = 1024;
-
-
-      if (ratio === "9:16") {
-
-        width = 768;
-        height = 1344;
-
-      }
-
-
-      if (ratio === "16:9") {
-
-        width = 1344;
-        height = 768;
-
-      }
-
-
-      /* =========================
-         QUALITY
-      ========================= */
-
-      let steps = 8;
-
-
-      if (quality === "hd") {
-
-        steps = 20;
-
-      }
-
-
-      /* =========================
-         GENERATE IMAGE
-      ========================= */
-
-      const image =
-        await env.AI.run(
-          "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-          {
-            prompt: imagePrompt,
-            width: width,
-            height: height,
-            num_steps: steps
-          }
-        );
-
-
-      /* =========================
-         RETURN IMAGE
-      ========================= */
-
-      return new Response(
-        image,
-        {
-          headers: {
-            "Content-Type": "image/png",
-            "Cache-Control": "no-store",
-            ...cors
-          }
-        }
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Aaru AI Error:",
-        error
-      );
-
-
-      return new Response(
-        JSON.stringify({
-          error:
-            error &&
-            error.message
-              ? error.message
-              : "Unknown Worker error"
-        }),
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-            ...cors
-          }
-        }
+      throw new Error(
+        text ||
+        "Worker did not return an image."
       );
     }
+
+
+    const blob =
+      await response.blob();
+
+
+    if(!blob || blob.size === 0){
+
+      throw new Error(
+        "Empty image received."
+      );
+    }
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onloadend =
+      function(){
+
+        const imageData =
+          reader.result;
+
+
+        result.innerHTML = `
+          <div class="result-card">
+
+            <img
+              src="${imageData}"
+              class="result-image"
+              alt="Aaru AI Generated Image">
+
+            <button
+              class="download-btn"
+              type="button"
+              onclick="downloadCurrentImage()">
+              ⬇️ Download Image
+            </button>
+
+          </div>
+        `;
+
+
+        saveToHistory(imageData);
+
+
+        status.innerText =
+          "✅ Image ready";
+
+
+        button.disabled =
+          false;
+
+        button.innerText =
+          "✨ Generate Image";
+      };
+
+
+    reader.onerror =
+      function(){
+
+        throw new Error(
+          "Could not read generated image."
+        );
+      };
+
+
+    reader.readAsDataURL(blob);
+
+
+  }catch(error){
+
+    clearTimeout(timeout);
+
+
+    console.error(
+      "Aaru AI:",
+      error
+    );
+
+
+    if(error.name === "AbortError"){
+
+      status.innerText =
+        "⏱️ 10 सेकंड में response नहीं मिला। फिर से कोशिश करें।";
+
+    }else{
+
+      status.innerText =
+        "❌ " +
+        (error.message ||
+        "Image generation failed.");
+
+    }
+
+
+    button.disabled =
+      false;
+
+    button.innerText =
+      "✨ Generate Image";
   }
-};
+}
+
+
+/* =========================
+   DOWNLOAD CURRENT IMAGE
+========================= */
+
+function downloadCurrentImage(){
+
+  const image =
+    document.querySelector(
+      ".result-image"
+    );
+
+
+  if(!image){
+
+    alert(
+      "पहले image generate करें।"
+    );
+
+    return;
+  }
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    image.src;
+
+  link.download =
+    "aaru-ai.png";
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+}
+
+
+/* =========================
+   HISTORY
+========================= */
+
+function saveToHistory(imageData){
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  history.unshift(imageData);
+
+
+  if(history.length > 10){
+
+    history =
+      history.slice(0,10);
+  }
+
+
+  try{
+
+    localStorage.setItem(
+      "aaruHistory",
+      JSON.stringify(history)
+    );
+
+  }catch(error){
+
+    /*
+      If browser storage becomes full,
+      keep only the latest 5 images.
+    */
+
+    history =
+      history.slice(0,5);
+
+    localStorage.setItem(
+      "aaruHistory",
+      JSON.stringify(history)
+    );
+  }
+
+
+  showHistory();
+}
+
+
+/* =========================
+   SHOW HISTORY
+========================= */
+
+function showHistory(){
+
+  const list =
+    document.getElementById(
+      "historyList"
+    );
+
+  const empty =
+    document.getElementById(
+      "noHistory"
+    );
+
+
+  if(!list || !empty){
+
+    return;
+  }
+
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  list.innerHTML = "";
+
+
+  if(history.length === 0){
+
+    empty.style.display =
+      "block";
+
+    return;
+  }
+
+
+  empty.style.display =
+    "none";
+
+
+  history.forEach(
+    function(image,index){
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "history-card";
+
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.src =
+        image;
+
+      img.alt =
+        "Aaru AI creation";
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "history-actions";
+
+
+      const download =
+        document.createElement(
+          "button"
+        );
+
+      download.type =
+        "button";
+
+      download.innerText =
+        "⬇️ Download";
+
+      download.onclick =
+        function(){
+
+          downloadHistoryImage(
+            image
+          );
+        };
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.innerText =
+        "🗑 Delete";
+
+      deleteButton.onclick =
+        function(){
+
+          deleteHistory(
+            index
+          );
+        };
+
+
+      actions.appendChild(
+        download
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      card.appendChild(
+        img
+      );
+
+      card.appendChild(
+        actions
+      );
+
+
+      list.appendChild(
+        card
+      );
+
+    }
+  );
+}
+
+
+/* =========================
+   DOWNLOAD HISTORY
+========================= */
+
+function downloadHistoryImage(
+  imageData
+){
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    imageData;
+
+  link.download =
+    "aaru-ai.png";
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+}
+
+
+/* =========================
+   DELETE HISTORY
+========================= */
+
+function deleteHistory(index){
+
+  let history =
+    JSON.parse(
+      localStorage.getItem(
+        "aaruHistory"
+      ) || "[]"
+    );
+
+
+  history.splice(
+    index,
+    1
+  );
+
+
+  localStorage.setItem(
+    "aaruHistory",
+    JSON.stringify(history)
+  );
+
+
+  showHistory();
+}
+
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    showHistory();
+
+    selectMode("image");
+
+  }
+);
+
+</script>
+
+</body>
+</html>
