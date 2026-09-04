@@ -446,7 +446,7 @@ async function generate(){
 
   /*
      IMPORTANT:
-     10 SECOND FRONTEND TIMEOUT
+     40 SECOND FRONTEND TIMEOUT
   */
 
   const controller =
@@ -457,7 +457,7 @@ async function generate(){
 
       controller.abort();
 
-    },10000);
+    },40000);
 
 
   try{
@@ -607,7 +607,7 @@ async function generate(){
     if(error.name === "AbortError"){
 
       status.innerText =
-        "⏱️ 10 सेकंड में response नहीं मिला। फिर से कोशिश करें।";
+        "⏱️ 40 सेकंड में response नहीं मिला। फिर से कोशिश करें।";
 
     }else{
 
