@@ -620,7 +620,7 @@ async function generate(){
 
 
     reader.onloadend =
-      function(){
+      async function(){
 
         const imageData =
           reader.result;
@@ -649,9 +649,39 @@ async function generate(){
         `;
 
 
-        saveToHistory(
-          imageData
-        );
+        /*
+          Save a compressed thumbnail
+          to History instead of storing
+          the full-size image.
+        */
+
+        try{
+
+          const historyImage =
+            await createHistoryThumbnail(
+              imageData
+            );
+
+          saveToHistory(
+            historyImage
+          );
+
+        }catch(error){
+
+          console.error(
+            "History thumbnail error:",
+            error
+          );
+
+          /*
+            If thumbnail creation fails,
+            do not stop image generation.
+          */
+
+          saveToHistory(
+            imageData
+          );
+        }
 
 
         status.innerText =
@@ -707,6 +737,117 @@ async function generate(){
     button.innerText =
       "✨ Generate Image";
   }
+}
+
+
+/* =================================
+   CREATE HISTORY THUMBNAIL
+================================= */
+
+function createHistoryThumbnail(
+  imageData
+){
+
+  return new Promise(
+    function(resolve,reject){
+
+      const img =
+        new Image();
+
+
+      img.onload =
+        function(){
+
+          try{
+
+            const maxWidth = 500;
+
+            let width =
+              img.width;
+
+            let height =
+              img.height;
+
+
+            if(width > maxWidth){
+
+              height =
+                Math.round(
+                  height *
+                  (maxWidth / width)
+                );
+
+              width =
+                maxWidth;
+            }
+
+
+            const canvas =
+              document.createElement(
+                "canvas"
+              );
+
+
+            canvas.width =
+              width;
+
+            canvas.height =
+              height;
+
+
+            const ctx =
+              canvas.getContext(
+                "2d"
+              );
+
+
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              width,
+              height
+            );
+
+
+            /*
+              JPEG compression keeps
+              localStorage usage much lower.
+            */
+
+            const thumbnail =
+              canvas.toDataURL(
+                "image/jpeg",
+                0.65
+              );
+
+
+            resolve(
+              thumbnail
+            );
+
+          }catch(error){
+
+            reject(error);
+          }
+        };
+
+
+      img.onerror =
+        function(){
+
+          reject(
+            new Error(
+              "Could not create thumbnail"
+            )
+          );
+        };
+
+
+      img.src =
+        imageData;
+    }
+  );
 }
 
 
@@ -776,16 +917,21 @@ function saveToHistory(
   }
 
 
+  /*
+    New image goes to the top.
+  */
+
   history.unshift(
     imageData
   );
 
 
-  if(history.length > 10){
+  /*
+    Keep maximum 10 images.
+  */
 
-    history =
-      history.slice(0,10);
-  }
+  history =
+    history.slice(0,10);
 
 
   try{
@@ -797,17 +943,35 @@ function saveToHistory(
 
   }catch(error){
 
-    history =
-      history.slice(0,5);
+    /*
+      Storage may still be full because
+      of old large images saved by the
+      previous version.
+
+      Clear old history and save only
+      the newest thumbnail.
+    */
 
     try{
 
-      localStorage.setItem(
-        "aaruHistory",
-        JSON.stringify(history)
+      localStorage.removeItem(
+        "aaruHistory"
       );
 
-    }catch(e){}
+      localStorage.setItem(
+        "aaruHistory",
+        JSON.stringify([
+          imageData
+        ])
+      );
+
+    }catch(e){
+
+      console.error(
+        "History storage failed:",
+        e
+      );
+    }
   }
 
 
@@ -890,6 +1054,9 @@ function showHistory(){
 
       img.src =
         image;
+
+      img.loading =
+        "lazy";
 
 
       const actions =
@@ -986,7 +1153,7 @@ function downloadHistoryImage(
     imageData;
 
   link.download =
-    "aaru-ai.png";
+    "aaru-ai-history.jpg";
 
 
   document.body.appendChild(link);
@@ -1026,10 +1193,20 @@ function deleteHistory(index){
   );
 
 
-  localStorage.setItem(
-    "aaruHistory",
-    JSON.stringify(history)
-  );
+  try{
+
+    localStorage.setItem(
+      "aaruHistory",
+      JSON.stringify(history)
+    );
+
+  }catch(e){
+
+    console.error(
+      "Could not update history:",
+      e
+    );
+  }
 
 
   showHistory();
