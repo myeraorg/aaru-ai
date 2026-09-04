@@ -180,7 +180,65 @@
       color: #999;
     }
 
+    #history {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #222;
+    }
+
+    #history h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #historyList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .history-item {
+      background: #15151c;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid #24242e;
+    }
+
+    .history-item img {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+    }
+
+    .history-download {
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px;
+      border: none;
+      border-radius: 8px;
+      background: #24242e;
+      color: white;
+      cursor: pointer;
+    }
+
+    .history-delete {
+      width: 100%;
+      margin-top: 6px;
+      padding: 9px;
+      border: none;
+      border-radius: 8px;
+      background: #1f1f29;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    #noHistory {
+      text-align: center;
+      color: #888;
+    }
+
     @media (max-width: 600px) {
+
       .hero h1 {
         font-size: 34px;
       }
@@ -191,6 +249,10 @@
 
       .controls {
         flex-direction: column;
+      }
+
+      #historyList {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -255,6 +317,7 @@
 
     <div id="result"></div>
 
+
     <div class="cards">
 
       <div class="card">
@@ -279,6 +342,22 @@
 
     </div>
 
+
+    <!-- MY CREATIONS -->
+
+    <section id="history">
+
+      <h2>🖼️ My Creations</h2>
+
+      <div id="historyList"></div>
+
+      <p id="noHistory">
+        अभी तक कोई इमेज नहीं बनाई गई है।
+      </p>
+
+    </section>
+
+
     <div class="nav">
       <span>Home</span>
       <span>Create</span>
@@ -287,6 +366,7 @@
     </div>
 
   </div>
+
 
   <script>
 
@@ -397,6 +477,10 @@
           result.appendChild(img);
 
 
+          // SAVE IMAGE TO HISTORY
+          saveToHistory(imageRequestURL);
+
+
           const downloadButton =
             document.createElement("button");
 
@@ -505,72 +589,199 @@
       }
 
     }
-function saveToHistory(imageURL) {
-  let history = JSON.parse(localStorage.getItem("aaruHistory") || "[]");
 
-  history.unshift(imageURL);
 
-  if (history.length > 20) {
-    history = history.slice(0, 20);
-  }
+    function saveToHistory(imageURL) {
 
-  localStorage.setItem("aaruHistory", JSON.stringify(history));
+      let history =
+        JSON.parse(
+          localStorage.getItem("aaruHistory") || "[]"
+        );
 
-  showHistory();
-}
 
-function showHistory() {
-  const historyList = document.getElementById("historyList");
-  const noHistory = document.getElementById("noHistory");
+      history.unshift(imageURL);
 
-  if (!historyList) return;
 
-  const history = JSON.parse(
-    localStorage.getItem("aaruHistory") || "[]"
-  );
+      if (history.length > 20) {
 
-  historyList.innerHTML = "";
+        history =
+          history.slice(0, 20);
 
-  if (history.length === 0) {
-    noHistory.style.display = "block";
-    return;
-  }
+      }
 
-  noHistory.style.display = "none";
 
-  history.forEach((imageURL) => {
-    const img = document.createElement("img");
+      localStorage.setItem(
+        "aaruHistory",
+        JSON.stringify(history)
+      );
 
-    img.src = imageURL;
 
-    img.style.width = "100%";
-    img.style.borderRadius = "12px";
-    img.style.display = "block";
+      showHistory();
+    }
 
-    historyList.appendChild(img);
-  });
-}
 
-showHistory();
+    function showHistory() {
+
+      const historyList =
+        document.getElementById("historyList");
+
+      const noHistory =
+        document.getElementById("noHistory");
+
+
+      if (!historyList) return;
+
+
+      const history =
+        JSON.parse(
+          localStorage.getItem("aaruHistory") || "[]"
+        );
+
+
+      historyList.innerHTML = "";
+
+
+      if (history.length === 0) {
+
+        noHistory.style.display =
+          "block";
+
+        return;
+      }
+
+
+      noHistory.style.display =
+        "none";
+
+
+      history.forEach(
+        (imageURL, index) => {
+
+          const item =
+            document.createElement("div");
+
+          item.className =
+            "history-item";
+
+
+          const img =
+            document.createElement("img");
+
+          img.src =
+            imageURL;
+
+
+          const downloadButton =
+            document.createElement("button");
+
+          downloadButton.className =
+            "history-download";
+
+          downloadButton.innerText =
+            "⬇️ Download";
+
+
+          downloadButton.onclick =
+            async function () {
+
+              try {
+
+                const response =
+                  await fetch(imageURL);
+
+                const blob =
+                  await response.blob();
+
+                const blobURL =
+                  URL.createObjectURL(blob);
+
+                const link =
+                  document.createElement("a");
+
+                link.href =
+                  blobURL;
+
+                link.download =
+                  "aaru-ai-image.png";
+
+                document.body.appendChild(link);
+
+                link.click();
+
+                link.remove();
+
+                URL.revokeObjectURL(blobURL);
+
+              } catch (error) {
+
+                console.error(error);
+
+              }
+
+            };
+
+
+          const deleteButton =
+            document.createElement("button");
+
+          deleteButton.className =
+            "history-delete";
+
+          deleteButton.innerText =
+            "🗑️ Delete";
+
+
+          deleteButton.onclick =
+            function () {
+
+              let currentHistory =
+                JSON.parse(
+                  localStorage.getItem("aaruHistory") || "[]"
+                );
+
+
+              currentHistory.splice(
+                index,
+                1
+              );
+
+
+              localStorage.setItem(
+                "aaruHistory",
+                JSON.stringify(currentHistory)
+              );
+
+
+              showHistory();
+
+            };
+
+
+          item.appendChild(img);
+
+          item.appendChild(
+            downloadButton
+          );
+
+          item.appendChild(
+            deleteButton
+          );
+
+
+          historyList.appendChild(
+            item
+          );
+
+        }
+      );
+
+    }
+
+
+    // LOAD HISTORY WHEN PAGE OPENS
+    showHistory();
+
   </script>
-  </section>
 
-  <section id="history" style="padding:20px; margin-top:20px;">
-    <h2>🖼️ My Creations</h2>
-
-    <div id="historyList" style="
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:12px;
-      margin-top:15px;
-    "></div>
-
-    <p id="noHistory" style="opacity:0.7;">
-      अभी कोई image नहीं है।
-    </p>
-  </section>
-
-</body>
-</html>
 </body>
 </html>
