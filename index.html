@@ -1,132 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Aaru AI</title>
 
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #0b0b12;
+      background: #0b0b0f;
       color: white;
-      min-height: 100vh;
     }
 
-    .app {
-      max-width: 480px;
+    .container {
+      max-width: 900px;
       margin: auto;
-      min-height: 100vh;
       padding: 20px;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 35px;
-    }
-
     .logo {
-      font-size: 25px;
+      font-size: 28px;
       font-weight: bold;
-    }
-
-    .logo span {
-      font-size: 13px;
-      opacity: .6;
-      margin-left: 5px;
-    }
-
-    .profile {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #29293a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      text-align: center;
+      margin-top: 20px;
     }
 
     .hero {
       text-align: center;
-      margin-bottom: 30px;
+      margin-top: 45px;
     }
 
     .hero h1 {
-      font-size: 32px;
+      font-size: 42px;
       margin-bottom: 10px;
     }
 
     .hero p {
-      color: #a5a5b5;
-      font-size: 15px;
+      color: #aaa;
+      font-size: 17px;
     }
 
     .tabs {
       display: flex;
       gap: 10px;
-      margin-bottom: 18px;
+      margin: 30px 0 15px;
     }
 
     .tab {
       flex: 1;
-      padding: 13px;
+      padding: 14px;
       border: none;
       border-radius: 12px;
-      background: #1b1b27;
+      background: #1a1a22;
       color: #aaa;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
     }
 
     .tab.active {
-      background: #6c4cff;
-      color: white;
-    }
-
-    .prompt {
-      background: #171722;
-      border: 1px solid #29293a;
-      border-radius: 18px;
-      padding: 15px;
+      background: white;
+      color: black;
     }
 
     textarea {
       width: 100%;
-      height: 130px;
-      background: transparent;
-      border: none;
-      outline: none;
+      min-height: 130px;
+      resize: vertical;
+      background: #15151c;
       color: white;
+      border: 1px solid #2a2a35;
+      border-radius: 14px;
+      padding: 16px;
       font-size: 16px;
-      resize: none;
+      outline: none;
     }
 
-    textarea::placeholder {
-      color: #77778a;
-    }
-
-    .options {
+    .controls {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-top: 12px;
     }
 
     select {
       flex: 1;
-      background: #222231;
-      color: white;
-      border: none;
+      padding: 13px;
       border-radius: 10px;
-      padding: 11px;
+      background: #15151c;
+      color: white;
+      border: 1px solid #2a2a35;
     }
 
     .generate {
@@ -134,338 +101,72 @@
       margin-top: 15px;
       padding: 16px;
       border: none;
-      border-radius: 14px;
-      background: #6c4cff;
-      color: white;
+      border-radius: 12px;
+      background: white;
+      color: black;
       font-size: 17px;
       font-weight: bold;
       cursor: pointer;
     }
 
     .generate:disabled {
-      opacity: .6;
+      opacity: 0.5;
     }
 
     #status {
       text-align: center;
-      color: #8f8fa3;
-      margin-top: 15px;
-      font-size: 13px;
-      min-height: 18px;
+      margin: 20px 0;
+      color: #aaa;
     }
 
     #result {
       margin-top: 20px;
+      text-align: center;
     }
 
     #result img {
-      width: 100%;
-      border-radius: 16px;
-      display: block;
-    }
-
-    .section {
-      margin-top: 35px;
-    }
-
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-    }
-
-    .section-title h2 {
-      font-size: 18px;
-    }
-
-    .section-title span {
-      color: #77778a;
-      font-size: 13px;
+      max-width: 100%;
+      border-radius: 15px;
+      margin-top: 10px;
     }
 
     .cards {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+      margin-top: 40px;
     }
 
     .card {
-      background: #171722;
-      border: 1px solid #29293a;
-      border-radius: 16px;
+      background: #15151c;
       padding: 20px;
-      min-height: 120px;
-    }
-
-    .card-icon {
-      font-size: 30px;
-      margin-bottom: 15px;
+      border-radius: 14px;
+      border: 1px solid #24242e;
     }
 
     .card h3 {
-      font-size: 15px;
-      margin-bottom: 5px;
+      margin-top: 0;
     }
 
     .card p {
-      color: #77778a;
-      font-size: 12px;
+      color: #999;
+      font-size: 14px;
     }
 
-    nav {
-      position: sticky;
-      bottom: 10px;
-      margin-top: 35px;
-      background: #171722;
-      border: 1px solid #29293a;
-      border-radius: 18px;
+    .nav {
       display: flex;
       justify-content: space-around;
-      padding: 13px 5px;
+      margin-top: 40px;
+      padding: 15px 0;
+      border-top: 1px solid #222;
+      color: #999;
     }
 
-    nav button {
-      background: none;
-      border: none;
-      color: #9999aa;
-      font-size: 12px;
-    }
-
-    nav button:first-child {
-      color: white;
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="app">
-
-    <header>
-      <div class="logo">
-        Aaru <span>AI</span>
-      </div>
-
-      <div class="profile">👤</div>
-    </header>
-
-    <section class="hero">
-      <h1>Create Anything.</h1>
-      <p>Turn your imagination into images and videos.</p>
-    </section>
-
-    <div class="tabs">
-
-      <button
-        class="tab active"
-        onclick="selectMode('image', this)">
-        🖼️ Image
-      </button>
-
-      <button
-        class="tab"
-        onclick="selectMode('video', this)">
-        🎬 Video
-      </button>
-
-    </div>
-
-    <div class="prompt">
-
-      <textarea
-        id="prompt"
-        placeholder="Describe the image you want to create..."
-      ></textarea>
-
-      <div class="options">
-
-        <select id="ratio">
-          <option value="9:16">9:16 Portrait</option>
-          <option value="1:1">1:1 Square</option>
-          <option value="16:9">16:9 Landscape</option>
-        </select>
-
-        <select id="quality">
-          <option value="standard">Standard</option>
-          <option value="hd">HD</option>
-        </select>
-
-      </div>
-
-      <button
-        id="generateBtn"
-        class="generate"
-        onclick="generate()">
-        ✨ Generate
-      </button>
-
-    </div>
-
-    <div id="status"></div>
-
-    <div id="result"></div>
-
-    <section class="section">
-
-      <div class="section-title">
-        <h2>Create with Aaru</h2>
-        <span>Explore</span>
-      </div>
-
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-icon">🎨</div>
-          <h3>AI Images</h3>
-          <p>Create stunning images</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">🎥</div>
-          <h3>AI Videos</h3>
-          <p>Generate creative videos</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">✨</div>
-          <h3>Image to Video</h3>
-          <p>Animate your images</p>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">⚡</div>
-          <h3>AI Studio</h3>
-          <p>More creative tools</p>
-        </div>
-
-      </div>
-
-    </section>
-
-    <nav>
-      <button>⌂<br>Home</button>
-      <button>＋<br>Create</button>
-      <button>▣<br>Creations</button>
-      <button>⚙<br>Settings</button>
-    </nav>
-
-  </div>
-
-  <script>
-
-    const API_URL =
-      "https://aaru-ai-api.myera-org.workers.dev/";
-
-    let mode = "image";
-
-
-    function selectMode(newMode, button) {
-
-      mode = newMode;
-
-      document.querySelectorAll(".tab")
-        .forEach(tab => {
-          tab.classList.remove("active");
-        });
-
-      button.classList.add("active");
-
-      document.getElementById("prompt").placeholder =
-        newMode === "image"
-          ? "Describe the image you want to create..."
-          : "Describe the video you want to create...";
-    }
-
-
-    async function generate() {
-
-      const prompt =
-        document.getElementById("prompt").value.trim();
-
-      const status =
-        document.getElementById("status");
-
-      const result =
-        document.getElementById("result");
-
-      const button =
-        document.getElementById("generateBtn");
-
-      if (!prompt) {
-
-        status.innerText =
-          "Please describe what you want to create.";
-
-        return;
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 34px;
       }
 
-      if (mode !== "image") {
-
-        status.innerText =
-          "Video generation will be added soon.";
-
-        return;
+      .cards {
+        grid-template-columns: 1fr;
       }
-
-      button.disabled = true;
-
-      status.innerText =
-        "✨ Aaru AI is preparing your image...";
-
-      result.innerHTML = "";
-
-      try {
-
-        const imageRequestURL =
-          API_URL +
-          "?prompt=" +
-          encodeURIComponent(prompt) +
-          "&t=" +
-          Date.now();
-
-        const img =
-          document.createElement("img");
-
-        img.src = imageRequestURL;
-
-        img.alt = prompt;
-
-        img.onload = function () {
-
-          result.appendChild(img);
-
-          status.innerText =
-            "✨ Image created successfully!";
-
-          button.disabled = false;
-        };
-
-        img.onerror = function () {
-
-          status.innerText =
-            "❌ Image generation failed. Please try again.";
-
-          console.error(
-            "Image failed:",
-            imageRequestURL
-          );
-
-          button.disabled = false;
-        };
-
-      } catch (error) {
-
-        console.error(error);
-
-        status.innerText =
-          "❌ Image generation failed. Please try again.";
-
-        button.disabled = false;
-      }
-
-    }
-
-  </script>
-
-</body>
-</html>
