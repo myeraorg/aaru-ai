@@ -2,551 +2,580 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#070707">
 <title>Aaru AI</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
-html,
-body{
-  width:100%;
-  min-height:100%;
+html,body{
+width:100%;
+min-height:100%;
 }
 
 body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#070707;
-  color:#fff;
-  overflow-x:hidden;
+font-family:Arial,Helvetica,sans-serif;
+background:#070707;
+color:#fff;
+overflow-x:hidden;
 }
 
-button,
-textarea,
-input{
-  font-family:inherit;
+button,textarea,input{
+font-family:inherit;
 }
 
-/* =========================
-   APP
-========================= */
+/* APP */
 
 .app{
-  width:100%;
-  min-height:100vh;
-  max-width:900px;
-  margin:auto;
+width:100%;
+min-height:100vh;
+max-width:900px;
+margin:auto;
 }
 
-/* =========================
-   HEADER
-========================= */
+/* HEADER */
 
 .header{
-  position:sticky;
-  top:0;
-  z-index:20;
-  height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
-  background:rgba(7,7,7,.94);
-  border-bottom:1px solid #171717;
-  backdrop-filter:blur(10px);
+position:sticky;
+top:0;
+z-index:30;
+height:58px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 14px;
+background:rgba(7,7,7,.95);
+border-bottom:1px solid #171717;
+backdrop-filter:blur(12px);
 }
 
 .left-header{
-  display:flex;
-  align-items:center;
-  gap:10px;
+display:flex;
+align-items:center;
+gap:10px;
 }
 
 .menu{
-  width:38px;
-  height:38px;
-  border:1px solid #292929;
-  border-radius:11px;
-  background:#111;
-  color:#fff;
-  font-size:20px;
-  cursor:pointer;
+width:38px;
+height:38px;
+border:1px solid #292929;
+border-radius:11px;
+background:#111;
+color:#fff;
+font-size:20px;
+cursor:pointer;
 }
 
 .logo{
-  font-size:21px;
-  font-weight:800;
-  letter-spacing:-.7px;
+font-size:21px;
+font-weight:800;
+letter-spacing:-.7px;
 }
 
 .logo span{
-  opacity:.5;
+opacity:.5;
 }
 
 .header-status{
-  font-size:11px;
-  color:#777;
+font-size:11px;
+color:#666;
 }
 
-/* =========================
-   CHAT AREA
-========================= */
+/* CHAT */
 
 .chat{
-  width:100%;
-  padding:15px 14px 190px;
+width:100%;
+padding:10px 12px 170px;
 }
 
 .welcome{
-  min-height:62vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:20px;
+min-height:68vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:20px;
 }
 
 .welcome-logo{
-  width:62px;
-  height:62px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid #333;
-  border-radius:20px;
-  background:#111;
-  font-size:25px;
-  font-weight:800;
-  margin-bottom:18px;
+width:64px;
+height:64px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#111;
+border:1px solid #333;
+border-radius:20px;
+font-size:27px;
+font-weight:800;
+margin-bottom:18px;
 }
 
 .welcome h1{
-  font-size:34px;
-  letter-spacing:-1.4px;
-  margin-bottom:9px;
+font-size:34px;
+letter-spacing:-1.4px;
+margin-bottom:9px;
 }
 
 .welcome p{
-  color:#777;
-  font-size:14px;
-  line-height:1.6;
-  max-width:430px;
+max-width:430px;
+color:#777;
+font-size:14px;
+line-height:1.6;
 }
 
-/* =========================
-   MESSAGE
-========================= */
+/* MESSAGES */
 
 .message{
-  display:flex;
-  width:100%;
-  margin:17px 0;
+display:flex;
+width:100%;
+margin:16px 0;
 }
 
 .message.user{
-  justify-content:flex-end;
+justify-content:flex-end;
 }
 
 .message.assistant{
-  justify-content:flex-start;
+justify-content:flex-start;
 }
 
 .message-inner{
-  max-width:min(78%,620px);
-}
-
-.user .message-inner{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
+max-width:min(78%,620px);
 }
 
 .bubble{
-  padding:12px 15px;
-  border-radius:18px;
-  font-size:15px;
-  line-height:1.55;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+padding:12px 15px;
+border-radius:18px;
+font-size:15px;
+line-height:1.55;
+white-space:pre-wrap;
+overflow-wrap:anywhere;
 }
 
 .user .bubble{
-  background:#fff;
-  color:#000;
-  border-bottom-right-radius:5px;
+background:#fff;
+color:#000;
+border-bottom-right-radius:5px;
 }
 
 .assistant .bubble{
-  background:#151515;
-  color:#eee;
-  border:1px solid #252525;
-  border-bottom-left-radius:5px;
+background:#151515;
+border:1px solid #252525;
+color:#eee;
+border-bottom-left-radius:5px;
 }
 
+/* USER PHOTO */
+
 .photo-user{
-  width:min(330px,80vw);
-  margin-bottom:7px;
+width:min(330px,80vw);
+margin-bottom:7px;
 }
 
 .photo-user img{
-  display:block;
-  width:100%;
-  max-height:330px;
-  object-fit:cover;
-  border-radius:16px;
-  border:1px solid #292929;
+width:100%;
+display:block;
+max-height:330px;
+object-fit:cover;
+border-radius:16px;
+border:1px solid #292929;
 }
 
-/* =========================
-   GENERATED IMAGE
-========================= */
+/* GENERATED */
 
 .generated{
-  width:min(560px,88vw);
+width:min(560px,88vw);
 }
 
 .generated img{
-  width:100%;
-  display:block;
-  border-radius:17px;
-  background:#111;
-  border:1px solid #252525;
+width:100%;
+display:block;
+border-radius:17px;
+background:#111;
+border:1px solid #252525;
 }
 
 .image-actions{
-  display:flex;
-  gap:8px;
-  margin-top:9px;
+display:flex;
+gap:8px;
+margin-top:9px;
 }
 
 .image-actions a,
 .image-actions button{
-  flex:1;
-  min-width:0;
-  border:1px solid #303030;
-  background:#141414;
-  color:#fff;
-  text-decoration:none;
-  text-align:center;
-  padding:10px 8px;
-  border-radius:11px;
-  font-size:12px;
-  cursor:pointer;
+flex:1;
+border:1px solid #303030;
+background:#141414;
+color:#fff;
+text-decoration:none;
+text-align:center;
+padding:10px 8px;
+border-radius:11px;
+font-size:12px;
+cursor:pointer;
 }
 
-/* =========================
-   TYPING
-========================= */
+/* TYPING */
 
 .typing{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  padding:13px 15px;
-  background:#151515;
-  border:1px solid #252525;
-  border-radius:17px;
-  border-bottom-left-radius:5px;
+display:flex;
+align-items:center;
+gap:5px;
+padding:13px 15px;
+background:#151515;
+border:1px solid #252525;
+border-radius:17px;
+border-bottom-left-radius:5px;
 }
 
 .typing i{
-  width:6px;
-  height:6px;
-  display:block;
-  background:#777;
-  border-radius:50%;
-  animation:typing 1s infinite;
+width:6px;
+height:6px;
+background:#777;
+border-radius:50%;
+animation:typing 1s infinite;
 }
 
 .typing i:nth-child(2){
-  animation-delay:.15s;
+animation-delay:.15s;
 }
 
 .typing i:nth-child(3){
-  animation-delay:.30s;
+animation-delay:.30s;
 }
 
 @keyframes typing{
-  0%,60%,100%{
-    opacity:.35;
-    transform:translateY(0);
-  }
-
-  30%{
-    opacity:1;
-    transform:translateY(-4px);
-  }
+0%,60%,100%{
+opacity:.3;
+transform:translateY(0);
+}
+30%{
+opacity:1;
+transform:translateY(-4px);
+}
 }
 
-/* =========================
-   COMPOSER
-========================= */
+/* COMPOSER */
 
 .composer-area{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:50;
-  padding:22px 12px 12px;
-  background:linear-gradient(
-    to bottom,
-    rgba(7,7,7,0),
-    #070707 30%
-  );
+position:fixed;
+left:0;
+right:0;
+bottom:0;
+z-index:50;
+padding:20px 10px 10px;
+background:linear-gradient(to bottom,rgba(7,7,7,0),#070707 30%);
 }
 
 .composer{
-  width:100%;
-  max-width:870px;
-  margin:auto;
-  background:#111;
-  border:1px solid #292929;
-  border-radius:20px;
-  padding:9px;
-  box-shadow:0 -10px 35px rgba(0,0,0,.25);
+width:100%;
+max-width:870px;
+margin:auto;
+background:#111;
+border:1px solid #292929;
+border-radius:20px;
+padding:9px;
+box-shadow:0 -10px 35px rgba(0,0,0,.25);
 }
 
-/* =========================
-   ATTACHMENT PREVIEW
-========================= */
+/* PHOTO PREVIEW */
 
 .attachment{
-  display:none;
-  position:relative;
-  width:120px;
-  margin:2px 0 9px 2px;
+display:none;
+position:relative;
+width:115px;
+margin:2px 0 9px 2px;
 }
 
 .attachment img{
-  width:120px;
-  height:120px;
-  object-fit:cover;
-  display:block;
-  border-radius:13px;
-  border:1px solid #333;
+width:115px;
+height:115px;
+object-fit:cover;
+border-radius:13px;
+border:1px solid #333;
+display:block;
 }
 
 .remove-photo{
-  position:absolute;
-  top:5px;
-  right:5px;
-  width:28px;
-  height:28px;
-  border:0;
-  border-radius:50%;
-  background:rgba(0,0,0,.85);
-  color:#fff;
-  font-size:18px;
-  cursor:pointer;
+position:absolute;
+top:5px;
+right:5px;
+width:28px;
+height:28px;
+border:0;
+border-radius:50%;
+background:rgba(0,0,0,.85);
+color:#fff;
+font-size:18px;
+cursor:pointer;
 }
 
-/* =========================
-   INPUT
-========================= */
+/* INPUT */
 
 .input-row{
-  display:flex;
-  align-items:flex-end;
-  gap:8px;
+display:flex;
+align-items:flex-end;
+gap:8px;
 }
 
 .attach-btn,
 .send-btn{
-  width:42px;
-  height:42px;
-  flex:none;
-  border-radius:13px;
-  cursor:pointer;
+width:42px;
+height:42px;
+flex:none;
+border-radius:13px;
+cursor:pointer;
 }
 
 .attach-btn{
-  border:1px solid #303030;
-  background:#181818;
-  color:#fff;
-  font-size:23px;
+border:1px solid #303030;
+background:#181818;
+color:#fff;
+font-size:23px;
 }
 
 .send-btn{
-  border:0;
-  background:#fff;
-  color:#000;
-  font-size:19px;
-  font-weight:bold;
+border:0;
+background:#fff;
+color:#000;
+font-size:20px;
+font-weight:bold;
 }
 
 .send-btn:disabled{
-  opacity:.35;
-  cursor:not-allowed;
+opacity:.35;
+cursor:not-allowed;
 }
 
 #prompt{
-  width:100%;
-  min-height:42px;
-  max-height:150px;
-  resize:none;
-  border:0;
-  outline:0;
-  background:transparent;
-  color:#fff;
-  font-size:15px;
-  line-height:1.45;
-  padding:10px 3px;
+width:100%;
+min-height:42px;
+max-height:150px;
+resize:none;
+border:0;
+outline:0;
+background:transparent;
+color:#fff;
+font-size:15px;
+line-height:1.45;
+padding:10px 3px;
 }
 
 #prompt::placeholder{
-  color:#666;
+color:#666;
 }
 
-/* =========================
-   TOOLS
-========================= */
+/* TOOLS */
 
 .tools{
-  display:flex;
-  gap:7px;
-  margin-top:8px;
-  padding:0 2px 1px;
-  overflow-x:auto;
-  scrollbar-width:none;
+display:flex;
+gap:7px;
+margin-top:8px;
+padding:0 2px 1px;
+overflow-x:auto;
+scrollbar-width:none;
 }
 
 .tools::-webkit-scrollbar{
-  display:none;
+display:none;
 }
 
 .tool{
-  flex:none;
-  border:1px solid #2b2b2b;
-  background:#181818;
-  color:#aaa;
-  padding:8px 11px;
-  border-radius:10px;
-  font-size:12px;
-  cursor:pointer;
+flex:none;
+border:1px solid #2b2b2b;
+background:#181818;
+color:#aaa;
+padding:8px 11px;
+border-radius:10px;
+font-size:12px;
+cursor:pointer;
 }
 
 .tool.active{
-  background:#fff;
-  color:#000;
-  border-color:#fff;
+background:#fff;
+color:#000;
+border-color:#fff;
 }
 
 #imageInput{
-  display:none;
+display:none;
 }
-
-/* =========================
-   STATUS
-========================= */
 
 .status{
-  min-height:17px;
-  text-align:center;
-  color:#777;
-  font-size:11px;
-  padding-top:6px;
+min-height:16px;
+text-align:center;
+color:#777;
+font-size:11px;
+padding-top:6px;
 }
 
-/* =========================
-   RECENT CREATIONS
-========================= */
+/* HISTORY DRAWER */
 
-.recent{
-  padding:0 14px 185px;
+.overlay{
+display:none;
+position:fixed;
+inset:0;
+z-index:80;
+background:rgba(0,0,0,.6);
 }
 
-.recent-title{
-  color:#888;
-  font-size:13px;
-  margin:5px 0 10px;
+.overlay.show{
+display:block;
 }
 
-.recent-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
+.history-drawer{
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+z-index:90;
+width:min(330px,88vw);
+background:#0d0d0d;
+border-right:1px solid #292929;
+transform:translateX(-100%);
+transition:transform .25s ease;
+overflow-y:auto;
 }
 
-.recent-item{
-  aspect-ratio:1;
-  border-radius:11px;
-  overflow:hidden;
-  background:#111;
-  border:1px solid #202020;
-  cursor:pointer;
+.history-drawer.show{
+transform:translateX(0);
 }
 
-.recent-item img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.history-head{
+height:60px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 14px;
+border-bottom:1px solid #222;
+position:sticky;
+top:0;
+background:#0d0d0d;
+z-index:2;
 }
 
-.recent-empty{
-  color:#444;
-  font-size:11px;
-  padding:8px 0;
+.history-head-title{
+font-weight:700;
+font-size:16px;
 }
 
-/* =========================
-   MOBILE
-========================= */
+.close-history{
+width:34px;
+height:34px;
+border:1px solid #303030;
+border-radius:10px;
+background:#151515;
+color:#fff;
+font-size:19px;
+cursor:pointer;
+}
+
+.history-tools{
+padding:12px 14px;
+border-bottom:1px solid #1c1c1c;
+}
+
+.delete-all{
+width:100%;
+border:1px solid #333;
+background:#151515;
+color:#ccc;
+padding:10px;
+border-radius:10px;
+font-size:12px;
+cursor:pointer;
+}
+
+.history-list{
+padding:12px;
+}
+
+.history-empty{
+text-align:center;
+color:#555;
+font-size:12px;
+padding:25px 5px;
+}
+
+.history-card{
+position:relative;
+display:flex;
+gap:9px;
+padding:8px;
+margin-bottom:8px;
+border:1px solid #242424;
+border-radius:12px;
+background:#111;
+}
+
+.history-card img{
+width:70px;
+height:70px;
+object-fit:cover;
+border-radius:9px;
+cursor:pointer;
+}
+
+.history-card-info{
+flex:1;
+display:flex;
+align-items:center;
+}
+
+.history-delete{
+position:absolute;
+right:7px;
+top:7px;
+width:27px;
+height:27px;
+border:0;
+border-radius:8px;
+background:#222;
+color:#aaa;
+cursor:pointer;
+font-size:15px;
+}
+
+/* MOBILE */
 
 @media(max-width:600px){
 
-  .header{
-    padding:0 12px;
-  }
+.header{
+padding:0 11px;
+}
 
-  .chat{
-    padding-left:10px;
-    padding-right:10px;
-  }
+.chat{
+padding-left:9px;
+padding-right:9px;
+}
 
-  .message-inner{
-    max-width:88%;
-  }
+.message-inner{
+max-width:88%;
+}
 
-  .welcome h1{
-    font-size:29px;
-  }
+.welcome h1{
+font-size:29px;
+}
 
-  .welcome{
-    min-height:58vh;
-  }
-
-  .generated{
-    width:90vw;
-  }
-
-  .recent{
-    padding-left:10px;
-    padding-right:10px;
-  }
-
-  .recent-grid{
-    grid-template-columns:repeat(4,1fr);
-  }
+.generated{
+width:90vw;
+}
 
 }
 
 @media(max-width:380px){
 
-  .tools .tool{
-    font-size:11px;
-    padding:7px 9px;
-  }
+.welcome h1{
+font-size:27px;
+}
 
-  .welcome h1{
-    font-size:27px;
-  }
+.tool{
+font-size:11px;
+padding:7px 9px;
+}
 
 }
 </style>
@@ -556,205 +585,215 @@ input{
 
 <div class="app">
 
-  <!-- HEADER -->
+<header class="header">
 
-  <header class="header">
+<div class="left-header">
 
-    <div class="left-header">
+<button
+class="menu"
+type="button"
+onclick="openHistory()"
+>
+☰
+</button>
 
-      <button
-        class="menu"
-        type="button"
-        onclick="clearChat()"
-        aria-label="Menu"
-      >
-        ☰
-      </button>
-
-      <div class="logo">
-        Aaru <span>AI</span>
-      </div>
-
-    </div>
-
-    <div class="header-status">
-      AI Assistant
-    </div>
-
-  </header>
-
-
-  <!-- CHAT -->
-
-  <main
-    class="chat"
-    id="chat"
-  >
-
-    <section
-      class="welcome"
-      id="welcome"
-    >
-
-      <div class="welcome-logo">
-        A
-      </div>
-
-      <h1>
-        What can I help with?
-      </h1>
-
-      <p>
-        Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।
-      </p>
-
-    </section>
-
-  </main>
-
-
-  <!-- RECENT -->
-
-  <section
-    class="recent"
-    id="recentSection"
-  >
-
-    <div class="recent-title">
-      Recent Creations
-    </div>
-
-    <div
-      class="recent-grid"
-      id="recentGrid"
-    ></div>
-
-  </section>
-
+<div class="logo">
+Aaru <span>AI</span>
+</div>
 
 </div>
+
+<div class="header-status">
+AI Assistant
+</div>
+
+</header>
+
+
+<main
+class="chat"
+id="chat"
+>
+
+<section
+class="welcome"
+id="welcome"
+>
+
+<div class="welcome-logo">
+A
+</div>
+
+<h1>
+What can I help with?
+</h1>
+
+<p>
+Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।
+</p>
+
+</section>
+
+</main>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<div
+class="overlay"
+id="overlay"
+onclick="closeHistory()"
+></div>
+
+<aside
+class="history-drawer"
+id="historyDrawer"
+>
+
+<div class="history-head">
+
+<div class="history-head-title">
+Recent Creations
+</div>
+
+<button
+class="close-history"
+type="button"
+onclick="closeHistory()"
+>
+×
+</button>
+
+</div>
+
+<div class="history-tools">
+
+<button
+class="delete-all"
+type="button"
+onclick="deleteAllHistory()"
+>
+🗑 Delete All
+</button>
+
+</div>
+
+<div
+class="history-list"
+id="historyList"
+></div>
+
+</aside>
 
 
 <!-- COMPOSER -->
 
 <div class="composer-area">
 
-  <div class="composer">
+<div class="composer">
 
-    <div
-      class="attachment"
-      id="attachment"
-    >
+<div
+class="attachment"
+id="attachment"
+>
 
-      <img
-        id="attachmentImage"
-        alt="Selected photo"
-      >
+<img
+id="attachmentImage"
+alt="Selected photo"
+>
 
-      <button
-        class="remove-photo"
-        type="button"
-        onclick="removePhoto()"
-      >
-        ×
-      </button>
+<button
+class="remove-photo"
+type="button"
+onclick="removePhoto()"
+>
+×
+</button>
 
-    </div>
-
-
-    <div class="input-row">
-
-      <button
-        class="attach-btn"
-        type="button"
-        onclick="openPhotoPicker()"
-        aria-label="Attach photo"
-      >
-        +
-      </button>
+</div>
 
 
-      <textarea
-        id="prompt"
-        rows="1"
-        placeholder="Message Aaru AI..."
-      ></textarea>
+<div class="input-row">
+
+<button
+class="attach-btn"
+type="button"
+onclick="openPhotoPicker()"
+>
++
+</button>
+
+<textarea
+id="prompt"
+rows="1"
+placeholder="Message Aaru AI..."
+></textarea>
+
+<button
+class="send-btn"
+id="sendBtn"
+type="button"
+onclick="sendMessage()"
+>
+↑
+</button>
+
+</div>
 
 
-      <button
-        class="send-btn"
-        id="sendBtn"
-        type="button"
-        onclick="sendMessage()"
-      >
-        ↑
-      </button>
+<div class="tools">
 
-    </div>
+<button
+class="tool"
+id="imageTool"
+type="button"
+onclick="toggleImageMode()"
+>
+🎨 Create Image
+</button>
 
+<button
+class="tool"
+type="button"
+onclick="openPhotoPicker()"
+>
+📷 Photo
+</button>
 
-    <div class="tools">
+<button
+class="tool"
+type="button"
+onclick="insertExample()"
+>
+✨ Example
+</button>
 
-      <button
-        class="tool"
-        id="imageTool"
-        type="button"
-        onclick="toggleImageMode()"
-      >
-        🎨 Create Image
-      </button>
-
-
-      <button
-        class="tool"
-        type="button"
-        onclick="openPhotoPicker()"
-      >
-        📷 Photo
-      </button>
+</div>
 
 
-      <button
-        class="tool"
-        type="button"
-        onclick="insertExample()"
-      >
-        ✨ Example
-      </button>
+<input
+type="file"
+id="imageInput"
+accept="image/jpeg,image/png,image/webp,image/*"
+>
 
-    </div>
+<div
+class="status"
+id="status"
+></div>
 
-
-    <input
-      type="file"
-      id="imageInput"
-      accept="image/jpeg,image/png,image/webp,image/*"
-    >
-
-
-    <div
-      class="status"
-      id="status"
-    ></div>
-
-  </div>
+</div>
 
 </div>
 
 
 <script>
 
-/* =========================
-   CONFIG
-========================= */
-
 const API_URL =
-  "https://aaru-ai-api.myera-org.workers.dev/";
+"https://aaru-ai-api.myera-org.workers.dev/";
 
-
-/* =========================
-   STATE
-========================= */
 
 let selectedImageDataUrl = "";
 
@@ -763,39 +802,41 @@ let imageMode = false;
 let busy = false;
 
 
-/* =========================
-   ELEMENTS
-========================= */
-
 const chat =
-  document.getElementById("chat");
+document.getElementById("chat");
 
 const welcome =
-  document.getElementById("welcome");
+document.getElementById("welcome");
 
 const promptInput =
-  document.getElementById("prompt");
+document.getElementById("prompt");
 
 const imageInput =
-  document.getElementById("imageInput");
+document.getElementById("imageInput");
 
 const attachment =
-  document.getElementById("attachment");
+document.getElementById("attachment");
 
 const attachmentImage =
-  document.getElementById("attachmentImage");
+document.getElementById("attachmentImage");
 
 const sendBtn =
-  document.getElementById("sendBtn");
+document.getElementById("sendBtn");
 
 const imageTool =
-  document.getElementById("imageTool");
+document.getElementById("imageTool");
 
 const status =
-  document.getElementById("status");
+document.getElementById("status");
 
-const recentGrid =
-  document.getElementById("recentGrid");
+const historyDrawer =
+document.getElementById("historyDrawer");
+
+const overlay =
+document.getElementById("overlay");
+
+const historyList =
+document.getElementById("historyList");
 
 
 /* =========================
@@ -803,19 +844,18 @@ const recentGrid =
 ========================= */
 
 promptInput.addEventListener(
-  "input",
-  function(){
+"input",
+function(){
 
-    this.style.height =
-      "42px";
+this.style.height = "42px";
 
-    this.style.height =
-      Math.min(
-        this.scrollHeight,
-        150
-      ) + "px";
+this.style.height =
+Math.min(
+this.scrollHeight,
+150
+) + "px";
 
-  }
+}
 );
 
 
@@ -824,21 +864,21 @@ promptInput.addEventListener(
 ========================= */
 
 promptInput.addEventListener(
-  "keydown",
-  function(event){
+"keydown",
+function(e){
 
-    if(
-      event.key === "Enter" &&
-      !event.shiftKey
-    ){
+if(
+e.key === "Enter" &&
+!e.shiftKey
+){
 
-      event.preventDefault();
+e.preventDefault();
 
-      sendMessage();
+sendMessage();
 
-    }
+}
 
-  }
+}
 );
 
 
@@ -848,7 +888,7 @@ promptInput.addEventListener(
 
 function openPhotoPicker(){
 
-  imageInput.click();
+imageInput.click();
 
 }
 
@@ -858,86 +898,68 @@ function openPhotoPicker(){
 ========================= */
 
 imageInput.addEventListener(
-  "change",
-  async function(){
+"change",
+async function(){
 
-    const file =
-      imageInput.files[0];
+const file =
+imageInput.files[0];
 
-    if(!file){
-      return;
-    }
+if(!file){
+return;
+}
 
+if(
+!file.type.startsWith("image/")
+){
 
-    if(
-      !file.type.startsWith(
-        "image/"
-      )
-    ){
+alert("कृपया image file चुनें।");
 
-      alert(
-        "कृपया image file चुनें।"
-      );
+imageInput.value = "";
 
-      imageInput.value = "";
+return;
 
-      return;
+}
 
-    }
+try{
 
+setStatus(
+"🔄 Photo तैयार हो रही है..."
+);
 
-    try{
+selectedImageDataUrl =
+await preparePhoto(file);
 
-      setStatus(
-        "🔄 Photo तैयार हो रही है..."
-      );
+attachmentImage.src =
+selectedImageDataUrl;
 
+attachment.style.display =
+"block";
 
-      selectedImageDataUrl =
-        await preparePhoto(
-          file
-        );
+/*
+ * Photo attached =
+ * automatically image mode.
+ */
 
+imageMode = true;
 
-      attachmentImage.src =
-        selectedImageDataUrl;
+imageTool.classList.add("active");
 
+promptInput.placeholder =
+"इस photo के साथ क्या करना है?";
 
-      attachment.style.display =
-        "block";
+setStatus("");
 
+}catch(error){
 
-      /*
-       * Photo attach होते ही
-       * image mode ON.
-       */
+console.error(error);
 
-      imageMode = true;
+setStatus(
+"❌ Photo तैयार नहीं हो सकी।"
+);
 
-      imageTool.classList.add(
-        "active"
-      );
+}
 
-
-      promptInput.placeholder =
-        "इस photo के साथ क्या करना है?";
-
-
-      setStatus("");
-
-    }catch(error){
-
-      console.error(
-        error
-      );
-
-      setStatus(
-        "❌ Photo तैयार नहीं हो सकी।"
-      );
-
-    }
-
-  }
+}
 );
 
 
@@ -947,261 +969,223 @@ imageInput.addEventListener(
 
 function preparePhoto(file){
 
-  return new Promise(
-    function(resolve,reject){
+return new Promise(
+function(resolve,reject){
 
-      const reader =
-        new FileReader();
+const reader =
+new FileReader();
 
+reader.onerror =
+function(){
 
-      reader.onerror =
-        function(){
+reject(
+new Error(
+"Photo read failed."
+)
+);
 
-          reject(
-            new Error(
-              "Photo read failed."
-            )
-          );
+};
 
-        };
+reader.onload =
+function(){
 
+const img =
+new Image();
 
-      reader.onload =
-        function(){
+img.onerror =
+function(){
 
-          const img =
-            new Image();
+reject(
+new Error(
+"Photo load failed."
+)
+);
 
+};
 
-          img.onerror =
-            function(){
+img.onload =
+function(){
 
-              reject(
-                new Error(
-                  "Photo load failed."
-                )
-              );
+const MAX = 768;
 
-            };
+let width =
+img.naturalWidth;
 
+let height =
+img.naturalHeight;
 
-          img.onload =
-            function(){
 
-              /*
-               * Small enough for AI request.
-               */
+const scale =
+Math.min(
+1,
+MAX /
+Math.max(
+width,
+height
+)
+);
 
-              const MAX =
-                768;
 
+width =
+Math.max(
+1,
+Math.round(
+width * scale
+)
+);
 
-              let width =
-                img.naturalWidth ||
-                img.width;
 
-              let height =
-                img.naturalHeight ||
-                img.height;
+height =
+Math.max(
+1,
+Math.round(
+height * scale
+)
+);
 
 
-              const scale =
-                Math.min(
-                  1,
-                  MAX /
-                  Math.max(
-                    width,
-                    height
-                  )
-                );
+const canvas =
+document.createElement("canvas");
 
+canvas.width =
+width;
 
-              width =
-                Math.max(
-                  1,
-                  Math.round(
-                    width * scale
-                  )
-                );
+canvas.height =
+height;
 
 
-              height =
-                Math.max(
-                  1,
-                  Math.round(
-                    height * scale
-                  )
-                );
+const ctx =
+canvas.getContext(
+"2d",
+{
+alpha:false
+}
+);
 
 
-              const canvas =
-                document.createElement(
-                  "canvas"
-                );
+ctx.drawImage(
+img,
+0,
+0,
+width,
+height
+);
 
 
-              canvas.width =
-                width;
+let quality = .68;
 
-              canvas.height =
-                height;
+let data =
+canvas.toDataURL(
+"image/jpeg",
+quality
+);
 
 
-              const ctx =
-                canvas.getContext(
-                  "2d",
-                  {
-                    alpha:false
-                  }
-                );
-
-
-              ctx.drawImage(
-                img,
-                0,
-                0,
-                width,
-                height
-              );
-
-
-              /*
-               * Progressive compression.
-               */
-
-              let quality =
-                0.70;
-
-              let dataUrl =
-                canvas.toDataURL(
-                  "image/jpeg",
-                  quality
-                );
-
-
-              /*
-               * Keep base64 safely below
-               * our Worker limit.
-               */
-
-              const MAX_LENGTH =
-                650000;
-
+/*
+ * Keep request small.
+ */
 
-              while(
-                dataUrl.length >
-                  MAX_LENGTH &&
-                quality > 0.35
-              ){
+while(
+data.length > 620000 &&
+quality > .35
+){
 
-                quality -= 0.08;
+quality -= .06;
 
-                dataUrl =
-                  canvas.toDataURL(
-                    "image/jpeg",
-                    quality
-                  );
-
-              }
-
-
-              /*
-               * If still large, use 512px.
-               */
-
-              if(
-                dataUrl.length >
-                MAX_LENGTH
-              ){
-
-                const scale2 =
-                  512 /
-                  Math.max(
-                    img.naturalWidth ||
-                    img.width,
-                    img.naturalHeight ||
-                    img.height
-                  );
-
-
-                const canvas2 =
-                  document.createElement(
-                    "canvas"
-                  );
-
-
-                canvas2.width =
-                  Math.max(
-                    1,
-                    Math.round(
-                      (
-                        img.naturalWidth ||
-                        img.width
-                      ) * scale2
-                    )
-                  );
-
-
-                canvas2.height =
-                  Math.max(
-                    1,
-                    Math.round(
-                      (
-                        img.naturalHeight ||
-                        img.height
-                      ) * scale2
-                    )
-                  );
-
-
-                const ctx2 =
-                  canvas2.getContext(
-                    "2d",
-                    {
-                      alpha:false
-                    }
-                  );
-
-
-                ctx2.drawImage(
-                  img,
-                  0,
-                  0,
-                  canvas2.width,
-                  canvas2.height
-                );
-
-
-                dataUrl =
-                  canvas2.toDataURL(
-                    "image/jpeg",
-                    0.50
-                  );
-
-              }
-
-
-              resolve(
-                dataUrl
-              );
-
-            };
-
-
-          img.src =
-            reader.result;
-
-        };
-
-
-      reader.readAsDataURL(
-        file
-      );
-
-    }
-  );
+data =
+canvas.toDataURL(
+"image/jpeg",
+quality
+);
 
 }
+
+
+/*
+ * Last fallback: 512px.
+ */
+
+if(
+data.length > 620000
+){
+
+const max2 = 512;
+
+const scale2 =
+Math.min(
+1,
+max2 /
+Math.max(
+img.naturalWidth,
+img.naturalHeight
+)
+);
+
+
+const canvas2 =
+document.createElement("canvas");
+
+
+canvas2.width =
+Math.max(
+1,
+Math.round(
+img.naturalWidth *
+scale2
+)
+);
+
+
+canvas2.height =
+Math.max(
+1,
+Math.round(
+img.naturalHeight *
+scale2
+)
+);
+
+
+const ctx2 =
+canvas2.getContext(
+"2d",
+{
+alpha:false
+}
+);
+
+
+ctx2.drawImage(
+img,
+0,
+0,
+canvas2.width,
+canvas2.height
+);
+
+
+data =
+canvas2.toDataURL(
+"image/jpeg",
+.45
+);
+
+}
+
+
+resolve(data);
+
+};
+
+img.src =
+reader.result;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+);
 
 
 /* =========================
@@ -1210,22 +1194,23 @@ function preparePhoto(file){
 
 function removePhoto(){
 
-  selectedImageDataUrl =
-    "";
+selectedImageDataUrl = "";
 
-  imageInput.value =
-    "";
+imageInput.value = "";
 
-  attachment.style.display =
-    "none";
+attachment.style.display =
+"none";
 
-  attachmentImage.src =
-    "";
+attachmentImage.src = "";
 
-  promptInput.placeholder =
-    imageMode
-      ? "Image में क्या बनाना चाहते हैं?"
-      : "Message Aaru AI...";
+imageMode = false;
+
+imageTool.classList.remove(
+"active"
+);
+
+promptInput.placeholder =
+"Message Aaru AI...";
 
 }
 
@@ -1236,29 +1221,28 @@ function removePhoto(){
 
 function toggleImageMode(){
 
-  imageMode =
-    !imageMode;
+imageMode =
+!imageMode;
 
+if(imageMode){
 
-  if(imageMode){
+imageTool.classList.add(
+"active"
+);
 
-    imageTool.classList.add(
-      "active"
-    );
+promptInput.placeholder =
+"Image में क्या बनाना चाहते हैं?";
 
-    promptInput.placeholder =
-      "Image में क्या बनाना चाहते हैं?";
+}else{
 
-  }else{
+imageTool.classList.remove(
+"active"
+);
 
-    imageTool.classList.remove(
-      "active"
-    );
+promptInput.placeholder =
+"Message Aaru AI...";
 
-    promptInput.placeholder =
-      "Message Aaru AI...";
-
-  }
+}
 
 }
 
@@ -1269,14 +1253,18 @@ function toggleImageMode(){
 
 function insertExample(){
 
-  promptInput.value =
-    "एक realistic Indian village at sunrise, cinematic photography";
+imageMode = true;
 
-  promptInput.dispatchEvent(
-    new Event("input")
-  );
+imageTool.classList.add("active");
 
-  promptInput.focus();
+promptInput.value =
+"एक भारतीय गाँव का photorealistic दृश्य, सुबह की सुनहरी रोशनी, खेत और दूर पहाड़";
+
+promptInput.dispatchEvent(
+new Event("input")
+);
+
+promptInput.focus();
 
 }
 
@@ -1287,44 +1275,41 @@ function insertExample(){
 
 function isImageRequest(text){
 
-  const t =
-    text.toLowerCase();
+const t =
+text.toLowerCase();
 
+const words = [
 
-  const words = [
+"create image",
+"generate image",
+"make image",
+"create a picture",
+"generate a picture",
+"make a picture",
+"draw a picture",
+"draw an image",
+"image generate",
+"image बनाओ",
+"image बना",
+"इमेज बनाओ",
+"इमेज बना",
+"फोटो बनाओ",
+"फोटो बना",
+"चित्र बनाओ",
+"चित्र बना",
+"तस्वीर बनाओ",
+"तस्वीर बना",
+"cinematic realistic",
+"cinematic photo",
+"photorealistic image",
+"realistic image"
 
-    "create image",
-    "generate image",
-    "make image",
-    "create a picture",
-    "generate a picture",
-    "make a picture",
-    "draw a picture",
-    "draw an image",
-    "image generate",
-    "image बनाओ",
-    "image बना",
-    "इमेज बनाओ",
-    "इमेज बना",
-    "फोटो बनाओ",
-    "फोटो बना",
-    "चित्र बनाओ",
-    "चित्र बना",
-    "तस्वीर बनाओ",
-    "तस्वीर बना"
+];
 
-  ];
-
-
-  return words.some(
-    function(word){
-
-      return t.includes(
-        word
-      );
-
-    }
-  );
+return words.some(
+word =>
+t.includes(word)
+);
 
 }
 
@@ -1335,241 +1320,173 @@ function isImageRequest(text){
 
 async function sendMessage(){
 
-  if(busy){
-    return;
-  }
+if(busy){
+return;
+}
+
+const text =
+promptInput.value.trim();
 
 
-  const text =
-    promptInput.value.trim();
+if(!text){
+
+alert(
+selectedImageDataUrl
+? "Photo के साथ क्या करना है, वह लिखें।"
+: "पहले अपना message लिखें।"
+);
+
+return;
+
+}
 
 
-  if(!text){
+/*
+ * IMPORTANT:
+ *
+ * Photo ALWAYS wins.
+ *
+ * Image button ALWAYS wins.
+ */
 
-    if(selectedImageDataUrl){
-
-      alert(
-        "Photo के साथ क्या करना है, वह लिखें।"
-      );
-
-    }else{
-
-      alert(
-        "पहले अपना message लिखें।"
-      );
-
-    }
-
-    return;
-
-  }
+const shouldGenerate =
+!!selectedImageDataUrl ||
+imageMode ||
+isImageRequest(text);
 
 
-  /*
-   * PHOTO ALWAYS HAS PRIORITY.
-   *
-   * इससे photo + prompt
-   * कभी normal chat में नहीं जाएगा।
-   */
+busy = true;
 
-  const generate =
-    !!selectedImageDataUrl ||
-    imageMode ||
-    isImageRequest(
-      text
-    );
+sendBtn.disabled = true;
 
 
-  busy = true;
+try{
 
-  sendBtn.disabled =
-    true;
+if(shouldGenerate){
 
+await generateImage(text);
 
-  try{
+}else{
 
-    if(generate){
+await sendChat(text);
 
-      await generateImage(
-        text
-      );
+}
 
-    }else{
+}finally{
 
-      await sendChat(
-        text
-      );
+busy = false;
 
-    }
+sendBtn.disabled = false;
 
-  }finally{
-
-    busy = false;
-
-    sendBtn.disabled =
-      false;
-
-  }
+}
 
 }
 
 
 /* =========================
-   ADD USER MESSAGE
+   USER MESSAGE
 ========================= */
 
 function addUserMessage(
-  text,
-  imageData
+text,
+photo
 ){
 
-  welcome.style.display =
-    "none";
+welcome.style.display =
+"none";
 
 
-  const message =
-    document.createElement(
-      "div"
-    );
+const message =
+document.createElement("div");
 
-  message.className =
-    "message user";
+message.className =
+"message user";
 
 
-  const inner =
-    document.createElement(
-      "div"
-    );
+const inner =
+document.createElement("div");
 
-  inner.className =
-    "message-inner";
+inner.className =
+"message-inner";
 
 
-  if(imageData){
+if(photo){
 
-    const photo =
-      document.createElement(
-        "div"
-      );
+const photoBox =
+document.createElement("div");
 
-    photo.className =
-      "photo-user";
+photoBox.className =
+"photo-user";
 
 
-    const img =
-      document.createElement(
-        "img"
-      );
+const img =
+document.createElement("img");
+
+img.src = photo;
+
+photoBox.appendChild(img);
+
+inner.appendChild(photoBox);
+
+}
 
 
-    img.src =
-      imageData;
+const bubble =
+document.createElement("div");
 
+bubble.className =
+"bubble";
 
-    photo.appendChild(
-      img
-    );
+bubble.textContent =
+text;
 
+inner.appendChild(bubble);
 
-    inner.appendChild(
-      photo
-    );
+message.appendChild(inner);
 
-  }
+chat.appendChild(message);
 
-
-  const bubble =
-    document.createElement(
-      "div"
-    );
-
-
-  bubble.className =
-    "bubble";
-
-
-  bubble.textContent =
-    text;
-
-
-  inner.appendChild(
-    bubble
-  );
-
-
-  message.appendChild(
-    inner
-  );
-
-
-  chat.appendChild(
-    message
-  );
-
-
-  scrollBottom();
+scrollBottom();
 
 }
 
 
 /* =========================
-   ASSISTANT TEXT
+   ASSISTANT
 ========================= */
 
-function addAssistantMessage(
-  text
-){
+function addAssistantMessage(text){
 
-  const message =
-    document.createElement(
-      "div"
-    );
+const message =
+document.createElement("div");
 
-
-  message.className =
-    "message assistant";
+message.className =
+"message assistant";
 
 
-  const inner =
-    document.createElement(
-      "div"
-    );
+const inner =
+document.createElement("div");
+
+inner.className =
+"message-inner";
 
 
-  inner.className =
-    "message-inner";
+const bubble =
+document.createElement("div");
 
+bubble.className =
+"bubble";
 
-  const bubble =
-    document.createElement(
-      "div"
-    );
+bubble.textContent =
+text;
 
+inner.appendChild(bubble);
 
-  bubble.className =
-    "bubble";
+message.appendChild(inner);
 
+chat.appendChild(message);
 
-  bubble.textContent =
-    text;
-
-
-  inner.appendChild(
-    bubble
-  );
-
-
-  message.appendChild(
-    inner
-  );
-
-
-  chat.appendChild(
-    message
-  );
-
-
-  scrollBottom();
+scrollBottom();
 
 }
 
@@ -1580,166 +1497,138 @@ function addAssistantMessage(
 
 function showTyping(){
 
-  removeTyping();
+removeTyping();
 
 
-  const message =
-    document.createElement(
-      "div"
-    );
+const message =
+document.createElement("div");
+
+message.id =
+"typingMessage";
+
+message.className =
+"message assistant";
 
 
-  message.className =
-    "message assistant";
+const inner =
+document.createElement("div");
 
-  message.id =
-    "typingMessage";
-
-
-  const inner =
-    document.createElement(
-      "div"
-    );
+inner.className =
+"message-inner";
 
 
-  inner.className =
-    "message-inner";
+inner.innerHTML =
+`
+<div class="typing">
+<i></i>
+<i></i>
+<i></i>
+</div>
+`;
 
 
-  inner.innerHTML = `
-    <div class="typing">
-      <i></i>
-      <i></i>
-      <i></i>
-    </div>
-  `;
+message.appendChild(inner);
 
+chat.appendChild(message);
 
-  message.appendChild(
-    inner
-  );
-
-
-  chat.appendChild(
-    message
-  );
-
-
-  scrollBottom();
+scrollBottom();
 
 }
 
 
 function removeTyping(){
 
-  const item =
-    document.getElementById(
-      "typingMessage"
-    );
+const item =
+document.getElementById(
+"typingMessage"
+);
 
-
-  if(item){
-
-    item.remove();
-
-  }
+if(item){
+item.remove();
+}
 
 }
 
 
 /* =========================
-   NORMAL CHAT
+   CHAT
 ========================= */
 
-async function sendChat(
-  text
-){
+async function sendChat(text){
 
-  addUserMessage(
-    text
-  );
+addUserMessage(text);
 
+promptInput.value = "";
 
-  promptInput.value =
-    "";
+resetTextarea();
 
-  resetTextarea();
+showTyping();
 
-
-  showTyping();
+setStatus(
+"Aaru सोच रहा है..."
+);
 
 
-  setStatus(
-    "Aaru सोच रहा है..."
-  );
+try{
+
+const response =
+await fetch(
+API_URL + "chat",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+message:text
+})
+
+}
+);
 
 
-  try{
-
-    const response =
-      await fetch(
-        API_URL + "chat",
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            message:text
-          })
-
-        }
-      );
+const data =
+await response.json();
 
 
-    const data =
-      await response.json();
+if(!response.ok){
+
+throw new Error(
+data.error ||
+"Chat failed."
+);
+
+}
 
 
-    if(!response.ok){
+removeTyping();
 
-      throw new Error(
-        data.error ||
-        "Chat failed."
-      );
-
-    }
+addAssistantMessage(
+data.reply ||
+"मुझे अभी कोई response नहीं मिला।"
+);
 
 
-    removeTyping();
+}catch(error){
 
+console.error(error);
 
-    addAssistantMessage(
-      data.reply ||
-      "मुझे अभी कोई response नहीं मिला।"
-    );
+removeTyping();
 
+addAssistantMessage(
+"❌ " +
+(
+error.message ||
+"Chat failed."
+)
+);
 
-  }catch(error){
+}
 
-    console.error(
-      error
-    );
-
-
-    removeTyping();
-
-
-    addAssistantMessage(
-      "❌ " +
-      (
-        error.message ||
-        "Chat failed."
-      )
-    );
-
-  }
-
-
-  setStatus("");
+setStatus("");
 
 }
 
@@ -1748,246 +1637,213 @@ async function sendChat(
    IMAGE GENERATION
 ========================= */
 
-async function generateImage(
-  text
+async function generateImage(text){
+
+const sourcePhoto =
+selectedImageDataUrl;
+
+
+addUserMessage(
+text,
+sourcePhoto
+);
+
+
+promptInput.value = "";
+
+resetTextarea();
+
+showTyping();
+
+
+setStatus(
+sourcePhoto
+? "🔄 Photo को cinematic बनाया जा रहा है..."
+: "✨ आपकी image तैयार हो रही है..."
+);
+
+
+try{
+
+let response;
+
+
+/* =====================
+   PHOTO
+===================== */
+
+if(sourcePhoto){
+
+const base64 =
+cleanBase64(
+sourcePhoto
+);
+
+
+if(!base64){
+
+throw new Error(
+"Photo data खाली है।"
+);
+
+}
+
+
+response =
+await fetch(
+API_URL,
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+
+prompt:text,
+
+ratio:"1:1",
+
+quality:"hd",
+
+image_b64:base64,
+
+strength:.65
+
+})
+
+}
+);
+
+}
+
+
+/* =====================
+   TEXT
+===================== */
+
+else{
+
+const params =
+new URLSearchParams();
+
+params.set(
+"prompt",
+text
+);
+
+params.set(
+"ratio",
+"1:1"
+);
+
+params.set(
+"quality",
+"hd"
+);
+
+
+response =
+await fetch(
+API_URL +
+"?" +
+params.toString()
+);
+
+}
+
+
+if(!response.ok){
+
+let message =
+"Image generation failed.";
+
+try{
+
+const data =
+await response.json();
+
+if(data.error){
+
+message =
+data.error;
+
+}
+
+}catch(e){}
+
+throw new Error(message);
+
+}
+
+
+const type =
+response.headers.get(
+"content-type"
+) || "";
+
+
+if(
+!type.includes("image")
 ){
 
-  /*
-   * Save photo BEFORE clearing it.
-   */
+throw new Error(
+"Server ने valid image नहीं भेजी।"
+);
 
-  const sourcePhoto =
-    selectedImageDataUrl;
+}
 
 
-  /*
-   * Show user message.
-   */
+const blob =
+await response.blob();
 
-  addUserMessage(
-    text,
-    sourcePhoto
-  );
 
+const url =
+URL.createObjectURL(blob);
 
-  promptInput.value =
-    "";
 
-  resetTextarea();
+removeTyping();
 
 
-  showTyping();
+addGeneratedImage(
+url,
+blob
+);
 
 
-  setStatus(
-    sourcePhoto
-      ? "🔄 Photo को transform किया जा रहा है..."
-      : "✨ आपकी image तैयार हो रही है..."
-  );
+removePhoto();
 
 
-  try{
+setStatus(
+"✅ Image तैयार है!"
+);
 
-    let response;
 
+}catch(error){
 
-    /* =====================
-       PHOTO → IMAGE
-    ===================== */
+console.error(
+"Image generation error:",
+error
+);
 
-    if(sourcePhoto){
 
-      const base64 =
-        cleanBase64(
-          sourcePhoto
-        );
+removeTyping();
 
 
-      if(!base64){
+addAssistantMessage(
+"❌ " +
+(
+error.message ||
+"Image generation failed."
+)
+);
 
-        throw new Error(
-          "Photo data खाली है।"
-        );
 
-      }
+setStatus("");
 
-
-      response =
-        await fetch(
-          API_URL,
-          {
-            method:"POST",
-
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-
-              prompt:text,
-
-              ratio:"1:1",
-
-              quality:"hd",
-
-              image_b64:base64,
-
-              strength:0.65
-
-            })
-
-          }
-        );
-
-    }
-
-
-    /* =====================
-       TEXT → IMAGE
-    ===================== */
-
-    else{
-
-      const params =
-        new URLSearchParams();
-
-
-      params.set(
-        "prompt",
-        text
-      );
-
-
-      params.set(
-        "ratio",
-        "1:1"
-      );
-
-
-      params.set(
-        "quality",
-        "hd"
-      );
-
-
-      response =
-        await fetch(
-          API_URL +
-          "?" +
-          params.toString()
-        );
-
-    }
-
-
-    if(!response.ok){
-
-      let message =
-        "Image generation failed.";
-
-
-      try{
-
-        const errorData =
-          await response.json();
-
-
-        if(
-          errorData &&
-          errorData.error
-        ){
-
-          message =
-            errorData.error;
-
-        }
-
-      }catch(e){}
-
-
-      throw new Error(
-        message
-      );
-
-    }
-
-
-    const contentType =
-      response.headers.get(
-        "content-type"
-      ) || "";
-
-
-    if(
-      !contentType.includes(
-        "image"
-      )
-    ){
-
-      throw new Error(
-        "Server ने valid image नहीं भेजी।"
-      );
-
-    }
-
-
-    const blob =
-      await response.blob();
-
-
-    const imageUrl =
-      URL.createObjectURL(
-        blob
-      );
-
-
-    removeTyping();
-
-
-    addGeneratedImage(
-      imageUrl,
-      blob
-    );
-
-
-    setStatus(
-      "✅ Image तैयार है!"
-    );
-
-
-    /*
-     * Composer से photo हटाएँ।
-     */
-
-    removePhoto();
-
-
-  }catch(error){
-
-    console.error(
-      "Image error:",
-      error
-    );
-
-
-    removeTyping();
-
-
-    addAssistantMessage(
-      "❌ " +
-      (
-        error.message ||
-        "Image generation failed."
-      )
-    );
-
-
-    setStatus(
-      "Image generation failed."
-    );
-
-  }
+}
 
 }
 
@@ -1997,190 +1853,135 @@ async function generateImage(
 ========================= */
 
 function addGeneratedImage(
-  imageUrl,
-  blob
+url,
+blob
 ){
 
-  const message =
-    document.createElement(
-      "div"
-    );
+const message =
+document.createElement("div");
+
+message.className =
+"message assistant";
 
 
-  message.className =
-    "message assistant";
+const inner =
+document.createElement("div");
+
+inner.className =
+"message-inner";
 
 
-  const inner =
-    document.createElement(
-      "div"
-    );
+const generated =
+document.createElement("div");
+
+generated.className =
+"generated";
 
 
-  inner.className =
-    "message-inner";
+const img =
+document.createElement("img");
+
+img.src = url;
 
 
-  const generated =
-    document.createElement(
-      "div"
-    );
+const actions =
+document.createElement("div");
+
+actions.className =
+"image-actions";
 
 
-  generated.className =
-    "generated";
+const download =
+document.createElement("a");
+
+download.href = url;
+
+download.download =
+"aaru-ai-" +
+Date.now() +
+".png";
+
+download.textContent =
+"⬇️ Download";
 
 
-  const img =
-    document.createElement(
-      "img"
-    );
+const another =
+document.createElement("button");
+
+another.type =
+"button";
+
+another.textContent =
+"🎨 Create another";
+
+another.onclick =
+function(){
+
+imageMode = true;
+
+imageTool.classList.add(
+"active"
+);
+
+promptInput.focus();
+
+};
 
 
-  img.src =
-    imageUrl;
+actions.appendChild(download);
+
+actions.appendChild(another);
+
+generated.appendChild(img);
+
+generated.appendChild(actions);
+
+inner.appendChild(generated);
+
+message.appendChild(inner);
+
+chat.appendChild(message);
 
 
-  img.alt =
-    "Aaru AI generated image";
+saveHistory(blob);
 
-
-  const actions =
-    document.createElement(
-      "div"
-    );
-
-
-  actions.className =
-    "image-actions";
-
-
-  const download =
-    document.createElement(
-      "a"
-    );
-
-
-  download.href =
-    imageUrl;
-
-
-  download.download =
-    "aaru-ai-" +
-    Date.now() +
-    ".png";
-
-
-  download.textContent =
-    "⬇️ Download";
-
-
-  const again =
-    document.createElement(
-      "button"
-    );
-
-
-  again.type =
-    "button";
-
-
-  again.textContent =
-    "🎨 Create another";
-
-
-  again.onclick =
-    function(){
-
-      promptInput.focus();
-
-    };
-
-
-  actions.appendChild(
-    download
-  );
-
-
-  actions.appendChild(
-    again
-  );
-
-
-  generated.appendChild(
-    img
-  );
-
-
-  generated.appendChild(
-    actions
-  );
-
-
-  inner.appendChild(
-    generated
-  );
-
-
-  message.appendChild(
-    inner
-  );
-
-
-  chat.appendChild(
-    message
-  );
-
-
-  saveHistory(
-    blob
-  );
-
-
-  scrollBottom();
+scrollBottom();
 
 }
 
 
 /* =========================
-   CLEAN BASE64
+   BASE64
 ========================= */
 
-function cleanBase64(
-  value
+function cleanBase64(value){
+
+if(!value){
+return "";
+}
+
+if(
+value.startsWith("data:")
 ){
 
-  if(!value){
-    return "";
-  }
+const comma =
+value.indexOf(",");
 
+if(comma >= 0){
 
-  if(
-    value.startsWith(
-      "data:"
-    )
-  ){
+value =
+value.substring(
+comma + 1
+);
 
-    const comma =
-      value.indexOf(",");
+}
 
+}
 
-    if(comma >= 0){
-
-      value =
-        value.substring(
-          comma + 1
-        );
-
-    }
-
-  }
-
-
-  return value.replace(
-    /\s/g,
-    ""
-  );
+return value.replace(
+/\s/g,
+""
+);
 
 }
 
@@ -2189,165 +1990,159 @@ function cleanBase64(
    HISTORY
 ========================= */
 
-function saveHistory(
-  blob
-){
+function saveHistory(blob){
 
-  const reader =
-    new FileReader();
+const reader =
+new FileReader();
 
 
-  reader.onloadend =
-    async function(){
+reader.onloadend =
+async function(){
 
-      try{
+try{
 
-        const thumbnail =
-          await makeThumbnail(
-            reader.result
-          );
-
-
-        let history =
-          JSON.parse(
-            localStorage.getItem(
-              "aaru_history"
-            ) || "[]"
-          );
+const thumbnail =
+await makeThumbnail(
+reader.result
+);
 
 
-        history.unshift(
-          thumbnail
-        );
+let history =
+JSON.parse(
+localStorage.getItem(
+"aaru_history"
+) || "[]"
+);
 
 
-        history =
-          history.slice(
-            0,
-            12
-          );
+history.unshift({
+id:Date.now(),
+image:thumbnail
+});
 
 
-        localStorage.setItem(
-          "aaru_history",
-          JSON.stringify(
-            history
-          )
-        );
+history =
+history.slice(
+0,
+20
+);
 
 
-        loadHistory();
-
-      }catch(error){
-
-        console.log(
-          "History error:",
-          error
-        );
-
-      }
-
-    };
+localStorage.setItem(
+"aaru_history",
+JSON.stringify(history)
+);
 
 
-  reader.readAsDataURL(
-    blob
-  );
+loadHistory();
+
+}catch(error){
+
+console.log(
+"History save failed",
+error
+);
+
+}
+
+};
+
+
+reader.readAsDataURL(blob);
 
 }
 
 
+/* =========================
+   THUMBNAIL
+========================= */
+
 function makeThumbnail(
-  dataUrl
+dataUrl
 ){
 
-  return new Promise(
-    function(resolve){
+return new Promise(
+function(resolve){
 
-      const img =
-        new Image();
-
-
-      img.onload =
-        function(){
-
-          const max =
-            500;
+const img =
+new Image();
 
 
-          let width =
-            img.width;
+img.onload =
+function(){
 
-          let height =
-            img.height;
-
-
-          if(
-            width > max
-          ){
-
-            const scale =
-              max / width;
+const max =
+500;
 
 
-            width =
-              Math.round(
-                width * scale
-              );
+let width =
+img.width;
+
+let height =
+img.height;
 
 
-            height =
-              Math.round(
-                height * scale
-              );
+if(width > max){
 
-          }
+const scale =
+max / width;
 
+width =
+Math.round(
+width * scale
+);
 
-          const canvas =
-            document.createElement(
-              "canvas"
-            );
+height =
+Math.round(
+height * scale
+);
 
-
-          canvas.width =
-            width;
-
-
-          canvas.height =
-            height;
+}
 
 
-          const ctx =
-            canvas.getContext(
-              "2d"
-            );
+const canvas =
+document.createElement(
+"canvas"
+);
 
 
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            width,
-            height
-          );
+canvas.width =
+width;
+
+canvas.height =
+height;
 
 
-          resolve(
-            canvas.toDataURL(
-              "image/jpeg",
-              0.65
-            )
-          );
-
-        };
+const ctx =
+canvas.getContext(
+"2d"
+);
 
 
-      img.src =
-        dataUrl;
+ctx.drawImage(
+img,
+0,
+0,
+width,
+height
+);
 
-    }
-  );
+
+resolve(
+canvas.toDataURL(
+"image/jpeg",
+.65
+)
+);
+
+};
+
+
+img.src =
+dataUrl;
+
+}
+);
 
 }
 
@@ -2358,229 +2153,361 @@ function makeThumbnail(
 
 function loadHistory(){
 
-  let history = [];
+let history = [];
 
 
-  try{
+try{
 
-    history =
-      JSON.parse(
-        localStorage.getItem(
-          "aaru_history"
-        ) || "[]"
-      );
+history =
+JSON.parse(
+localStorage.getItem(
+"aaru_history"
+) || "[]"
+);
 
-  }catch(error){
+}catch(e){
 
-    history = [];
+history = [];
 
-  }
+}
 
 
-  recentGrid.innerHTML =
-    "";
+historyList.innerHTML = "";
 
 
-  if(
-    !history.length
-  ){
+if(!history.length){
 
-    recentGrid.innerHTML =
-      '<div class="recent-empty">अभी कोई creation नहीं है</div>';
+historyList.innerHTML =
+`
+<div class="history-empty">
+अभी कोई creation नहीं है
+</div>
+`;
 
-    return;
+return;
 
-  }
+}
 
 
-  history.forEach(
-    function(imageData){
+history.forEach(
+function(item,index){
 
-      const item =
-        document.createElement(
-          "div"
-        );
+/*
+ * Backward compatibility:
+ * old history may be plain strings.
+ */
 
+const image =
+typeof item === "string"
+? item
+: item.image;
 
-      item.className =
-        "recent-item";
 
+const id =
+typeof item === "string"
+? index
+: item.id;
 
-      const img =
-        document.createElement(
-          "img"
-        );
 
+const card =
+document.createElement("div");
 
-      img.src =
-        imageData;
+card.className =
+"history-card";
 
 
-      img.loading =
-        "lazy";
+const img =
+document.createElement("img");
 
+img.src =
+image;
 
-      item.appendChild(
-        img
-      );
+img.loading =
+"lazy";
 
 
-      item.onclick =
-        function(){
+img.onclick =
+function(){
 
-          const message =
-            document.createElement(
-              "div"
-            );
+closeHistory();
 
+showHistoryImage(
+image
+);
 
-          message.className =
-            "message assistant";
+};
 
 
-          const inner =
-            document.createElement(
-              "div"
-            );
+const info =
+document.createElement("div");
 
+info.className =
+"history-card-info";
 
-          inner.className =
-            "message-inner";
+info.textContent =
+"Creation " +
+(index + 1);
 
 
-          const generated =
-            document.createElement(
-              "div"
-            );
+const del =
+document.createElement("button");
 
+del.className =
+"history-delete";
 
-          generated.className =
-            "generated";
+del.type =
+"button";
 
+del.textContent =
+"🗑";
 
-          const preview =
-            document.createElement(
-              "img"
-            );
 
+del.onclick =
+function(e){
 
-          preview.src =
-            imageData;
+e.stopPropagation();
 
+deleteHistoryItem(id,index);
 
-          const actions =
-            document.createElement(
-              "div"
-            );
+};
 
 
-          actions.className =
-            "image-actions";
+card.appendChild(img);
 
+card.appendChild(info);
 
-          const download =
-            document.createElement(
-              "a"
-            );
+card.appendChild(del);
 
+historyList.appendChild(card);
 
-          download.href =
-            imageData;
+}
 
-
-          download.download =
-            "aaru-ai-history.jpg";
-
-
-          download.textContent =
-            "⬇️ Download";
-
-
-          actions.appendChild(
-            download
-          );
-
-
-          generated.appendChild(
-            preview
-          );
-
-
-          generated.appendChild(
-            actions
-          );
-
-
-          inner.appendChild(
-            generated
-          );
-
-
-          message.appendChild(
-            inner
-          );
-
-
-          chat.appendChild(
-            message
-          );
-
-
-          scrollBottom();
-
-        };
-
-
-      recentGrid.appendChild(
-        item
-      );
-
-    }
-  );
+);
 
 }
 
 
 /* =========================
-   CLEAR CHAT
+   SHOW HISTORY IMAGE
 ========================= */
 
-function clearChat(){
+function showHistoryImage(
+image
+){
 
-  const ok =
-    confirm(
-      "क्या current chat साफ करना है?"
-    );
+const message =
+document.createElement("div");
 
-
-  if(!ok){
-    return;
-  }
+message.className =
+"message assistant";
 
 
-  chat.innerHTML =
-    "";
+const inner =
+document.createElement("div");
+
+inner.className =
+"message-inner";
 
 
-  chat.appendChild(
-    welcome
-  );
+const generated =
+document.createElement("div");
+
+generated.className =
+"generated";
 
 
-  welcome.style.display =
-    "flex";
+const img =
+document.createElement("img");
+
+img.src =
+image;
+
+
+const actions =
+document.createElement("div");
+
+actions.className =
+"image-actions";
+
+
+const download =
+document.createElement("a");
+
+download.href =
+image;
+
+download.download =
+"aaru-history.jpg";
+
+download.textContent =
+"⬇️ Download";
+
+
+actions.appendChild(
+download
+);
+
+
+generated.appendChild(img);
+
+generated.appendChild(actions);
+
+inner.appendChild(generated);
+
+message.appendChild(inner);
+
+chat.appendChild(message);
+
+scrollBottom();
 
 }
 
 
 /* =========================
-   RESET TEXTAREA
+   DELETE ONE
+========================= */
+
+function deleteHistoryItem(
+id,
+index
+){
+
+let history =
+JSON.parse(
+localStorage.getItem(
+"aaru_history"
+) || "[]"
+);
+
+
+if(
+typeof history[index] === "object" &&
+history[index] !== null
+){
+
+history =
+history.filter(
+item =>
+item.id !== id
+);
+
+}else{
+
+history.splice(
+index,
+1
+);
+
+}
+
+
+localStorage.setItem(
+"aaru_history",
+JSON.stringify(history)
+);
+
+
+loadHistory();
+
+}
+
+
+/* =========================
+   DELETE ALL
+========================= */
+
+function deleteAllHistory(){
+
+const history =
+localStorage.getItem(
+"aaru_history"
+);
+
+
+if(!history){
+return;
+}
+
+
+if(
+!confirm(
+"क्या Recent Creations की सभी images delete करनी हैं?"
+)
+){
+
+return;
+
+}
+
+
+localStorage.removeItem(
+"aaru_history"
+);
+
+
+loadHistory();
+
+}
+
+
+/* =========================
+   HISTORY DRAWER
+========================= */
+
+function openHistory(){
+
+loadHistory();
+
+historyDrawer.classList.add(
+"show"
+);
+
+overlay.classList.add(
+"show"
+);
+
+}
+
+
+function closeHistory(){
+
+historyDrawer.classList.remove(
+"show"
+);
+
+overlay.classList.remove(
+"show"
+);
+
+}
+
+
+/* =========================
+   CLEAR CURRENT CHAT
+========================= */
+
+function clearCurrentChat(){
+
+chat.innerHTML = "";
+
+chat.appendChild(
+welcome
+);
+
+welcome.style.display =
+"flex";
+
+}
+
+
+/* =========================
+   RESET
 ========================= */
 
 function resetTextarea(){
 
-  promptInput.style.height =
-    "42px";
+promptInput.style.height =
+"42px";
 
 }
 
@@ -2589,12 +2516,10 @@ function resetTextarea(){
    STATUS
 ========================= */
 
-function setStatus(
-  text
-){
+function setStatus(text){
 
-  status.textContent =
-    text || "";
+status.textContent =
+text || "";
 
 }
 
@@ -2605,28 +2530,26 @@ function setStatus(
 
 function scrollBottom(){
 
-  setTimeout(
-    function(){
+setTimeout(
+function(){
 
-      window.scrollTo(
-        {
-          top:
-            document.body.scrollHeight,
+window.scrollTo(
+{
+top:
+document.body.scrollHeight,
+behavior:"smooth"
+}
+);
 
-          behavior:
-            "smooth"
-        }
-      );
-
-    },
-    60
-  );
+},
+60
+);
 
 }
 
 
 /* =========================
-   INIT
+   INITIAL
 ========================= */
 
 loadHistory();
