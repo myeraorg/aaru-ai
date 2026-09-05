@@ -7,576 +7,586 @@
 <title>Aaru AI</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
 html,body{
-width:100%;
-min-height:100%;
+  width:100%;
+  min-height:100%;
 }
 
 body{
-font-family:Arial,Helvetica,sans-serif;
-background:#070707;
-color:#fff;
-overflow-x:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#070707;
+  color:#fff;
+  overflow-x:hidden;
 }
 
-button,textarea,input{
-font-family:inherit;
+button,
+textarea,
+input{
+  font-family:inherit;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
 }
 
 /* APP */
 
 .app{
-width:100%;
-min-height:100vh;
-max-width:900px;
-margin:auto;
+  width:100%;
+  min-height:100vh;
+  max-width:900px;
+  margin:auto;
 }
 
 /* HEADER */
 
 .header{
-position:sticky;
-top:0;
-z-index:30;
-height:58px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 14px;
-background:rgba(7,7,7,.95);
-border-bottom:1px solid #171717;
-backdrop-filter:blur(12px);
+  position:sticky;
+  top:0;
+  z-index:30;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  background:rgba(7,7,7,.96);
+  border-bottom:1px solid #171717;
+  backdrop-filter:blur(12px);
 }
 
 .left-header{
-display:flex;
-align-items:center;
-gap:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 .menu{
-width:38px;
-height:38px;
-border:1px solid #292929;
-border-radius:11px;
-background:#111;
-color:#fff;
-font-size:20px;
-cursor:pointer;
+  width:38px;
+  height:38px;
+  border:1px solid #292929;
+  border-radius:11px;
+  background:#111;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
 }
 
 .logo{
-font-size:21px;
-font-weight:800;
-letter-spacing:-.7px;
+  font-size:21px;
+  font-weight:800;
+  letter-spacing:-.7px;
 }
 
 .logo span{
-opacity:.5;
+  opacity:.5;
 }
 
 .header-status{
-font-size:11px;
-color:#666;
+  font-size:11px;
+  color:#666;
 }
 
 /* CHAT */
 
 .chat{
-width:100%;
-padding:10px 12px 170px;
+  width:100%;
+  padding:10px 12px 170px;
 }
 
 .welcome{
-min-height:68vh;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-text-align:center;
-padding:20px;
+  min-height:68vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
 }
 
 .welcome-logo{
-width:64px;
-height:64px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#111;
-border:1px solid #333;
-border-radius:20px;
-font-size:27px;
-font-weight:800;
-margin-bottom:18px;
+  width:64px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  border:1px solid #333;
+  border-radius:20px;
+  font-size:27px;
+  font-weight:800;
+  margin-bottom:18px;
 }
 
 .welcome h1{
-font-size:34px;
-letter-spacing:-1.4px;
-margin-bottom:9px;
+  font-size:34px;
+  letter-spacing:-1.4px;
+  margin-bottom:9px;
 }
 
 .welcome p{
-max-width:430px;
-color:#777;
-font-size:14px;
-line-height:1.6;
+  max-width:430px;
+  color:#777;
+  font-size:14px;
+  line-height:1.6;
 }
 
 /* MESSAGES */
 
 .message{
-display:flex;
-width:100%;
-margin:16px 0;
+  display:flex;
+  width:100%;
+  margin:16px 0;
 }
 
 .message.user{
-justify-content:flex-end;
+  justify-content:flex-end;
 }
 
 .message.assistant{
-justify-content:flex-start;
+  justify-content:flex-start;
 }
 
 .message-inner{
-max-width:min(78%,620px);
+  max-width:min(78%,620px);
 }
 
 .bubble{
-padding:12px 15px;
-border-radius:18px;
-font-size:15px;
-line-height:1.55;
-white-space:pre-wrap;
-overflow-wrap:anywhere;
+  padding:12px 15px;
+  border-radius:18px;
+  font-size:15px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
 }
 
 .user .bubble{
-background:#fff;
-color:#000;
-border-bottom-right-radius:5px;
+  background:#fff;
+  color:#000;
+  border-bottom-right-radius:5px;
 }
 
 .assistant .bubble{
-background:#151515;
-border:1px solid #252525;
-color:#eee;
-border-bottom-left-radius:5px;
+  background:#151515;
+  border:1px solid #252525;
+  color:#eee;
+  border-bottom-left-radius:5px;
 }
 
 /* USER PHOTO */
 
 .photo-user{
-width:min(330px,80vw);
-margin-bottom:7px;
+  width:min(330px,80vw);
+  margin-bottom:7px;
 }
 
 .photo-user img{
-width:100%;
-display:block;
-max-height:330px;
-object-fit:cover;
-border-radius:16px;
-border:1px solid #292929;
+  width:100%;
+  display:block;
+  max-height:330px;
+  object-fit:cover;
+  border-radius:16px;
+  border:1px solid #292929;
 }
 
-/* GENERATED */
+/* GENERATED IMAGE */
 
 .generated{
-width:min(560px,88vw);
+  width:min(560px,88vw);
 }
 
 .generated img{
-width:100%;
-display:block;
-border-radius:17px;
-background:#111;
-border:1px solid #252525;
+  width:100%;
+  display:block;
+  border-radius:17px;
+  background:#111;
+  border:1px solid #252525;
 }
 
 .image-actions{
-display:flex;
-gap:8px;
-margin-top:9px;
+  display:flex;
+  gap:8px;
+  margin-top:9px;
 }
 
 .image-actions a,
 .image-actions button{
-flex:1;
-border:1px solid #303030;
-background:#141414;
-color:#fff;
-text-decoration:none;
-text-align:center;
-padding:10px 8px;
-border-radius:11px;
-font-size:12px;
-cursor:pointer;
+  flex:1;
+  border:1px solid #303030;
+  background:#141414;
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  padding:10px 8px;
+  border-radius:11px;
+  font-size:12px;
+  cursor:pointer;
 }
 
 /* TYPING */
 
 .typing{
-display:flex;
-align-items:center;
-gap:5px;
-padding:13px 15px;
-background:#151515;
-border:1px solid #252525;
-border-radius:17px;
-border-bottom-left-radius:5px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:13px 15px;
+  background:#151515;
+  border:1px solid #252525;
+  border-radius:17px;
+  border-bottom-left-radius:5px;
 }
 
 .typing i{
-width:6px;
-height:6px;
-background:#777;
-border-radius:50%;
-animation:typing 1s infinite;
+  width:6px;
+  height:6px;
+  background:#777;
+  border-radius:50%;
+  animation:typing 1s infinite;
 }
 
 .typing i:nth-child(2){
-animation-delay:.15s;
+  animation-delay:.15s;
 }
 
 .typing i:nth-child(3){
-animation-delay:.30s;
+  animation-delay:.30s;
 }
 
 @keyframes typing{
-0%,60%,100%{
-opacity:.3;
-transform:translateY(0);
-}
-30%{
-opacity:1;
-transform:translateY(-4px);
-}
+  0%,60%,100%{
+    opacity:.3;
+    transform:translateY(0);
+  }
+  30%{
+    opacity:1;
+    transform:translateY(-4px);
+  }
 }
 
 /* COMPOSER */
 
 .composer-area{
-position:fixed;
-left:0;
-right:0;
-bottom:0;
-z-index:50;
-padding:20px 10px 10px;
-background:linear-gradient(to bottom,rgba(7,7,7,0),#070707 30%);
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:50;
+  padding:20px 10px 10px;
+  background:linear-gradient(to bottom,rgba(7,7,7,0),#070707 30%);
 }
 
 .composer{
-width:100%;
-max-width:870px;
-margin:auto;
-background:#111;
-border:1px solid #292929;
-border-radius:20px;
-padding:9px;
-box-shadow:0 -10px 35px rgba(0,0,0,.25);
+  width:100%;
+  max-width:870px;
+  margin:auto;
+  background:#111;
+  border:1px solid #292929;
+  border-radius:20px;
+  padding:9px;
+  box-shadow:0 -10px 35px rgba(0,0,0,.25);
 }
 
-/* PHOTO PREVIEW */
+/* ATTACHMENT */
 
 .attachment{
-display:none;
-position:relative;
-width:115px;
-margin:2px 0 9px 2px;
+  display:none;
+  position:relative;
+  width:115px;
+  margin:2px 0 9px 2px;
 }
 
 .attachment img{
-width:115px;
-height:115px;
-object-fit:cover;
-border-radius:13px;
-border:1px solid #333;
-display:block;
+  width:115px;
+  height:115px;
+  object-fit:cover;
+  border-radius:13px;
+  border:1px solid #333;
+  display:block;
 }
 
 .remove-photo{
-position:absolute;
-top:5px;
-right:5px;
-width:28px;
-height:28px;
-border:0;
-border-radius:50%;
-background:rgba(0,0,0,.85);
-color:#fff;
-font-size:18px;
-cursor:pointer;
+  position:absolute;
+  top:5px;
+  right:5px;
+  width:28px;
+  height:28px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.85);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
 }
 
 /* INPUT */
 
 .input-row{
-display:flex;
-align-items:flex-end;
-gap:8px;
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
 }
 
 .attach-btn,
 .send-btn{
-width:42px;
-height:42px;
-flex:none;
-border-radius:13px;
-cursor:pointer;
+  width:42px;
+  height:42px;
+  flex:none;
+  border-radius:13px;
+  cursor:pointer;
 }
 
 .attach-btn{
-border:1px solid #303030;
-background:#181818;
-color:#fff;
-font-size:23px;
+  border:1px solid #303030;
+  background:#181818;
+  color:#fff;
+  font-size:23px;
 }
 
 .send-btn{
-border:0;
-background:#fff;
-color:#000;
-font-size:20px;
-font-weight:bold;
+  border:0;
+  background:#fff;
+  color:#000;
+  font-size:20px;
+  font-weight:bold;
 }
 
 .send-btn:disabled{
-opacity:.35;
-cursor:not-allowed;
+  opacity:.35;
+  cursor:not-allowed;
 }
 
 #prompt{
-width:100%;
-min-height:42px;
-max-height:150px;
-resize:none;
-border:0;
-outline:0;
-background:transparent;
-color:#fff;
-font-size:15px;
-line-height:1.45;
-padding:10px 3px;
+  width:100%;
+  min-height:42px;
+  max-height:150px;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#fff;
+  font-size:15px;
+  line-height:1.45;
+  padding:10px 3px;
 }
 
 #prompt::placeholder{
-color:#666;
+  color:#666;
 }
 
 /* TOOLS */
 
 .tools{
-display:flex;
-gap:7px;
-margin-top:8px;
-padding:0 2px 1px;
-overflow-x:auto;
-scrollbar-width:none;
+  display:flex;
+  gap:7px;
+  margin-top:8px;
+  padding:0 2px 1px;
+  overflow-x:auto;
+  scrollbar-width:none;
 }
 
 .tools::-webkit-scrollbar{
-display:none;
+  display:none;
 }
 
 .tool{
-flex:none;
-border:1px solid #2b2b2b;
-background:#181818;
-color:#aaa;
-padding:8px 11px;
-border-radius:10px;
-font-size:12px;
-cursor:pointer;
+  flex:none;
+  border:1px solid #2b2b2b;
+  background:#181818;
+  color:#aaa;
+  padding:8px 11px;
+  border-radius:10px;
+  font-size:12px;
+  cursor:pointer;
 }
 
 .tool.active{
-background:#fff;
-color:#000;
-border-color:#fff;
+  background:#fff;
+  color:#000;
+  border-color:#fff;
 }
 
 #imageInput{
-display:none;
+  display:none;
 }
 
 .status{
-min-height:16px;
-text-align:center;
-color:#777;
-font-size:11px;
-padding-top:6px;
+  min-height:16px;
+  text-align:center;
+  color:#777;
+  font-size:11px;
+  padding-top:6px;
 }
 
-/* HISTORY DRAWER */
+/* HISTORY */
 
 .overlay{
-display:none;
-position:fixed;
-inset:0;
-z-index:80;
-background:rgba(0,0,0,.6);
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:80;
+  background:rgba(0,0,0,.6);
 }
 
 .overlay.show{
-display:block;
+  display:block;
 }
 
 .history-drawer{
-position:fixed;
-top:0;
-left:0;
-bottom:0;
-z-index:90;
-width:min(330px,88vw);
-background:#0d0d0d;
-border-right:1px solid #292929;
-transform:translateX(-100%);
-transition:transform .25s ease;
-overflow-y:auto;
+  position:fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  z-index:90;
+  width:min(330px,88vw);
+  background:#0d0d0d;
+  border-right:1px solid #292929;
+  transform:translateX(-100%);
+  transition:transform .25s ease;
+  overflow-y:auto;
 }
 
 .history-drawer.show{
-transform:translateX(0);
+  transform:translateX(0);
 }
 
 .history-head{
-height:60px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 14px;
-border-bottom:1px solid #222;
-position:sticky;
-top:0;
-background:#0d0d0d;
-z-index:2;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  border-bottom:1px solid #222;
+  position:sticky;
+  top:0;
+  background:#0d0d0d;
+  z-index:2;
 }
 
 .history-head-title{
-font-weight:700;
-font-size:16px;
+  font-weight:700;
+  font-size:16px;
 }
 
 .close-history{
-width:34px;
-height:34px;
-border:1px solid #303030;
-border-radius:10px;
-background:#151515;
-color:#fff;
-font-size:19px;
-cursor:pointer;
+  width:34px;
+  height:34px;
+  border:1px solid #303030;
+  border-radius:10px;
+  background:#151515;
+  color:#fff;
+  font-size:19px;
+  cursor:pointer;
 }
 
 .history-tools{
-padding:12px 14px;
-border-bottom:1px solid #1c1c1c;
+  padding:12px 14px;
+  border-bottom:1px solid #1c1c1c;
 }
 
 .delete-all{
-width:100%;
-border:1px solid #333;
-background:#151515;
-color:#ccc;
-padding:10px;
-border-radius:10px;
-font-size:12px;
-cursor:pointer;
+  width:100%;
+  border:1px solid #333;
+  background:#151515;
+  color:#ccc;
+  padding:10px;
+  border-radius:10px;
+  font-size:12px;
+  cursor:pointer;
 }
 
 .history-list{
-padding:12px;
+  padding:12px;
 }
 
 .history-empty{
-text-align:center;
-color:#555;
-font-size:12px;
-padding:25px 5px;
+  text-align:center;
+  color:#555;
+  font-size:12px;
+  padding:25px 5px;
 }
 
 .history-card{
-position:relative;
-display:flex;
-gap:9px;
-padding:8px;
-margin-bottom:8px;
-border:1px solid #242424;
-border-radius:12px;
-background:#111;
+  position:relative;
+  display:flex;
+  gap:9px;
+  padding:8px;
+  margin-bottom:8px;
+  border:1px solid #242424;
+  border-radius:12px;
+  background:#111;
 }
 
 .history-card img{
-width:70px;
-height:70px;
-object-fit:cover;
-border-radius:9px;
-cursor:pointer;
+  width:70px;
+  height:70px;
+  object-fit:cover;
+  border-radius:9px;
+  cursor:pointer;
 }
 
 .history-card-info{
-flex:1;
-display:flex;
-align-items:center;
+  flex:1;
+  display:flex;
+  align-items:center;
+  color:#999;
+  font-size:12px;
 }
 
 .history-delete{
-position:absolute;
-right:7px;
-top:7px;
-width:27px;
-height:27px;
-border:0;
-border-radius:8px;
-background:#222;
-color:#aaa;
-cursor:pointer;
-font-size:15px;
+  position:absolute;
+  right:7px;
+  top:7px;
+  width:27px;
+  height:27px;
+  border:0;
+  border-radius:8px;
+  background:#222;
+  color:#aaa;
+  cursor:pointer;
+  font-size:15px;
 }
 
 /* MOBILE */
 
 @media(max-width:600px){
 
-.header{
-padding:0 11px;
-}
+  .header{
+    padding:0 11px;
+  }
 
-.chat{
-padding-left:9px;
-padding-right:9px;
-}
+  .chat{
+    padding-left:9px;
+    padding-right:9px;
+  }
 
-.message-inner{
-max-width:88%;
-}
+  .message-inner{
+    max-width:88%;
+  }
 
-.welcome h1{
-font-size:29px;
-}
+  .welcome h1{
+    font-size:29px;
+  }
 
-.generated{
-width:90vw;
-}
-
+  .generated{
+    width:90vw;
+  }
 }
 
 @media(max-width:380px){
 
-.welcome h1{
-font-size:27px;
-}
+  .welcome h1{
+    font-size:27px;
+  }
 
-.tool{
-font-size:11px;
-padding:7px 9px;
-}
-
+  .tool{
+    font-size:11px;
+    padding:7px 9px;
+  }
 }
 </style>
 </head>
@@ -587,52 +597,44 @@ padding:7px 9px;
 
 <header class="header">
 
-<div class="left-header">
+  <div class="left-header">
 
-<button
-class="menu"
-type="button"
-onclick="openHistory()"
->
-☰
-</button>
+    <button
+      class="menu"
+      id="menuBtn"
+      type="button"
+    >☰</button>
 
-<div class="logo">
-Aaru <span>AI</span>
-</div>
+    <div class="logo">
+      Aaru <span>AI</span>
+    </div>
 
-</div>
+  </div>
 
-<div class="header-status">
-AI Assistant
-</div>
+  <div class="header-status">
+    AI Assistant
+  </div>
 
 </header>
 
 
-<main
-class="chat"
-id="chat"
->
+<main class="chat" id="chat">
 
-<section
-class="welcome"
-id="welcome"
->
+  <section class="welcome" id="welcome">
 
-<div class="welcome-logo">
-A
-</div>
+    <div class="welcome-logo">
+      A
+    </div>
 
-<h1>
-What can I help with?
-</h1>
+    <h1>
+      What can I help with?
+    </h1>
 
-<p>
-Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।
-</p>
+    <p>
+      Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।
+    </p>
 
-</section>
+  </section>
 
 </main>
 
@@ -642,48 +644,45 @@ Chat करें, photo edit करें या अपनी कल्पन�
 <!-- HISTORY -->
 
 <div
-class="overlay"
-id="overlay"
-onclick="closeHistory()"
+  class="overlay"
+  id="overlay"
 ></div>
 
 <aside
-class="history-drawer"
-id="historyDrawer"
+  class="history-drawer"
+  id="historyDrawer"
 >
 
-<div class="history-head">
+  <div class="history-head">
 
-<div class="history-head-title">
-Recent Creations
-</div>
+    <div class="history-head-title">
+      Recent Creations
+    </div>
 
-<button
-class="close-history"
-type="button"
-onclick="closeHistory()"
->
-×
-</button>
+    <button
+      class="close-history"
+      id="closeHistoryBtn"
+      type="button"
+    >×</button>
 
-</div>
+  </div>
 
-<div class="history-tools">
+  <div class="history-tools">
 
-<button
-class="delete-all"
-type="button"
-onclick="deleteAllHistory()"
->
-🗑 Delete All
-</button>
+    <button
+      class="delete-all"
+      id="deleteAllBtn"
+      type="button"
+    >
+      🗑 Delete All
+    </button>
 
-</div>
+  </div>
 
-<div
-class="history-list"
-id="historyList"
-></div>
+  <div
+    class="history-list"
+    id="historyList"
+  ></div>
 
 </aside>
 
@@ -692,151 +691,202 @@ id="historyList"
 
 <div class="composer-area">
 
-<div class="composer">
+  <div class="composer">
 
-<div
-class="attachment"
-id="attachment"
->
+    <div
+      class="attachment"
+      id="attachment"
+    >
 
-<img
-id="attachmentImage"
-alt="Selected photo"
->
+      <img
+        id="attachmentImage"
+        alt="Selected photo"
+      >
 
-<button
-class="remove-photo"
-type="button"
-onclick="removePhoto()"
->
-×
-</button>
+      <button
+        class="remove-photo"
+        id="removePhotoBtn"
+        type="button"
+      >×</button>
 
-</div>
+    </div>
 
 
-<div class="input-row">
+    <div class="input-row">
 
-<button
-class="attach-btn"
-type="button"
-onclick="openPhotoPicker()"
->
-+
-</button>
+      <button
+        class="attach-btn"
+        id="attachBtn"
+        type="button"
+      >+</button>
 
-<textarea
-id="prompt"
-rows="1"
-placeholder="Message Aaru AI..."
-></textarea>
+      <textarea
+        id="prompt"
+        rows="1"
+        placeholder="Message Aaru AI..."
+      ></textarea>
 
-<button
-class="send-btn"
-id="sendBtn"
-type="button"
-onclick="sendMessage()"
->
-↑
-</button>
+      <button
+        class="send-btn"
+        id="sendBtn"
+        type="button"
+      >↑</button>
 
-</div>
+    </div>
 
 
-<div class="tools">
+    <div class="tools">
 
-<button
-class="tool"
-id="imageTool"
-type="button"
-onclick="toggleImageMode()"
->
-🎨 Create Image
-</button>
+      <button
+        class="tool"
+        id="imageTool"
+        type="button"
+      >
+        🎨 Create Image
+      </button>
 
-<button
-class="tool"
-type="button"
-onclick="openPhotoPicker()"
->
-📷 Photo
-</button>
+      <button
+        class="tool"
+        id="photoTool"
+        type="button"
+      >
+        📷 Photo
+      </button>
 
-<button
-class="tool"
-type="button"
-onclick="insertExample()"
->
-✨ Example
-</button>
+      <button
+        class="tool"
+        id="exampleTool"
+        type="button"
+      >
+        ✨ Example
+      </button>
 
-</div>
+    </div>
 
 
-<input
-type="file"
-id="imageInput"
-accept="image/jpeg,image/png,image/webp,image/*"
->
+    <input
+      type="file"
+      id="imageInput"
+      accept="image/jpeg,image/png,image/webp,image/*"
+    >
 
-<div
-class="status"
-id="status"
-></div>
+    <div
+      class="status"
+      id="status"
+    ></div>
 
-</div>
+  </div>
 
 </div>
 
 
 <script>
 
-const API_URL =
-"https://aaru-ai-api.myera-org.workers.dev/";
+/* =====================================================
+   AARU AI FRONTEND
+===================================================== */
 
+"use strict";
+
+
+/* =========================
+   CONFIG
+========================= */
+
+const API_URL =
+  "https://aaru-ai-api.myera-org.workers.dev/";
+
+
+/* =========================
+   STATE
+========================= */
 
 let selectedImageDataUrl = "";
-
 let imageMode = false;
-
 let busy = false;
 
 
+/* =========================
+   ELEMENTS
+========================= */
+
 const chat =
-document.getElementById("chat");
+  document.getElementById("chat");
 
 const welcome =
-document.getElementById("welcome");
+  document.getElementById("welcome");
 
 const promptInput =
-document.getElementById("prompt");
+  document.getElementById("prompt");
 
 const imageInput =
-document.getElementById("imageInput");
+  document.getElementById("imageInput");
 
 const attachment =
-document.getElementById("attachment");
+  document.getElementById("attachment");
 
 const attachmentImage =
-document.getElementById("attachmentImage");
+  document.getElementById("attachmentImage");
 
 const sendBtn =
-document.getElementById("sendBtn");
+  document.getElementById("sendBtn");
 
 const imageTool =
-document.getElementById("imageTool");
+  document.getElementById("imageTool");
+
+const photoTool =
+  document.getElementById("photoTool");
+
+const exampleTool =
+  document.getElementById("exampleTool");
+
+const attachBtn =
+  document.getElementById("attachBtn");
+
+const removePhotoBtn =
+  document.getElementById("removePhotoBtn");
 
 const status =
-document.getElementById("status");
+  document.getElementById("status");
+
+const menuBtn =
+  document.getElementById("menuBtn");
 
 const historyDrawer =
-document.getElementById("historyDrawer");
+  document.getElementById("historyDrawer");
+
+const closeHistoryBtn =
+  document.getElementById("closeHistoryBtn");
 
 const overlay =
-document.getElementById("overlay");
+  document.getElementById("overlay");
 
 const historyList =
-document.getElementById("historyList");
+  document.getElementById("historyList");
+
+const deleteAllBtn =
+  document.getElementById("deleteAllBtn");
+
+
+/* =========================
+   SAFETY CHECK
+========================= */
+
+console.log("Aaru AI frontend loaded");
+
+
+if(
+  !chat ||
+  !promptInput ||
+  !imageInput ||
+  !sendBtn
+){
+
+  console.error(
+    "Aaru AI: Required elements missing."
+  );
+
+}
 
 
 /* =========================
@@ -844,18 +894,18 @@ document.getElementById("historyList");
 ========================= */
 
 promptInput.addEventListener(
-"input",
-function(){
+  "input",
+  function(){
 
-this.style.height = "42px";
+    this.style.height = "42px";
 
-this.style.height =
-Math.min(
-this.scrollHeight,
-150
-) + "px";
+    this.style.height =
+      Math.min(
+        this.scrollHeight,
+        150
+      ) + "px";
 
-}
+  }
 );
 
 
@@ -864,21 +914,91 @@ this.scrollHeight,
 ========================= */
 
 promptInput.addEventListener(
-"keydown",
-function(e){
+  "keydown",
+  function(e){
 
-if(
-e.key === "Enter" &&
-!e.shiftKey
-){
+    if(
+      e.key === "Enter" &&
+      !e.shiftKey
+    ){
 
-e.preventDefault();
+      e.preventDefault();
 
-sendMessage();
+      sendMessage();
 
-}
+    }
 
-}
+  }
+);
+
+
+/* =========================
+   BUTTON EVENTS
+========================= */
+
+menuBtn.addEventListener(
+  "click",
+  openHistory
+);
+
+
+closeHistoryBtn.addEventListener(
+  "click",
+  closeHistory
+);
+
+
+overlay.addEventListener(
+  "click",
+  closeHistory
+);
+
+
+deleteAllBtn.addEventListener(
+  "click",
+  deleteAllHistory
+);
+
+
+attachBtn.addEventListener(
+  "click",
+  openPhotoPicker
+);
+
+
+photoTool.addEventListener(
+  "click",
+  openPhotoPicker
+);
+
+
+removePhotoBtn.addEventListener(
+  "click",
+  removePhoto
+);
+
+
+imageTool.addEventListener(
+  "click",
+  toggleImageMode
+);
+
+
+exampleTool.addEventListener(
+  "click",
+  insertExample
+);
+
+
+sendBtn.addEventListener(
+  "click",
+  sendMessage
+);
+
+
+imageInput.addEventListener(
+  "change",
+  handlePhotoSelect
 );
 
 
@@ -888,7 +1008,11 @@ sendMessage();
 
 function openPhotoPicker(){
 
-imageInput.click();
+  if(busy){
+    return;
+  }
+
+  imageInput.click();
 
 }
 
@@ -897,70 +1021,75 @@ imageInput.click();
    PHOTO SELECT
 ========================= */
 
-imageInput.addEventListener(
-"change",
-async function(){
+async function handlePhotoSelect(){
 
-const file =
-imageInput.files[0];
+  const file =
+    imageInput.files[0];
 
-if(!file){
-return;
+  if(!file){
+    return;
+  }
+
+  if(
+    !file.type ||
+    !file.type.startsWith("image/")
+  ){
+
+    alert(
+      "कृपया image file चुनें।"
+    );
+
+    imageInput.value = "";
+
+    return;
+
+  }
+
+  try{
+
+    setStatus(
+      "🔄 Photo तैयार हो रही है..."
+    );
+
+    selectedImageDataUrl =
+      await preparePhoto(file);
+
+    attachmentImage.src =
+      selectedImageDataUrl;
+
+    attachment.style.display =
+      "block";
+
+    imageMode = true;
+
+    imageTool.classList.add(
+      "active"
+    );
+
+    promptInput.placeholder =
+      "इस photo के साथ क्या करना है?";
+
+    setStatus("");
+
+  }catch(error){
+
+    console.error(
+      "Photo preparation error:",
+      error
+    );
+
+    selectedImageDataUrl = "";
+
+    attachment.style.display =
+      "none";
+
+    setStatus(
+      "❌ Photo तैयार नहीं हो सकी।"
+    );
+
+  }
+
 }
-
-if(
-!file.type.startsWith("image/")
-){
-
-alert("कृपया image file चुनें।");
-
-imageInput.value = "";
-
-return;
-
-}
-
-try{
-
-setStatus(
-"🔄 Photo तैयार हो रही है..."
-);
-
-selectedImageDataUrl =
-await preparePhoto(file);
-
-attachmentImage.src =
-selectedImageDataUrl;
-
-attachment.style.display =
-"block";
-
-/*
- * Photo attached =
- * automatically image mode.
- */
-
-imageMode = true;
-
-imageTool.classList.add("active");
-
-promptInput.placeholder =
-"इस photo के साथ क्या करना है?";
-
-setStatus("");
-
-}catch(error){
-
-console.error(error);
-
-setStatus(
-"❌ Photo तैयार नहीं हो सकी।"
-);
-
-}
-
-}
-);
 
 
 /* =========================
@@ -969,223 +1098,234 @@ setStatus(
 
 function preparePhoto(file){
 
-return new Promise(
-function(resolve,reject){
+  return new Promise(
+    function(resolve,reject){
 
-const reader =
-new FileReader();
+      const reader =
+        new FileReader();
 
-reader.onerror =
-function(){
+      reader.onerror =
+        function(){
 
-reject(
-new Error(
-"Photo read failed."
-)
-);
+          reject(
+            new Error(
+              "Photo read failed."
+            )
+          );
 
-};
-
-reader.onload =
-function(){
-
-const img =
-new Image();
-
-img.onerror =
-function(){
-
-reject(
-new Error(
-"Photo load failed."
-)
-);
-
-};
-
-img.onload =
-function(){
-
-const MAX = 768;
-
-let width =
-img.naturalWidth;
-
-let height =
-img.naturalHeight;
+        };
 
 
-const scale =
-Math.min(
-1,
-MAX /
-Math.max(
-width,
-height
-)
-);
+      reader.onload =
+        function(){
+
+          const img =
+            new Image();
+
+          img.onerror =
+            function(){
+
+              reject(
+                new Error(
+                  "Photo load failed."
+                )
+              );
+
+            };
 
 
-width =
-Math.max(
-1,
-Math.round(
-width * scale
-)
-);
+          img.onload =
+            function(){
+
+              let maxSize = 768;
+
+              let width =
+                img.naturalWidth;
+
+              let height =
+                img.naturalHeight;
 
 
-height =
-Math.max(
-1,
-Math.round(
-height * scale
-)
-);
+              const scale =
+                Math.min(
+                  1,
+                  maxSize /
+                  Math.max(
+                    width,
+                    height
+                  )
+                );
 
 
-const canvas =
-document.createElement("canvas");
+              width =
+                Math.max(
+                  1,
+                  Math.round(
+                    width * scale
+                  )
+                );
 
-canvas.width =
-width;
 
-canvas.height =
-height;
+              height =
+                Math.max(
+                  1,
+                  Math.round(
+                    height * scale
+                  )
+                );
 
 
-const ctx =
-canvas.getContext(
-"2d",
-{
-alpha:false
+              const canvas =
+                document.createElement(
+                  "canvas"
+                );
+
+
+              canvas.width =
+                width;
+
+              canvas.height =
+                height;
+
+
+              const ctx =
+                canvas.getContext(
+                  "2d",
+                  {
+                    alpha:false
+                  }
+                );
+
+
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                width,
+                height
+              );
+
+
+              let quality = 0.68;
+
+              let data =
+                canvas.toDataURL(
+                  "image/jpeg",
+                  quality
+                );
+
+
+              /*
+               * Keep base64 request small.
+               */
+
+              while(
+                data.length > 600000 &&
+                quality > 0.30
+              ){
+
+                quality -= 0.05;
+
+                data =
+                  canvas.toDataURL(
+                    "image/jpeg",
+                    quality
+                  );
+
+              }
+
+
+              /*
+               * Final fallback.
+               */
+
+              if(
+                data.length > 600000
+              ){
+
+                const max2 = 512;
+
+                const scale2 =
+                  Math.min(
+                    1,
+                    max2 /
+                    Math.max(
+                      img.naturalWidth,
+                      img.naturalHeight
+                    )
+                  );
+
+
+                const canvas2 =
+                  document.createElement(
+                    "canvas"
+                  );
+
+
+                canvas2.width =
+                  Math.max(
+                    1,
+                    Math.round(
+                      img.naturalWidth *
+                      scale2
+                    )
+                  );
+
+
+                canvas2.height =
+                  Math.max(
+                    1,
+                    Math.round(
+                      img.naturalHeight *
+                      scale2
+                    )
+                  );
+
+
+                const ctx2 =
+                  canvas2.getContext(
+                    "2d",
+                    {
+                      alpha:false
+                    }
+                  );
+
+
+                ctx2.drawImage(
+                  img,
+                  0,
+                  0,
+                  canvas2.width,
+                  canvas2.height
+                );
+
+
+                data =
+                  canvas2.toDataURL(
+                    "image/jpeg",
+                    0.42
+                  );
+
+              }
+
+
+              resolve(data);
+
+            };
+
+
+          img.src =
+            reader.result;
+
+        };
+
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
 }
-);
-
-
-ctx.drawImage(
-img,
-0,
-0,
-width,
-height
-);
-
-
-let quality = .68;
-
-let data =
-canvas.toDataURL(
-"image/jpeg",
-quality
-);
-
-
-/*
- * Keep request small.
- */
-
-while(
-data.length > 620000 &&
-quality > .35
-){
-
-quality -= .06;
-
-data =
-canvas.toDataURL(
-"image/jpeg",
-quality
-);
-
-}
-
-
-/*
- * Last fallback: 512px.
- */
-
-if(
-data.length > 620000
-){
-
-const max2 = 512;
-
-const scale2 =
-Math.min(
-1,
-max2 /
-Math.max(
-img.naturalWidth,
-img.naturalHeight
-)
-);
-
-
-const canvas2 =
-document.createElement("canvas");
-
-
-canvas2.width =
-Math.max(
-1,
-Math.round(
-img.naturalWidth *
-scale2
-)
-);
-
-
-canvas2.height =
-Math.max(
-1,
-Math.round(
-img.naturalHeight *
-scale2
-)
-);
-
-
-const ctx2 =
-canvas2.getContext(
-"2d",
-{
-alpha:false
-}
-);
-
-
-ctx2.drawImage(
-img,
-0,
-0,
-canvas2.width,
-canvas2.height
-);
-
-
-data =
-canvas2.toDataURL(
-"image/jpeg",
-.45
-);
-
-}
-
-
-resolve(data);
-
-};
-
-img.src =
-reader.result;
-
-};
-
-reader.readAsDataURL(file);
-
-}
-);
 
 
 /* =========================
@@ -1194,23 +1334,25 @@ reader.readAsDataURL(file);
 
 function removePhoto(){
 
-selectedImageDataUrl = "";
+  selectedImageDataUrl = "";
 
-imageInput.value = "";
+  imageInput.value = "";
 
-attachment.style.display =
-"none";
+  attachment.style.display =
+    "none";
 
-attachmentImage.src = "";
+  attachmentImage.src = "";
 
-imageMode = false;
+  imageMode = false;
 
-imageTool.classList.remove(
-"active"
-);
+  imageTool.classList.remove(
+    "active"
+  );
 
-promptInput.placeholder =
-"Message Aaru AI...";
+  promptInput.placeholder =
+    "Message Aaru AI...";
+
+  setStatus("");
 
 }
 
@@ -1221,28 +1363,33 @@ promptInput.placeholder =
 
 function toggleImageMode(){
 
-imageMode =
-!imageMode;
+  if(busy){
+    return;
+  }
 
-if(imageMode){
+  imageMode =
+    !imageMode;
 
-imageTool.classList.add(
-"active"
-);
 
-promptInput.placeholder =
-"Image में क्या बनाना चाहते हैं?";
+  if(imageMode){
 
-}else{
+    imageTool.classList.add(
+      "active"
+    );
 
-imageTool.classList.remove(
-"active"
-);
+    promptInput.placeholder =
+      "Image में क्या बनाना चाहते हैं?";
 
-promptInput.placeholder =
-"Message Aaru AI...";
+  }else{
 
-}
+    imageTool.classList.remove(
+      "active"
+    );
+
+    promptInput.placeholder =
+      "Message Aaru AI...";
+
+  }
 
 }
 
@@ -1253,18 +1400,26 @@ promptInput.placeholder =
 
 function insertExample(){
 
-imageMode = true;
+  if(busy){
+    return;
+  }
 
-imageTool.classList.add("active");
+  imageMode = true;
 
-promptInput.value =
-"एक भारतीय गाँव का photorealistic दृश्य, सुबह की सुनहरी रोशनी, खेत और दूर पहाड़";
+  imageTool.classList.add(
+    "active"
+  );
 
-promptInput.dispatchEvent(
-new Event("input")
-);
+  promptInput.value =
+    "एक भारतीय गाँव का photorealistic दृश्य, सुबह की सुनहरी रोशनी, खेत और दूर पहाड़";
 
-promptInput.focus();
+
+  promptInput.dispatchEvent(
+    new Event("input")
+  );
+
+
+  promptInput.focus();
 
 }
 
@@ -1275,110 +1430,130 @@ promptInput.focus();
 
 function isImageRequest(text){
 
-const t =
-text.toLowerCase();
+  const t =
+    String(text || "")
+      .toLowerCase();
 
-const words = [
 
-"create image",
-"generate image",
-"make image",
-"create a picture",
-"generate a picture",
-"make a picture",
-"draw a picture",
-"draw an image",
-"image generate",
-"image बनाओ",
-"image बना",
-"इमेज बनाओ",
-"इमेज बना",
-"फोटो बनाओ",
-"फोटो बना",
-"चित्र बनाओ",
-"चित्र बना",
-"तस्वीर बनाओ",
-"तस्वीर बना",
-"cinematic realistic",
-"cinematic photo",
-"photorealistic image",
-"realistic image"
+  const words = [
 
-];
+    "create image",
+    "generate image",
+    "make image",
+    "create a picture",
+    "generate a picture",
+    "make a picture",
+    "draw a picture",
+    "draw an image",
+    "image generate",
 
-return words.some(
-word =>
-t.includes(word)
-);
+    "image बनाओ",
+    "image बना",
+    "इमेज बनाओ",
+    "इमेज बना",
+    "फोटो बनाओ",
+    "फोटो बना",
+    "फोटो तैयार",
+    "चित्र बनाओ",
+    "चित्र बना",
+    "तस्वीर बनाओ",
+    "तस्वीर बना",
+
+    "cinematic realistic",
+    "cinematic photo",
+    "photorealistic image",
+    "realistic image",
+
+    "generate an image",
+    "create an image"
+
+  ];
+
+
+  return words.some(
+    function(word){
+
+      return t.includes(word);
+
+    }
+  );
 
 }
 
 
 /* =========================
-   SEND
+   SEND MESSAGE
 ========================= */
 
 async function sendMessage(){
 
-if(busy){
-return;
-}
-
-const text =
-promptInput.value.trim();
+  if(busy){
+    return;
+  }
 
 
-if(!text){
-
-alert(
-selectedImageDataUrl
-? "Photo के साथ क्या करना है, वह लिखें।"
-: "पहले अपना message लिखें।"
-);
-
-return;
-
-}
+  const text =
+    promptInput.value.trim();
 
 
-/*
- * IMPORTANT:
- *
- * Photo ALWAYS wins.
- *
- * Image button ALWAYS wins.
- */
+  if(!text){
 
-const shouldGenerate =
-!!selectedImageDataUrl ||
-imageMode ||
-isImageRequest(text);
+    if(selectedImageDataUrl){
+
+      alert(
+        "Photo के साथ क्या करना है, वह लिखें।"
+      );
+
+    }else{
+
+      alert(
+        "पहले अपना message लिखें।"
+      );
+
+    }
+
+    return;
+
+  }
 
 
-busy = true;
+  const shouldGenerate =
+    !!selectedImageDataUrl ||
+    imageMode ||
+    isImageRequest(text);
 
-sendBtn.disabled = true;
+
+  busy = true;
+
+  sendBtn.disabled = true;
 
 
-try{
+  try{
 
-if(shouldGenerate){
+    if(shouldGenerate){
 
-await generateImage(text);
+      await generateImage(text);
 
-}else{
+    }else{
 
-await sendChat(text);
+      await sendChat(text);
 
-}
+    }
 
-}finally{
+  }catch(error){
 
-busy = false;
+    console.error(
+      "Send error:",
+      error
+    );
 
-sendBtn.disabled = false;
+  }finally{
 
-}
+    busy = false;
+
+    sendBtn.disabled = false;
+
+  }
 
 }
 
@@ -1388,105 +1563,152 @@ sendBtn.disabled = false;
 ========================= */
 
 function addUserMessage(
-text,
-photo
+  text,
+  photo
 ){
 
-welcome.style.display =
-"none";
+  welcome.style.display =
+    "none";
 
 
-const message =
-document.createElement("div");
+  const message =
+    document.createElement(
+      "div"
+    );
 
-message.className =
-"message user";
-
-
-const inner =
-document.createElement("div");
-
-inner.className =
-"message-inner";
+  message.className =
+    "message user";
 
 
-if(photo){
+  const inner =
+    document.createElement(
+      "div"
+    );
 
-const photoBox =
-document.createElement("div");
-
-photoBox.className =
-"photo-user";
-
-
-const img =
-document.createElement("img");
-
-img.src = photo;
-
-photoBox.appendChild(img);
-
-inner.appendChild(photoBox);
-
-}
+  inner.className =
+    "message-inner";
 
 
-const bubble =
-document.createElement("div");
+  if(photo){
 
-bubble.className =
-"bubble";
+    const photoBox =
+      document.createElement(
+        "div"
+      );
 
-bubble.textContent =
-text;
+    photoBox.className =
+      "photo-user";
 
-inner.appendChild(bubble);
 
-message.appendChild(inner);
+    const img =
+      document.createElement(
+        "img"
+      );
 
-chat.appendChild(message);
+    img.src =
+      photo;
 
-scrollBottom();
+
+    photoBox.appendChild(
+      img
+    );
+
+
+    inner.appendChild(
+      photoBox
+    );
+
+  }
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.textContent =
+    text;
+
+
+  inner.appendChild(
+    bubble
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
 
 }
 
 
 /* =========================
-   ASSISTANT
+   ASSISTANT MESSAGE
 ========================= */
 
-function addAssistantMessage(text){
+function addAssistantMessage(
+  text
+){
 
-const message =
-document.createElement("div");
+  const message =
+    document.createElement(
+      "div"
+    );
 
-message.className =
-"message assistant";
-
-
-const inner =
-document.createElement("div");
-
-inner.className =
-"message-inner";
+  message.className =
+    "message assistant";
 
 
-const bubble =
-document.createElement("div");
+  const inner =
+    document.createElement(
+      "div"
+    );
 
-bubble.className =
-"bubble";
+  inner.className =
+    "message-inner";
 
-bubble.textContent =
-text;
 
-inner.appendChild(bubble);
+  const bubble =
+    document.createElement(
+      "div"
+    );
 
-message.appendChild(inner);
+  bubble.className =
+    "bubble";
 
-chat.appendChild(message);
 
-scrollBottom();
+  bubble.textContent =
+    text;
+
+
+  inner.appendChild(
+    bubble
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
 
 }
 
@@ -1497,138 +1719,174 @@ scrollBottom();
 
 function showTyping(){
 
-removeTyping();
+  removeTyping();
 
 
-const message =
-document.createElement("div");
+  const message =
+    document.createElement(
+      "div"
+    );
 
-message.id =
-"typingMessage";
+  message.id =
+    "typingMessage";
 
-message.className =
-"message assistant";
-
-
-const inner =
-document.createElement("div");
-
-inner.className =
-"message-inner";
+  message.className =
+    "message assistant";
 
 
-inner.innerHTML =
-`
-<div class="typing">
-<i></i>
-<i></i>
-<i></i>
-</div>
-`;
+  const inner =
+    document.createElement(
+      "div"
+    );
+
+  inner.className =
+    "message-inner";
 
 
-message.appendChild(inner);
+  inner.innerHTML =
+    '<div class="typing">' +
+    '<i></i><i></i><i></i>' +
+    '</div>';
 
-chat.appendChild(message);
 
-scrollBottom();
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
 
 }
 
 
 function removeTyping(){
 
-const item =
-document.getElementById(
-"typingMessage"
-);
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
 
-if(item){
-item.remove();
-}
+
+  if(item){
+
+    item.remove();
+
+  }
 
 }
 
 
 /* =========================
-   CHAT
+   CHAT API
 ========================= */
 
 async function sendChat(text){
 
-addUserMessage(text);
-
-promptInput.value = "";
-
-resetTextarea();
-
-showTyping();
-
-setStatus(
-"Aaru सोच रहा है..."
-);
+  addUserMessage(
+    text
+  );
 
 
-try{
+  promptInput.value = "";
 
-const response =
-await fetch(
-API_URL + "chat",
-{
-method:"POST",
-
-headers:{
-"Content-Type":
-"application/json"
-},
-
-body:JSON.stringify({
-message:text
-})
-
-}
-);
+  resetTextarea();
 
 
-const data =
-await response.json();
+  showTyping();
 
 
-if(!response.ok){
-
-throw new Error(
-data.error ||
-"Chat failed."
-);
-
-}
+  setStatus(
+    "Aaru सोच रहा है..."
+  );
 
 
-removeTyping();
+  try{
 
-addAssistantMessage(
-data.reply ||
-"मुझे अभी कोई response नहीं मिला।"
-);
+    const response =
+      await fetch(
+        API_URL + "chat",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+            message:text
+          })
+
+        }
+      );
 
 
-}catch(error){
+    let data = null;
 
-console.error(error);
 
-removeTyping();
+    try{
 
-addAssistantMessage(
-"❌ " +
-(
-error.message ||
-"Chat failed."
-)
-);
+      data =
+        await response.json();
 
-}
+    }catch(e){
 
-setStatus("");
+      data = null;
+
+    }
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data &&
+        data.error
+        ? data.error
+        : "Chat failed."
+      );
+
+    }
+
+
+    removeTyping();
+
+
+    addAssistantMessage(
+      data &&
+      data.reply
+      ? data.reply
+      : "मुझे अभी कोई response नहीं मिला।"
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Chat error:",
+      error
+    );
+
+
+    removeTyping();
+
+
+    addAssistantMessage(
+      "❌ " +
+      (
+        error.message ||
+        "Chat failed."
+      )
+    );
+
+  }
+
+
+  setStatus("");
 
 }
 
@@ -1639,211 +1897,240 @@ setStatus("");
 
 async function generateImage(text){
 
-const sourcePhoto =
-selectedImageDataUrl;
+  const sourcePhoto =
+    selectedImageDataUrl;
 
 
-addUserMessage(
-text,
-sourcePhoto
-);
+  addUserMessage(
+    text,
+    sourcePhoto
+  );
 
 
-promptInput.value = "";
+  promptInput.value = "";
 
-resetTextarea();
+  resetTextarea();
 
-showTyping();
 
+  showTyping();
 
-setStatus(
-sourcePhoto
-? "🔄 Photo को cinematic बनाया जा रहा है..."
-: "✨ आपकी image तैयार हो रही है..."
-);
 
+  setStatus(
+    sourcePhoto
+    ? "🔄 Photo को transform किया जा रहा है..."
+    : "✨ आपकी image तैयार हो रही है..."
+  );
 
-try{
 
-let response;
+  try{
 
+    let response;
 
-/* =====================
-   PHOTO
-===================== */
 
-if(sourcePhoto){
+    /* =====================
+       PHOTO TO IMAGE
+    ===================== */
 
-const base64 =
-cleanBase64(
-sourcePhoto
-);
+    if(sourcePhoto){
 
+      const base64 =
+        cleanBase64(
+          sourcePhoto
+        );
 
-if(!base64){
 
-throw new Error(
-"Photo data खाली है।"
-);
+      if(!base64){
 
-}
+        throw new Error(
+          "Photo data खाली है।"
+        );
 
+      }
 
-response =
-await fetch(
-API_URL,
-{
-method:"POST",
 
-headers:{
-"Content-Type":
-"application/json"
-},
+      if(base64.length > 650000){
 
-body:JSON.stringify({
+        throw new Error(
+          "Photo अभी भी बहुत बड़ी है। छोटी photo चुनें।"
+        );
 
-prompt:text,
+      }
 
-ratio:"1:1",
 
-quality:"hd",
+      response =
+        await fetch(
+          API_URL,
+          {
+            method:"POST",
 
-image_b64:base64,
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
 
-strength:.65
+            body:JSON.stringify({
 
-})
+              prompt:text,
 
-}
-);
+              ratio:"1:1",
 
-}
+              quality:"hd",
 
+              image_b64:base64,
 
-/* =====================
-   TEXT
-===================== */
+              strength:.65
 
-else{
+            })
 
-const params =
-new URLSearchParams();
+          }
+        );
 
-params.set(
-"prompt",
-text
-);
+    }
 
-params.set(
-"ratio",
-"1:1"
-);
 
-params.set(
-"quality",
-"hd"
-);
+    /* =====================
+       TEXT TO IMAGE
+    ===================== */
 
+    else{
 
-response =
-await fetch(
-API_URL +
-"?" +
-params.toString()
-);
+      const params =
+        new URLSearchParams();
 
-}
 
+      params.set(
+        "prompt",
+        text
+      );
 
-if(!response.ok){
 
-let message =
-"Image generation failed.";
+      params.set(
+        "ratio",
+        "1:1"
+      );
 
-try{
 
-const data =
-await response.json();
+      params.set(
+        "quality",
+        "hd"
+      );
 
-if(data.error){
 
-message =
-data.error;
+      response =
+        await fetch(
+          API_URL +
+          "?" +
+          params.toString()
+        );
 
-}
+    }
 
-}catch(e){}
 
-throw new Error(message);
+    /* =====================
+       RESPONSE
+    ===================== */
 
-}
+    if(!response.ok){
 
+      let message =
+        "Image generation failed.";
 
-const type =
-response.headers.get(
-"content-type"
-) || "";
 
+      try{
 
-if(
-!type.includes("image")
-){
+        const data =
+          await response.json();
 
-throw new Error(
-"Server ने valid image नहीं भेजी।"
-);
 
-}
+        if(
+          data &&
+          data.error
+        ){
 
+          message =
+            data.error;
 
-const blob =
-await response.blob();
+        }
 
+      }catch(e){}
 
-const url =
-URL.createObjectURL(blob);
 
+      throw new Error(
+        message
+      );
 
-removeTyping();
+    }
 
 
-addGeneratedImage(
-url,
-blob
-);
+    const type =
+      response.headers.get(
+        "content-type"
+      ) || "";
 
 
-removePhoto();
+    if(
+      !type.toLowerCase().includes(
+        "image"
+      )
+    ){
 
+      throw new Error(
+        "Server ने valid image नहीं भेजी।"
+      );
 
-setStatus(
-"✅ Image तैयार है!"
-);
+    }
 
 
-}catch(error){
+    const blob =
+      await response.blob();
 
-console.error(
-"Image generation error:",
-error
-);
 
+    const url =
+      URL.createObjectURL(
+        blob
+      );
 
-removeTyping();
 
+    removeTyping();
 
-addAssistantMessage(
-"❌ " +
-(
-error.message ||
-"Image generation failed."
-)
-);
 
+    addGeneratedImage(
+      url,
+      blob
+    );
 
-setStatus("");
 
-}
+    removePhoto();
+
+
+    setStatus(
+      "✅ Image तैयार है!"
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Image generation error:",
+      error
+    );
+
+
+    removeTyping();
+
+
+    addAssistantMessage(
+      "❌ " +
+      (
+        error.message ||
+        "Image generation failed."
+      )
+    );
+
+
+    setStatus("");
+
+  }
 
 }
 
@@ -1853,99 +2140,148 @@ setStatus("");
 ========================= */
 
 function addGeneratedImage(
-url,
-blob
+  url,
+  blob
 ){
 
-const message =
-document.createElement("div");
+  const message =
+    document.createElement(
+      "div"
+    );
 
-message.className =
-"message assistant";
-
-
-const inner =
-document.createElement("div");
-
-inner.className =
-"message-inner";
+  message.className =
+    "message assistant";
 
 
-const generated =
-document.createElement("div");
+  const inner =
+    document.createElement(
+      "div"
+    );
 
-generated.className =
-"generated";
-
-
-const img =
-document.createElement("img");
-
-img.src = url;
+  inner.className =
+    "message-inner";
 
 
-const actions =
-document.createElement("div");
+  const generated =
+    document.createElement(
+      "div"
+    );
 
-actions.className =
-"image-actions";
-
-
-const download =
-document.createElement("a");
-
-download.href = url;
-
-download.download =
-"aaru-ai-" +
-Date.now() +
-".png";
-
-download.textContent =
-"⬇️ Download";
+  generated.className =
+    "generated";
 
 
-const another =
-document.createElement("button");
+  const img =
+    document.createElement(
+      "img"
+    );
 
-another.type =
-"button";
-
-another.textContent =
-"🎨 Create another";
-
-another.onclick =
-function(){
-
-imageMode = true;
-
-imageTool.classList.add(
-"active"
-);
-
-promptInput.focus();
-
-};
+  img.src =
+    url;
 
 
-actions.appendChild(download);
+  const actions =
+    document.createElement(
+      "div"
+    );
 
-actions.appendChild(another);
-
-generated.appendChild(img);
-
-generated.appendChild(actions);
-
-inner.appendChild(generated);
-
-message.appendChild(inner);
-
-chat.appendChild(message);
+  actions.className =
+    "image-actions";
 
 
-saveHistory(blob);
+  const download =
+    document.createElement(
+      "a"
+    );
 
-scrollBottom();
+  download.href =
+    url;
+
+
+  download.download =
+    "aaru-ai-" +
+    Date.now() +
+    ".png";
+
+
+  download.textContent =
+    "⬇️ Download";
+
+
+  const another =
+    document.createElement(
+      "button"
+    );
+
+
+  another.type =
+    "button";
+
+
+  another.textContent =
+    "🎨 Create another";
+
+
+  another.addEventListener(
+    "click",
+    function(){
+
+      imageMode = true;
+
+      imageTool.classList.add(
+        "active"
+      );
+
+      promptInput.placeholder =
+        "Image में क्या बनाना चाहते हैं?";
+
+      promptInput.focus();
+
+    }
+  );
+
+
+  actions.appendChild(
+    download
+  );
+
+
+  actions.appendChild(
+    another
+  );
+
+
+  generated.appendChild(
+    img
+  );
+
+
+  generated.appendChild(
+    actions
+  );
+
+
+  inner.appendChild(
+    generated
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  saveHistory(
+    blob
+  );
+
+
+  scrollBottom();
 
 }
 
@@ -1954,101 +2290,113 @@ scrollBottom();
    BASE64
 ========================= */
 
-function cleanBase64(value){
-
-if(!value){
-return "";
-}
-
-if(
-value.startsWith("data:")
+function cleanBase64(
+  value
 ){
 
-const comma =
-value.indexOf(",");
+  if(!value){
+    return "";
+  }
 
-if(comma >= 0){
 
-value =
-value.substring(
-comma + 1
-);
+  if(
+    value.startsWith("data:")
+  ){
 
-}
+    const comma =
+      value.indexOf(",");
 
-}
 
-return value.replace(
-/\s/g,
-""
-);
+    if(comma >= 0){
+
+      value =
+        value.substring(
+          comma + 1
+        );
+
+    }
+
+  }
+
+
+  return value.replace(
+    /\s/g,
+    ""
+  );
 
 }
 
 
 /* =========================
-   HISTORY
+   HISTORY SAVE
 ========================= */
 
-function saveHistory(blob){
+function saveHistory(
+  blob
+){
 
-const reader =
-new FileReader();
-
-
-reader.onloadend =
-async function(){
-
-try{
-
-const thumbnail =
-await makeThumbnail(
-reader.result
-);
+  const reader =
+    new FileReader();
 
 
-let history =
-JSON.parse(
-localStorage.getItem(
-"aaru_history"
-) || "[]"
-);
+  reader.onloadend =
+    async function(){
+
+      try{
+
+        const thumbnail =
+          await makeThumbnail(
+            reader.result
+          );
 
 
-history.unshift({
-id:Date.now(),
-image:thumbnail
-});
+        let history =
+          JSON.parse(
+            localStorage.getItem(
+              "aaru_history"
+            ) || "[]"
+          );
 
 
-history =
-history.slice(
-0,
-20
-);
+        history.unshift({
+          id:Date.now(),
+          image:thumbnail
+        });
 
 
-localStorage.setItem(
-"aaru_history",
-JSON.stringify(history)
-);
+        history =
+          history.slice(
+            0,
+            20
+          );
 
 
-loadHistory();
-
-}catch(error){
-
-console.log(
-"History save failed",
-error
-);
-
-}
-
-};
+        localStorage.setItem(
+          "aaru_history",
+          JSON.stringify(
+            history
+          )
+        );
 
 
-reader.readAsDataURL(blob);
+        loadHistory();
+
+
+      }catch(error){
+
+        console.log(
+          "History save failed:",
+          error
+        );
+
+      }
+
+    };
+
+
+  reader.readAsDataURL(
+    blob
+  );
 
 }
 
@@ -2058,91 +2406,93 @@ reader.readAsDataURL(blob);
 ========================= */
 
 function makeThumbnail(
-dataUrl
+  dataUrl
 ){
 
-return new Promise(
-function(resolve){
+  return new Promise(
+    function(resolve){
 
-const img =
-new Image();
-
-
-img.onload =
-function(){
-
-const max =
-500;
+      const img =
+        new Image();
 
 
-let width =
-img.width;
+      img.onload =
+        function(){
 
-let height =
-img.height;
-
-
-if(width > max){
-
-const scale =
-max / width;
-
-width =
-Math.round(
-width * scale
-);
-
-height =
-Math.round(
-height * scale
-);
-
-}
+          const max =
+            500;
 
 
-const canvas =
-document.createElement(
-"canvas"
-);
+          let width =
+            img.width;
+
+          let height =
+            img.height;
 
 
-canvas.width =
-width;
+          if(width > max){
 
-canvas.height =
-height;
-
-
-const ctx =
-canvas.getContext(
-"2d"
-);
+            const scale =
+              max / width;
 
 
-ctx.drawImage(
-img,
-0,
-0,
-width,
-height
-);
+            width =
+              Math.round(
+                width * scale
+              );
 
 
-resolve(
-canvas.toDataURL(
-"image/jpeg",
-.65
-)
-);
+            height =
+              Math.round(
+                height * scale
+              );
 
-};
+          }
 
 
-img.src =
-dataUrl;
+          const canvas =
+            document.createElement(
+              "canvas"
+            );
 
-}
-);
+
+          canvas.width =
+            width;
+
+          canvas.height =
+            height;
+
+
+          const ctx =
+            canvas.getContext(
+              "2d"
+            );
+
+
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            width,
+            height
+          );
+
+
+          resolve(
+            canvas.toDataURL(
+              "image/jpeg",
+              .65
+            )
+          );
+
+        };
+
+
+      img.src =
+        dataUrl;
+
+    }
+  );
 
 }
 
@@ -2153,136 +2503,163 @@ dataUrl;
 
 function loadHistory(){
 
-let history = [];
+  let history = [];
 
 
-try{
+  try{
 
-history =
-JSON.parse(
-localStorage.getItem(
-"aaru_history"
-) || "[]"
-);
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "aaru_history"
+        ) || "[]"
+      );
 
-}catch(e){
+  }catch(e){
 
-history = [];
+    history = [];
 
-}
-
-
-historyList.innerHTML = "";
+  }
 
 
-if(!history.length){
-
-historyList.innerHTML =
-`
-<div class="history-empty">
-अभी कोई creation नहीं है
-</div>
-`;
-
-return;
-
-}
+  historyList.innerHTML =
+    "";
 
 
-history.forEach(
-function(item,index){
+  if(!history.length){
 
-/*
- * Backward compatibility:
- * old history may be plain strings.
- */
+    historyList.innerHTML =
+      '<div class="history-empty">' +
+      'अभी कोई creation नहीं है' +
+      '</div>';
 
-const image =
-typeof item === "string"
-? item
-: item.image;
+    return;
+
+  }
 
 
-const id =
-typeof item === "string"
-? index
-: item.id;
+  history.forEach(
+    function(item,index){
+
+      const image =
+        typeof item === "string"
+        ? item
+        : item.image;
 
 
-const card =
-document.createElement("div");
-
-card.className =
-"history-card";
-
-
-const img =
-document.createElement("img");
-
-img.src =
-image;
-
-img.loading =
-"lazy";
+      const id =
+        typeof item === "string"
+        ? index
+        : item.id;
 
 
-img.onclick =
-function(){
-
-closeHistory();
-
-showHistoryImage(
-image
-);
-
-};
+      const card =
+        document.createElement(
+          "div"
+        );
 
 
-const info =
-document.createElement("div");
-
-info.className =
-"history-card-info";
-
-info.textContent =
-"Creation " +
-(index + 1);
+      card.className =
+        "history-card";
 
 
-const del =
-document.createElement("button");
-
-del.className =
-"history-delete";
-
-del.type =
-"button";
-
-del.textContent =
-"🗑";
+      const img =
+        document.createElement(
+          "img"
+        );
 
 
-del.onclick =
-function(e){
-
-e.stopPropagation();
-
-deleteHistoryItem(id,index);
-
-};
+      img.src =
+        image;
 
 
-card.appendChild(img);
+      img.loading =
+        "lazy";
 
-card.appendChild(info);
 
-card.appendChild(del);
+      img.addEventListener(
+        "click",
+        function(){
 
-historyList.appendChild(card);
+          closeHistory();
 
-}
+          showHistoryImage(
+            image
+          );
 
-);
+        }
+      );
+
+
+      const info =
+        document.createElement(
+          "div"
+        );
+
+
+      info.className =
+        "history-card-info";
+
+
+      info.textContent =
+        "Creation " +
+        (index + 1);
+
+
+      const del =
+        document.createElement(
+          "button"
+        );
+
+
+      del.className =
+        "history-delete";
+
+
+      del.type =
+        "button";
+
+
+      del.textContent =
+        "🗑";
+
+
+      del.addEventListener(
+        "click",
+        function(e){
+
+          e.stopPropagation();
+
+          deleteHistoryItem(
+            id,
+            index
+          );
+
+        }
+      );
+
+
+      card.appendChild(
+        img
+      );
+
+
+      card.appendChild(
+        info
+      );
+
+
+      card.appendChild(
+        del
+      );
+
+
+      historyList.appendChild(
+        card
+      );
+
+    }
+  );
 
 }
 
@@ -2292,73 +2669,108 @@ historyList.appendChild(card);
 ========================= */
 
 function showHistoryImage(
-image
+  image
 ){
 
-const message =
-document.createElement("div");
-
-message.className =
-"message assistant";
-
-
-const inner =
-document.createElement("div");
-
-inner.className =
-"message-inner";
+  const message =
+    document.createElement(
+      "div"
+    );
 
 
-const generated =
-document.createElement("div");
-
-generated.className =
-"generated";
+  message.className =
+    "message assistant";
 
 
-const img =
-document.createElement("img");
-
-img.src =
-image;
-
-
-const actions =
-document.createElement("div");
-
-actions.className =
-"image-actions";
+  const inner =
+    document.createElement(
+      "div"
+    );
 
 
-const download =
-document.createElement("a");
-
-download.href =
-image;
-
-download.download =
-"aaru-history.jpg";
-
-download.textContent =
-"⬇️ Download";
+  inner.className =
+    "message-inner";
 
 
-actions.appendChild(
-download
-);
+  const generated =
+    document.createElement(
+      "div"
+    );
 
 
-generated.appendChild(img);
+  generated.className =
+    "generated";
 
-generated.appendChild(actions);
 
-inner.appendChild(generated);
+  const img =
+    document.createElement(
+      "img"
+    );
 
-message.appendChild(inner);
 
-chat.appendChild(message);
+  img.src =
+    image;
 
-scrollBottom();
+
+  const actions =
+    document.createElement(
+      "div"
+    );
+
+
+  actions.className =
+    "image-actions";
+
+
+  const download =
+    document.createElement(
+      "a"
+    );
+
+
+  download.href =
+    image;
+
+
+  download.download =
+    "aaru-history.jpg";
+
+
+  download.textContent =
+    "⬇️ Download";
+
+
+  actions.appendChild(
+    download
+  );
+
+
+  generated.appendChild(
+    img
+  );
+
+
+  generated.appendChild(
+    actions
+  );
+
+
+  inner.appendChild(
+    generated
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
 
 }
 
@@ -2368,46 +2780,62 @@ scrollBottom();
 ========================= */
 
 function deleteHistoryItem(
-id,
-index
+  id,
+  index
 ){
 
-let history =
-JSON.parse(
-localStorage.getItem(
-"aaru_history"
-) || "[]"
-);
+  let history = [];
 
 
-if(
-typeof history[index] === "object" &&
-history[index] !== null
-){
+  try{
 
-history =
-history.filter(
-item =>
-item.id !== id
-);
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "aaru_history"
+        ) || "[]"
+      );
 
-}else{
+  }catch(e){
 
-history.splice(
-index,
-1
-);
+    history = [];
 
-}
+  }
 
 
-localStorage.setItem(
-"aaru_history",
-JSON.stringify(history)
-);
+  if(
+    typeof history[index] === "object" &&
+    history[index] !== null
+  ){
+
+    history =
+      history.filter(
+        function(item){
+
+          return item.id !== id;
+
+        }
+      );
+
+  }else{
+
+    history.splice(
+      index,
+      1
+    );
+
+  }
 
 
-loadHistory();
+  localStorage.setItem(
+    "aaru_history",
+    JSON.stringify(
+      history
+    )
+  );
+
+
+  loadHistory();
 
 }
 
@@ -2418,96 +2846,85 @@ loadHistory();
 
 function deleteAllHistory(){
 
-const history =
-localStorage.getItem(
-"aaru_history"
-);
+  const history =
+    localStorage.getItem(
+      "aaru_history"
+    );
 
 
-if(!history){
-return;
-}
+  if(!history){
+    return;
+  }
 
 
-if(
-!confirm(
-"क्या Recent Creations की सभी images delete करनी हैं?"
-)
-){
+  if(
+    !confirm(
+      "क्या Recent Creations की सभी images delete करनी हैं?"
+    )
+  ){
 
-return;
+    return;
 
-}
-
-
-localStorage.removeItem(
-"aaru_history"
-);
+  }
 
 
-loadHistory();
+  localStorage.removeItem(
+    "aaru_history"
+  );
+
+
+  loadHistory();
 
 }
 
 
 /* =========================
-   HISTORY DRAWER
+   HISTORY OPEN
 ========================= */
 
 function openHistory(){
 
-loadHistory();
+  loadHistory();
 
-historyDrawer.classList.add(
-"show"
-);
 
-overlay.classList.add(
-"show"
-);
+  historyDrawer.classList.add(
+    "show"
+  );
+
+
+  overlay.classList.add(
+    "show"
+  );
 
 }
 
+
+/* =========================
+   HISTORY CLOSE
+========================= */
 
 function closeHistory(){
 
-historyDrawer.classList.remove(
-"show"
-);
-
-overlay.classList.remove(
-"show"
-);
-
-}
+  historyDrawer.classList.remove(
+    "show"
+  );
 
 
-/* =========================
-   CLEAR CURRENT CHAT
-========================= */
-
-function clearCurrentChat(){
-
-chat.innerHTML = "";
-
-chat.appendChild(
-welcome
-);
-
-welcome.style.display =
-"flex";
+  overlay.classList.remove(
+    "show"
+  );
 
 }
 
 
 /* =========================
-   RESET
+   RESET TEXTAREA
 ========================= */
 
 function resetTextarea(){
 
-promptInput.style.height =
-"42px";
+  promptInput.style.height =
+    "42px";
 
 }
 
@@ -2516,10 +2933,12 @@ promptInput.style.height =
    STATUS
 ========================= */
 
-function setStatus(text){
+function setStatus(
+  text
+){
 
-status.textContent =
-text || "";
+  status.textContent =
+    text || "";
 
 }
 
@@ -2530,20 +2949,19 @@ text || "";
 
 function scrollBottom(){
 
-setTimeout(
-function(){
+  setTimeout(
+    function(){
 
-window.scrollTo(
-{
-top:
-document.body.scrollHeight,
-behavior:"smooth"
-}
-);
+      window.scrollTo({
+        top:
+          document.body.scrollHeight,
+        behavior:
+          "smooth"
+      });
 
-},
-60
-);
+    },
+    60
+  );
 
 }
 
@@ -2553,6 +2971,10 @@ behavior:"smooth"
 ========================= */
 
 loadHistory();
+
+console.log(
+  "Aaru AI ready."
+);
 
 </script>
 
