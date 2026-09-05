@@ -2,12 +2,12 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
 <title>Aaru AI</title>
 
 <style>
-
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -37,72 +37,15 @@ body{
 }
 
 button,
-textarea,
-input{
+input,
+textarea{
   font:inherit;
 }
 
 button{
-  cursor:pointer;
+  -webkit-user-select:none;
+  user-select:none;
 }
-
-#app{
-  width:100%;
-  min-height:100dvh;
-  display:flex;
-  flex-direction:column;
-}
-
-header{
-  height:58px;
-  min-height:58px;
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  background:#11141b;
-}
-
-.menu-btn{
-  width:40px;
-  height:40px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:#fff;
-  font-size:23px;
-}
-
-.menu-btn:hover{
-  background:rgba(255,255,255,.07);
-}
-
-.logo{
-  margin-left:8px;
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:.2px;
-}
-
-.online{
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  opacity:.75;
-}
-
-.online-dot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#35d07f;
-}
-
-/* =========================================================
-   DOCUMENT SCROLL
-========================================================= */
 
 main{
   position:relative;
@@ -112,235 +55,176 @@ main{
   scroll-behavior:smooth;
 }
 
-#chat{
-  width:100%;
-  max-width:900px;
-  margin:0 auto;
-  padding:22px 15px 150px;
-}
-
-#welcome{
-  min-height:55vh;
+.app{
+  min-height:100dvh;
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:25px;
 }
 
-.welcome-logo{
-  font-size:38px;
-  font-weight:900;
-  margin-bottom:10px;
-}
+/* =========================
+   HEADER
+========================= */
 
-.welcome-text{
-  font-size:15px;
-  opacity:.6;
-  max-width:500px;
-  line-height:1.6;
-}
-
-.message{
+.header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:58px;
   display:flex;
-  width:100%;
-  margin:10px 0;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  background:rgba(15,17,23,.96);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(14px);
 }
 
-.message.user{
-  justify-content:flex-end;
-}
-
-.message.assistant{
-  justify-content:flex-start;
-}
-
-.bubble{
-  max-width:min(85%,720px);
-  padding:11px 14px;
-  border-radius:17px;
-  font-size:15px;
-  line-height:1.55;
-  word-break:break-word;
-}
-
-.user .bubble{
-  background:#2563eb;
+.menu-btn{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
   color:#fff;
-  border-bottom-right-radius:5px;
-  white-space:pre-wrap;
-}
-
-.assistant .bubble{
-  background:#191d26;
-  color:#f3f4f6;
-  border:1px solid rgba(255,255,255,.06);
-  border-bottom-left-radius:5px;
-  white-space:normal;
-}
-
-.assistant .bubble p{
-  margin:0 0 10px;
-}
-
-.assistant .bubble p:last-child{
-  margin-bottom:0;
-}
-
-.assistant .bubble h1,
-.assistant .bubble h2,
-.assistant .bubble h3{
-  margin:8px 0 10px;
-  line-height:1.35;
-}
-
-.assistant .bubble h1{
   font-size:22px;
+  cursor:pointer;
 }
 
-.assistant .bubble h2{
-  font-size:19px;
+.brand{
+  min-width:0;
+  flex:1;
 }
 
-.assistant .bubble h3{
-  font-size:17px;
-}
-
-.assistant .bubble ul,
-.assistant .bubble ol{
-  margin:7px 0 11px;
-  padding-left:23px;
-}
-
-.assistant .bubble li{
-  margin:4px 0;
-}
-
-.assistant .bubble strong{
+.brand-name{
+  font-size:18px;
   font-weight:800;
+  letter-spacing:.2px;
 }
 
-.assistant .bubble em{
-  font-style:italic;
+.brand-sub{
+  margin-top:1px;
+  font-size:10px;
+  opacity:.45;
 }
 
-.assistant .bubble a{
-  color:#60a5fa;
-  text-decoration:underline;
-  word-break:break-all;
+.new-chat-top{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:21px;
+  cursor:pointer;
 }
 
-.assistant .bubble code{
-  font-family:monospace;
-  font-size:.9em;
-  padding:2px 5px;
-  border-radius:5px;
-  background:rgba(255,255,255,.09);
-}
+/* =========================
+   DRAWER
+========================= */
 
-.assistant .bubble pre{
-  margin:10px 0;
-  padding:12px;
-  overflow-x:auto;
-  border-radius:10px;
-  background:#0b0d12;
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.assistant .bubble pre code{
-  padding:0;
-  background:none;
-}
-
-#overlay{
+.drawer-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.55);
-  z-index:90;
-  display:none;
+  z-index:200;
+  background:rgba(0,0,0,.58);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
 }
 
-#overlay.show{
-  display:block;
+.drawer-overlay.open{
+  opacity:1;
+  pointer-events:auto;
 }
 
-#drawer{
+.drawer{
   position:fixed;
+  z-index:210;
   top:0;
   left:0;
   bottom:0;
-  width:min(310px,85vw);
-  background:#11141b;
-  border-right:1px solid rgba(255,255,255,.08);
-  z-index:100;
+  width:min(88vw,340px);
+  background:#151821;
+  border-right:1px solid rgba(255,255,255,.07);
   transform:translateX(-105%);
-  transition:transform .25s ease;
+  transition:.22s ease;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
 
-#drawer.open{
+.drawer.open{
   transform:translateX(0);
 }
 
-.drawer-top{
-  padding:14px;
-  border-bottom:1px solid rgba(255,255,255,.08);
+.drawer-head{
+  height:58px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.drawer-title{
+  flex:1;
+  font-size:17px;
+  font-weight:800;
 }
 
 .close-drawer{
-  float:right;
-  width:36px;
-  height:36px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:#fff;
-  font-size:22px;
-}
-
-.close-drawer:hover{
-  background:rgba(255,255,255,.07);
-}
-
-.new-chat-btn{
-  width:100%;
-  margin-top:4px;
-  padding:11px 13px;
+  width:38px;
+  height:38px;
   border:0;
   border-radius:11px;
-  background:#2563eb;
+  background:rgba(255,255,255,.07);
   color:#fff;
-  font-weight:700;
+  font-size:21px;
 }
 
-.new-chat-btn:hover{
-  background:#1d4ed8;
-}
-
-.drawer-scroll{
+.drawer-body{
   flex:1;
   overflow-y:auto;
-  padding:8px 10px 20px;
-  -webkit-overflow-scrolling:touch;
+  padding:12px;
 }
 
-.history-section{
-  margin:4px 0 20px;
+.drawer-action{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:0;
+  color:#fff;
+  background:rgba(255,255,255,.055);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:8px;
+  text-align:left;
+  cursor:pointer;
 }
 
-.history-heading{
-  padding:8px 5px;
-  font-size:12px;
-  font-weight:800;
-  opacity:.55;
+.drawer-action:hover{
+  background:rgba(255,255,255,.09);
 }
 
-#chatHistory{
+.section-title{
+  margin:18px 4px 9px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  opacity:.4;
+}
+
+/* =========================
+   CHAT HISTORY
+========================= */
+
+.chat-history{
   display:flex;
   flex-direction:column;
-  gap:5px;
+  gap:4px;
 }
 
 .chat-history-item{
@@ -354,11 +238,11 @@ main{
 }
 
 .chat-history-item:hover{
-  background:rgba(255,255,255,.06);
+  background:rgba(255,255,255,.055);
 }
 
 .chat-history-item.active{
-  background:rgba(255,255,255,.09);
+  background:rgba(255,255,255,.085);
 }
 
 .chat-history-info{
@@ -381,90 +265,251 @@ main{
 }
 
 .delete-chat{
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   flex:none;
   border:0;
-  border-radius:7px;
+  border-radius:8px;
   background:transparent;
   color:#fff;
-  opacity:.3;
-  font-size:19px;
+  opacity:.48;
+  font-size:16px;
+  cursor:pointer;
 }
 
 .delete-chat:hover{
   opacity:1;
-  background:rgba(255,255,255,.08);
+  background:rgba(255,70,70,.13);
 }
 
-.chat-history-empty{
-  padding:8px 5px;
+.empty-history{
+  padding:15px 10px;
   font-size:12px;
   opacity:.4;
+  line-height:1.5;
 }
 
-#creations{
+/* =========================
+   CHAT AREA
+========================= */
+
+.chat-wrap{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:18px 12px 155px;
+}
+
+.messages{
   display:flex;
   flex-direction:column;
-  gap:9px;
+  gap:14px;
 }
 
-.creation-item{
-  background:#191d26;
-  border-radius:11px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.06);
+.message{
+  width:100%;
+  display:flex;
 }
 
-.creation-item img{
+.message.user{
+  justify-content:flex-end;
+}
+
+.message.assistant{
+  justify-content:flex-start;
+}
+
+.bubble{
+  max-width:min(85%,720px);
+  padding:11px 14px;
+  border-radius:17px;
+  font-size:15px;
+  line-height:1.55;
+  word-break:break-word;
+
+  /* Android Chrome long-press text selection */
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
+  cursor:text;
+}
+
+.message.user .bubble,
+.message.assistant .bubble{
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
+}
+
+.message.user .bubble{
+  background:#245eea;
+  border-bottom-right-radius:5px;
+}
+
+.message.assistant .bubble{
+  background:#191d27;
+  border:1px solid rgba(255,255,255,.055);
+  border-bottom-left-radius:5px;
+}
+
+.message.system .bubble{
+  background:rgba(255,255,255,.05);
+}
+
+/* =========================
+   MARKDOWN
+========================= */
+
+.md h1,
+.md h2,
+.md h3{
+  margin:14px 0 8px;
+  line-height:1.25;
+}
+
+.md h1{
+  font-size:22px;
+}
+
+.md h2{
+  font-size:19px;
+}
+
+.md h3{
+  font-size:17px;
+}
+
+.md p{
+  margin:0 0 9px;
+}
+
+.md p:last-child{
+  margin-bottom:0;
+}
+
+.md ul,
+.md ol{
+  margin:7px 0 10px;
+  padding-left:22px;
+}
+
+.md li{
+  margin:4px 0;
+}
+
+.md blockquote{
+  margin:10px 0;
+  padding:7px 12px;
+  border-left:3px solid #777;
+  background:rgba(255,255,255,.04);
+  opacity:.9;
+}
+
+.md a{
+  color:#71a7ff;
+  text-decoration:underline;
+}
+
+.md code{
+  padding:2px 5px;
+  border-radius:5px;
+  background:#0d1016;
+  font-family:monospace;
+  font-size:.92em;
+}
+
+.md pre{
+  margin:10px 0;
+  padding:12px;
+  overflow:auto;
+  border-radius:10px;
+  background:#0b0e13;
+  border:1px solid rgba(255,255,255,.07);
+  white-space:pre;
+}
+
+.md pre code{
+  padding:0;
+  background:transparent;
+}
+
+/* =========================
+   IMAGES
+========================= */
+
+.generated-image{
   display:block;
   width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
+  max-width:720px;
+  border-radius:14px;
+  margin-top:8px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
 }
 
-.creation-info{
-  padding:8px;
-}
-
-.creation-prompt{
+.image-note{
+  margin-top:7px;
   font-size:11px;
-  line-height:1.4;
-  opacity:.65;
+  opacity:.42;
 }
 
-.drawer-bottom{
-  padding:10px;
-  border-top:1px solid rgba(255,255,255,.08);
+/* =========================
+   TYPING
+========================= */
+
+.typing{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 2px;
 }
 
-.delete-all-btn{
-  width:100%;
-  padding:10px;
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;
-  background:transparent;
-  color:#fff;
-  font-size:12px;
-  opacity:.7;
+.typing span{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#fff;
+  opacity:.35;
+  animation:typing 1s infinite;
 }
 
-.delete-all-btn:hover{
-  background:rgba(255,255,255,.06);
-  opacity:1;
+.typing span:nth-child(2){
+  animation-delay:.15s;
 }
 
-.composer-wrap{
+.typing span:nth-child(3){
+  animation-delay:.3s;
+}
+
+@keyframes typing{
+  0%,70%,100%{
+    transform:translateY(0);
+    opacity:.25;
+  }
+  35%{
+    transform:translateY(-4px);
+    opacity:.8;
+  }
+}
+
+/* =========================
+   COMPOSER
+========================= */
+
+.composer-shell{
   position:fixed;
   left:0;
   right:0;
   bottom:0;
-  z-index:50;
-  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  z-index:120;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
   background:linear-gradient(
-    to top,
-    #0f1117 75%,
-    rgba(15,17,23,0)
+    to bottom,
+    rgba(15,17,23,0),
+    rgba(15,17,23,.94) 22%,
+    #0f1117 48%
   );
 }
 
@@ -472,11 +517,43 @@ main{
   width:100%;
   max-width:900px;
   margin:0 auto;
-  background:#191d26;
-  border:1px solid rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.1);
+  background:#171a23;
   border-radius:18px;
   padding:8px;
-  box-shadow:0 -4px 25px rgba(0,0,0,.18);
+  box-shadow:0 8px 35px rgba(0,0,0,.25);
+}
+
+.photo-preview{
+  display:none;
+  position:relative;
+  width:74px;
+  height:74px;
+  margin:3px 3px 8px;
+}
+
+.photo-preview.show{
+  display:block;
+}
+
+.photo-preview img{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.remove-photo{
+  position:absolute;
+  right:-6px;
+  top:-6px;
+  width:23px;
+  height:23px;
+  border:0;
+  border-radius:50%;
+  background:#ef4444;
+  color:#fff;
+  font-size:15px;
 }
 
 .input-row{
@@ -485,49 +562,46 @@ main{
   gap:7px;
 }
 
-.tool-btn{
-  width:39px;
-  height:39px;
-  flex:none;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:#fff;
-  font-size:19px;
-}
-
-.tool-btn:hover{
-  background:rgba(255,255,255,.07);
-}
-
 #prompt{
   flex:1;
   min-width:0;
-  max-height:130px;
-  min-height:39px;
+  min-height:42px;
+  max-height:150px;
   resize:none;
   border:0;
   outline:0;
-  background:transparent;
   color:#fff;
-  padding:10px 4px;
-  font-size:15px;
+  background:transparent;
+  padding:10px 8px;
   line-height:1.4;
 }
 
 #prompt::placeholder{
-  color:rgba(255,255,255,.4);
+  color:#fff;
+  opacity:.38;
 }
 
-.send-btn{
-  width:42px;
-  height:42px;
+.icon-btn{
+  width:40px;
+  height:40px;
   flex:none;
   border:0;
   border-radius:12px;
-  background:#2563eb;
+  background:rgba(255,255,255,.065);
   color:#fff;
-  font-size:18px;
+  cursor:pointer;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.1);
+}
+
+.send-btn{
+  background:#2864e8;
+}
+
+.send-btn:hover{
+  background:#3570ed;
 }
 
 .send-btn:disabled{
@@ -535,374 +609,295 @@ main{
   cursor:not-allowed;
 }
 
-.tool-row{
+.mode-row{
   display:flex;
+  align-items:center;
   gap:7px;
-  margin-top:6px;
-  overflow-x:auto;
-  scrollbar-width:none;
+  padding:4px 4px 1px;
 }
 
-.tool-row::-webkit-scrollbar{
-  display:none;
-}
-
-.tool-chip{
-  flex:none;
-  border:1px solid rgba(255,255,255,.08);
+.mode-pill{
+  border:0;
   border-radius:10px;
-  background:transparent;
-  color:#ddd;
-  padding:7px 10px;
+  padding:6px 9px;
   font-size:11px;
+  background:transparent;
+  color:#fff;
+  opacity:.48;
+  cursor:pointer;
 }
 
-.tool-chip:hover,
-.tool-chip.active{
+.mode-pill.active{
   background:rgba(255,255,255,.08);
+  opacity:1;
 }
 
-#photoPreview{
+#photoInput{
   display:none;
-  position:relative;
-  margin:4px 4px 7px;
-  width:65px;
-  height:65px;
-  border-radius:10px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.1);
 }
 
-#photoPreview img{
+/* =========================
+   CREATIONS
+========================= */
+
+.creation-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+.creation-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:11px;
+  background:#0e1117;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.creation-card img{
+  display:block;
   width:100%;
-  height:100%;
+  aspect-ratio:1/1;
   object-fit:cover;
 }
 
-.clear-photo{
-  position:absolute;
-  top:3px;
-  right:3px;
-  width:21px;
-  height:21px;
-  border:0;
-  border-radius:50%;
-  background:rgba(0,0,0,.65);
-  color:#fff;
-  font-size:13px;
+.creation-prompt{
+  padding:7px;
+  font-size:10px;
+  opacity:.6;
+  line-height:1.35;
 }
 
-.generated-image-card{
-  width:min(90%,650px);
-  margin:8px 0;
-  padding:8px;
-  border-radius:15px;
-  background:#191d26;
-  border:1px solid rgba(255,255,255,.08);
+/* =========================
+   IMAGE VIEWER
+========================= */
+
+.image-viewer{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.9);
 }
 
-.generated-image-card img{
-  width:100%;
-  display:block;
+.image-viewer.open{
+  display:flex;
+}
+
+.image-viewer img{
+  max-width:100%;
+  max-height:90dvh;
+  object-fit:contain;
   border-radius:10px;
 }
 
-.generated-actions{
-  display:flex;
-  gap:7px;
-  margin-top:8px;
+.close-viewer{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  font-size:23px;
 }
 
-.generated-actions button{
-  flex:1;
-  padding:9px;
-  border:0;
-  border-radius:9px;
-  background:rgba(255,255,255,.08);
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:92px;
+  z-index:700;
+  transform:translate(-50%,20px);
+  max-width:90vw;
+  padding:10px 14px;
+  border-radius:11px;
+  background:#252a36;
   color:#fff;
   font-size:12px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  box-shadow:0 7px 25px rgba(0,0,0,.3);
 }
 
-.loading-row{
-  display:flex;
-  justify-content:flex-start;
-  margin:10px 0;
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
 }
 
-.loading-bubble{
-  padding:11px 14px;
-  border-radius:17px;
-  background:#191d26;
-  border:1px solid rgba(255,255,255,.06);
-  font-size:13px;
-  opacity:.7;
-}
-
-.dots{
-  display:inline-flex;
-  gap:4px;
-}
-
-.dots span{
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#fff;
-  opacity:.5;
-  animation:dot 1.2s infinite;
-}
-
-.dots span:nth-child(2){
-  animation-delay:.15s;
-}
-
-.dots span:nth-child(3){
-  animation-delay:.3s;
-}
-
-@keyframes dot{
-  0%,60%,100%{
-    opacity:.25;
-    transform:translateY(0);
-  }
-
-  30%{
-    opacity:1;
-    transform:translateY(-3px);
-  }
-}
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media(max-width:600px){
 
-  #chat{
-    padding:15px 10px 145px;
+  .header{
+    height:55px;
+  }
+
+  .brand-name{
+    font-size:17px;
+  }
+
+  .chat-wrap{
+    padding:14px 9px 155px;
   }
 
   .bubble{
     max-width:90%;
-    font-size:14px;
+    font-size:15px;
   }
 
-  .welcome-logo{
-    font-size:32px;
+  .composer{
+    border-radius:17px;
   }
 
-  .tool-chip{
-    padding:7px 9px;
+  .creation-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
-
 </style>
 </head>
 
-
 <body>
 
-<div id="app">
+<div class="app">
 
-<header>
+  <!-- HEADER -->
+  <header class="header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
 
-<button
-  id="menuBtn"
-  class="menu-btn"
-  type="button"
-  aria-label="Menu"
->☰</button>
+    <div class="brand">
+      <div class="brand-name">Aaru AI</div>
+      <div class="brand-sub">Fast • Smart • Indian AI</div>
+    </div>
 
-<div class="logo">
-Aaru AI
-</div>
+    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
+      ＋
+    </button>
+  </header>
 
-<div class="online">
-<span class="online-dot"></span>
-Online
-</div>
+  <!-- DRAWER OVERLAY -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
 
-</header>
+  <!-- DRAWER -->
+  <aside class="drawer" id="drawer">
 
+    <div class="drawer-head">
+      <div class="drawer-title">Aaru AI</div>
+      <button class="close-drawer" id="closeDrawer">×</button>
+    </div>
 
-<main id="main">
+    <div class="drawer-body">
 
-<div id="chat">
+      <button class="drawer-action" id="newChatBtn">
+        <span>＋</span>
+        <span>नई चैट</span>
+      </button>
 
-<div id="welcome">
+      <button class="drawer-action" id="deleteAllBtn">
+        <span>🗑️</span>
+        <span>सभी चैट डिलीट करें</span>
+      </button>
 
-<div class="welcome-logo">
-Aaru AI
-</div>
+      <div class="section-title">Recent Chats</div>
+      <div class="chat-history" id="chatHistory"></div>
 
-<div class="welcome-text">
-नमस्ते! मैं Aaru AI हूँ।<br>
-आप मुझसे कुछ भी पूछ सकते हैं।
-</div>
+      <div class="section-title">Recent Creations</div>
+      <div class="creation-grid" id="creationGrid"></div>
 
-</div>
+    </div>
+  </aside>
 
-</div>
+  <!-- MAIN -->
+  <main>
 
-</main>
+    <div class="chat-wrap">
+      <div class="messages" id="messages"></div>
+    </div>
 
+  </main>
 
-<div id="overlay"></div>
+  <!-- COMPOSER -->
+  <div class="composer-shell">
 
+    <div class="composer">
 
-<aside id="drawer">
+      <div class="photo-preview" id="photoPreview">
+        <img id="photoPreviewImg" alt="Selected image">
+        <button class="remove-photo" id="removePhoto">×</button>
+      </div>
 
-<div class="drawer-top">
+      <div class="input-row">
 
-<button
-  id="closeDrawer"
-  class="close-drawer"
-  type="button"
->×</button>
+        <button class="icon-btn" id="photoBtn" title="Photo">
+          📎
+        </button>
 
-<button
-  id="newChatBtn"
-  class="new-chat-btn"
-  type="button"
->
-＋ New Chat
-</button>
+        <textarea
+          id="prompt"
+          rows="1"
+          placeholder="Aaru से कुछ भी पूछें..."
+          autocomplete="off"
+          spellcheck="true"></textarea>
 
-<div style="clear:both"></div>
+        <button class="icon-btn send-btn" id="sendBtn" title="Send">
+          ➤
+        </button>
 
-</div>
+      </div>
 
+      <div class="mode-row">
 
-<div class="drawer-scroll">
+        <button
+          class="mode-pill"
+          id="chatModeBtn"
+          type="button">
+          💬 Chat
+        </button>
 
-<div class="history-section">
+        <button
+          class="mode-pill"
+          id="imageModeBtn"
+          type="button">
+          🎨 Image
+        </button>
 
-<div class="history-heading">
-Recent Chats
-</div>
+      </div>
 
-<div id="chatHistory"></div>
+    </div>
 
-</div>
-
-
-<div class="history-section">
-
-<div class="history-heading">
-Recent Creations
-</div>
-
-<div id="creations"></div>
-
-</div>
-
-</div>
-
-
-<div class="drawer-bottom">
-
-<button
-  id="deleteAllChatsBtn"
-  class="delete-all-btn"
-  type="button"
->
-Delete all chat history
-</button>
-
-</div>
-
-</aside>
-
-
-<div class="composer-wrap">
-
-<div class="composer">
-
-<div id="photoPreview">
-
-<img
-  id="previewImage"
-  src=""
-  alt=""
->
-
-<button
-  id="clearPhoto"
-  class="clear-photo"
-  type="button"
->×</button>
+  </div>
 
 </div>
-
-
-<div class="input-row">
-
-<button
-  id="photoBtn"
-  class="tool-btn"
-  type="button"
-  title="Photo"
->📷</button>
-
-<textarea
-  id="prompt"
-  rows="1"
-  placeholder="Aaru AI से कुछ पूछें..."
-></textarea>
-
-<button
-  id="sendBtn"
-  class="send-btn"
-  type="button"
-  aria-label="Send"
->➤</button>
-
-</div>
-
-
-<div class="tool-row">
-
-<button
-  id="imageTool"
-  class="tool-chip"
-  type="button"
->
-🎨 Create Image
-</button>
-
-<button
-  id="photoTool"
-  class="tool-chip"
-  type="button"
->
-📷 Photo
-</button>
-
-<button
-  id="exampleTool"
-  class="tool-chip"
-  type="button"
->
-✨ Example
-</button>
-
-</div>
-
-</div>
-
-</div>
-
 
 <input
   type="file"
   id="photoInput"
-  accept="image/*"
-  hidden
->
+  accept="image/*">
 
+<div class="image-viewer" id="imageViewer">
+  <button class="close-viewer" id="closeViewer">×</button>
+  <img id="viewerImg" alt="Image preview">
 </div>
+
+<div class="toast" id="toast"></div>
 
 
 <script>
+"use strict";
 
 /* =========================================================
-   AARU AI FRONTEND
+   CONFIG
 ========================================================= */
 
 const API =
@@ -918,47 +913,34 @@ const IMAGE_KEY =
   "aaru_history";
 
 
-const main =
-  document.getElementById("main");
+/* =========================================================
+   STATE
+========================================================= */
 
-const chat =
-  document.getElementById("chat");
+let chats = [];
+let currentChatId = null;
+let messages = [];
 
-const welcome =
-  document.getElementById("welcome");
+let imageMode = false;
 
-const prompt =
+let selectedPhotoBase64 = null;
+let selectedPhotoUrl = null;
+
+let isBusy = false;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const messagesEl =
+  document.getElementById("messages");
+
+const promptEl =
   document.getElementById("prompt");
 
 const sendBtn =
   document.getElementById("sendBtn");
-
-const menuBtn =
-  document.getElementById("menuBtn");
-
-const drawer =
-  document.getElementById("drawer");
-
-const overlay =
-  document.getElementById("overlay");
-
-const closeDrawer =
-  document.getElementById("closeDrawer");
-
-const newChatBtn =
-  document.getElementById("newChatBtn");
-
-const imageTool =
-  document.getElementById("imageTool");
-
-const photoTool =
-  document.getElementById("photoTool");
-
-const exampleTool =
-  document.getElementById("exampleTool");
-
-const photoBtn =
-  document.getElementById("photoBtn");
 
 const photoInput =
   document.getElementById("photoInput");
@@ -966,455 +948,678 @@ const photoInput =
 const photoPreview =
   document.getElementById("photoPreview");
 
-const previewImage =
-  document.getElementById("previewImage");
+const photoPreviewImg =
+  document.getElementById("photoPreviewImg");
 
-const clearPhotoBtn =
-  document.getElementById("clearPhoto");
-
-const chatHistory =
+const chatHistoryEl =
   document.getElementById("chatHistory");
 
-const creations =
-  document.getElementById("creations");
+const creationGrid =
+  document.getElementById("creationGrid");
 
-const deleteAllChatsBtn =
-  document.getElementById("deleteAllChatsBtn");
+const drawer =
+  document.getElementById("drawer");
 
+const drawerOverlay =
+  document.getElementById("drawerOverlay");
 
-let chats = [];
+const imageViewer =
+  document.getElementById("imageViewer");
 
-let currentChatId = null;
+const viewerImg =
+  document.getElementById("viewerImg");
 
-let messages = [];
+const toastEl =
+  document.getElementById("toast");
 
-let imageMode = false;
+const chatModeBtn =
+  document.getElementById("chatModeBtn");
 
-let selectedPhotoBase64 = null;
-
-let selectedPhotoUrl = null;
-
-let isBusy = false;
+const imageModeBtn =
+  document.getElementById("imageModeBtn");
 
 
 /* =========================================================
-   UTILS
+   BASIC HELPERS
 ========================================================= */
-
-function scrollBottom(){
-
-  setTimeout(()=>{
-
-    window.scrollTo({
-      top:document.documentElement.scrollHeight,
-      behavior:"smooth"
-    });
-
-  },30);
-}
-
-
-function scrollTop(){
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-}
-
 
 function makeChatId(){
 
-  return (
-    "chat_" +
+  return "chat_" +
     Date.now().toString(36) +
     "_" +
     Math.random()
       .toString(36)
-      .slice(2,10)
-  );
+      .slice(2,9);
 }
 
 
 function makeImageId(){
 
-  return (
-    "img_" +
+  return "img_" +
     Date.now().toString(36) +
     "_" +
     Math.random()
       .toString(36)
-      .slice(2,10)
-  );
+      .slice(2,10);
 }
 
 
-function makeChatTitle(text){
+function showToast(text){
 
-  text =
-    String(text || "")
-      .trim()
-      .replace(/\s+/g," ");
+  toastEl.textContent =
+    String(text || "");
 
-  if(!text){
-    return "नई चैट";
-  }
+  toastEl.classList.add("show");
 
-  if(text.length > 42){
+  clearTimeout(showToast.timer);
 
-    text =
-      text
-        .slice(0,42)
-        .trim() +
-      "…";
-  }
-
-  return text;
+  showToast.timer =
+    setTimeout(() => {
+      toastEl.classList.remove("show");
+    },2200);
 }
 
 
-function formatChatDate(timestamp){
+function escapeHTML(value){
 
-  if(!timestamp){
-    return "";
-  }
-
-  const d =
-    new Date(timestamp);
-
-  const now =
-    new Date();
-
-  if(
-    d.toDateString() ===
-    now.toDateString()
-  ){
-
-    return d.toLocaleTimeString(
-      "hi-IN",
-      {
-        hour:"2-digit",
-        minute:"2-digit"
-      }
-    );
-  }
-
-  return d.toLocaleDateString(
-    "hi-IN",
-    {
-      day:"numeric",
-      month:"short"
-    }
-  );
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 
 /* =========================================================
-   CHAT STORAGE
+   MARKDOWN RENDERER
+   IMPORTANT: MAIN MARKDOWN LOGIC KEPT INTACT
+========================================================= */
+
+function inlineMarkdown(text){
+
+  let s = escapeHTML(text);
+
+  s = s.replace(
+    /`([^`]+)`/g,
+    "<code>$1</code>"
+  );
+
+  s = s.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+  s = s.replace(
+    /\*\*([^*]+)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  s = s.replace(
+    /__([^_]+)__/g,
+    "<strong>$1</strong>"
+  );
+
+  s = s.replace(
+    /(?<!\*)\*([^*]+)\*(?!\*)/g,
+    "<em>$1</em>"
+  );
+
+  s = s.replace(
+    /(?<!_)_([^_]+)_(?!_)/g,
+    "<em>$1</em>"
+  );
+
+  return s;
+}
+
+
+function renderMarkdown(text){
+
+  const source =
+    String(text ?? "")
+      .replace(/\r\n/g,"\n")
+      .replace(/\r/g,"\n");
+
+  const lines =
+    source.split("\n");
+
+  let html = "";
+  let inCode = false;
+  let codeBuffer = [];
+  let codeLang = "";
+
+  let inUl = false;
+  let inOl = false;
+
+  function closeLists(){
+
+    if(inUl){
+      html += "</ul>";
+      inUl = false;
+    }
+
+    if(inOl){
+      html += "</ol>";
+      inOl = false;
+    }
+  }
+
+  function flushParagraph(buffer){
+
+    if(!buffer.length) return;
+
+    const value =
+      buffer.join("\n").trim();
+
+    if(!value) return;
+
+    html +=
+      "<p>" +
+      inlineMarkdown(
+        value.replace(/\n/g,"<br>")
+      ) +
+      "</p>";
+  }
+
+  let paragraph = [];
+
+  for(let i=0;i<lines.length;i++){
+
+    const line = lines[i];
+
+    if(line.trim().startsWith("```")){
+
+      if(inCode){
+
+        html +=
+          "<pre><code>" +
+          escapeHTML(
+            codeBuffer.join("\n")
+          ) +
+          "</code></pre>";
+
+        codeBuffer = [];
+        codeLang = "";
+        inCode = false;
+
+      }else{
+
+        flushParagraph(paragraph);
+        paragraph = [];
+
+        closeLists();
+
+        inCode = true;
+
+        codeLang =
+          line.trim()
+            .slice(3)
+            .trim();
+      }
+
+      continue;
+    }
+
+    if(inCode){
+
+      codeBuffer.push(line);
+      continue;
+    }
+
+    if(!line.trim()){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+
+      closeLists();
+
+      continue;
+    }
+
+    const h3 =
+      line.match(/^###\s+(.+)$/);
+
+    const h2 =
+      line.match(/^##\s+(.+)$/);
+
+    const h1 =
+      line.match(/^#\s+(.+)$/);
+
+    if(h1){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+      closeLists();
+
+      html +=
+        "<h1>" +
+        inlineMarkdown(h1[1]) +
+        "</h1>";
+
+      continue;
+    }
+
+    if(h2){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+      closeLists();
+
+      html +=
+        "<h2>" +
+        inlineMarkdown(h2[1]) +
+        "</h2>";
+
+      continue;
+    }
+
+    if(h3){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+      closeLists();
+
+      html +=
+        "<h3>" +
+        inlineMarkdown(h3[1]) +
+        "</h3>";
+
+      continue;
+    }
+
+    const ul =
+      line.match(/^\s*[-*+]\s+(.+)$/);
+
+    const ol =
+      line.match(/^\s*\d+[.)]\s+(.+)$/);
+
+    if(ul){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+
+      if(inOl){
+        html += "</ol>";
+        inOl = false;
+      }
+
+      if(!inUl){
+
+        html += "<ul>";
+        inUl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ul[1]) +
+        "</li>";
+
+      continue;
+    }
+
+    if(ol){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+
+      if(inUl){
+        html += "</ul>";
+        inUl = false;
+      }
+
+      if(!inOl){
+
+        html += "<ol>";
+        inOl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ol[1]) +
+        "</li>";
+
+      continue;
+    }
+
+    const quote =
+      line.match(/^\s*>\s?(.*)$/);
+
+    if(quote){
+
+      flushParagraph(paragraph);
+      paragraph = [];
+      closeLists();
+
+      html +=
+        "<blockquote>" +
+        inlineMarkdown(quote[1]) +
+        "</blockquote>";
+
+      continue;
+    }
+
+    paragraph.push(line);
+  }
+
+  if(inCode){
+
+    html +=
+      "<pre><code>" +
+      escapeHTML(
+        codeBuffer.join("\n")
+      ) +
+      "</code></pre>";
+  }
+
+  flushParagraph(paragraph);
+  closeLists();
+
+  return html || "";
+}
+
+
+/* =========================================================
+   STORAGE HELPERS
+========================================================= */
+
+function safeGet(key){
+
+  try{
+
+    return localStorage.getItem(key);
+
+  }catch(e){
+
+    console.warn(
+      "localStorage get failed:",
+      e
+    );
+
+    return null;
+  }
+}
+
+
+function safeRemove(key){
+
+  try{
+
+    localStorage.removeItem(key);
+
+  }catch(e){
+
+    console.warn(
+      "localStorage remove failed:",
+      e
+    );
+  }
+}
+
+
+/* =========================================================
+   CHAT NORMALIZATION
 ========================================================= */
 
 function normalizeChat(chat){
 
-  if(
-    !chat ||
-    !chat.id
-  ){
+  if(!chat || typeof chat !== "object"){
     return null;
   }
 
+  const id =
+    String(chat.id || "");
+
+  if(!id){
+    return null;
+  }
 
   const rawMessages =
     Array.isArray(chat.messages)
       ? chat.messages
       : [];
 
-
   const normalizedMessages =
     rawMessages
-      .filter(
-        m =>
-          m &&
-          (
-            m.role === "user" ||
-            m.role === "assistant"
-          ) &&
-          typeof m.content === "string"
-      )
-      .map(
-        m => {
+      .filter(Boolean)
+      .slice(-60)
+      .map(msg => {
 
-          const item = {
+        const role =
+          msg.role === "user"
+            ? "user"
+            : "assistant";
 
-            role:m.role,
+        const content =
+          String(msg.content ?? "")
+            .slice(0,8000);
 
-            content:String(
-              m.content || ""
-            ).slice(0,8000)
+        const result = {
+          role,
+          content
+        };
 
-          };
-
-
-          if(
-            typeof m.imageId === "string" &&
-            m.imageId
-          ){
-
-            item.imageId =
-              m.imageId;
-          }
-
-
-          return item;
+        if(msg.imageId){
+          result.imageId =
+            String(msg.imageId);
         }
-      )
-      .slice(-60);
 
+        return result;
+      });
+
+  let title =
+    String(chat.title || "")
+      .trim()
+      .slice(0,80);
+
+  if(!title || title === "नई चैट"){
+
+    const firstUser =
+      normalizedMessages.find(
+        m => m.role === "user"
+      );
+
+    if(firstUser){
+
+      title =
+        firstUser.content
+          .replace(/\s+/g," ")
+          .trim()
+          .slice(0,80);
+    }
+  }
+
+  if(!title){
+    title = "नई चैट";
+  }
+
+  const now =
+    Date.now();
 
   return {
 
-    id:String(chat.id),
+    id,
 
-    title:
-      makeChatTitle(
-        chat.title ||
-        (
-          normalizedMessages.find(
-            m =>
-              m.role === "user"
-          ) || {}
-        ).content ||
-        "नई चैट"
-      ),
+    title,
 
     messages:
       normalizedMessages,
 
     createdAt:
-      Number(
-        chat.createdAt
-      ) || Date.now(),
+      Number(chat.createdAt) || now,
 
     updatedAt:
-      Number(
-        chat.updatedAt
-      ) || Date.now()
+      Number(chat.updatedAt) || now
   };
 }
 
+
+/* =========================================================
+   SAVE CHAT HISTORY
+   Quota-resilient
+========================================================= */
+
+function saveChatHistory(showError = true){
+
+  const attempts = [
+    40,
+    30,
+    25,
+    20,
+    15,
+    10,
+    5,
+    3,
+    1
+  ];
+
+  for(const limit of attempts){
+
+    try{
+
+      const data =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )
+          .slice(0,limit);
+
+      localStorage.setItem(
+        CHAT_LIST_KEY,
+        JSON.stringify(data)
+      );
+
+      return true;
+
+    }catch(error){
+
+      console.warn(
+        "Chat history save failed:",
+        limit,
+        error
+      );
+    }
+  }
+
+  if(showError){
+
+    showToast(
+      "Chat history save नहीं हो पाई।"
+    );
+  }
+
+  return false;
+}
+
+
+/* =========================================================
+   LOAD CHAT HISTORY
+========================================================= */
 
 function loadChatHistory(){
 
   chats = [];
 
+  const raw =
+    safeGet(CHAT_LIST_KEY);
 
-  try{
+  if(raw){
 
-    const raw =
-      localStorage.getItem(
-        CHAT_LIST_KEY
-      );
+    try{
 
-
-    if(raw){
-
-      const saved =
+      const parsed =
         JSON.parse(raw);
 
-
-      if(Array.isArray(saved)){
-
-        chats =
-          saved
-            .map(normalizeChat)
-            .filter(Boolean);
-
-
-        /*
-          पुराने/खराब duplicate IDs हटाएँ।
-        */
+      if(Array.isArray(parsed)){
 
         const seen =
           new Set();
 
         chats =
-          chats.filter(
-            item => {
+          parsed
+            .map(normalizeChat)
+            .filter(Boolean)
+            .filter(chat => {
 
-              if(seen.has(item.id)){
+              if(seen.has(chat.id)){
                 return false;
               }
 
-              seen.add(item.id);
+              seen.add(chat.id);
 
               return true;
-            }
-          );
-
-
-        saveChatHistory(false);
-
-        return;
+            });
       }
-    }
 
+    }catch(error){
 
-    /*
-      पुराने single-chat storage की migration।
-    */
-
-    const oldRaw =
-      localStorage.getItem(
-        OLD_CHAT_KEY
+      console.warn(
+        "Invalid chat history:",
+        error
       );
 
+      chats = [];
+    }
 
-    if(oldRaw){
+    saveChatHistory(false);
+
+    return;
+  }
+
+
+  /* पुराने single-chat storage की migration */
+
+  const oldRaw =
+    safeGet(OLD_CHAT_KEY);
+
+  if(oldRaw){
+
+    try{
 
       const oldMessages =
         JSON.parse(oldRaw);
 
+      if(Array.isArray(oldMessages) &&
+         oldMessages.length){
 
-      if(
-        Array.isArray(oldMessages) &&
-        oldMessages.length
-      ){
+        const now =
+          Date.now();
 
-        const normalized =
-          oldMessages
-            .filter(
-              m =>
-                m &&
-                (
-                  m.role === "user" ||
-                  m.role === "assistant"
-                ) &&
-                typeof m.content === "string"
-            )
-            .map(
-              m => ({
+        const item =
+          normalizeChat({
+            id:makeChatId(),
+            title:"पुरानी चैट",
+            messages:oldMessages,
+            createdAt:now,
+            updatedAt:now
+          });
 
-                role:m.role,
-
-                content:String(
-                  m.content || ""
-                ).slice(0,8000)
-
-              })
-            )
-            .slice(-60);
-
-
-        const firstUser =
-          normalized.find(
-            m =>
-              m.role === "user"
-          );
-
-
-        const oldChat = {
-
-          id:makeChatId(),
-
-          title:makeChatTitle(
-            firstUser
-              ? firstUser.content
-              : "पुरानी चैट"
-          ),
-
-          messages:normalized,
-
-          createdAt:Date.now(),
-
-          updatedAt:Date.now()
-        };
-
-
-        chats = [
-          oldChat
-        ];
-
-
-        saveChatHistory(false);
-
-
-        localStorage.removeItem(
-          OLD_CHAT_KEY
-        );
+        if(item){
+          chats = [item];
+        }
       }
+
+    }catch(error){
+
+      console.warn(
+        "Old chat migration failed:",
+        error
+      );
     }
 
-  }catch(error){
+    safeRemove(OLD_CHAT_KEY);
 
-    console.warn(
-      "Chat history load failed:",
-      error
-    );
-
-    chats = [];
+    saveChatHistory(false);
   }
-}
-
-
-function saveChatHistory(
-  rerender=true
-){
-
-  try{
-
-    chats =
-      chats
-        .filter(
-          c =>
-            c &&
-            c.id &&
-            Array.isArray(c.messages)
-        )
-        .sort(
-          (a,b) =>
-            (b.updatedAt || 0) -
-            (a.updatedAt || 0)
-        )
-        .slice(0,50);
-
-
-    localStorage.setItem(
-      CHAT_LIST_KEY,
-      JSON.stringify(chats)
-    );
-
-  }catch(error){
-
-    console.warn(
-      "Chat history save failed:",
-      error
-    );
-  }
-
-
-  if(rerender){
-
-    renderChatHistory();
-  }
-}
-
-
-function getCurrentChat(){
-
-  if(!currentChatId){
-    return null;
-  }
-
-  return (
-    chats.find(
-      c =>
-        c.id === currentChatId
-    ) || null
-  );
 }
 
 
 /* =========================================================
-   CREATE / ACTIVATE CHAT
+   CREATE NEW CHAT
 ========================================================= */
 
 function createNewChat(){
@@ -1422,212 +1627,345 @@ function createNewChat(){
   const now =
     Date.now();
 
-
   const item = {
 
-    id:makeChatId(),
+    id:
+      makeChatId(),
 
-    title:"नई चैट",
+    title:
+      "नई चैट",
 
-    messages:[],
+    messages:
+      [],
 
-    createdAt:now,
+    createdAt:
+      now,
 
-    updatedAt:now
+    updatedAt:
+      now
   };
 
-
-  chats.unshift(
-    item
-  );
-
+  chats.unshift(item);
 
   currentChatId =
     item.id;
 
-
   messages = [];
 
-
-  /*
-    बहुत जरूरी:
-    खाली New Chat भी तुरंत persist होगा।
-    इसलिए refresh के बाद पुरानी chat वापस नहीं आएगी।
-  */
-
   saveChatHistory();
-
 
   return item;
 }
 
 
+/* =========================================================
+   CURRENT CHAT
+========================================================= */
+
 function ensureCurrentChat(){
 
   if(currentChatId){
 
-    const existing =
-      getCurrentChat();
+    const found =
+      chats.find(
+        chat =>
+          chat.id === currentChatId
+      );
 
-    if(existing){
-      return existing;
+    if(found){
+      return found;
     }
   }
-
 
   return createNewChat();
 }
 
 
-/* =========================================================
-   IMAGE RECORD LOOKUP
-========================================================= */
-
-function getImageHistory(){
-
-  try{
-
-    const raw =
-      localStorage.getItem(
-        IMAGE_KEY
-      );
-
-
-    const parsed =
-      raw
-        ? JSON.parse(raw)
-        : [];
-
-
-    return Array.isArray(parsed)
-      ? parsed
-      : [];
-
-  }catch(error){
-
-    console.warn(
-      "Image history read failed:",
-      error
-    );
-
-    return [];
-  }
-}
-
-
-function findCreationById(id){
-
-  if(!id){
-    return null;
-  }
-
-
-  const history =
-    getImageHistory();
-
-
-  return (
-    history.find(
-      item =>
-        item &&
-        item.id === id &&
-        item.image
-    ) || null
-  );
-}
-
-
-/* =========================================================
-   SAVE CURRENT CHAT
-========================================================= */
-
 function saveCurrentChat(){
 
-  if(!currentChatId){
-    return;
-  }
+  const chat =
+    ensureCurrentChat();
 
-
-  const item =
-    getCurrentChat();
-
-
-  if(!item){
-    return;
-  }
-
-
-  /*
-    पूरी messages array save होगी।
-    सिर्फ पहला message नहीं।
-  */
-
-  item.messages =
+  chat.messages =
     messages
-      .filter(
-        m =>
-          m &&
-          (
-            m.role === "user" ||
-            m.role === "assistant"
-          ) &&
-          typeof m.content === "string"
-      )
-      .map(
-        m => {
+      .slice(-60)
+      .map(msg => {
 
-          const saved = {
+        const result = {
 
-            role:m.role,
+          role:
+            msg.role === "user"
+              ? "user"
+              : "assistant",
 
-            content:String(
-              m.content || ""
-            ).slice(0,8000)
+          content:
+            String(msg.content ?? "")
+              .slice(0,8000)
+        };
 
-          };
-
-
-          if(
-            typeof m.imageId === "string" &&
-            m.imageId
-          ){
-
-            saved.imageId =
-              m.imageId;
-          }
-
-
-          return saved;
+        if(msg.imageId){
+          result.imageId =
+            String(msg.imageId);
         }
-      )
-      .slice(-60);
 
+        return result;
+      });
 
   const firstUser =
-    item.messages.find(
-      m =>
-        m.role === "user"
+    chat.messages.find(
+      msg =>
+        msg.role === "user"
     );
-
 
   if(firstUser){
 
-    item.title =
-      makeChatTitle(
-        firstUser.content
-      );
+    chat.title =
+      firstUser.content
+        .replace(/\s+/g," ")
+        .trim()
+        .slice(0,80)
+        || "नई चैट";
   }else{
 
-    item.title =
+    chat.title =
       "नई चैट";
   }
 
-
-  item.updatedAt =
+  chat.updatedAt =
     Date.now();
 
-
   saveChatHistory();
+}
+
+
+/* =========================================================
+   RENDER CURRENT CHAT
+========================================================= */
+
+function renderCurrentChat(){
+
+  messagesEl.innerHTML = "";
+
+  for(const msg of messages){
+
+    if(msg.role === "user"){
+
+      addUserMessage(
+        msg.content,
+        false
+      );
+
+    }else{
+
+      addAssistantMessage(
+        msg.content,
+        false,
+        msg.imageId || null
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   ADD USER MESSAGE
+========================================================= */
+
+function addUserMessage(
+  text,
+  persist = true
+){
+
+  const value =
+    String(text ?? "");
+
+  messages.push({
+
+    role:"user",
+
+    content:value
+  });
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "message user";
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    "bubble";
+
+  bubble.textContent =
+    value;
+
+  message.appendChild(bubble);
+
+  messagesEl.appendChild(message);
+
+  if(persist){
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   ADD ASSISTANT MESSAGE
+========================================================= */
+
+function addAssistantMessage(
+  text,
+  persist = true,
+  imageId = null
+){
+
+  const value =
+    String(text ?? "");
+
+  messages.push({
+
+    role:"assistant",
+
+    content:value,
+
+    ...(imageId
+      ? {imageId}
+      : {})
+  });
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "message assistant";
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    "bubble md";
+
+  bubble.innerHTML =
+    renderMarkdown(value);
+
+  if(imageId){
+
+    const creation =
+      findCreationById(imageId);
+
+    if(creation){
+
+      const img =
+        document.createElement("img");
+
+      img.className =
+        "generated-image";
+
+      img.src =
+        creation.image;
+
+      img.alt =
+        creation.prompt ||
+        "Generated image";
+
+      img.addEventListener(
+        "click",
+        () => openImageViewer(
+          creation.image
+        )
+      );
+
+      bubble.appendChild(img);
+
+      const note =
+        document.createElement("div");
+
+      note.className =
+        "image-note";
+
+      note.textContent =
+        "Image generated successfully.";
+
+      bubble.appendChild(note);
+    }
+  }
+
+  message.appendChild(bubble);
+
+  messagesEl.appendChild(message);
+
+  if(persist){
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   TYPING INDICATOR
+========================================================= */
+
+function showTyping(){
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "message assistant";
+
+  message.id =
+    "typingMessage";
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    "bubble";
+
+  bubble.innerHTML = `
+    <div class="typing">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+
+  message.appendChild(bubble);
+
+  messagesEl.appendChild(message);
+
+  scrollBottom();
+}
+
+
+function hideTyping(){
+
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
+
+  if(item){
+    item.remove();
+  }
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollBottom(){
+
+  requestAnimationFrame(() => {
+
+    window.scrollTo({
+      top:document.documentElement.scrollHeight,
+      behavior:"smooth"
+    });
+
+  });
 }
 
 
@@ -1635,18 +1973,39 @@ function saveCurrentChat(){
    CHAT HISTORY UI
 ========================================================= */
 
+function formatTime(timestamp){
+
+  if(!timestamp){
+    return "";
+  }
+
+  const date =
+    new Date(timestamp);
+
+  return date.toLocaleString(
+    "hi-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      hour:"2-digit",
+      minute:"2-digit"
+    }
+  );
+}
+
+
 function renderChatHistory(){
 
-  chatHistory.innerHTML = "";
-
+  chatHistoryEl.innerHTML = "";
 
   const sorted =
-    [...chats].sort(
-      (a,b) =>
-        (b.updatedAt || 0) -
-        (a.updatedAt || 0)
-    );
-
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      );
 
   if(!sorted.length){
 
@@ -1654,22 +2013,18 @@ function renderChatHistory(){
       document.createElement("div");
 
     empty.className =
-      "chat-history-empty";
+      "empty-history";
 
     empty.textContent =
       "अभी कोई पुरानी चैट नहीं है।";
 
-    chatHistory.appendChild(
-      empty
-    );
+    chatHistoryEl.appendChild(empty);
 
     return;
   }
 
 
-  for(
-    const item of sorted
-  ){
+  for(const item of sorted){
 
     const row =
       document.createElement("div");
@@ -1706,23 +2061,22 @@ function renderChatHistory(){
     meta.className =
       "chat-history-meta";
 
-
     const count =
       Array.isArray(item.messages)
         ? item.messages.length
         : 0;
 
-
     meta.textContent =
-      count
-        ? `${count} messages • ${formatChatDate(item.updatedAt)}`
-        : `खाली चैट • ${formatChatDate(item.updatedAt)}`;
+      count +
+      " messages • " +
+      formatTime(item.updatedAt);
 
 
     info.appendChild(title);
-
     info.appendChild(meta);
 
+
+    /* हर history का अलग delete button */
 
     const deleteBtn =
       document.createElement("button");
@@ -1733,196 +2087,45 @@ function renderChatHistory(){
     deleteBtn.type =
       "button";
 
-    deleteBtn.textContent =
-      "×";
-
     deleteBtn.title =
-      "चैट हटाएँ";
+      "इस चैट को डिलीट करें";
+
+    deleteBtn.setAttribute(
+      "aria-label",
+      "Delete chat"
+    );
+
+    deleteBtn.textContent =
+      "🗑️";
 
 
-    deleteBtn.onclick =
-      function(event){
+    deleteBtn.addEventListener(
+      "click",
+      event => {
 
+        event.preventDefault();
         event.stopPropagation();
 
         deleteChat(item.id);
-      };
+      }
+    );
 
 
     row.appendChild(info);
-
     row.appendChild(deleteBtn);
 
 
-    row.onclick =
-      function(){
+    row.addEventListener(
+      "click",
+      () => {
 
         openChat(item.id);
-      };
-
-
-    chatHistory.appendChild(row);
-  }
-}
-
-
-/* =========================================================
-   DELETE ONE CHAT
-========================================================= */
-
-function deleteChat(id){
-
-  const target =
-    chats.find(
-      c => c.id === id
+        closeDrawer();
+      }
     );
 
 
-  if(!target){
-    return;
-  }
-
-
-  if(
-    !confirm(
-      `“${target.title || "नई चैट"}” हटानी है?`
-    )
-  ){
-    return;
-  }
-
-
-  const wasCurrent =
-    currentChatId === id;
-
-
-  chats =
-    chats.filter(
-      c =>
-        c.id !== id
-    );
-
-
-  if(wasCurrent){
-
-    /*
-      Current chat हटाने के बाद
-      नया persistent chat बनाएँ।
-    */
-
-    currentChatId = null;
-
-    messages = [];
-
-
-    createNewChat();
-
-
-    renderCurrentChat();
-
-
-  }else{
-
-    saveChatHistory();
-  }
-}
-
-
-/* =========================================================
-   DELETE ALL CHATS
-========================================================= */
-
-function deleteAllChats(){
-
-  if(!chats.length){
-    return;
-  }
-
-
-  if(
-    !confirm(
-      "सभी टेक्स्ट चैट हिस्ट्री हटानी है?"
-    )
-  ){
-    return;
-  }
-
-
-  chats = [];
-
-  currentChatId = null;
-
-  messages = [];
-
-
-  localStorage.removeItem(
-    CHAT_LIST_KEY
-  );
-
-
-  localStorage.removeItem(
-    OLD_CHAT_KEY
-  );
-
-
-  /*
-    पूरी तरह खाली रहने के बजाय
-    नया persistent current chat बनाएँ।
-  */
-
-  createNewChat();
-
-
-  renderCurrentChat();
-
-  renderChatHistory();
-
-  closeMenu();
-
-  scrollTop();
-}
-
-
-/* =========================================================
-   RENDER CURRENT CHAT
-========================================================= */
-
-function renderCurrentChat(){
-
-  chat.innerHTML = "";
-
-  chat.appendChild(
-    welcome
-  );
-
-
-  welcome.style.display =
-    messages.length
-      ? "none"
-      : "flex";
-
-
-  for(
-    const msg of messages
-  ){
-
-    if(msg.role === "user"){
-
-      addUserMessage(
-        msg.content,
-        false
-      );
-
-    }else if(
-      msg.role === "assistant"
-    ){
-
-      addAssistantMessage(
-        msg.content,
-        false,
-        msg.imageId || null
-      );
-    }
+    chatHistoryEl.appendChild(row);
   }
 }
 
@@ -1933,1175 +2136,129 @@ function renderCurrentChat(){
 
 function openChat(id){
 
-  const selected =
+  const chat =
     chats.find(
-      c => c.id === id
+      item => item.id === id
     );
 
-
-  if(!selected){
+  if(!chat){
     return;
   }
 
-
-  /*
-    वर्तमान chat पहले save करें।
-  */
-
-  if(currentChatId){
-
-    saveCurrentChat();
-  }
-
-
   currentChatId =
-    selected.id;
-
+    chat.id;
 
   messages =
-    Array.isArray(
-      selected.messages
-    )
-      ? selected.messages.slice(-60)
+    Array.isArray(chat.messages)
+      ? chat.messages.slice(-60)
       : [];
 
-
   renderCurrentChat();
+  renderChatHistory();
 
+  scrollBottom();
+}
+
+
+/* =========================================================
+   DELETE CHAT
+========================================================= */
+
+function deleteChat(id){
+
+  const chat =
+    chats.find(
+      item => item.id === id
+    );
+
+  if(!chat){
+    return;
+  }
+
+  const ok =
+    confirm(
+      `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
+    );
+
+  if(!ok){
+    return;
+  }
+
+  chats =
+    chats.filter(
+      item => item.id !== id
+    );
+
+
+  if(currentChatId === id){
+
+    currentChatId =
+      null;
+
+    messages = [];
+
+    createNewChat();
+
+    renderCurrentChat();
+
+  }else{
+
+    saveChatHistory();
+  }
 
   renderChatHistory();
 
-  closeMenu();
-
-  scrollBottom();
-}
-
-
-/* =========================================================
-   SAFE MARKDOWN
-   ORIGINAL RENDERER
-========================================================= */
-
-function escapeHTML(str){
-
-  return String(str)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-}
-
-
-function inlineMarkdown(text){
-
-  let s =
-    escapeHTML(text);
-
-
-  s =
-    s.replace(
-      /`([^`]+)`/g,
-      "<code>$1</code>"
-    );
-
-
-  s =
-    s.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-
-      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
-
-
-  s =
-    s.replace(
-      /\*\*([^*]+)\*\*/g,
-      "<strong>$1</strong>"
-    );
-
-
-  s =
-    s.replace(
-      /(^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?:;])/g,
-      "$1<em>$2</em>"
-    );
-
-
-  s =
-    s.replace(
-      /__([^_]+)__/g,
-      "<strong>$1</strong>"
-    );
-
-
-  return s;
-}
-
-
-function renderMarkdown(markdown){
-
-  const text =
-    String(markdown || "")
-      .replace(/\r\n/g,"\n")
-      .replace(/\r/g,"\n");
-
-
-  const lines =
-    text.split("\n");
-
-
-  let html = "";
-
-  let inCode = false;
-
-  let codeBuffer = [];
-
-  let inUl = false;
-
-  let inOl = false;
-
-
-  function closeLists(){
-
-    if(inUl){
-
-      html += "</ul>";
-
-      inUl = false;
-    }
-
-
-    if(inOl){
-
-      html += "</ol>";
-
-      inOl = false;
-    }
-  }
-
-
-  for(
-    let i=0;
-    i<lines.length;
-    i++
-  ){
-
-    const raw =
-      lines[i];
-
-
-    if(
-      raw
-        .trim()
-        .startsWith("```")
-    ){
-
-      if(!inCode){
-
-        closeLists();
-
-        inCode = true;
-
-        codeBuffer = [];
-
-      }else{
-
-        html +=
-          "<pre><code>" +
-          escapeHTML(
-            codeBuffer.join("\n")
-          ) +
-          "</code></pre>";
-
-        inCode = false;
-
-        codeBuffer = [];
-      }
-
-      continue;
-    }
-
-
-    if(inCode){
-
-      codeBuffer.push(raw);
-
-      continue;
-    }
-
-
-    if(!raw.trim()){
-
-      closeLists();
-
-      continue;
-    }
-
-
-    const heading =
-      raw.match(
-        /^(#{1,3})\s+(.+)$/
-      );
-
-
-    if(heading){
-
-      closeLists();
-
-      const level =
-        heading[1].length;
-
-
-      html +=
-        "<h" +
-        level +
-        ">" +
-        inlineMarkdown(
-          heading[2]
-        ) +
-        "</h" +
-        level +
-        ">";
-
-
-      continue;
-    }
-
-
-    const bullet =
-      raw.match(
-        /^\s*[-*+]\s+(.+)$/
-      );
-
-
-    if(bullet){
-
-      if(inOl){
-
-        html += "</ol>";
-
-        inOl = false;
-      }
-
-
-      if(!inUl){
-
-        html += "<ul>";
-
-        inUl = true;
-      }
-
-
-      html +=
-        "<li>" +
-        inlineMarkdown(
-          bullet[1]
-        ) +
-        "</li>";
-
-
-      continue;
-    }
-
-
-    const numbered =
-      raw.match(
-        /^\s*\d+\.\s+(.+)$/
-      );
-
-
-    if(numbered){
-
-      if(inUl){
-
-        html += "</ul>";
-
-        inUl = false;
-      }
-
-
-      if(!inOl){
-
-        html += "<ol>";
-
-        inOl = true;
-      }
-
-
-      html +=
-        "<li>" +
-        inlineMarkdown(
-          numbered[1]
-        ) +
-        "</li>";
-
-
-      continue;
-    }
-
-
-    closeLists();
-
-
-    html +=
-      "<p>" +
-      inlineMarkdown(raw) +
-      "</p>";
-  }
-
-
-  if(inCode){
-
-    html +=
-      "<pre><code>" +
-      escapeHTML(
-        codeBuffer.join("\n")
-      ) +
-      "</code></pre>";
-  }
-
-
-  closeLists();
-
-
-  return html;
-}
-
-
-/* =========================================================
-   MESSAGE UI
-========================================================= */
-
-function addUserMessage(
-  text,
-  save=true
-){
-
-  welcome.style.display =
-    "none";
-
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "message user";
-
-
-  const bubble =
-    document.createElement("div");
-
-  bubble.className =
-    "bubble";
-
-
-  bubble.textContent =
-    String(text || "");
-
-
-  row.appendChild(
-    bubble
+  showToast(
+    "चैट डिलीट कर दी गई।"
   );
-
-
-  chat.appendChild(
-    row
-  );
-
-
-  if(save){
-
-    ensureCurrentChat();
-
-
-    messages.push({
-
-      role:"user",
-
-      content:String(
-        text || ""
-      )
-
-    });
-
-
-    saveCurrentChat();
-  }
-
-
-  scrollBottom();
 }
 
 
 /* =========================================================
-   ASSISTANT MESSAGE
+   DELETE ALL CHATS
 ========================================================= */
 
-function addAssistantMessage(
-  text,
-  save=true,
-  imageId=null
-){
+function deleteAllChats(){
 
-  welcome.style.display =
-    "none";
-
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "message assistant";
-
-
-  const bubble =
-    document.createElement("div");
-
-  bubble.className =
-    "bubble";
-
-
-  bubble.innerHTML =
-    renderMarkdown(
-      String(text || "")
-    );
-
-
-  row.appendChild(
-    bubble
-  );
-
-
-  chat.appendChild(
-    row
-  );
-
-
-  /*
-    Image message होने पर linked image restore करें।
-  */
-
-  if(imageId){
-
-    const creation =
-      findCreationById(
-        imageId
-      );
-
-
-    if(
-      creation &&
-      creation.image
-    ){
-
-      appendImageCardToChat(
-        creation.image,
-        creation.prompt || "",
-        true
-      );
-    }
-  }
-
-
-  if(save){
-
-    ensureCurrentChat();
-
-
-    const message = {
-
-      role:"assistant",
-
-      content:String(
-        text || ""
-      )
-
-    };
-
-
-    if(
-      typeof imageId === "string" &&
-      imageId
-    ){
-
-      message.imageId =
-        imageId;
-    }
-
-
-    messages.push(
-      message
-    );
-
-
-    saveCurrentChat();
-  }
-
-
-  scrollBottom();
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-function showLoading(){
-
-  removeLoading();
-
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "loading-row";
-
-  row.id =
-    "loadingRow";
-
-
-  row.innerHTML = `
-
-    <div class="loading-bubble">
-
-      <span class="dots">
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-      </span>
-
-    </div>
-
-  `;
-
-
-  chat.appendChild(row);
-
-  scrollBottom();
-}
-
-
-function removeLoading(){
-
-  const old =
-    document.getElementById(
-      "loadingRow"
-    );
-
-
-  if(old){
-    old.remove();
-  }
-}
-
-
-/* =========================================================
-   CHAT API
-========================================================= */
-
-async function sendChat(text){
-
-  if(isBusy){
+  if(!chats.length){
+    showToast("डिलीट करने के लिए कोई चैट नहीं है।");
     return;
   }
 
+  const ok =
+    confirm(
+      "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
+    );
 
-  text =
-    String(text || "").trim();
-
-
-  if(!text){
+  if(!ok){
     return;
   }
 
+  chats = [];
 
-  isBusy = true;
+  currentChatId =
+    null;
 
-  sendBtn.disabled = true;
+  messages = [];
 
+  safeRemove(CHAT_LIST_KEY);
+  safeRemove(OLD_CHAT_KEY);
 
-  addUserMessage(
-    text,
-    true
+  createNewChat();
+
+  renderCurrentChat();
+  renderChatHistory();
+
+  closeDrawer();
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+  showToast(
+    "सभी चैट डिलीट कर दी गईं।"
   );
-
-
-  showLoading();
-
-
-  try{
-
-    const contextMessages =
-      messages
-        .slice(-20)
-        .map(
-          m => ({
-
-            role:m.role,
-
-            content:String(
-              m.content || ""
-            ).slice(0,8000)
-
-          })
-        );
-
-
-    const response =
-      await fetch(
-        API + "chat",
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-
-            message:text,
-
-            messages:
-              contextMessages
-
-          })
-        }
-      );
-
-
-    let data = {};
-
-
-    try{
-
-      data =
-        await response.json();
-
-    }catch(e){
-
-      data = {};
-    }
-
-
-    removeLoading();
-
-
-    if(!response.ok){
-
-      throw new Error(
-        data.error ||
-        data.message ||
-        "Server error"
-      );
-    }
-
-
-    const reply =
-      data.reply ||
-      data.answer ||
-      data.response ||
-      "मुझे कोई उत्तर नहीं मिला।";
-
-
-    addAssistantMessage(
-      reply,
-      true
-    );
-
-
-  }catch(error){
-
-    removeLoading();
-
-
-    addAssistantMessage(
-      "माफ़ कीजिए, अभी सर्वर से जवाब नहीं मिल पाया। कृपया थोड़ी देर बाद फिर कोशिश करें।",
-      true
-    );
-
-
-    console.error(
-      "Chat error:",
-      error
-    );
-
-  }finally{
-
-    isBusy = false;
-
-    sendBtn.disabled = false;
-
-    prompt.focus();
-  }
-}
-
-
-/* =========================================================
-   IMAGE INTENT
-========================================================= */
-
-function detectImageIntent(text){
-
-  const t =
-    String(text || "")
-      .toLowerCase()
-      .trim();
-
-
-  const words = [
-
-    "image",
-    "photo",
-    "picture",
-    "generate image",
-    "create image",
-    "make image",
-    "draw",
-    "बनाओ",
-    "बनाएं",
-    "बनाना",
-    "तस्वीर",
-    "फोटो",
-    "चित्र",
-    "इमेज",
-    "जनरेट करो",
-    "इमेज बनाओ",
-    "तस्वीर बनाओ"
-
-  ];
-
-
-  return words.some(
-    word =>
-      t.includes(word)
-  );
-}
-
-
-/* =========================================================
-   IMAGE GENERATION / EDITING
-========================================================= */
-
-async function generateImage(
-  userPrompt
-){
-
-  if(isBusy){
-    return;
-  }
-
-
-  userPrompt =
-    String(
-      userPrompt || ""
-    ).trim();
-
-
-  if(!userPrompt){
-    return;
-  }
-
-
-  isBusy = true;
-
-  sendBtn.disabled = true;
-
-
-  const photoForEdit =
-    selectedPhotoBase64;
-
-  const isPhotoEdit =
-    !!photoForEdit;
-
-
-  addUserMessage(
-    userPrompt,
-    true
-  );
-
-
-  showLoading();
-
-
-  try{
-
-    let response;
-
-
-    if(isPhotoEdit){
-
-      response =
-        await fetch(
-          API + "image",
-          {
-            method:"POST",
-
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-
-              prompt:userPrompt,
-
-              image_b64:
-                photoForEdit,
-
-              ratio:"1:1",
-
-              quality:"hd"
-
-            })
-          }
-        );
-
-
-    }else{
-
-      response =
-        await fetch(
-
-          API +
-          "?prompt=" +
-          encodeURIComponent(
-            userPrompt
-          ) +
-          "&ratio=1:1&quality=hd",
-
-          {
-            method:"GET"
-          }
-
-        );
-    }
-
-
-    if(!response.ok){
-
-      let errorText = "";
-
-      try{
-
-        errorText =
-          await response.text();
-
-      }catch(e){}
-
-
-      throw new Error(
-        errorText ||
-        "Image generation failed"
-      );
-    }
-
-
-    const blob =
-      await response.blob();
-
-
-    const imageUrl =
-      URL.createObjectURL(
-        blob
-      );
-
-
-    removeLoading();
-
-
-    /*
-      पहले image history में persist करें।
-    */
-
-    const imageId =
-      await saveCreation(
-        imageUrl,
-        userPrompt
-      );
-
-
-    /*
-      फिर assistant image message को
-      उसी current chat में save करें।
-    */
-
-    const assistantMessage = {
-
-      role:"assistant",
-
-      content:
-        isPhotoEdit
-          ? "🖼️ Image edited successfully."
-          : "🖼️ Image generated successfully."
-
-    };
-
-
-    if(imageId){
-
-      assistantMessage.imageId =
-        imageId;
-    }
-
-
-    messages.push(
-      assistantMessage
-    );
-
-
-    saveCurrentChat();
-
-
-    /*
-      UI image।
-    */
-
-    addGeneratedImage(
-      imageUrl,
-      userPrompt,
-      imageId,
-      false
-    );
-
-
-    if(isPhotoEdit){
-
-      clearSelectedPhoto();
-
-      imageMode = false;
-
-      imageTool.classList.remove(
-        "active"
-      );
-
-      prompt.placeholder =
-        "Aaru AI से कुछ पूछें...";
-    }
-
-
-  }catch(error){
-
-    removeLoading();
-
-
-    addAssistantMessage(
-      isPhotoEdit
-        ? "माफ़ कीजिए, फोटो edit नहीं हो पाई। कृपया फिर कोशिश करें।"
-        : "माफ़ कीजिए, इमेज अभी generate नहीं हो पाई। कृपया फिर कोशिश करें।",
-      true
-    );
-
-
-    console.error(
-      "Image error:",
-      error
-    );
-
-  }finally{
-
-    isBusy = false;
-
-    sendBtn.disabled = false;
-
-    prompt.focus();
-  }
-}
-
-
-/* =========================================================
-   GENERATED IMAGE UI
-========================================================= */
-
-function appendImageCardToChat(
-  imageUrl,
-  promptText,
-  addAgain=true
-){
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "message assistant";
-
-
-  const card =
-    document.createElement("div");
-
-  card.className =
-    "generated-image-card";
-
-
-  const img =
-    document.createElement("img");
-
-  img.src =
-    imageUrl;
-
-  img.alt =
-    promptText ||
-    "Generated image";
-
-
-  const actions =
-    document.createElement("div");
-
-  actions.className =
-    "generated-actions";
-
-
-  const download =
-    document.createElement("button");
-
-  download.type =
-    "button";
-
-  download.textContent =
-    "Download";
-
-
-  download.onclick =
-    function(){
-
-      const a =
-        document.createElement("a");
-
-      a.href =
-        imageUrl;
-
-      a.download =
-        "aaru-ai-image.png";
-
-      document.body.appendChild(a);
-
-      a.click();
-
-      a.remove();
-    };
-
-
-  actions.appendChild(
-    download
-  );
-
-
-  if(addAgain){
-
-    const again =
-      document.createElement("button");
-
-    again.type =
-      "button";
-
-    again.textContent =
-      "Create another";
-
-
-    again.onclick =
-      function(){
-
-        prompt.value =
-          promptText || "";
-
-        imageMode = true;
-
-        imageTool.classList.add(
-          "active"
-        );
-
-        prompt.focus();
-
-        autoResize();
-      };
-
-
-    actions.appendChild(
-      again
-    );
-  }
-
-
-  card.appendChild(img);
-
-  card.appendChild(
-    actions
-  );
-
-
-  row.appendChild(
-    card
-  );
-
-
-  chat.appendChild(
-    row
-  );
-
-
-  return row;
-}
-
-
-function addGeneratedImage(
-  imageUrl,
-  promptText,
-  imageId=null,
-  saveCreationNow=true
-){
-
-  welcome.style.display =
-    "none";
-
-
-  appendImageCardToChat(
-    imageUrl,
-    promptText,
-    true
-  );
-
-
-  /*
-    सामान्यतः यहाँ false होगा,
-    क्योंकि generateImage पहले ही save कर चुका है।
-  */
-
-  if(
-    saveCreationNow
-  ){
-
-    saveCreation(
-      imageUrl,
-      promptText
-    );
-  }
-
-
-  scrollBottom();
 }
 
 
@@ -3109,970 +2266,932 @@ function addGeneratedImage(
    IMAGE HISTORY
 ========================================================= */
 
-function blobToHistoryDataURL(
-  blob,
-  maxSize=900
-){
+function getCreations(){
 
-  return new Promise(
-    (resolve,reject)=>{
+  const raw =
+    safeGet(IMAGE_KEY);
 
-      const objectUrl =
-        URL.createObjectURL(
-          blob
-        );
-
-
-      const img =
-        new Image();
-
-
-      img.onload =
-        function(){
-
-          try{
-
-            const width =
-              img.naturalWidth || 1;
-
-            const height =
-              img.naturalHeight || 1;
-
-
-            const largest =
-              Math.max(
-                width,
-                height
-              );
-
-
-            const scale =
-              Math.min(
-                1,
-                maxSize / largest
-              );
-
-
-            const canvas =
-              document.createElement(
-                "canvas"
-              );
-
-
-            canvas.width =
-              Math.max(
-                1,
-                Math.round(
-                  width * scale
-                )
-              );
-
-
-            canvas.height =
-              Math.max(
-                1,
-                Math.round(
-                  height * scale
-                )
-              );
-
-
-            const ctx =
-              canvas.getContext(
-                "2d"
-              );
-
-
-            if(!ctx){
-
-              throw new Error(
-                "Canvas unavailable"
-              );
-            }
-
-
-            ctx.drawImage(
-              img,
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-
-            /*
-              WebP storage size छोटा रखता है।
-            */
-
-            let data =
-              canvas.toDataURL(
-                "image/webp",
-                0.86
-              );
-
-
-            /*
-              Browser WebP support न हो तो JPEG।
-            */
-
-            if(
-              !data.startsWith(
-                "data:image/webp"
-              )
-            ){
-
-              data =
-                canvas.toDataURL(
-                  "image/jpeg",
-                  0.86
-                );
-            }
-
-
-            URL.revokeObjectURL(
-              objectUrl
-            );
-
-
-            resolve(data);
-
-          }catch(error){
-
-            URL.revokeObjectURL(
-              objectUrl
-            );
-
-
-            /*
-              Canvas fail होने पर original
-              blob को fallback के रूप में रखें।
-            */
-
-            const reader =
-              new FileReader();
-
-
-            reader.onload =
-              () =>
-                resolve(
-                  reader.result
-                );
-
-
-            reader.onerror =
-              () =>
-                reject(error);
-
-
-            reader.readAsDataURL(
-              blob
-            );
-          }
-        };
-
-
-      img.onerror =
-        function(){
-
-          URL.revokeObjectURL(
-            objectUrl
-          );
-
-
-          const reader =
-            new FileReader();
-
-
-          reader.onload =
-            () =>
-              resolve(
-                reader.result
-              );
-
-
-          reader.onerror =
-            () =>
-              reject(
-                new Error(
-                  "Image conversion failed"
-                )
-              );
-
-
-          reader.readAsDataURL(
-            blob
-          );
-        };
-
-
-      img.src =
-        objectUrl;
-    }
-  );
-}
-
-
-async function saveCreation(
-  url,
-  promptText
-){
-
-  const imageId =
-    makeImageId();
-
+  if(!raw){
+    return [];
+  }
 
   try{
 
-    const response =
-      await fetch(url);
+    const parsed =
+      JSON.parse(raw);
 
-
-    if(!response.ok){
-
-      throw new Error(
-        "Image blob fetch failed"
-      );
+    if(!Array.isArray(parsed)){
+      return [];
     }
 
-
-    const blob =
-      await response.blob();
-
-
-    const dataUrl =
-      await blobToHistoryDataURL(
-        blob,
-        900
+    return parsed
+      .filter(
+        item =>
+          item &&
+          item.image
       );
 
+  }catch(error){
 
-    const newItem = {
-
-      id:imageId,
-
-      image:dataUrl,
-
-      prompt:
-        String(
-          promptText || ""
-        ).slice(0,300),
-
-      time:Date.now()
-
-    };
-
-
-    let history =
-      getImageHistory();
-
-
-    history.unshift(
-      newItem
+    console.warn(
+      "Image history parse failed:",
+      error
     );
 
-
-    history =
-      history
-        .filter(
-          item =>
-            item &&
-            item.image
-        )
-        .slice(0,20);
+    return [];
+  }
+}
 
 
-    let saved =
-      false;
+function saveCreations(list){
 
+  const attempts = [
+    20,
+    12,
+    10,
+    8,
+    6,
+    4,
+    2,
+    1
+  ];
 
-    /*
-      Normal save।
-    */
+  for(const limit of attempts){
 
     try{
 
       localStorage.setItem(
         IMAGE_KEY,
-        JSON.stringify(history)
+        JSON.stringify(
+          list.slice(0,limit)
+        )
       );
 
-      saved = true;
+      return true;
 
     }catch(error){
 
       console.warn(
-        "Image history full:",
+        "Image history save failed:",
+        limit,
         error
       );
     }
+  }
+
+  return false;
+}
 
 
-    /*
-      Quota problem होने पर पुराने records
-      कम करते जाएँ।
-    */
+function findCreationById(id){
 
-    if(!saved){
+  if(!id){
+    return null;
+  }
 
-      for(
-        const keepCount
-        of [12,10,8,6,4,2,1]
-      ){
-
-        try{
-
-          const reduced =
-            history.slice(
-              0,
-              keepCount
-            );
+  return getCreations().find(
+    item =>
+      item.id === id
+  ) || null;
+}
 
 
-          localStorage.setItem(
-            IMAGE_KEY,
-            JSON.stringify(
-              reduced
-            )
-          );
+/* =========================================================
+   IMAGE COMPRESSION
+========================================================= */
 
+async function blobToHistoryDataURL(
+  blob,
+  maxSize = 900
+){
 
-          saved = true;
+  try{
 
-          break;
+    const bitmap =
+      await createImageBitmap(blob);
 
-        }catch(error){}
-      }
+    let width =
+      bitmap.width;
+
+    let height =
+      bitmap.height;
+
+    const scale =
+      Math.min(
+        1,
+        maxSize /
+        Math.max(width,height)
+      );
+
+    width =
+      Math.max(
+        1,
+        Math.round(width * scale)
+      );
+
+    height =
+      Math.max(
+        1,
+        Math.round(height * scale)
+      );
+
+    const canvas =
+      document.createElement("canvas");
+
+    canvas.width =
+      width;
+
+    canvas.height =
+      height;
+
+    const ctx =
+      canvas.getContext("2d");
+
+    ctx.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+    bitmap.close();
+
+    let dataURL =
+      canvas.toDataURL(
+        "image/webp",
+        .86
+      );
+
+    if(
+      !dataURL ||
+      dataURL.indexOf(
+        "data:image/webp"
+      ) !== 0
+    ){
+
+      dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          .84
+        );
     }
 
-
-    renderCreations();
-
-
-    return saved
-      ? imageId
-      : null;
+    return dataURL;
 
   }catch(error){
 
     console.warn(
-      "Image history save failed:",
+      "Image compression failed:",
       error
     );
-
 
     return null;
   }
 }
 
 
+/* =========================================================
+   SAVE CREATION
+========================================================= */
+
+async function saveCreation(
+  imageData,
+  promptText
+){
+
+  if(!imageData){
+    return null;
+  }
+
+  const imageId =
+    makeImageId();
+
+  let historyImage =
+    imageData;
+
+  try{
+
+    const response =
+      await fetch(imageData);
+
+    if(response.ok){
+
+      const blob =
+        await response.blob();
+
+      const compressed =
+        await blobToHistoryDataURL(
+          blob,
+          900
+        );
+
+      if(compressed){
+        historyImage =
+          compressed;
+      }
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Image history compression fetch failed:",
+      error
+    );
+  }
+
+
+  const record = {
+
+    id:imageId,
+
+    image:historyImage,
+
+    prompt:
+      String(promptText || "")
+        .slice(0,300),
+
+    time:
+      Date.now()
+  };
+
+
+  let list =
+    getCreations();
+
+  list.unshift(record);
+
+  if(!saveCreations(list)){
+
+    /* अंतिम fallback */
+    try{
+
+      localStorage.setItem(
+        IMAGE_KEY,
+        JSON.stringify([record])
+      );
+
+    }catch(error){
+
+      console.warn(
+        "Unable to save image:",
+        error
+      );
+    }
+  }
+
+  renderCreations();
+
+  return imageId;
+}
+
+
+/* =========================================================
+   RENDER CREATIONS
+========================================================= */
+
 function renderCreations(){
 
-  creations.innerHTML = "";
+  creationGrid.innerHTML = "";
 
+  const list =
+    getCreations();
 
-  const history =
-    getImageHistory();
-
-
-  if(!history.length){
+  if(!list.length){
 
     const empty =
       document.createElement("div");
 
     empty.className =
-      "chat-history-empty";
+      "empty-history";
 
     empty.textContent =
-      "अभी कोई image नहीं है।";
+      "अभी कोई image creation नहीं है।";
 
-    creations.appendChild(
-      empty
-    );
+    creationGrid.appendChild(empty);
 
     return;
   }
 
 
-  for(
-    const item of history
-  ){
+  list.slice(0,20).forEach(
+    item => {
 
-    if(
-      !item ||
-      !item.image
-    ){
-      continue;
-    }
+      const card =
+        document.createElement("div");
 
+      card.className =
+        "creation-card";
 
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "creation-item";
-
-
-    const img =
-      document.createElement("img");
-
-    img.src =
-      item.image;
-
-    img.alt =
-      item.prompt ||
-      "Creation";
-
-
-    const info =
-      document.createElement("div");
-
-    info.className =
-      "creation-info";
-
-
-    const text =
-      document.createElement("div");
-
-    text.className =
-      "creation-prompt";
-
-    text.textContent =
-      item.prompt ||
-      "Image";
-
-
-    info.appendChild(
-      text
-    );
-
-
-    card.appendChild(
-      img
-    );
-
-    card.appendChild(
-      info
-    );
-
-
-    card.onclick =
-      function(){
-
-        showCreationInChat(
-          item.image,
-          item.prompt
-        );
-
-        closeMenu();
-      };
-
-
-    creations.appendChild(
-      card
-    );
-  }
-}
-
-
-function showCreationInChat(
-  image,
-  promptText
-){
-
-  welcome.style.display =
-    "none";
-
-
-  appendImageCardToChat(
-    image,
-    promptText,
-    false
-  );
-
-
-  scrollBottom();
-}
-
-
-/* =========================================================
-   PHOTO RESIZE
-========================================================= */
-
-function resizeImageForReference(
-  file,
-  maxSize=480
-){
-
-  return new Promise(
-    (resolve,reject)=>{
 
       const img =
-        new Image();
-
-
-      const objectUrl =
-        URL.createObjectURL(
-          file
-        );
-
-
-      img.onload =
-        function(){
-
-          try{
-
-            const width =
-              img.naturalWidth;
-
-            const height =
-              img.naturalHeight;
-
-
-            const largest =
-              Math.max(
-                width,
-                height
-              );
-
-
-            const scale =
-              Math.min(
-                1,
-                maxSize / largest
-              );
-
-
-            const canvas =
-              document.createElement(
-                "canvas"
-              );
-
-
-            canvas.width =
-              Math.max(
-                1,
-                Math.round(
-                  width * scale
-                )
-              );
-
-
-            canvas.height =
-              Math.max(
-                1,
-                Math.round(
-                  height * scale
-                )
-              );
-
-
-            const ctx =
-              canvas.getContext(
-                "2d"
-              );
-
-
-            if(!ctx){
-
-              throw new Error(
-                "Canvas not supported"
-              );
-            }
-
-
-            ctx.drawImage(
-              img,
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-
-            const result =
-              canvas.toDataURL(
-                "image/jpeg",
-                0.86
-              );
-
-
-            URL.revokeObjectURL(
-              objectUrl
-            );
-
-
-            resolve(result);
-
-          }catch(error){
-
-            URL.revokeObjectURL(
-              objectUrl
-            );
-
-            reject(error);
-          }
-        };
-
-
-      img.onerror =
-        function(){
-
-          URL.revokeObjectURL(
-            objectUrl
-          );
-
-
-          reject(
-            new Error(
-              "Image load failed"
-            )
-          );
-        };
-
+        document.createElement("img");
 
       img.src =
-        objectUrl;
+        item.image;
+
+      img.alt =
+        item.prompt || "Creation";
+
+
+      img.addEventListener(
+        "click",
+        () =>
+          openImageViewer(
+            item.image
+          )
+      );
+
+
+      const prompt =
+        document.createElement("div");
+
+      prompt.className =
+        "creation-prompt";
+
+      prompt.textContent =
+        item.prompt ||
+        "Image";
+
+
+      card.appendChild(img);
+      card.appendChild(prompt);
+
+      creationGrid.appendChild(card);
     }
   );
 }
 
 
 /* =========================================================
-   PHOTO
+   IMAGE VIEWER
 ========================================================= */
 
-function openPhotoPicker(){
+function openImageViewer(src){
 
-  if(isBusy){
+  if(!src){
     return;
   }
 
-  photoInput.click();
+  viewerImg.src =
+    src;
+
+  imageViewer.classList.add(
+    "open"
+  );
 }
 
 
-photoInput.onchange =
-  async function(){
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+  viewerImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   PHOTO INPUT
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
 
     const file =
-      this.files &&
-      this.files[0];
-
+      event.target.files &&
+      event.target.files[0];
 
     if(!file){
       return;
     }
 
+    if(!file.type.startsWith("image/")){
 
-    if(
-      !file.type ||
-      !file.type.startsWith(
-        "image/"
-      )
-    ){
-
-      clearSelectedPhoto();
+      showToast(
+        "कृपया image file चुनें।"
+      );
 
       return;
     }
-
 
     try{
 
-      const originalUrl =
-        URL.createObjectURL(
-          file
-        );
-
-
-      if(
-        selectedPhotoUrl &&
-        selectedPhotoUrl.startsWith(
-          "blob:"
-        )
-      ){
-
-        try{
-
-          URL.revokeObjectURL(
-            selectedPhotoUrl
-          );
-
-        }catch(e){}
-      }
-
+      selectedPhotoBase64 =
+        await fileToDataURL(file);
 
       selectedPhotoUrl =
-        originalUrl;
+        selectedPhotoBase64;
 
-
-      previewImage.src =
+      photoPreviewImg.src =
         selectedPhotoUrl;
 
-
-      photoPreview.style.display =
-        "block";
-
-
-      selectedPhotoBase64 =
-        await resizeImageForReference(
-          file,
-          480
-        );
-
+      photoPreview.classList.add(
+        "show"
+      );
 
       imageMode = true;
 
+      updateModeButtons();
 
-      imageTool.classList.add(
-        "active"
+      showToast(
+        "Photo तैयार है। अब edit instruction भेजें।"
       );
-
-
-      prompt.placeholder =
-        "फोटो में क्या edit करना है?";
-
-
-      prompt.focus();
-
 
     }catch(error){
 
-      console.error(
-        "Photo processing error:",
-        error
+      console.error(error);
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
       );
-
-
-      clearSelectedPhoto();
-
-
-      alert(
-        "फोटो तैयार नहीं हो पाई। कृपया दूसरी फोटो चुनें।"
-      );
-    }
-  };
-
-
-function clearSelectedPhoto(){
-
-  selectedPhotoBase64 = null;
-
-
-  if(selectedPhotoUrl){
-
-    if(
-      selectedPhotoUrl.startsWith(
-        "blob:"
-      )
-    ){
-
-      try{
-
-        URL.revokeObjectURL(
-          selectedPhotoUrl
-        );
-
-      }catch(e){}
     }
   }
+);
 
 
-  selectedPhotoUrl = null;
+function fileToDataURL(file){
 
-  previewImage.src = "";
+  return new Promise(
+    (resolve,reject) => {
 
-  photoPreview.style.display =
-    "none";
+      const reader =
+        new FileReader();
 
-  photoInput.value = "";
+      reader.onload =
+        () => resolve(
+          reader.result
+        );
 
+      reader.onerror =
+        reject;
 
-  imageMode = false;
-
-  imageTool.classList.remove(
-    "active"
+      reader.readAsDataURL(file);
+    }
   );
-
-  prompt.placeholder =
-    "Aaru AI से कुछ पूछें...";
 }
 
 
 /* =========================================================
-   DRAWER
+   REMOVE PHOTO
 ========================================================= */
 
-function openMenu(){
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    () => {
 
-  drawer.classList.add(
-    "open"
+      selectedPhotoBase64 =
+        null;
+
+      selectedPhotoUrl =
+        null;
+
+      photoInput.value =
+        "";
+
+      photoPreview.classList.remove(
+        "show"
+      );
+    }
   );
-
-  overlay.classList.add(
-    "show"
-  );
-}
-
-
-function closeMenu(){
-
-  drawer.classList.remove(
-    "open"
-  );
-
-  overlay.classList.remove(
-    "show"
-  );
-}
-
-
-menuBtn.onclick =
-  openMenu;
-
-closeDrawer.onclick =
-  closeMenu;
-
-overlay.onclick =
-  closeMenu;
 
 
 /* =========================================================
-   NEW CHAT
+   MODE
 ========================================================= */
 
-newChatBtn.onclick =
-  function(){
+function updateModeButtons(){
 
-    if(isBusy){
-      return;
-    }
+  chatModeBtn.classList.toggle(
+    "active",
+    !imageMode
+  );
 
-
-    /*
-      वर्तमान chat को पहले सुरक्षित करें।
-    */
-
-    if(currentChatId){
-
-      saveCurrentChat();
-    }
+  imageModeBtn.classList.toggle(
+    "active",
+    imageMode
+  );
+}
 
 
-    /*
-      अब सचमुच नया persistent chat बनाएँ।
-      पहले वाले code में currentChatId=null
-      किया जा रहा था, इसलिए refresh पर latest
-      पुरानी chat फिर से select हो जाती थी।
-    */
-
-    createNewChat();
-
-
-    renderCurrentChat();
-
-    renderChatHistory();
-
-
-    clearSelectedPhoto();
-
+chatModeBtn.addEventListener(
+  "click",
+  () => {
 
     imageMode = false;
 
-
-    imageTool.classList.remove(
-      "active"
-    );
-
-
-    prompt.placeholder =
-      "Aaru AI से कुछ पूछें...";
+    updateModeButtons();
+  }
+);
 
 
-    closeMenu();
+imageModeBtn.addEventListener(
+  "click",
+  () => {
 
-    scrollTop();
+    imageMode = true;
 
-    prompt.focus();
-  };
+    updateModeButtons();
+  }
+);
 
 
 /* =========================================================
-   DELETE ALL
+   IMAGE DATA NORMALIZATION
 ========================================================= */
 
-deleteAllChatsBtn.onclick =
-  deleteAllChats;
+function normalizeImageResult(data){
+
+  if(!data){
+    return null;
+  }
+
+  if(typeof data === "string"){
+
+    if(
+      data.startsWith("data:image/")
+    ){
+      return data;
+    }
+
+    return (
+      "data:image/png;base64," +
+      data
+    );
+  }
+
+  if(data.image){
+
+    return normalizeImageResult(
+      data.image
+    );
+  }
+
+  if(data.result){
+
+    return normalizeImageResult(
+      data.result
+    );
+  }
+
+  if(data.data){
+
+    return normalizeImageResult(
+      data.data
+    );
+  }
+
+  return null;
+}
+
+
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
+
+async function generateImage(
+  prompt
+){
+
+  const payload = {
+
+    prompt:
+      String(prompt || ""),
+
+    ratio:
+      "1:1",
+
+    quality:
+      "standard"
+  };
+
+  if(selectedPhotoBase64){
+
+    payload.image_b64 =
+      selectedPhotoBase64;
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(payload)
+      }
+    );
+
+
+  const text =
+    await response.text();
+
+  let data = null;
+
+  try{
+
+    data =
+      JSON.parse(text);
+
+  }catch(error){
+
+    data = null;
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      text ||
+      "Image generation failed"
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+  return image;
+}
+
+
+/* =========================================================
+   CHAT API
+========================================================= */
+
+async function sendChatRequest(){
+
+  const cleanMessages =
+    messages
+      .slice(-19)
+      .map(msg => ({
+        role:
+          msg.role === "user"
+            ? "user"
+            : "assistant",
+
+        content:
+          String(msg.content || "")
+            .slice(0,8000)
+      }));
+
+
+  const response =
+    await fetch(
+      API + "chat",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+
+            message:
+              messages[messages.length - 1]
+                ?.content || "",
+
+            messages:
+              cleanMessages
+          })
+      }
+    );
+
+
+  const text =
+    await response.text();
+
+  let data = null;
+
+  try{
+
+    data =
+      JSON.parse(text);
+
+  }catch(error){
+
+    data = null;
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      text ||
+      "Chat request failed"
+    );
+  }
+
+
+  if(typeof data === "string"){
+    return data;
+  }
+
+
+  return (
+    data?.response ??
+    data?.answer ??
+    data?.text ??
+    data?.message ??
+    data?.output ??
+    data?.content ??
+    ""
+  );
+}
 
 
 /* =========================================================
    SEND
 ========================================================= */
 
-sendBtn.onclick =
-  async function(){
+async function handleSend(){
 
-    const text =
-      prompt.value.trim();
+  if(isBusy){
+    return;
+  }
 
+  const prompt =
+    promptEl.value.trim();
 
-    if(!text || isBusy){
-      return;
-    }
+  if(!prompt){
 
-
-    const hasPhoto =
-      !!selectedPhotoBase64;
-
-
-    prompt.value = "";
-
-    autoResize();
-
-
-    if(hasPhoto){
-
-      imageMode = true;
-
-      imageTool.classList.add(
-        "active"
-      );
-
-
-      await generateImage(
-        text
-      );
-
-      return;
-    }
-
-
-    if(
-      imageMode ||
-      detectImageIntent(text)
-    ){
-
-      await generateImage(
-        text
-      );
-
-      return;
-    }
-
-
-    await sendChat(
-      text
+    showToast(
+      "पहले कुछ लिखें।"
     );
-  };
+
+    return;
+  }
+
+
+  ensureCurrentChat();
+
+
+  isBusy = true;
+
+  sendBtn.disabled =
+    true;
+
+
+  addUserMessage(
+    prompt,
+    true
+  );
+
+
+  promptEl.value = "";
+
+  autoResize();
+
+  scrollBottom();
+
+
+  try{
+
+    if(imageMode){
+
+      showTyping();
+
+      const image =
+        await generateImage(
+          prompt
+        );
+
+      hideTyping();
+
+      const imageId =
+        await saveCreation(
+          image,
+          prompt
+        );
+
+
+      addAssistantMessage(
+        "🖼️ Image generated successfully.",
+        false,
+        imageId
+      );
+
+      saveCurrentChat();
+
+
+      selectedPhotoBase64 =
+        null;
+
+      selectedPhotoUrl =
+        null;
+
+      photoInput.value =
+        "";
+
+      photoPreview.classList.remove(
+        "show"
+      );
+
+    }else{
+
+      showTyping();
+
+      const answer =
+        await sendChatRequest();
+
+      hideTyping();
+
+      addAssistantMessage(
+        answer ||
+        "माफ़ कीजिए, अभी कोई जवाब नहीं मिला।",
+        true
+      );
+    }
+
+
+  }catch(error){
+
+    console.error(error);
+
+    hideTyping();
+
+    addAssistantMessage(
+      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      true
+    );
+
+    showToast(
+      error?.message ||
+      "Request failed"
+    );
+
+  }finally{
+
+    isBusy = false;
+
+    sendBtn.disabled =
+      false;
+
+    scrollBottom();
+
+    promptEl.focus();
+  }
+}
+
+
+/* =========================================================
+   TEXTAREA AUTO RESIZE
+========================================================= */
+
+function autoResize(){
+
+  promptEl.style.height =
+    "auto";
+
+  promptEl.style.height =
+    Math.min(
+      promptEl.scrollHeight,
+      150
+    ) + "px";
+}
+
+
+promptEl.addEventListener(
+  "input",
+  autoResize
+);
 
 
 /* =========================================================
    ENTER TO SEND
 ========================================================= */
 
-prompt.addEventListener(
+promptEl.addEventListener(
   "keydown",
-  function(event){
+  event => {
 
     if(
       event.key === "Enter" &&
@@ -4081,122 +3200,204 @@ prompt.addEventListener(
 
       event.preventDefault();
 
-      sendBtn.click();
+      handleSend();
     }
   }
 );
 
 
 /* =========================================================
-   AUTO RESIZE
+   SEND BUTTON
 ========================================================= */
 
-function autoResize(){
-
-  prompt.style.height =
-    "auto";
-
-
-  prompt.style.height =
-    Math.min(
-      prompt.scrollHeight,
-      130
-    ) + "px";
-}
-
-
-prompt.addEventListener(
-  "input",
-  autoResize
+sendBtn.addEventListener(
+  "click",
+  handleSend
 );
 
 
 /* =========================================================
-   IMAGE TOOL
+   PHOTO BUTTON
 ========================================================= */
 
-imageTool.onclick =
-  function(){
+document
+  .getElementById("photoBtn")
+  .addEventListener(
+    "click",
+    () => {
 
-    imageMode =
-      !imageMode;
-
-
-    imageTool.classList.toggle(
-      "active",
-      imageMode
-    );
-
-
-    if(imageMode){
-
-      prompt.placeholder =
-        selectedPhotoBase64
-          ? "फोटो में क्या edit करना है?"
-          : "क्या image बनानी है?";
-
-    }else{
-
-      prompt.placeholder =
-        "Aaru AI से कुछ पूछें...";
+      photoInput.click();
     }
-
-
-    prompt.focus();
-  };
+  );
 
 
 /* =========================================================
-   PHOTO TOOL
+   DRAWER
 ========================================================= */
 
-photoTool.onclick =
-  openPhotoPicker;
+function openDrawer(){
 
-photoBtn.onclick =
-  openPhotoPicker;
+  drawer.classList.add(
+    "open"
+  );
 
-clearPhotoBtn.onclick =
-  clearSelectedPhoto;
+  drawerOverlay.classList.add(
+    "open"
+  );
+}
+
+
+function closeDrawer(){
+
+  drawer.classList.remove(
+    "open"
+  );
+
+  drawerOverlay.classList.remove(
+    "open"
+  );
+}
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener(
+    "click",
+    openDrawer
+  );
+
+
+document
+  .getElementById("closeDrawer")
+  .addEventListener(
+    "click",
+    closeDrawer
+  );
+
+
+drawerOverlay.addEventListener(
+  "click",
+  closeDrawer
+);
 
 
 /* =========================================================
-   EXAMPLE
+   NEW CHAT
 ========================================================= */
 
-exampleTool.onclick =
-  function(){
+function startNewChat(){
 
-    const examples = [
+  if(isBusy){
+    return;
+  }
 
-      "भारत की आज की सबसे बड़ी खबर क्या है?",
+  saveCurrentChat();
 
-      "मुझे एक futuristic Indian city की cinematic image बनाओ",
+  createNewChat();
 
-      "आज की तारीख में OpenAI की सबसे नई खबर क्या है?",
+  renderCurrentChat();
 
-      "एक सुंदर भारतीय गाँव की realistic तस्वीर बनाओ"
+  renderChatHistory();
 
-    ];
+  imageMode = false;
+
+  updateModeButtons();
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  closeDrawer();
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+  setTimeout(
+    () => promptEl.focus(),
+    100
+  );
+}
 
 
-    const selected =
-      examples[
-        Math.floor(
-          Math.random() *
-          examples.length
-        )
-      ];
+document
+  .getElementById("newChatBtn")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
 
 
-    prompt.value =
-      selected;
+document
+  .getElementById("newChatTop")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
 
 
-    autoResize();
+/* =========================================================
+   DELETE ALL
+========================================================= */
 
-    prompt.focus();
-  };
+document
+  .getElementById("deleteAllBtn")
+  .addEventListener(
+    "click",
+    deleteAllChats
+  );
+
+
+/* =========================================================
+   IMAGE VIEWER EVENTS
+========================================================= */
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closeImageViewer
+  );
+
+
+imageViewer.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target === imageViewer
+    ){
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   ESC KEY
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key === "Escape"){
+
+      closeDrawer();
+      closeImageViewer();
+    }
+  }
+);
 
 
 /* =========================================================
@@ -4206,40 +3407,31 @@ exampleTool.onclick =
 loadChatHistory();
 
 
-/*
-  अगर कोई chat नहीं है तो नया persistent chat बनाएँ।
-*/
-
 if(!chats.length){
 
   createNewChat();
 
 }else{
 
-  /*
-    हमेशा latest updated chat ही restore करें।
-    New Chat अब पहले से ही chats में persisted है,
-    इसलिए refresh पर वही वापस आएगी।
-  */
-
   const latest =
-    [...chats].sort(
-      (a,b) =>
-        (b.updatedAt || 0) -
-        (a.updatedAt || 0)
-    )[0];
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )[0];
 
+  if(latest){
 
-  currentChatId =
-    latest.id;
+    currentChatId =
+      latest.id;
 
-
-  messages =
-    Array.isArray(
-      latest.messages
-    )
-      ? latest.messages.slice(-60)
-      : [];
+    messages =
+      Array.isArray(latest.messages)
+        ? latest.messages.slice(-60)
+        : [];
+  }
 }
 
 
@@ -4249,35 +3441,65 @@ renderChatHistory();
 
 renderCreations();
 
+updateModeButtons();
+
 autoResize();
 
 scrollBottom();
 
 
 /* =========================================================
-   PAGE VISIBILITY / SAFETY SAVE
+   SAVE BEFORE PAGE LEAVE
+========================================================= */
+
+window.addEventListener(
+  "pagehide",
+  () => {
+
+    try{
+
+      if(currentChatId){
+        saveCurrentChat();
+      }
+
+    }catch(error){
+
+      console.warn(
+        "pagehide save failed:",
+        error
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   VISIBILITY SAVE
 ========================================================= */
 
 document.addEventListener(
   "visibilitychange",
-  function(){
+  () => {
 
     if(
       document.visibilityState ===
       "hidden"
     ){
 
-      saveCurrentChat();
+      try{
+
+        if(currentChatId){
+          saveCurrentChat();
+        }
+
+      }catch(error){
+
+        console.warn(
+          "visibility save failed:",
+          error
+        );
+      }
     }
-  }
-);
-
-
-window.addEventListener(
-  "pagehide",
-  function(){
-
-    saveCurrentChat();
   }
 );
 
