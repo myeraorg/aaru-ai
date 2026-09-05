@@ -18,14 +18,14 @@ body{
   margin:0;
   padding:0;
   width:100%;
-  height:100%;
-  overflow:hidden;
+  min-height:100%;
   font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
   background:#0f1117;
   color:#fff;
+  overscroll-behavior-y:auto;
 }
 
 button,
@@ -40,7 +40,7 @@ button{
 
 #app{
   width:100%;
-  height:100dvh;
+  min-height:100dvh;
   display:flex;
   flex-direction:column;
 }
@@ -98,6 +98,7 @@ main{
   min-height:0;
   overflow-y:auto;
   overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
 }
 
@@ -312,6 +313,7 @@ main{
   flex:1;
   overflow-y:auto;
   padding:8px 10px 20px;
+  -webkit-overflow-scrolling:touch;
 }
 
 .history-section{
@@ -1011,6 +1013,19 @@ function makeChatId(){
 }
 
 
+function makeImageId(){
+
+  return (
+    "img_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,10)
+  );
+}
+
+
 function makeChatTitle(text){
 
   text =
@@ -1263,6 +1278,64 @@ function createNewChat(){
 }
 
 
+/* =========================================================
+   IMAGE RECORD LOOKUP
+========================================================= */
+
+function getImageHistory(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        IMAGE_KEY
+      );
+
+    const parsed =
+      raw
+        ? JSON.parse(raw)
+        : [];
+
+    return Array.isArray(parsed)
+      ? parsed
+      : [];
+
+  }catch(error){
+
+    console.warn(
+      "Image history read failed:",
+      error
+    );
+
+    return [];
+  }
+}
+
+
+function findCreationById(id){
+
+  if(!id){
+    return null;
+  }
+
+  const history =
+    getImageHistory();
+
+  return (
+    history.find(
+      item =>
+        item &&
+        item.id === id &&
+        item.image
+    ) || null
+  );
+}
+
+
+/* =========================================================
+   SAVE CURRENT CHAT
+========================================================= */
+
 function saveCurrentChat(){
 
   if(!currentChatId){
@@ -1289,12 +1362,36 @@ function saveCurrentChat(){
           typeof m.content === "string"
       )
       .map(
-        m => ({
-          role:m.role,
-          content:String(
-            m.content || ""
-          ).slice(0,8000)
-        })
+        m => {
+
+          const saved = {
+
+            role:m.role,
+
+            content:String(
+              m.content || ""
+            ).slice(0,8000)
+
+          };
+
+
+          /*
+            Image message का relation
+            preserve करें।
+          */
+
+          if(
+            m.imageId &&
+            typeof m.imageId === "string"
+          ){
+
+            saved.imageId =
+              m.imageId;
+          }
+
+
+          return saved;
+        }
       )
       .slice(-40);
 
@@ -1526,6 +1623,11 @@ function deleteAllChats(){
   );
 
 
+  localStorage.removeItem(
+    OLD_CHAT_KEY
+  );
+
+
   chat.innerHTML = "";
 
   chat.appendChild(
@@ -1602,7 +1704,8 @@ function openChat(id){
 
       addAssistantMessage(
         msg.content,
-        false
+        false,
+        msg.imageId || null
       );
     }
   }
@@ -1618,6 +1721,7 @@ function openChat(id){
 
 /* =========================================================
    SAFE MARKDOWN
+   ORIGINAL RENDERER — UNCHANGED
 ========================================================= */
 
 function escapeHTML(str){
@@ -1995,9 +2099,15 @@ function addUserMessage(
 }
 
 
+/*
+  imageId optional है।
+  इसी से refresh के बाद image restore होगी।
+*/
+
 function addAssistantMessage(
   text,
-  save=true
+  save=true,
+  imageId=null
 ){
 
   welcome.style.display =
@@ -2034,6 +2144,33 @@ function addAssistantMessage(
   );
 
 
+  /*
+    अगर assistant message किसी image
+    से linked है तो image भी render करें।
+  */
+
+  if(imageId){
+
+    const creation =
+      findCreationById(
+        imageId
+      );
+
+
+    if(
+      creation &&
+      creation.image
+    ){
+
+      appendImageCardToChat(
+        creation.image,
+        creation.prompt || "",
+        false
+      );
+    }
+  }
+
+
   if(save){
 
     if(!currentChatId){
@@ -2042,7 +2179,7 @@ function addAssistantMessage(
     }
 
 
-    messages.push({
+    const message = {
 
       role:"assistant",
 
@@ -2050,7 +2187,19 @@ function addAssistantMessage(
         text || ""
       )
 
-    });
+    };
+
+
+    if(imageId){
+
+      message.imageId =
+        imageId;
+    }
+
+
+    messages.push(
+      message
+    );
 
 
     saveCurrentChat();
@@ -2326,11 +2475,6 @@ async function generateImage(
   sendBtn.disabled = true;
 
 
-  /*
-    Photo की current value को request से
-    पहले सुरक्षित कर रहे हैं।
-  */
-
   const photoForEdit =
     selectedPhotoBase64;
 
@@ -2352,10 +2496,6 @@ async function generateImage(
     let response;
 
 
-    /* ========================================
-       PHOTO EDIT
-    ======================================== */
-
     if(isPhotoEdit){
 
       response =
@@ -2373,10 +2513,6 @@ async function generateImage(
 
               prompt:userPrompt,
 
-              /*
-                यही Worker का सही field है।
-              */
-
               image_b64:
                 photoForEdit,
 
@@ -2390,10 +2526,6 @@ async function generateImage(
 
 
     }else{
-
-      /* ======================================
-         NORMAL IMAGE GENERATION
-      ====================================== */
 
       response =
         await fetch(
@@ -2445,13 +2577,24 @@ async function generateImage(
     removeLoading();
 
 
-    addGeneratedImage(
-      imageUrl,
-      userPrompt
-    );
+    /*
+      पहले image को persistent storage में
+      save करें और ID प्राप्त करें।
+    */
+
+    const imageId =
+      await saveCreation(
+        imageUrl,
+        userPrompt
+      );
 
 
-    messages.push({
+    /*
+      Chat में image-linked assistant message
+      save करें।
+    */
+
+    const assistantMessage = {
 
       role:"assistant",
 
@@ -2460,15 +2603,38 @@ async function generateImage(
           ? "🖼️ Image edited successfully."
           : "🖼️ Image generated successfully."
 
-    });
+    };
+
+
+    if(imageId){
+
+      assistantMessage.imageId =
+        imageId;
+    }
+
+
+    messages.push(
+      assistantMessage
+    );
 
 
     saveCurrentChat();
 
 
     /*
-      EDIT सफल होने के बाद composer से
-      photo हटाएँ।
+      UI में image दिखाएँ।
+    */
+
+    addGeneratedImage(
+      imageUrl,
+      userPrompt,
+      imageId,
+      false
+    );
+
+
+    /*
+      EDIT सफल होने के बाद photo हटाएँ।
     */
 
     if(isPhotoEdit){
@@ -2519,14 +2685,11 @@ async function generateImage(
    GENERATED IMAGE UI
 ========================================================= */
 
-function addGeneratedImage(
+function appendImageCardToChat(
   imageUrl,
-  promptText
+  promptText,
+  addAgain=true
 ){
-
-  welcome.style.display =
-    "none";
-
 
   const row =
     document.createElement("div");
@@ -2586,38 +2749,42 @@ function addGeneratedImage(
     };
 
 
-  const again =
-    document.createElement("button");
-
-  again.textContent =
-    "Create another";
-
-
-  again.onclick =
-    function(){
-
-      prompt.value =
-        promptText || "";
-
-      imageMode = true;
-
-      imageTool.classList.add(
-        "active"
-      );
-
-      prompt.focus();
-
-      autoResize();
-    };
-
-
   actions.appendChild(
     download
   );
 
-  actions.appendChild(
-    again
-  );
+
+  if(addAgain){
+
+    const again =
+      document.createElement("button");
+
+    again.textContent =
+      "Create another";
+
+
+    again.onclick =
+      function(){
+
+        prompt.value =
+          promptText || "";
+
+        imageMode = true;
+
+        imageTool.classList.add(
+          "active"
+        );
+
+        prompt.focus();
+
+        autoResize();
+      };
+
+
+    actions.appendChild(
+      again
+    );
+  }
 
 
   card.appendChild(img);
@@ -2632,10 +2799,42 @@ function addGeneratedImage(
   chat.appendChild(row);
 
 
-  saveCreation(
+  return row;
+}
+
+
+function addGeneratedImage(
+  imageUrl,
+  promptText,
+  imageId=null,
+  saveCreationNow=true
+){
+
+  welcome.style.display =
+    "none";
+
+
+  /*
+    अगर image पहले ही save हो चुकी है,
+    दोबारा save नहीं करेंगे।
+  */
+
+  appendImageCardToChat(
     imageUrl,
-    promptText
+    promptText,
+    true
   );
+
+
+  if(
+    saveCreationNow
+  ){
+
+    saveCreation(
+      imageUrl,
+      promptText
+    );
+  }
 
 
   scrollBottom();
@@ -2651,106 +2850,178 @@ function saveCreation(
   promptText
 ){
 
-  try{
+  return new Promise(
+    resolve => {
 
-    const history =
-      JSON.parse(
-        localStorage.getItem(
-          IMAGE_KEY
-        ) || "[]"
-      );
+      const imageId =
+        makeImageId();
 
 
-    fetch(url)
+      fetch(url)
 
-      .then(
-        response =>
-          response.blob()
-      )
+        .then(
+          response => {
 
-      .then(
-        blob => {
+            if(!response.ok){
 
-          const reader =
-            new FileReader();
+              throw new Error(
+                "Image blob fetch failed"
+              );
+            }
 
+            return response.blob();
+          }
+        )
 
-          reader.onload =
-            function(){
+        .then(
+          blob => {
 
-              history.unshift({
-
-                image:
-                  reader.result,
-
-                prompt:
-                  String(
-                    promptText || ""
-                  ).slice(0,300),
-
-                time:
-                  Date.now()
-
-              });
+            const reader =
+              new FileReader();
 
 
-              history.splice(20);
+            reader.onload =
+              function(){
+
+                const newItem = {
+
+                  id:imageId,
+
+                  image:
+                    reader.result,
+
+                  prompt:
+                    String(
+                      promptText || ""
+                    ).slice(0,300),
+
+                  time:
+                    Date.now()
+
+                };
 
 
-              try{
+                let history =
+                  getImageHistory();
 
-                localStorage.setItem(
 
-                  IMAGE_KEY,
-
-                  JSON.stringify(
-                    history
-                  )
-
+                history.unshift(
+                  newItem
                 );
 
-              }catch(error){
 
-                history.splice(8);
+                history =
+                  history
+                    .filter(
+                      item =>
+                        item &&
+                        item.image
+                    )
+                    .slice(0,20);
 
+
+                let saved = false;
+
+
+                /*
+                  पहले normal save।
+                */
 
                 try{
 
                   localStorage.setItem(
-
                     IMAGE_KEY,
-
-                    JSON.stringify(
-                      history
-                    )
-
+                    JSON.stringify(history)
                   );
 
-                }catch(e){}
-              }
+                  saved = true;
+
+                }catch(error){
+
+                  console.warn(
+                    "Image history full, reducing:",
+                    error
+                  );
+                }
 
 
-              renderCreations();
-            };
+                /*
+                  Storage full हो तो धीरे-धीरे
+                  पुरानी images हटाएँ।
+                */
+
+                if(!saved){
+
+                  for(
+                    const keepCount
+                    of [12,10,8,6,4,2,1]
+                  ){
+
+                    try{
+
+                      const reduced =
+                        history.slice(
+                          0,
+                          keepCount
+                        );
 
 
-          reader.readAsDataURL(
-            blob
-          );
-        }
-      )
+                      localStorage.setItem(
+                        IMAGE_KEY,
+                        JSON.stringify(
+                          reduced
+                        )
+                      );
 
-      .catch(
-        ()=>{}
-      );
 
-  }catch(error){
+                      saved = true;
 
-    console.warn(
-      "History save failed:",
-      error
-    );
-  }
+                      break;
+
+                    }catch(error){}
+
+                  }
+                }
+
+
+                renderCreations();
+
+
+                resolve(
+                  saved
+                    ? imageId
+                    : null
+                );
+              };
+
+
+            reader.onerror =
+              function(){
+
+                resolve(null);
+              };
+
+
+            reader.readAsDataURL(
+              blob
+            );
+          }
+        )
+
+        .catch(
+          error => {
+
+            console.warn(
+              "Image history save failed:",
+              error
+            );
+
+            resolve(null);
+          }
+        );
+
+    }
+  );
 }
 
 
@@ -2759,27 +3030,8 @@ function renderCreations(){
   creations.innerHTML = "";
 
 
-  let history = [];
-
-
-  try{
-
-    history =
-      JSON.parse(
-        localStorage.getItem(
-          IMAGE_KEY
-        ) || "[]"
-      );
-
-  }catch(e){
-
-    history = [];
-  }
-
-
-  if(!Array.isArray(history)){
-    history = [];
-  }
+  const history =
+    getImageHistory();
 
 
   if(!history.length){
@@ -2889,79 +3141,11 @@ function showCreationInChat(
     "none";
 
 
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "message assistant";
-
-
-  const card =
-    document.createElement("div");
-
-  card.className =
-    "generated-image-card";
-
-
-  const img =
-    document.createElement("img");
-
-  img.src =
-    image;
-
-  img.alt =
-    promptText || "Generated image";
-
-
-  const actions =
-    document.createElement("div");
-
-  actions.className =
-    "generated-actions";
-
-
-  const download =
-    document.createElement("button");
-
-  download.textContent =
-    "Download";
-
-
-  download.onclick =
-    function(){
-
-      const a =
-        document.createElement("a");
-
-      a.href =
-        image;
-
-      a.download =
-        "aaru-ai-image.png";
-
-      document.body.appendChild(a);
-
-      a.click();
-
-      a.remove();
-    };
-
-
-  actions.appendChild(
-    download
+  appendImageCardToChat(
+    image,
+    promptText,
+    false
   );
-
-
-  card.appendChild(img);
-
-  card.appendChild(
-    actions
-  );
-
-
-  row.appendChild(card);
-
-  chat.appendChild(row);
 
 
   scrollBottom();
@@ -3151,14 +3335,29 @@ photoInput.onchange =
 
     try{
 
-      /*
-        Preview के लिए original image
-      */
-
       const originalUrl =
         URL.createObjectURL(
           file
         );
+
+
+      /*
+        पुराना blob URL revoke करें।
+      */
+
+      if(
+        selectedPhotoUrl &&
+        selectedPhotoUrl.startsWith("blob:")
+      ){
+
+        try{
+
+          URL.revokeObjectURL(
+            selectedPhotoUrl
+          );
+
+        }catch(e){}
+      }
 
 
       selectedPhotoUrl =
@@ -3172,10 +3371,6 @@ photoInput.onchange =
       photoPreview.style.display =
         "block";
 
-
-      /*
-        Worker को भेजने के लिए resized image
-      */
 
       selectedPhotoBase64 =
         await resizeImageForReference(
@@ -3249,6 +3444,21 @@ function clearSelectedPhoto(){
     "none";
 
   photoInput.value = "";
+
+
+  /*
+    Photo हटाने पर image mode भी
+    बंद कर दें।
+  */
+
+  imageMode = false;
+
+  imageTool.classList.remove(
+    "active"
+  );
+
+  prompt.placeholder =
+    "Aaru AI से कुछ पूछें...";
 }
 
 
@@ -3369,19 +3579,9 @@ sendBtn.onclick =
     }
 
 
-    /*
-      Photo मौजूद है तो यह हमेशा
-      PHOTO EDIT request होगी।
-    */
-
     const hasPhoto =
       !!selectedPhotoBase64;
 
-
-    /*
-      Text को तुरंत composer से हटाएँ।
-      Photo सफल request तक रहेगी।
-    */
 
     prompt.value = "";
 
@@ -3405,10 +3605,6 @@ sendBtn.onclick =
     }
 
 
-    /*
-      Normal image generation
-    */
-
     if(
       imageMode ||
       detectImageIntent(text)
@@ -3421,10 +3617,6 @@ sendBtn.onclick =
       return;
     }
 
-
-    /*
-      Normal chat
-    */
 
     await sendChat(
       text
@@ -3640,7 +3832,8 @@ function restoreCurrentChat(){
 
       addAssistantMessage(
         msg.content,
-        false
+        false,
+        msg.imageId || null
       );
     }
   }
