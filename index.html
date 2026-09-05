@@ -13,74 +13,140 @@
   padding:0;
 }
 
+html,
+body{
+  width:100%;
+  min-height:100%;
+}
+
 body{
   font-family:Arial,Helvetica,sans-serif;
   background:#070707;
   color:#fff;
-  min-height:100vh;
+  overflow-x:hidden;
 }
 
-.container{
-  width:100%;
-  max-width:720px;
-  margin:auto;
-  padding:14px;
+button,
+textarea,
+input{
+  font-family:inherit;
 }
+
+/* =========================
+   APP
+========================= */
+
+.app{
+  width:100%;
+  min-height:100vh;
+  max-width:900px;
+  margin:auto;
+}
+
+/* =========================
+   HEADER
+========================= */
 
 .header{
-  height:48px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  height:58px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:18px;
+  padding:0 16px;
+  background:rgba(7,7,7,.94);
+  border-bottom:1px solid #171717;
+  backdrop-filter:blur(10px);
+}
+
+.left-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.menu{
+  width:38px;
+  height:38px;
+  border:1px solid #292929;
+  border-radius:11px;
+  background:#111;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
 }
 
 .logo{
-  font-size:24px;
+  font-size:21px;
   font-weight:800;
-  letter-spacing:-1px;
+  letter-spacing:-.7px;
 }
 
 .logo span{
   opacity:.5;
 }
 
-.menu-btn{
-  width:40px;
-  height:40px;
-  border:1px solid #292929;
-  background:#111;
-  color:#fff;
-  border-radius:12px;
-  font-size:20px;
-  cursor:pointer;
+.header-status{
+  font-size:11px;
+  color:#777;
 }
 
+/* =========================
+   CHAT AREA
+========================= */
+
 .chat{
-  min-height:calc(100vh - 180px);
-  padding-bottom:160px;
+  width:100%;
+  padding:15px 14px 190px;
 }
 
 .welcome{
+  min-height:62vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  padding:70px 15px 35px;
+  padding:20px;
+}
+
+.welcome-logo{
+  width:62px;
+  height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #333;
+  border-radius:20px;
+  background:#111;
+  font-size:25px;
+  font-weight:800;
+  margin-bottom:18px;
 }
 
 .welcome h1{
-  font-size:36px;
-  letter-spacing:-1.5px;
-  margin-bottom:10px;
+  font-size:34px;
+  letter-spacing:-1.4px;
+  margin-bottom:9px;
 }
 
 .welcome p{
-  color:#888;
+  color:#777;
   font-size:14px;
   line-height:1.6;
+  max-width:430px;
 }
+
+/* =========================
+   MESSAGE
+========================= */
 
 .message{
   display:flex;
-  margin:15px 0;
+  width:100%;
+  margin:17px 0;
 }
 
 .message.user{
@@ -91,14 +157,23 @@ body{
   justify-content:flex-start;
 }
 
+.message-inner{
+  max-width:min(78%,620px);
+}
+
+.user .message-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+}
+
 .bubble{
-  max-width:88%;
-  padding:13px 15px;
-  border-radius:17px;
-  line-height:1.55;
+  padding:12px 15px;
+  border-radius:18px;
   font-size:15px;
+  line-height:1.55;
   white-space:pre-wrap;
-  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 
 .user .bubble{
@@ -109,21 +184,39 @@ body{
 
 .assistant .bubble{
   background:#151515;
-  border:1px solid #252525;
   color:#eee;
+  border:1px solid #252525;
   border-bottom-left-radius:5px;
 }
 
-.image-message{
-  width:100%;
-  max-width:520px;
+.photo-user{
+  width:min(330px,80vw);
+  margin-bottom:7px;
 }
 
-.image-message img{
+.photo-user img{
+  display:block;
+  width:100%;
+  max-height:330px;
+  object-fit:cover;
+  border-radius:16px;
+  border:1px solid #292929;
+}
+
+/* =========================
+   GENERATED IMAGE
+========================= */
+
+.generated{
+  width:min(560px,88vw);
+}
+
+.generated img{
   width:100%;
   display:block;
-  border-radius:16px;
+  border-radius:17px;
   background:#111;
+  border:1px solid #252525;
 }
 
 .image-actions{
@@ -135,282 +228,428 @@ body{
 .image-actions a,
 .image-actions button{
   flex:1;
-  border:1px solid #333;
-  background:#151515;
+  min-width:0;
+  border:1px solid #303030;
+  background:#141414;
   color:#fff;
   text-decoration:none;
-  padding:10px;
-  border-radius:10px;
   text-align:center;
-  font-size:13px;
+  padding:10px 8px;
+  border-radius:11px;
+  font-size:12px;
   cursor:pointer;
 }
 
+/* =========================
+   TYPING
+========================= */
+
 .typing{
-  display:inline-flex;
-  gap:4px;
+  display:flex;
   align-items:center;
-  padding:14px 16px;
+  gap:5px;
+  padding:13px 15px;
   background:#151515;
   border:1px solid #252525;
-  border-radius:16px;
+  border-radius:17px;
+  border-bottom-left-radius:5px;
 }
 
-.typing span{
+.typing i{
   width:6px;
   height:6px;
+  display:block;
   background:#777;
   border-radius:50%;
   animation:typing 1s infinite;
 }
 
-.typing span:nth-child(2){
+.typing i:nth-child(2){
   animation-delay:.15s;
 }
 
-.typing span:nth-child(3){
-  animation-delay:.3s;
+.typing i:nth-child(3){
+  animation-delay:.30s;
 }
 
 @keyframes typing{
   0%,60%,100%{
+    opacity:.35;
     transform:translateY(0);
-    opacity:.4;
   }
+
   30%{
-    transform:translateY(-4px);
     opacity:1;
+    transform:translateY(-4px);
   }
 }
 
-/* COMPOSER */
+/* =========================
+   COMPOSER
+========================= */
 
-.composer-wrap{
+.composer-area{
   position:fixed;
   left:0;
   right:0;
   bottom:0;
+  z-index:50;
+  padding:22px 12px 12px;
   background:linear-gradient(
     to bottom,
     rgba(7,7,7,0),
-    #070707 28%
+    #070707 30%
   );
-  padding:25px 14px 14px;
-  z-index:50;
 }
 
 .composer{
-  max-width:720px;
+  width:100%;
+  max-width:870px;
   margin:auto;
   background:#111;
   border:1px solid #292929;
-  border-radius:18px;
-  padding:10px;
+  border-radius:20px;
+  padding:9px;
+  box-shadow:0 -10px 35px rgba(0,0,0,.25);
 }
 
-.preview{
+/* =========================
+   ATTACHMENT PREVIEW
+========================= */
+
+.attachment{
   display:none;
   position:relative;
-  margin-bottom:9px;
+  width:120px;
+  margin:2px 0 9px 2px;
 }
 
-.preview img{
-  width:100%;
-  max-height:180px;
-  object-fit:contain;
-  border-radius:12px;
-  background:#050505;
+.attachment img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  display:block;
+  border-radius:13px;
+  border:1px solid #333;
 }
 
 .remove-photo{
   position:absolute;
-  top:8px;
-  right:8px;
-  width:32px;
-  height:32px;
-  border:none;
+  top:5px;
+  right:5px;
+  width:28px;
+  height:28px;
+  border:0;
   border-radius:50%;
   background:rgba(0,0,0,.85);
   color:#fff;
-  font-size:19px;
+  font-size:18px;
   cursor:pointer;
 }
 
-.text-row{
+/* =========================
+   INPUT
+========================= */
+
+.input-row{
   display:flex;
   align-items:flex-end;
   gap:8px;
 }
 
-.plus-btn{
-  width:40px;
-  height:40px;
+.attach-btn,
+.send-btn{
+  width:42px;
+  height:42px;
   flex:none;
-  border:1px solid #333;
-  background:#181818;
-  color:#fff;
-  border-radius:12px;
-  font-size:24px;
+  border-radius:13px;
   cursor:pointer;
 }
 
+.attach-btn{
+  border:1px solid #303030;
+  background:#181818;
+  color:#fff;
+  font-size:23px;
+}
+
+.send-btn{
+  border:0;
+  background:#fff;
+  color:#000;
+  font-size:19px;
+  font-weight:bold;
+}
+
+.send-btn:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+}
+
 #prompt{
-  flex:1;
+  width:100%;
   min-height:42px;
-  max-height:140px;
+  max-height:150px;
   resize:none;
-  border:none;
-  outline:none;
+  border:0;
+  outline:0;
   background:transparent;
   color:#fff;
   font-size:15px;
   line-height:1.45;
-  padding:10px 4px;
+  padding:10px 3px;
 }
 
 #prompt::placeholder{
   color:#666;
 }
 
-.send-btn{
-  width:42px;
-  height:42px;
-  flex:none;
-  border:none;
-  border-radius:13px;
-  background:#fff;
-  color:#000;
-  font-size:18px;
-  cursor:pointer;
-}
-
-.send-btn:disabled{
-  opacity:.4;
-}
+/* =========================
+   TOOLS
+========================= */
 
 .tools{
   display:flex;
   gap:7px;
   margin-top:8px;
+  padding:0 2px 1px;
   overflow-x:auto;
+  scrollbar-width:none;
 }
 
-.tool-btn{
-  border:1px solid #2c2c2c;
+.tools::-webkit-scrollbar{
+  display:none;
+}
+
+.tool{
+  flex:none;
+  border:1px solid #2b2b2b;
   background:#181818;
-  color:#bbb;
+  color:#aaa;
   padding:8px 11px;
   border-radius:10px;
   font-size:12px;
-  white-space:nowrap;
   cursor:pointer;
 }
 
-.tool-btn.active{
+.tool.active{
   background:#fff;
   color:#000;
+  border-color:#fff;
 }
 
-.hidden{
-  display:none!important;
+#imageInput{
+  display:none;
 }
+
+/* =========================
+   STATUS
+========================= */
 
 .status{
+  min-height:17px;
   text-align:center;
+  color:#777;
+  font-size:11px;
+  padding-top:6px;
+}
+
+/* =========================
+   RECENT CREATIONS
+========================= */
+
+.recent{
+  padding:0 14px 185px;
+}
+
+.recent-title{
   color:#888;
-  font-size:12px;
-  padding:8px;
+  font-size:13px;
+  margin:5px 0 10px;
 }
 
-.history-section{
-  margin-top:25px;
-}
-
-.history-title{
-  color:#aaa;
-  font-size:14px;
-  margin-bottom:10px;
-}
-
-.history{
+.recent-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:8px;
 }
 
-.history-item{
+.recent-item{
   aspect-ratio:1;
+  border-radius:11px;
   overflow:hidden;
-  border-radius:10px;
   background:#111;
+  border:1px solid #202020;
   cursor:pointer;
 }
 
-.history-item img{
+.recent-item img{
   width:100%;
   height:100%;
   object-fit:cover;
 }
 
-.empty{
-  color:#555;
-  font-size:12px;
-  text-align:center;
-  padding:12px;
+.recent-empty{
+  color:#444;
+  font-size:11px;
+  padding:8px 0;
 }
 
-@media(max-width:400px){
-  .welcome h1{
-    font-size:31px;
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:600px){
+
+  .header{
+    padding:0 12px;
   }
 
-  .bubble{
-    max-width:92%;
+  .chat{
+    padding-left:10px;
+    padding-right:10px;
   }
+
+  .message-inner{
+    max-width:88%;
+  }
+
+  .welcome h1{
+    font-size:29px;
+  }
+
+  .welcome{
+    min-height:58vh;
+  }
+
+  .generated{
+    width:90vw;
+  }
+
+  .recent{
+    padding-left:10px;
+    padding-right:10px;
+  }
+
+  .recent-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+}
+
+@media(max-width:380px){
+
+  .tools .tool{
+    font-size:11px;
+    padding:7px 9px;
+  }
+
+  .welcome h1{
+    font-size:27px;
+  }
+
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-  <div class="header">
-    <div class="logo">Aaru <span>AI</span></div>
+  <!-- HEADER -->
 
-    <button class="menu-btn" type="button" onclick="clearChat()">
-      ⋮
-    </button>
-  </div>
+  <header class="header">
 
-  <div class="chat" id="chat">
+    <div class="left-header">
 
-    <div class="welcome" id="welcome">
-      <h1>What can I help with?</h1>
+      <button
+        class="menu"
+        type="button"
+        onclick="clearChat()"
+        aria-label="Menu"
+      >
+        ☰
+      </button>
+
+      <div class="logo">
+        Aaru <span>AI</span>
+      </div>
+
+    </div>
+
+    <div class="header-status">
+      AI Assistant
+    </div>
+
+  </header>
+
+
+  <!-- CHAT -->
+
+  <main
+    class="chat"
+    id="chat"
+  >
+
+    <section
+      class="welcome"
+      id="welcome"
+    >
+
+      <div class="welcome-logo">
+        A
+      </div>
+
+      <h1>
+        What can I help with?
+      </h1>
+
       <p>
         Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।
       </p>
+
+    </section>
+
+  </main>
+
+
+  <!-- RECENT -->
+
+  <section
+    class="recent"
+    id="recentSection"
+  >
+
+    <div class="recent-title">
+      Recent Creations
     </div>
 
-  </div>
+    <div
+      class="recent-grid"
+      id="recentGrid"
+    ></div>
 
-  <div class="history-section" id="historySection">
-    <div class="history-title">Recent Creations</div>
-    <div class="history" id="history"></div>
-  </div>
+  </section>
+
 
 </div>
 
 
 <!-- COMPOSER -->
 
-<div class="composer-wrap">
+<div class="composer-area">
 
   <div class="composer">
 
-    <div class="preview" id="preview">
+    <div
+      class="attachment"
+      id="attachment"
+    >
 
-      <img id="previewImage" alt="Selected photo">
+      <img
+        id="attachmentImage"
+        alt="Selected photo"
+      >
 
       <button
         class="remove-photo"
@@ -422,21 +661,25 @@ body{
 
     </div>
 
-    <div class="text-row">
+
+    <div class="input-row">
 
       <button
-        class="plus-btn"
+        class="attach-btn"
         type="button"
-        onclick="document.getElementById('imageInput').click()"
+        onclick="openPhotoPicker()"
+        aria-label="Attach photo"
       >
         +
       </button>
+
 
       <textarea
         id="prompt"
         rows="1"
         placeholder="Message Aaru AI..."
       ></textarea>
+
 
       <button
         class="send-btn"
@@ -449,43 +692,50 @@ body{
 
     </div>
 
+
     <div class="tools">
 
       <button
-        class="tool-btn"
-        id="imageModeBtn"
+        class="tool"
+        id="imageTool"
         type="button"
         onclick="toggleImageMode()"
       >
         🎨 Create Image
       </button>
 
+
       <button
-        class="tool-btn"
+        class="tool"
         type="button"
-        onclick="document.getElementById('imageInput').click()"
+        onclick="openPhotoPicker()"
       >
         📷 Photo
       </button>
 
+
       <button
-        class="tool-btn"
+        class="tool"
         type="button"
-        onclick="setExample('एक realistic Indian village at sunrise, cinematic photography')"
+        onclick="insertExample()"
       >
         ✨ Example
       </button>
 
     </div>
 
+
     <input
       type="file"
       id="imageInput"
-      accept="image/*"
-      class="hidden"
+      accept="image/jpeg,image/png,image/webp,image/*"
     >
 
-    <div class="status" id="status"></div>
+
+    <div
+      class="status"
+      id="status"
+    ></div>
 
   </div>
 
@@ -494,11 +744,22 @@ body{
 
 <script>
 
+/* =========================
+   CONFIG
+========================= */
+
 const API_URL =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
-let selectedImageBase64 = "";
+
+/* =========================
+   STATE
+========================= */
+
+let selectedImageDataUrl = "";
+
 let imageMode = false;
+
 let busy = false;
 
 
@@ -506,48 +767,52 @@ let busy = false;
    ELEMENTS
 ========================= */
 
-const promptInput =
-  document.getElementById("prompt");
-
-const sendBtn =
-  document.getElementById("sendBtn");
-
-const imageModeBtn =
-  document.getElementById("imageModeBtn");
-
-const imageInput =
-  document.getElementById("imageInput");
-
-const preview =
-  document.getElementById("preview");
-
-const previewImage =
-  document.getElementById("previewImage");
-
 const chat =
   document.getElementById("chat");
 
 const welcome =
   document.getElementById("welcome");
 
+const promptInput =
+  document.getElementById("prompt");
+
+const imageInput =
+  document.getElementById("imageInput");
+
+const attachment =
+  document.getElementById("attachment");
+
+const attachmentImage =
+  document.getElementById("attachmentImage");
+
+const sendBtn =
+  document.getElementById("sendBtn");
+
+const imageTool =
+  document.getElementById("imageTool");
+
 const status =
   document.getElementById("status");
 
+const recentGrid =
+  document.getElementById("recentGrid");
+
 
 /* =========================
-   TEXTAREA AUTO RESIZE
+   TEXTAREA
 ========================= */
 
 promptInput.addEventListener(
   "input",
   function(){
 
-    this.style.height = "42px";
+    this.style.height =
+      "42px";
 
     this.style.height =
       Math.min(
         this.scrollHeight,
-        140
+        150
       ) + "px";
 
   }
@@ -555,7 +820,7 @@ promptInput.addEventListener(
 
 
 /* =========================
-   ENTER TO SEND
+   ENTER
 ========================= */
 
 promptInput.addEventListener(
@@ -578,90 +843,97 @@ promptInput.addEventListener(
 
 
 /* =========================
-   IMAGE MODE
+   PHOTO PICKER
 ========================= */
 
-function toggleImageMode(){
+function openPhotoPicker(){
 
-  imageMode = !imageMode;
-
-  if(imageMode){
-
-    imageModeBtn.classList.add("active");
-
-    promptInput.placeholder =
-      "Image में क्या बनाना चाहते हैं?";
-
-  }else{
-
-    imageModeBtn.classList.remove("active");
-
-    promptInput.placeholder =
-      "Message Aaru AI...";
-
-  }
+  imageInput.click();
 
 }
 
 
 /* =========================
-   PHOTO UPLOAD
+   PHOTO SELECT
 ========================= */
 
 imageInput.addEventListener(
   "change",
-  async function(event){
+  async function(){
 
     const file =
-      event.target.files[0];
+      imageInput.files[0];
 
     if(!file){
       return;
     }
 
-    if(!file.type.startsWith("image/")){
 
-      alert("कृपया image file चुनें।");
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      alert(
+        "कृपया image file चुनें।"
+      );
 
       imageInput.value = "";
 
       return;
+
     }
+
 
     try{
 
-      status.textContent =
-        "Photo तैयार हो रही है...";
+      setStatus(
+        "🔄 Photo तैयार हो रही है..."
+      );
 
-      selectedImageBase64 =
-        await compressImage(file);
 
-      previewImage.src =
-        selectedImageBase64;
+      selectedImageDataUrl =
+        await preparePhoto(
+          file
+        );
 
-      preview.style.display =
+
+      attachmentImage.src =
+        selectedImageDataUrl;
+
+
+      attachment.style.display =
         "block";
 
+
       /*
-       * Photo attached होने पर
-       * image mode automatically ON.
+       * Photo attach होते ही
+       * image mode ON.
        */
 
       imageMode = true;
 
-      imageModeBtn.classList.add("active");
+      imageTool.classList.add(
+        "active"
+      );
+
 
       promptInput.placeholder =
         "इस photo के साथ क्या करना है?";
 
-      status.textContent = "";
+
+      setStatus("");
 
     }catch(error){
 
-      console.error(error);
+      console.error(
+        error
+      );
 
-      status.textContent =
-        "❌ Photo तैयार नहीं हो सकी।";
+      setStatus(
+        "❌ Photo तैयार नहीं हो सकी।"
+      );
 
     }
 
@@ -670,10 +942,10 @@ imageInput.addEventListener(
 
 
 /* =========================
-   COMPRESS PHOTO
+   PREPARE PHOTO
 ========================= */
 
-function compressImage(file){
+function preparePhoto(file){
 
   return new Promise(
     function(resolve,reject){
@@ -681,14 +953,18 @@ function compressImage(file){
       const reader =
         new FileReader();
 
+
       reader.onerror =
         function(){
+
           reject(
             new Error(
-              "File read failed"
+              "Photo read failed."
             )
           );
+
         };
+
 
       reader.onload =
         function(){
@@ -696,39 +972,49 @@ function compressImage(file){
           const img =
             new Image();
 
+
           img.onerror =
             function(){
+
               reject(
                 new Error(
-                  "Image load failed"
+                  "Photo load failed."
                 )
               );
+
             };
+
 
           img.onload =
             function(){
 
               /*
-               * Maximum dimension 768px.
-               * इससे request काफी छोटी रहेगी।
+               * Small enough for AI request.
                */
 
-              const MAX_SIZE = 768;
+              const MAX =
+                768;
+
 
               let width =
+                img.naturalWidth ||
                 img.width;
 
               let height =
+                img.naturalHeight ||
                 img.height;
+
 
               const scale =
                 Math.min(
                   1,
-                  MAX_SIZE / Math.max(
+                  MAX /
+                  Math.max(
                     width,
                     height
                   )
                 );
+
 
               width =
                 Math.max(
@@ -738,6 +1024,7 @@ function compressImage(file){
                   )
                 );
 
+
               height =
                 Math.max(
                   1,
@@ -746,16 +1033,19 @@ function compressImage(file){
                   )
                 );
 
+
               const canvas =
                 document.createElement(
                   "canvas"
                 );
+
 
               canvas.width =
                 width;
 
               canvas.height =
                 height;
+
 
               const ctx =
                 canvas.getContext(
@@ -765,6 +1055,7 @@ function compressImage(file){
                   }
                 );
 
+
               ctx.drawImage(
                 img,
                 0,
@@ -773,11 +1064,13 @@ function compressImage(file){
                 height
               );
 
+
               /*
-               * पहले quality .70
+               * Progressive compression.
                */
 
-              let quality = 0.70;
+              let quality =
+                0.70;
 
               let dataUrl =
                 canvas.toDataURL(
@@ -785,18 +1078,20 @@ function compressImage(file){
                   quality
                 );
 
+
               /*
-               * Base64 बहुत बड़ा हो तो
-               * quality और कम करेंगे।
+               * Keep base64 safely below
+               * our Worker limit.
                */
 
-              const MAX_BASE64_LENGTH =
-                850000;
+              const MAX_LENGTH =
+                650000;
+
 
               while(
                 dataUrl.length >
-                  MAX_BASE64_LENGTH &&
-                quality > 0.40
+                  MAX_LENGTH &&
+                quality > 0.35
               ){
 
                 quality -= 0.08;
@@ -809,80 +1104,99 @@ function compressImage(file){
 
               }
 
+
               /*
-               * अंतिम fallback:
-               * 512px तक resize.
+               * If still large, use 512px.
                */
 
               if(
                 dataUrl.length >
-                MAX_BASE64_LENGTH
+                MAX_LENGTH
               ){
 
-                const secondCanvas =
+                const scale2 =
+                  512 /
+                  Math.max(
+                    img.naturalWidth ||
+                    img.width,
+                    img.naturalHeight ||
+                    img.height
+                  );
+
+
+                const canvas2 =
                   document.createElement(
                     "canvas"
                   );
 
-                const secondScale =
-                  512 /
-                  Math.max(
-                    img.width,
-                    img.height
-                  );
 
-                secondCanvas.width =
+                canvas2.width =
                   Math.max(
                     1,
                     Math.round(
-                      img.width *
-                      secondScale
+                      (
+                        img.naturalWidth ||
+                        img.width
+                      ) * scale2
                     )
                   );
 
-                secondCanvas.height =
+
+                canvas2.height =
                   Math.max(
                     1,
                     Math.round(
-                      img.height *
-                      secondScale
+                      (
+                        img.naturalHeight ||
+                        img.height
+                      ) * scale2
                     )
                   );
 
-                const secondCtx =
-                  secondCanvas.getContext(
+
+                const ctx2 =
+                  canvas2.getContext(
                     "2d",
                     {
                       alpha:false
                     }
                   );
 
-                secondCtx.drawImage(
+
+                ctx2.drawImage(
                   img,
                   0,
                   0,
-                  secondCanvas.width,
-                  secondCanvas.height
+                  canvas2.width,
+                  canvas2.height
                 );
 
+
                 dataUrl =
-                  secondCanvas.toDataURL(
+                  canvas2.toDataURL(
                     "image/jpeg",
-                    0.55
+                    0.50
                   );
 
               }
 
-              resolve(dataUrl);
+
+              resolve(
+                dataUrl
+              );
 
             };
+
 
           img.src =
             reader.result;
 
         };
 
-      reader.readAsDataURL(file);
+
+      reader.readAsDataURL(
+        file
+      );
 
     }
   );
@@ -896,20 +1210,55 @@ function compressImage(file){
 
 function removePhoto(){
 
-  selectedImageBase64 = "";
+  selectedImageDataUrl =
+    "";
 
-  imageInput.value = "";
+  imageInput.value =
+    "";
 
-  preview.style.display =
+  attachment.style.display =
     "none";
 
-  previewImage.src = "";
+  attachmentImage.src =
+    "";
 
-  /*
-   * Photo हटने पर image mode
-   * automatically बंद नहीं करेंगे,
-   * ताकि user Create Image mode में रह सके।
-   */
+  promptInput.placeholder =
+    imageMode
+      ? "Image में क्या बनाना चाहते हैं?"
+      : "Message Aaru AI...";
+
+}
+
+
+/* =========================
+   IMAGE MODE
+========================= */
+
+function toggleImageMode(){
+
+  imageMode =
+    !imageMode;
+
+
+  if(imageMode){
+
+    imageTool.classList.add(
+      "active"
+    );
+
+    promptInput.placeholder =
+      "Image में क्या बनाना चाहते हैं?";
+
+  }else{
+
+    imageTool.classList.remove(
+      "active"
+    );
+
+    promptInput.placeholder =
+      "Message Aaru AI...";
+
+  }
 
 }
 
@@ -918,234 +1267,16 @@ function removePhoto(){
    EXAMPLE
 ========================= */
 
-function setExample(text){
+function insertExample(){
 
   promptInput.value =
-    text;
-
-  promptInput.focus();
+    "एक realistic Indian village at sunrise, cinematic photography";
 
   promptInput.dispatchEvent(
     new Event("input")
   );
 
-}
-
-
-/* =========================
-   ADD USER MESSAGE
-========================= */
-
-function addUserMessage(text){
-
-  welcome.style.display =
-    "none";
-
-  const wrapper =
-    document.createElement("div");
-
-  wrapper.className =
-    "message user";
-
-  const bubble =
-    document.createElement("div");
-
-  bubble.className =
-    "bubble";
-
-  bubble.textContent =
-    text;
-
-  wrapper.appendChild(
-    bubble
-  );
-
-  chat.appendChild(
-    wrapper
-  );
-
-  scrollToBottom();
-
-}
-
-
-/* =========================
-   ADD ASSISTANT MESSAGE
-========================= */
-
-function addAssistantMessage(text){
-
-  const wrapper =
-    document.createElement("div");
-
-  wrapper.className =
-    "message assistant";
-
-  const bubble =
-    document.createElement("div");
-
-  bubble.className =
-    "bubble";
-
-  bubble.textContent =
-    text;
-
-  wrapper.appendChild(
-    bubble
-  );
-
-  chat.appendChild(
-    wrapper
-  );
-
-  scrollToBottom();
-
-}
-
-
-/* =========================
-   TYPING
-========================= */
-
-function addTyping(){
-
-  const wrapper =
-    document.createElement("div");
-
-  wrapper.className =
-    "message assistant";
-
-  wrapper.id =
-    "typingMessage";
-
-  wrapper.innerHTML = `
-    <div class="typing">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  `;
-
-  chat.appendChild(
-    wrapper
-  );
-
-  scrollToBottom();
-
-}
-
-
-function removeTyping(){
-
-  const element =
-    document.getElementById(
-      "typingMessage"
-    );
-
-  if(element){
-
-    element.remove();
-
-  }
-
-}
-
-
-/* =========================
-   IMAGE MESSAGE
-========================= */
-
-function addImageMessage(
-  imageUrl,
-  blob
-){
-
-  welcome.style.display =
-    "none";
-
-  const wrapper =
-    document.createElement("div");
-
-  wrapper.className =
-    "message assistant";
-
-  const box =
-    document.createElement("div");
-
-  box.className =
-    "image-message";
-
-  const img =
-    document.createElement("img");
-
-  img.src =
-    imageUrl;
-
-  img.alt =
-    "Aaru AI generated image";
-
-  const actions =
-    document.createElement("div");
-
-  actions.className =
-    "image-actions";
-
-  const download =
-    document.createElement("a");
-
-  download.textContent =
-    "⬇️ Download";
-
-  download.href =
-    imageUrl;
-
-  download.download =
-    "aaru-ai-" +
-    Date.now() +
-    ".png";
-
-  const newImage =
-    document.createElement("button");
-
-  newImage.textContent =
-    "🎨 Create another";
-
-  newImage.onclick =
-    function(){
-
-      promptInput.focus();
-
-    };
-
-  actions.appendChild(
-    download
-  );
-
-  actions.appendChild(
-    newImage
-  );
-
-  box.appendChild(
-    img
-  );
-
-  box.appendChild(
-    actions
-  );
-
-  wrapper.appendChild(
-    box
-  );
-
-  chat.appendChild(
-    wrapper
-  );
-
-  saveHistoryFromBlob(
-    blob
-  );
-
-  scrollToBottom();
+  promptInput.focus();
 
 }
 
@@ -1154,22 +1285,25 @@ function addImageMessage(
    IMAGE INTENT
 ========================= */
 
-function looksLikeImageRequest(text){
+function isImageRequest(text){
 
-  const value =
+  const t =
     text.toLowerCase();
 
-  const keywords = [
+
+  const words = [
 
     "create image",
     "generate image",
     "make image",
-    "make a picture",
-    "generate a picture",
     "create a picture",
-    "draw an image",
+    "generate a picture",
+    "make a picture",
     "draw a picture",
+    "draw an image",
+    "image generate",
     "image बनाओ",
+    "image बना",
     "इमेज बनाओ",
     "इमेज बना",
     "फोटो बनाओ",
@@ -1177,17 +1311,18 @@ function looksLikeImageRequest(text){
     "चित्र बनाओ",
     "चित्र बना",
     "तस्वीर बनाओ",
-    "तस्वीर बना",
-    "photo बनाओ",
-    "image generate"
+    "तस्वीर बना"
 
   ];
 
-  return keywords.some(
-    function(keyword){
-      return value.includes(
-        keyword
+
+  return words.some(
+    function(word){
+
+      return t.includes(
+        word
       );
+
     }
   );
 
@@ -1195,7 +1330,7 @@ function looksLikeImageRequest(text){
 
 
 /* =========================
-   SEND MESSAGE
+   SEND
 ========================= */
 
 async function sendMessage(){
@@ -1204,12 +1339,14 @@ async function sendMessage(){
     return;
   }
 
+
   const text =
     promptInput.value.trim();
 
+
   if(!text){
 
-    if(selectedImageBase64){
+    if(selectedImageDataUrl){
 
       alert(
         "Photo के साथ क्या करना है, वह लिखें।"
@@ -1218,62 +1355,303 @@ async function sendMessage(){
     }else{
 
       alert(
-        "पहले message या prompt लिखें।"
+        "पहले अपना message लिखें।"
       );
 
     }
 
     return;
+
   }
 
 
   /*
-   * IMPORTANT:
+   * PHOTO ALWAYS HAS PRIORITY.
    *
-   * Photo attached होने पर
-   * हमेशा image generation.
-   *
-   * इससे photo वाला prompt
-   * normal chat में नहीं जाएगा।
+   * इससे photo + prompt
+   * कभी normal chat में नहीं जाएगा।
    */
 
-  const shouldGenerateImage =
+  const generate =
+    !!selectedImageDataUrl ||
     imageMode ||
-    !!selectedImageBase64 ||
-    looksLikeImageRequest(text);
+    isImageRequest(
+      text
+    );
 
 
   busy = true;
 
-  sendBtn.disabled = true;
+  sendBtn.disabled =
+    true;
 
 
-  if(shouldGenerateImage){
+  try{
 
-    await generateImageFromChat(
-      text
-    );
+    if(generate){
 
-  }else{
+      await generateImage(
+        text
+      );
 
-    await sendChatMessage(
-      text
-    );
+    }else{
+
+      await sendChat(
+        text
+      );
+
+    }
+
+  }finally{
+
+    busy = false;
+
+    sendBtn.disabled =
+      false;
 
   }
-
-  busy = false;
-
-  sendBtn.disabled = false;
 
 }
 
 
 /* =========================
-   CHAT
+   ADD USER MESSAGE
 ========================= */
 
-async function sendChatMessage(
+function addUserMessage(
+  text,
+  imageData
+){
+
+  welcome.style.display =
+    "none";
+
+
+  const message =
+    document.createElement(
+      "div"
+    );
+
+  message.className =
+    "message user";
+
+
+  const inner =
+    document.createElement(
+      "div"
+    );
+
+  inner.className =
+    "message-inner";
+
+
+  if(imageData){
+
+    const photo =
+      document.createElement(
+        "div"
+      );
+
+    photo.className =
+      "photo-user";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+
+    img.src =
+      imageData;
+
+
+    photo.appendChild(
+      img
+    );
+
+
+    inner.appendChild(
+      photo
+    );
+
+  }
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.textContent =
+    text;
+
+
+  inner.appendChild(
+    bubble
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
+
+}
+
+
+/* =========================
+   ASSISTANT TEXT
+========================= */
+
+function addAssistantMessage(
+  text
+){
+
+  const message =
+    document.createElement(
+      "div"
+    );
+
+
+  message.className =
+    "message assistant";
+
+
+  const inner =
+    document.createElement(
+      "div"
+    );
+
+
+  inner.className =
+    "message-inner";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.textContent =
+    text;
+
+
+  inner.appendChild(
+    bubble
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
+
+}
+
+
+/* =========================
+   TYPING
+========================= */
+
+function showTyping(){
+
+  removeTyping();
+
+
+  const message =
+    document.createElement(
+      "div"
+    );
+
+
+  message.className =
+    "message assistant";
+
+  message.id =
+    "typingMessage";
+
+
+  const inner =
+    document.createElement(
+      "div"
+    );
+
+
+  inner.className =
+    "message-inner";
+
+
+  inner.innerHTML = `
+    <div class="typing">
+      <i></i>
+      <i></i>
+      <i></i>
+    </div>
+  `;
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  scrollBottom();
+
+}
+
+
+function removeTyping(){
+
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
+
+
+  if(item){
+
+    item.remove();
+
+  }
+
+}
+
+
+/* =========================
+   NORMAL CHAT
+========================= */
+
+async function sendChat(
   text
 ){
 
@@ -1281,15 +1659,20 @@ async function sendChatMessage(
     text
   );
 
-  promptInput.value = "";
 
-  promptInput.style.height =
-    "42px";
+  promptInput.value =
+    "";
 
-  addTyping();
+  resetTextarea();
 
-  status.textContent =
-    "Aaru सोच रहा है...";
+
+  showTyping();
+
+
+  setStatus(
+    "Aaru सोच रहा है..."
+  );
+
 
   try{
 
@@ -1307,47 +1690,56 @@ async function sendChatMessage(
           body:JSON.stringify({
             message:text
           })
+
         }
       );
 
+
     const data =
-      await readJsonResponse(
-        response
-      );
+      await response.json();
+
 
     if(!response.ok){
 
       throw new Error(
         data.error ||
-        "Chat failed"
+        "Chat failed."
       );
 
     }
 
+
     removeTyping();
+
 
     addAssistantMessage(
       data.reply ||
-      "मुझे कोई response नहीं मिला।"
+      "मुझे अभी कोई response नहीं मिला।"
     );
+
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     removeTyping();
+
 
     addAssistantMessage(
       "❌ " +
       (
         error.message ||
-        "Chat failed"
+        "Chat failed."
       )
     );
 
   }
 
-  status.textContent = "";
+
+  setStatus("");
 
 }
 
@@ -1356,51 +1748,69 @@ async function sendChatMessage(
    IMAGE GENERATION
 ========================= */
 
-async function generateImageFromChat(
+async function generateImage(
   text
 ){
 
   /*
-   * User message chat में दिखेगा,
-   * लेकिन Worker /chat पर नहीं जाएगा।
+   * Save photo BEFORE clearing it.
+   */
+
+  const sourcePhoto =
+    selectedImageDataUrl;
+
+
+  /*
+   * Show user message.
    */
 
   addUserMessage(
-    text
+    text,
+    sourcePhoto
   );
 
-  promptInput.value = "";
 
-  promptInput.style.height =
-    "42px";
+  promptInput.value =
+    "";
 
-  status.textContent =
-    selectedImageBase64
-      ? "🔄 Photo तैयार करके image बना रहे हैं..."
-      : "✨ आपकी image तैयार हो रही है...";
+  resetTextarea();
+
+
+  showTyping();
+
+
+  setStatus(
+    sourcePhoto
+      ? "🔄 Photo को transform किया जा रहा है..."
+      : "✨ आपकी image तैयार हो रही है..."
+  );
+
 
   try{
 
     let response;
 
-    /*
-     * PHOTO TO IMAGE
-     */
 
-    if(selectedImageBase64){
+    /* =====================
+       PHOTO → IMAGE
+    ===================== */
 
-      const clean =
+    if(sourcePhoto){
+
+      const base64 =
         cleanBase64(
-          selectedImageBase64
+          sourcePhoto
         );
 
-      if(!clean){
+
+      if(!base64){
 
         throw new Error(
-          "Uploaded photo data empty है।"
+          "Photo data खाली है।"
         );
 
       }
+
 
       response =
         await fetch(
@@ -1421,39 +1831,45 @@ async function generateImageFromChat(
 
               quality:"hd",
 
-              image_b64:clean,
+              image_b64:base64,
 
               strength:0.65
 
             })
+
           }
         );
 
     }
 
-    /*
-     * TEXT TO IMAGE
-     */
+
+    /* =====================
+       TEXT → IMAGE
+    ===================== */
 
     else{
 
       const params =
         new URLSearchParams();
 
+
       params.set(
         "prompt",
         text
       );
+
 
       params.set(
         "ratio",
         "1:1"
       );
 
+
       params.set(
         "quality",
         "hd"
       );
+
 
       response =
         await fetch(
@@ -1467,25 +1883,31 @@ async function generateImageFromChat(
 
     if(!response.ok){
 
-      let errorMessage =
+      let message =
         "Image generation failed.";
+
 
       try{
 
         const errorData =
           await response.json();
 
-        if(errorData.error){
 
-          errorMessage =
+        if(
+          errorData &&
+          errorData.error
+        ){
+
+          message =
             errorData.error;
 
         }
 
       }catch(e){}
 
+
       throw new Error(
-        errorMessage
+        message
       );
 
     }
@@ -1503,19 +1925,8 @@ async function generateImageFromChat(
       )
     ){
 
-      let serverText =
-        "";
-
-      try{
-
-        serverText =
-          await response.text();
-
-      }catch(e){}
-
       throw new Error(
-        serverText ||
-        "Server ने image नहीं भेजी।"
+        "Server ने valid image नहीं भेजी।"
       );
 
     }
@@ -1524,25 +1935,29 @@ async function generateImageFromChat(
     const blob =
       await response.blob();
 
+
     const imageUrl =
       URL.createObjectURL(
         blob
       );
 
 
-    addImageMessage(
+    removeTyping();
+
+
+    addGeneratedImage(
       imageUrl,
       blob
     );
 
 
-    status.textContent =
-      "✅ Image तैयार है!";
+    setStatus(
+      "✅ Image तैयार है!"
+    );
 
 
     /*
-     * Photo इस्तेमाल होने के बाद
-     * उसे composer में न रखें।
+     * Composer से photo हटाएँ।
      */
 
     removePhoto();
@@ -1551,9 +1966,13 @@ async function generateImageFromChat(
   }catch(error){
 
     console.error(
-      "Image generation error:",
+      "Image error:",
       error
     );
+
+
+    removeTyping();
+
 
     addAssistantMessage(
       "❌ " +
@@ -1563,10 +1982,162 @@ async function generateImageFromChat(
       )
     );
 
-    status.textContent =
-      "Image generation failed.";
+
+    setStatus(
+      "Image generation failed."
+    );
 
   }
+
+}
+
+
+/* =========================
+   GENERATED IMAGE
+========================= */
+
+function addGeneratedImage(
+  imageUrl,
+  blob
+){
+
+  const message =
+    document.createElement(
+      "div"
+    );
+
+
+  message.className =
+    "message assistant";
+
+
+  const inner =
+    document.createElement(
+      "div"
+    );
+
+
+  inner.className =
+    "message-inner";
+
+
+  const generated =
+    document.createElement(
+      "div"
+    );
+
+
+  generated.className =
+    "generated";
+
+
+  const img =
+    document.createElement(
+      "img"
+    );
+
+
+  img.src =
+    imageUrl;
+
+
+  img.alt =
+    "Aaru AI generated image";
+
+
+  const actions =
+    document.createElement(
+      "div"
+    );
+
+
+  actions.className =
+    "image-actions";
+
+
+  const download =
+    document.createElement(
+      "a"
+    );
+
+
+  download.href =
+    imageUrl;
+
+
+  download.download =
+    "aaru-ai-" +
+    Date.now() +
+    ".png";
+
+
+  download.textContent =
+    "⬇️ Download";
+
+
+  const again =
+    document.createElement(
+      "button"
+    );
+
+
+  again.type =
+    "button";
+
+
+  again.textContent =
+    "🎨 Create another";
+
+
+  again.onclick =
+    function(){
+
+      promptInput.focus();
+
+    };
+
+
+  actions.appendChild(
+    download
+  );
+
+
+  actions.appendChild(
+    again
+  );
+
+
+  generated.appendChild(
+    img
+  );
+
+
+  generated.appendChild(
+    actions
+  );
+
+
+  inner.appendChild(
+    generated
+  );
+
+
+  message.appendChild(
+    inner
+  );
+
+
+  chat.appendChild(
+    message
+  );
+
+
+  saveHistory(
+    blob
+  );
+
+
+  scrollBottom();
 
 }
 
@@ -1576,58 +2147,40 @@ async function generateImageFromChat(
 ========================= */
 
 function cleanBase64(
-  data
+  value
 ){
 
-  if(!data){
+  if(!value){
     return "";
   }
 
+
   if(
-    data.startsWith(
+    value.startsWith(
       "data:"
     )
   ){
 
     const comma =
-      data.indexOf(",");
+      value.indexOf(",");
 
-    if(comma !== -1){
 
-      return data.substring(
-        comma + 1
-      );
+    if(comma >= 0){
+
+      value =
+        value.substring(
+          comma + 1
+        );
 
     }
 
   }
 
-  return data
-    .replace(/\s/g,"");
 
-}
-
-
-/* =========================
-   READ JSON ERROR
-========================= */
-
-async function readJsonResponse(
-  response
-){
-
-  try{
-
-    return await response.json();
-
-  }catch(error){
-
-    return {
-      error:
-        "Invalid server response"
-    };
-
-  }
+  return value.replace(
+    /\s/g,
+    ""
+  );
 
 }
 
@@ -1636,49 +2189,44 @@ async function readJsonResponse(
    HISTORY
 ========================= */
 
-async function saveHistoryFromBlob(
+function saveHistory(
   blob
 ){
 
-  try{
+  const reader =
+    new FileReader();
 
-    const reader =
-      new FileReader();
 
-    reader.onloadend =
-      async function(){
+  reader.onloadend =
+    async function(){
+
+      try{
 
         const thumbnail =
-          await createThumbnail(
+          await makeThumbnail(
             reader.result
           );
 
-        let history = [];
 
-        try{
+        let history =
+          JSON.parse(
+            localStorage.getItem(
+              "aaru_history"
+            ) || "[]"
+          );
 
-          history =
-            JSON.parse(
-              localStorage.getItem(
-                "aaru_history"
-              ) || "[]"
-            );
-
-        }catch(e){
-
-          history = [];
-
-        }
 
         history.unshift(
           thumbnail
         );
 
+
         history =
           history.slice(
             0,
-            10
+            12
           );
+
 
         localStorage.setItem(
           "aaru_history",
@@ -1687,27 +2235,29 @@ async function saveHistoryFromBlob(
           )
         );
 
+
         loadHistory();
 
-      };
+      }catch(error){
 
-    reader.readAsDataURL(
-      blob
-    );
+        console.log(
+          "History error:",
+          error
+        );
 
-  }catch(error){
+      }
 
-    console.log(
-      "History save failed",
-      error
-    );
+    };
 
-  }
+
+  reader.readAsDataURL(
+    blob
+  );
 
 }
 
 
-function createThumbnail(
+function makeThumbnail(
   dataUrl
 ){
 
@@ -1717,11 +2267,13 @@ function createThumbnail(
       const img =
         new Image();
 
+
       img.onload =
         function(){
 
-          const maxWidth =
+          const max =
             500;
+
 
           let width =
             img.width;
@@ -1729,19 +2281,20 @@ function createThumbnail(
           let height =
             img.height;
 
+
           if(
-            width >
-            maxWidth
+            width > max
           ){
 
             const scale =
-              maxWidth /
-              width;
+              max / width;
+
 
             width =
               Math.round(
                 width * scale
               );
+
 
             height =
               Math.round(
@@ -1750,21 +2303,26 @@ function createThumbnail(
 
           }
 
+
           const canvas =
             document.createElement(
               "canvas"
             );
 
+
           canvas.width =
             width;
 
+
           canvas.height =
             height;
+
 
           const ctx =
             canvas.getContext(
               "2d"
             );
+
 
           ctx.drawImage(
             img,
@@ -1774,6 +2332,7 @@ function createThumbnail(
             height
           );
 
+
           resolve(
             canvas.toDataURL(
               "image/jpeg",
@@ -1782,6 +2341,7 @@ function createThumbnail(
           );
 
         };
+
 
       img.src =
         dataUrl;
@@ -1798,12 +2358,8 @@ function createThumbnail(
 
 function loadHistory(){
 
-  const container =
-    document.getElementById(
-      "history"
-    );
-
   let history = [];
+
 
   try{
 
@@ -1814,22 +2370,28 @@ function loadHistory(){
         ) || "[]"
       );
 
-  }catch(e){
+  }catch(error){
 
     history = [];
 
   }
 
-  container.innerHTML = "";
 
-  if(!history.length){
+  recentGrid.innerHTML =
+    "";
 
-    container.innerHTML =
-      '<div class="empty">अभी कोई creation नहीं है</div>';
+
+  if(
+    !history.length
+  ){
+
+    recentGrid.innerHTML =
+      '<div class="recent-empty">अभी कोई creation नहीं है</div>';
 
     return;
 
   }
+
 
   history.forEach(
     function(imageData){
@@ -1839,98 +2401,137 @@ function loadHistory(){
           "div"
         );
 
+
       item.className =
-        "history-item";
+        "recent-item";
+
 
       const img =
         document.createElement(
           "img"
         );
 
+
       img.src =
         imageData;
 
+
       img.loading =
         "lazy";
+
 
       item.appendChild(
         img
       );
 
+
       item.onclick =
         function(){
 
-          const wrapper =
+          const message =
             document.createElement(
               "div"
             );
 
-          wrapper.className =
+
+          message.className =
             "message assistant";
 
-          const box =
+
+          const inner =
             document.createElement(
               "div"
             );
 
-          box.className =
-            "image-message";
 
-          const result =
+          inner.className =
+            "message-inner";
+
+
+          const generated =
+            document.createElement(
+              "div"
+            );
+
+
+          generated.className =
+            "generated";
+
+
+          const preview =
             document.createElement(
               "img"
             );
 
-          result.src =
+
+          preview.src =
             imageData;
+
 
           const actions =
             document.createElement(
               "div"
             );
 
+
           actions.className =
             "image-actions";
+
 
           const download =
             document.createElement(
               "a"
             );
 
-          download.textContent =
-            "⬇️ Download";
 
           download.href =
             imageData;
 
+
           download.download =
-            "aaru-ai-history.png";
+            "aaru-ai-history.jpg";
+
+
+          download.textContent =
+            "⬇️ Download";
+
 
           actions.appendChild(
             download
           );
 
-          box.appendChild(
-            result
+
+          generated.appendChild(
+            preview
           );
 
-          box.appendChild(
+
+          generated.appendChild(
             actions
           );
 
-          wrapper.appendChild(
-            box
+
+          inner.appendChild(
+            generated
           );
+
+
+          message.appendChild(
+            inner
+          );
+
 
           chat.appendChild(
-            wrapper
+            message
           );
 
-          scrollToBottom();
+
+          scrollBottom();
 
         };
 
-      container.appendChild(
+
+      recentGrid.appendChild(
         item
       );
 
@@ -1946,24 +2547,54 @@ function loadHistory(){
 
 function clearChat(){
 
-  if(
-    !confirm(
-      "Chat साफ करना है?"
-    )
-  ){
+  const ok =
+    confirm(
+      "क्या current chat साफ करना है?"
+    );
 
+
+  if(!ok){
     return;
-
   }
 
-  chat.innerHTML = "";
+
+  chat.innerHTML =
+    "";
+
 
   chat.appendChild(
     welcome
   );
 
+
   welcome.style.display =
-    "block";
+    "flex";
+
+}
+
+
+/* =========================
+   RESET TEXTAREA
+========================= */
+
+function resetTextarea(){
+
+  promptInput.style.height =
+    "42px";
+
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+function setStatus(
+  text
+){
+
+  status.textContent =
+    text || "";
 
 }
 
@@ -1972,25 +2603,30 @@ function clearChat(){
    SCROLL
 ========================= */
 
-function scrollToBottom(){
+function scrollBottom(){
 
   setTimeout(
     function(){
 
       window.scrollTo(
-        0,
-        document.body.scrollHeight
+        {
+          top:
+            document.body.scrollHeight,
+
+          behavior:
+            "smooth"
+        }
       );
 
     },
-    50
+    60
   );
 
 }
 
 
 /* =========================
-   START
+   INIT
 ========================= */
 
 loadHistory();
