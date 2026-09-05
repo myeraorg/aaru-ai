@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1.0"
+>
+
 <title>Aaru AI</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0
+}
 
 body{
 font-family:Arial,Helvetica,sans-serif;
@@ -23,7 +34,10 @@ max-width:1100px;
 margin:auto
 }
 
-/* SIDEBAR */
+
+/* =====================================================
+SIDEBAR
+===================================================== */
 
 .sidebar{
 width:250px;
@@ -95,7 +109,10 @@ cursor:pointer;
 font-size:12px
 }
 
-/* MAIN */
+
+/* =====================================================
+MAIN
+===================================================== */
 
 .main{
 flex:1;
@@ -129,10 +146,14 @@ background:#111;
 border:1px solid #292929;
 color:#fff;
 border-radius:9px;
-padding:8px 10px
+padding:8px 10px;
+font-size:18px
 }
 
-/* CHAT */
+
+/* =====================================================
+CHAT
+===================================================== */
 
 .chat{
 flex:1;
@@ -160,11 +181,16 @@ line-height:1.6
 
 .message{
 display:flex;
-margin-bottom:22px
+margin-bottom:22px;
+width:100%
 }
 
 .message.user{
 justify-content:flex-end
+}
+
+.message.ai{
+justify-content:flex-start
 }
 
 .bubble{
@@ -204,13 +230,19 @@ margin-right:9px;
 flex-shrink:0
 }
 
-/* IMAGE */
+
+/* =====================================================
+GENERATED IMAGE
+===================================================== */
 
 .generated-image{
 max-width:100%;
+width:auto;
+height:auto;
 display:block;
 margin-top:10px;
-border-radius:14px
+border-radius:14px;
+background:#000
 }
 
 .image-actions{
@@ -229,11 +261,15 @@ border-radius:8px;
 font-size:12px
 }
 
-/* TYPING */
+
+/* =====================================================
+TYPING
+===================================================== */
 
 .typing{
 display:flex;
-gap:5px
+gap:5px;
+padding:5px 2px
 }
 
 .typing span{
@@ -244,15 +280,30 @@ background:#777;
 animation:blink 1.2s infinite
 }
 
-.typing span:nth-child(2){animation-delay:.15s}
-.typing span:nth-child(3){animation-delay:.3s}
-
-@keyframes blink{
-0%,80%,100%{opacity:.2}
-40%{opacity:1}
+.typing span:nth-child(2){
+animation-delay:.15s
 }
 
-/* COMPOSER */
+.typing span:nth-child(3){
+animation-delay:.3s
+}
+
+@keyframes blink{
+
+0%,80%,100%{
+opacity:.2
+}
+
+40%{
+opacity:1
+}
+
+}
+
+
+/* =====================================================
+COMPOSER
+===================================================== */
 
 .composer-wrap{
 position:fixed;
@@ -260,7 +311,10 @@ bottom:0;
 left:250px;
 right:0;
 padding:12px 14px 14px;
-background:linear-gradient(transparent,#070707 25%);
+background:linear-gradient(
+transparent,
+#070707 25%
+);
 z-index:10
 }
 
@@ -346,7 +400,8 @@ font-size:17px
 }
 
 .send-btn:disabled{
-opacity:.4
+opacity:.4;
+cursor:not-allowed
 }
 
 .tools{
@@ -376,7 +431,10 @@ border-color:#555
 display:none
 }
 
-/* MEMORY MODAL */
+
+/* =====================================================
+MEMORY MODAL
+===================================================== */
 
 .modal{
 display:none;
@@ -442,11 +500,16 @@ justify-content:space-between;
 gap:8px
 }
 
+.memory-row span{
+word-break:break-word
+}
+
 .memory-row button{
 background:none;
 border:none;
 color:#777;
-cursor:pointer
+cursor:pointer;
+font-size:17px
 }
 
 .clear-memory{
@@ -460,7 +523,10 @@ border-radius:9px;
 cursor:pointer
 }
 
-/* MOBILE */
+
+/* =====================================================
+MOBILE
+===================================================== */
 
 @media(max-width:700px){
 
@@ -503,62 +569,110 @@ font-size:32px
 }
 
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
-<!-- SIDEBAR -->
 
-<aside class="sidebar" id="sidebar">
+<!-- =====================================================
+SIDEBAR
+===================================================== -->
+
+<aside
+class="sidebar"
+id="sidebar"
+>
 
 <div class="sidebar-logo">
 Aaru <span>AI</span>
 </div>
 
-<button class="new-chat" onclick="newChat()">
+
+<button
+class="new-chat"
+onclick="newChat()"
+type="button"
+>
 ＋ New Chat
 </button>
+
 
 <div class="history-label">
 RECENT CHATS
 </div>
 
-<div class="history-list" id="historyList"></div>
 
-<button class="memory-btn" onclick="openMemory()">
+<div
+class="history-list"
+id="historyList"
+>
+</div>
+
+
+<button
+class="memory-btn"
+onclick="openMemory()"
+type="button"
+>
 🧠 Memory
 </button>
 
 </aside>
 
 
-<!-- MAIN -->
+
+<!-- =====================================================
+MAIN
+===================================================== -->
 
 <main class="main">
 
+
 <header class="header">
+
 
 <button
 class="mobile-menu"
-onclick="toggleSidebar()">
+onclick="toggleSidebar()"
+type="button"
+>
 ☰
 </button>
+
 
 <div class="logo">
 Aaru <span>AI</span>
 </div>
 
+
 </header>
 
 
-<div class="chat" id="chat">
 
-<div class="welcome" id="welcome">
+<!-- =====================================================
+CHAT AREA
+===================================================== -->
 
-<h1>How can I help?</h1>
+<div
+class="chat"
+id="chat"
+>
+
+<div
+class="welcome"
+id="welcome"
+>
+
+<h1>
+How can I help?
+</h1>
 
 <p>
 Ask anything, create an image,<br>
@@ -570,34 +684,53 @@ or upload a photo to transform it.
 </div>
 
 
-<!-- COMPOSER -->
+
+<!-- =====================================================
+COMPOSER
+===================================================== -->
 
 <div class="composer-wrap">
 
 <div class="composer">
 
-<div class="preview" id="preview">
 
-<img id="previewImage">
+<!-- IMAGE PREVIEW -->
+
+<div
+class="preview"
+id="preview"
+>
+
+<img
+id="previewImage"
+alt="Selected photo"
+>
 
 <button
 class="remove-preview"
 onclick="removeImage()"
-type="button">
+type="button"
+>
 ×
 </button>
 
 </div>
 
 
+
+<!-- INPUT -->
+
 <div class="input-row">
+
 
 <button
 class="icon-btn"
 onclick="fileInput.click()"
-type="button">
+type="button"
+>
 ＋
 </button>
+
 
 <textarea
 id="prompt"
@@ -605,40 +738,54 @@ rows="1"
 placeholder="Message Aaru AI..."
 ></textarea>
 
+
 <button
 class="send-btn"
 id="sendBtn"
 onclick="sendMessage()"
-type="button">
+type="button"
+>
 ➤
 </button>
+
 
 </div>
 
 
+
+<!-- TOOLS -->
+
 <div class="tools">
+
 
 <button
 class="tool"
 id="imageTool"
 onclick="toggleImageMode()"
-type="button">
+type="button"
+>
 🎨 Create Image
 </button>
+
 
 <button
 class="tool"
 onclick="fileInput.click()"
-type="button">
+type="button"
+>
 📷 Photo
 </button>
 
+
 </div>
+
 
 <input
 type="file"
 id="fileInput"
-accept="image/*">
+accept="image/*"
+>
+
 
 </div>
 
@@ -649,45 +796,65 @@ accept="image/*">
 </div>
 
 
-<!-- MEMORY MODAL -->
 
-<div class="modal" id="memoryModal">
+<!-- =====================================================
+MEMORY MODAL
+===================================================== -->
+
+<div
+class="modal"
+id="memoryModal"
+>
 
 <div class="modal-box">
 
+
 <div class="modal-head">
 
-<h2>🧠 Aaru Memory</h2>
+<h2>
+🧠 Aaru Memory
+</h2>
 
 <button
 class="close"
-onclick="closeMemory()">
+onclick="closeMemory()"
+type="button"
+>
 ×
 </button>
 
 </div>
 
+
 <div class="memory-info">
-Aaru की saved memories आपके browser में localStorage में रखी जाती हैं।
+Aaru की saved memories अभी आपके browser में localStorage में रखी जाती हैं।
 </div>
+
 
 <div
 class="memory-list"
-id="memoryList">
+id="memoryList"
+>
 </div>
+
 
 <button
 class="clear-memory"
-onclick="clearMemory()">
+onclick="clearMemory()"
+type="button"
+>
 Clear All Memory
 </button>
 
+
 </div>
 
 </div>
+
 
 
 <script>
+
 
 /* =====================================================
 CONFIG
@@ -731,7 +898,51 @@ document.getElementById("historyList");
 
 
 /* =====================================================
-LOCAL STORAGE HELPERS
+AUTO RESIZE TEXTAREA
+===================================================== */
+
+promptInput.addEventListener(
+"input",
+function(){
+
+this.style.height =
+"auto";
+
+this.style.height =
+Math.min(
+this.scrollHeight,
+130
+) + "px";
+
+}
+);
+
+
+/* =====================================================
+ENTER TO SEND
+===================================================== */
+
+promptInput.addEventListener(
+"keydown",
+function(event){
+
+if(
+event.key === "Enter" &&
+!event.shiftKey
+){
+
+event.preventDefault();
+
+sendMessage();
+
+}
+
+}
+);
+
+
+/* =====================================================
+LOCAL CHAT STORAGE
 ===================================================== */
 
 function getChats(){
@@ -744,7 +955,7 @@ localStorage.getItem(
 ) || "[]"
 );
 
-}catch(e){
+}catch(error){
 
 return [];
 
@@ -764,7 +975,7 @@ JSON.stringify(chats)
 
 
 /* =====================================================
-MEMORY
+MEMORY STORAGE
 ===================================================== */
 
 function getMemory(){
@@ -777,7 +988,7 @@ localStorage.getItem(
 ) || "[]"
 );
 
-}catch(e){
+}catch(error){
 
 return [];
 
@@ -796,21 +1007,24 @@ JSON.stringify(memory)
 }
 
 
-/*
-Basic automatic memory.
-
-We only save obvious preference-style
-sentences, not the whole conversation.
-*/
+/* =====================================================
+AUTOMATIC MEMORY DETECTION
+===================================================== */
 
 function detectMemory(text){
+
+if(!text){
+return;
+}
 
 const lower =
 text.toLowerCase();
 
 const patterns = [
+
 "remember that",
 "याद रखना",
+"याद रखो",
 "मुझे पसंद है",
 "मुझे पसंद",
 "मेरा नाम",
@@ -819,28 +1033,41 @@ const patterns = [
 "my name is",
 "i like",
 "i prefer"
+
 ];
+
 
 const found =
 patterns.some(
-p => lower.includes(p)
+pattern =>
+lower.includes(pattern)
 );
 
-if(!found)return;
+
+if(!found){
+return;
+}
+
 
 let memory =
 getMemory();
 
+
 if(
 !memory.some(
-m => m.text === text
+item =>
+item.text === text
 )
 ){
 
 memory.unshift({
+
 id:Date.now(),
+
 text:text
+
 });
+
 
 memory =
 memory.slice(0,30);
@@ -855,7 +1082,7 @@ renderMemory();
 
 
 /* =====================================================
-BUILD SYSTEM CONTEXT
+BUILD CHAT CONTEXT
 ===================================================== */
 
 function buildMessages(){
@@ -865,25 +1092,31 @@ getMemory();
 
 let memoryText = "";
 
+
 if(memory.length){
 
 memoryText =
 "\n\nUser memory:\n" +
 memory
 .map(
-m => "- " + m.text
+item =>
+"- " + item.text
 )
 .join("\n");
 
 }
 
+
 return [
 
 {
+
 role:"system",
+
 content:
-"You are Aaru AI. Use the user's saved memory when it is relevant." +
+"You are Aaru AI, a helpful multilingual AI assistant. Use saved user memory when relevant." +
 memoryText
+
 },
 
 ...messages
@@ -894,7 +1127,7 @@ memoryText
 
 
 /* =====================================================
-CHAT HISTORY
+CHAT HISTORY UI
 ===================================================== */
 
 function renderHistory(){
@@ -904,6 +1137,7 @@ getChats();
 
 historyList.innerHTML = "";
 
+
 if(!chats.length){
 
 historyList.innerHTML =
@@ -912,6 +1146,7 @@ historyList.innerHTML =
 return;
 
 }
+
 
 chats
 .slice()
@@ -952,22 +1187,30 @@ SAVE CURRENT CHAT
 
 function saveCurrentChat(){
 
-if(!messages.length)return;
+if(!messages.length){
+return;
+}
+
 
 const chats =
 getChats();
 
+
 const firstUser =
 messages.find(
-m => m.role === "user"
+message =>
+message.role === "user"
 );
+
 
 const title =
 firstUser
 ? firstUser.content.slice(0,40)
 : "New Chat";
 
+
 const data = {
+
 id:
 currentChatId ||
 Date.now(),
@@ -980,10 +1223,13 @@ updatedAt:Date.now()
 
 };
 
+
 const index =
 chats.findIndex(
-c => c.id === data.id
+item =>
+item.id === data.id
 );
+
 
 if(index >= 0){
 
@@ -995,6 +1241,7 @@ data;
 chats.push(data);
 
 }
+
 
 saveChats(chats);
 
@@ -1015,15 +1262,22 @@ function loadChat(id){
 const chats =
 getChats();
 
+
 const selected =
 chats.find(
-c => c.id === id
+item =>
+item.id === id
 );
 
-if(!selected)return;
+
+if(!selected){
+return;
+}
+
 
 currentChatId =
 selected.id;
+
 
 messages =
 Array.isArray(
@@ -1032,19 +1286,25 @@ selected.messages
 ? selected.messages
 : [];
 
+
 chat.innerHTML = "";
+
 
 messages.forEach(
 message => {
 
-if(message.role === "user"){
+if(
+message.role === "user"
+){
 
 addUserMessage(
 message.content,
 false
 );
 
-}else if(
+}
+
+else if(
 message.role === "assistant"
 ){
 
@@ -1057,6 +1317,7 @@ false
 
 }
 );
+
 
 closeSidebar();
 
@@ -1073,16 +1334,22 @@ function newChat(){
 
 saveCurrentChat();
 
+
 messages = [];
 
 currentChatId = null;
 
-selectedImageBase64 = "";
 
 chat.innerHTML = `
-<div class="welcome" id="welcome">
 
-<h1>How can I help?</h1>
+<div
+class="welcome"
+id="welcome"
+>
+
+<h1>
+How can I help?
+</h1>
 
 <p>
 Ask anything, create an image,<br>
@@ -1090,14 +1357,40 @@ or upload a photo to transform it.
 </p>
 
 </div>
+
 `;
+
 
 promptInput.value = "";
 
 promptInput.style.height =
 "auto";
 
+
 removeImage();
+
+
+imageMode = false;
+
+
+const imageBtn =
+document.getElementById(
+"imageTool"
+);
+
+
+imageBtn.classList.remove(
+"active"
+);
+
+
+imageBtn.textContent =
+"🎨 Create Image";
+
+
+promptInput.placeholder =
+"Message Aaru AI...";
+
 
 closeSidebar();
 
@@ -1110,7 +1403,7 @@ ADD USER MESSAGE
 
 function addUserMessage(
 text,
-scroll=true
+shouldScroll = true
 ){
 
 const row =
@@ -1118,6 +1411,7 @@ document.createElement("div");
 
 row.className =
 "message user";
+
 
 const bubble =
 document.createElement("div");
@@ -1128,11 +1422,19 @@ bubble.className =
 bubble.textContent =
 text;
 
-row.appendChild(bubble);
 
-chat.appendChild(row);
+row.appendChild(
+bubble
+);
 
-if(scroll)scrollBottom();
+chat.appendChild(
+row
+);
+
+
+if(shouldScroll){
+scrollBottom();
+}
 
 }
 
@@ -1143,7 +1445,7 @@ ADD AI MESSAGE
 
 function addAIMessage(
 text,
-scroll=true
+shouldScroll = true
 ){
 
 const row =
@@ -1151,6 +1453,7 @@ document.createElement("div");
 
 row.className =
 "message ai";
+
 
 const avatar =
 document.createElement("div");
@@ -1161,6 +1464,7 @@ avatar.className =
 avatar.textContent =
 "AI";
 
+
 const bubble =
 document.createElement("div");
 
@@ -1170,13 +1474,24 @@ bubble.className =
 bubble.textContent =
 text;
 
-row.appendChild(avatar);
 
-row.appendChild(bubble);
+row.appendChild(
+avatar
+);
 
-chat.appendChild(row);
+row.appendChild(
+bubble
+);
 
-if(scroll)scrollBottom();
+chat.appendChild(
+row
+);
+
+
+if(shouldScroll){
+scrollBottom();
+}
+
 
 return bubble;
 
@@ -1184,7 +1499,7 @@ return bubble;
 
 
 /* =====================================================
-TYPING
+TYPING INDICATOR
 ===================================================== */
 
 function showTyping(){
@@ -1198,6 +1513,7 @@ row.className =
 row.id =
 "typingMessage";
 
+
 const avatar =
 document.createElement("div");
 
@@ -1207,25 +1523,39 @@ avatar.className =
 avatar.textContent =
 "AI";
 
+
 const bubble =
 document.createElement("div");
 
 bubble.className =
 "bubble";
 
+
 bubble.innerHTML = `
+
 <div class="typing">
+
 <span></span>
 <span></span>
 <span></span>
+
 </div>
+
 `;
 
-row.appendChild(avatar);
 
-row.appendChild(bubble);
+row.appendChild(
+avatar
+);
 
-chat.appendChild(row);
+row.appendChild(
+bubble
+);
+
+chat.appendChild(
+row
+);
+
 
 scrollBottom();
 
@@ -1234,12 +1564,109 @@ scrollBottom();
 
 function removeTyping(){
 
-const el =
+const element =
 document.getElementById(
 "typingMessage"
 );
 
-if(el)el.remove();
+
+if(element){
+element.remove();
+}
+
+}
+
+
+/* =====================================================
+IMAGE INTENT DETECTION
+===================================================== */
+
+function isImageRequest(text){
+
+if(!text){
+return false;
+}
+
+
+const value =
+text
+.toLowerCase()
+.trim();
+
+
+const imagePatterns = [
+
+/चित्र\s*(बनाओ|बना|बनाना|तैयार करो|तैयार करें)/i,
+
+/तस्वीर\s*(बनाओ|बना|बनाना|तैयार करो|तैयार करें)/i,
+
+/फोटो\s*(बनाओ|बना|बनाना|तैयार करो|तैयार करें)/i,
+
+/इमेज\s*(बनाओ|बना|बनाना|तैयार करो|तैयार करें)/i,
+
+/चित्र\s*generate/i,
+
+/तस्वीर\s*generate/i,
+
+/इमेज\s*generate/i,
+
+/फोटो\s*generate/i,
+
+/image\s*(बनाओ|बना|generate|create|make|draw)/i,
+
+/picture\s*(बनाओ|बना|generate|create|make|draw)/i,
+
+/photo\s*(बनाओ|बना|generate|create|make|draw)/i,
+
+/generate\s+(an?\s+)?image/i,
+
+/generate\s+(an?\s+)?picture/i,
+
+/generate\s+(a\s+)?photo/i,
+
+/create\s+(an?\s+)?image/i,
+
+/create\s+(an?\s+)?picture/i,
+
+/create\s+(a\s+)?photo/i,
+
+/make\s+(an?\s+)?image/i,
+
+/make\s+(an?\s+)?picture/i,
+
+/make\s+(a\s+)?photo/i,
+
+/draw\s+(an?\s+)?image/i,
+
+/draw\s+(a\s+)?picture/i,
+
+/draw\s+(a\s+)?scene/i,
+
+/generate\s+image/i,
+
+/create\s+image/i,
+
+/make\s+image/i,
+
+/image\s+generation/i,
+
+/image\s+generate\s+करो/i,
+
+/इमेज\s+जनरेट\s+करो/i,
+
+/इमेज\s+जनरेट\s+करें/i,
+
+/तस्वीर\s+जनरेट\s+करो/i,
+
+/चित्र\s+जनरेट\s+करो/i
+
+];
+
+
+return imagePatterns.some(
+pattern =>
+pattern.test(value)
+);
 
 }
 
@@ -1253,11 +1680,16 @@ async function sendMessage(){
 const text =
 promptInput.value.trim();
 
-if(!text && !selectedImageBase64){
+
+if(
+!text &&
+!selectedImageBase64
+){
 
 return;
 
 }
+
 
 sendBtn.disabled =
 true;
@@ -1268,8 +1700,15 @@ document.getElementById(
 "welcome"
 );
 
-if(welcome)welcome.remove();
 
+if(welcome){
+welcome.remove();
+}
+
+
+/* =====================================================
+SHOW USER MESSAGE
+===================================================== */
 
 if(text){
 
@@ -1278,7 +1717,9 @@ addUserMessage(text);
 }
 
 
-/* MEMORY */
+/* =====================================================
+MEMORY
+===================================================== */
 
 if(text){
 
@@ -1287,17 +1728,41 @@ detectMemory(text);
 }
 
 
-/* IMAGE */
+/* =====================================================
+IMAGE REQUEST
+===================================================== */
+
+const imageRequested =
+isImageRequest(text);
+
+
+/*
+If:
+
+1. Image Mode is ON
+OR
+2. Photo is uploaded
+OR
+3. User explicitly asks to create an image
+
+then go directly to image generation.
+
+This prevents GLM from returning:
+{{image_generation_placeholder}}
+*/
+
 
 if(
 imageMode ||
-selectedImageBase64
+selectedImageBase64 ||
+imageRequested
 ){
 
 await generateImage(
 text ||
 "Create a high quality image from the uploaded photo."
 );
+
 
 sendBtn.disabled =
 false;
@@ -1307,18 +1772,30 @@ return;
 }
 
 
-/* CHAT */
+/* =====================================================
+NORMAL CHAT
+===================================================== */
 
 messages.push({
+
 role:"user",
+
 content:text
+
 });
 
 
 /*
-Send conversation + memory
-to Worker.
+Keep last 20 messages.
 */
+
+if(messages.length > 20){
+
+messages =
+messages.slice(-20);
+
+}
+
 
 showTyping();
 
@@ -1329,6 +1806,7 @@ const response =
 await fetch(
 API_URL + "chat",
 {
+
 method:"POST",
 
 headers:{
@@ -1347,8 +1825,19 @@ buildMessages()
 );
 
 
-const data =
+let data = {};
+
+
+try{
+
+data =
 await response.json();
+
+}catch(error){
+
+data = {};
+
+}
 
 
 removeTyping();
@@ -1365,19 +1854,25 @@ data.error ||
 
 
 const reply =
-data.reply || "";
+data.reply ||
+"मुझे कोई response नहीं मिला।";
 
 
 messages.push({
+
 role:"assistant",
+
 content:reply
+
 });
 
 
-addAIMessage(reply);
+addAIMessage(
+reply
+);
 
 
-/* SAVE */
+/* SAVE CHAT */
 
 saveCurrentChat();
 
@@ -1385,6 +1880,7 @@ saveCurrentChat();
 }catch(error){
 
 removeTyping();
+
 
 addAIMessage(
 "❌ " +
@@ -1413,7 +1909,7 @@ promptInput.style.height =
 
 
 /* =====================================================
-IMAGE GENERATION
+GENERATE IMAGE
 ===================================================== */
 
 async function generateImage(
@@ -1427,6 +1923,7 @@ text =
 
 }
 
+
 showTyping();
 
 
@@ -1435,12 +1932,17 @@ try{
 let response;
 
 
+/* =====================================================
+PHOTO TO IMAGE
+===================================================== */
+
 if(selectedImageBase64){
 
 response =
 await fetch(
 API_URL,
 {
+
 method:"POST",
 
 headers:{
@@ -1468,7 +1970,14 @@ strength:0.65
 }
 );
 
-}else{
+}
+
+
+/* =====================================================
+TEXT TO IMAGE
+===================================================== */
+
+else{
 
 const params =
 new URLSearchParams({
@@ -1481,6 +1990,7 @@ quality:"hd"
 
 });
 
+
 response =
 await fetch(
 API_URL +
@@ -1491,14 +2001,22 @@ params.toString()
 }
 
 
+/* =====================================================
+CHECK RESPONSE
+===================================================== */
+
 if(!response.ok){
 
-let errorData={};
+let errorData = {};
+
 
 try{
+
 errorData =
 await response.json();
-}catch(e){}
+
+}catch(error){}
+
 
 throw new Error(
 errorData.error ||
@@ -1512,7 +2030,9 @@ const blob =
 await response.blob();
 
 
-if(!blob.type.includes("image")){
+if(
+!blob.type.includes("image")
+){
 
 throw new Error(
 "Server ने valid image नहीं भेजी।"
@@ -1521,12 +2041,22 @@ throw new Error(
 }
 
 
+/* =====================================================
+IMAGE URL
+===================================================== */
+
 const imageUrl =
-URL.createObjectURL(blob);
+URL.createObjectURL(
+blob
+);
 
 
 removeTyping();
 
+
+/* =====================================================
+IMAGE MESSAGE
+===================================================== */
 
 const row =
 document.createElement("div");
@@ -1551,7 +2081,11 @@ document.createElement("div");
 bubble.className =
 "bubble";
 
-bubble.textContent =
+
+const title =
+document.createElement("div");
+
+title.textContent =
 "✨ आपकी image तैयार है।";
 
 
@@ -1564,6 +2098,13 @@ image.className =
 image.src =
 imageUrl;
 
+image.alt =
+"Generated by Aaru AI";
+
+
+/* =====================================================
+DOWNLOAD BUTTON
+===================================================== */
 
 const actions =
 document.createElement("div");
@@ -1591,6 +2132,11 @@ actions.appendChild(
 download
 );
 
+
+bubble.appendChild(
+title
+);
+
 bubble.appendChild(
 image
 );
@@ -1598,6 +2144,7 @@ image
 bubble.appendChild(
 actions
 );
+
 
 row.appendChild(
 avatar
@@ -1611,12 +2158,48 @@ chat.appendChild(
 row
 );
 
+
 scrollBottom();
+
+
+/* =====================================================
+SAVE IMAGE IN LOCAL HISTORY
+===================================================== */
+
+try{
+
+const reader =
+new FileReader();
+
+
+reader.onloadend =
+function(){
+
+saveImageToHistory(
+reader.result
+);
+
+};
+
+
+reader.readAsDataURL(
+blob
+);
+
+}catch(error){
+
+console.log(
+"Image history failed",
+error
+);
+
+}
 
 
 }catch(error){
 
 removeTyping();
+
 
 addAIMessage(
 "❌ " +
@@ -1628,26 +2211,33 @@ error.message ||
 
 }
 
+
 finally{
 
 removeImage();
 
-imageMode = false;
 
-const btn =
+imageMode =
+false;
+
+
+const imageBtn =
 document.getElementById(
 "imageTool"
 );
 
-btn.classList.remove(
+
+imageBtn.classList.remove(
 "active"
 );
 
-btn.textContent =
+imageBtn.textContent =
 "🎨 Create Image";
+
 
 promptInput.placeholder =
 "Message Aaru AI...";
+
 
 promptInput.value = "";
 
@@ -1670,9 +2260,15 @@ function(event){
 const file =
 event.target.files[0];
 
-if(!file)return;
 
-if(!file.type.startsWith("image/")){
+if(!file){
+return;
+}
+
+
+if(
+!file.type.startsWith("image/")
+){
 
 alert(
 "कृपया image file चुनें।"
@@ -1682,30 +2278,39 @@ return;
 
 }
 
+
 const reader =
 new FileReader();
 
+
 reader.onload =
-function(e){
+function(event){
 
 selectedImageBase64 =
-e.target.result;
+event.target.result;
+
 
 document
 .getElementById(
 "previewImage"
-).src =
+)
+.src =
 selectedImageBase64;
+
 
 document
 .getElementById(
 "preview"
-).style.display =
+)
+.style.display =
 "block";
 
 };
 
-reader.readAsDataURL(file);
+
+reader.readAsDataURL(
+file
+);
 
 }
 );
@@ -1721,10 +2326,12 @@ selectedImageBase64 = "";
 
 fileInput.value = "";
 
+
 document
 .getElementById(
 "preview"
-).style.display =
+)
+.style.display =
 "none";
 
 }
@@ -1739,27 +2346,35 @@ function toggleImageMode(){
 imageMode =
 !imageMode;
 
-const btn =
+
+const button =
 document.getElementById(
 "imageTool"
 );
 
+
 if(imageMode){
 
-btn.classList.add("active");
+button.classList.add(
+"active"
+);
 
-btn.textContent =
+button.textContent =
 "🎨 Image Mode ON";
+
 
 promptInput.placeholder =
 "Describe the image you want...";
 
 }else{
 
-btn.classList.remove("active");
+button.classList.remove(
+"active"
+);
 
-btn.textContent =
+button.textContent =
 "🎨 Create Image";
+
 
 promptInput.placeholder =
 "Message Aaru AI...";
@@ -1777,15 +2392,65 @@ function cleanBase64(
 dataUrl
 ){
 
-if(!dataUrl)return "";
+if(!dataUrl){
+return "";
+}
 
-if(dataUrl.includes(",")){
+
+if(
+dataUrl.includes(",")
+){
 
 return dataUrl.split(",")[1];
 
 }
 
+
 return dataUrl;
+
+}
+
+
+/* =====================================================
+IMAGE HISTORY
+===================================================== */
+
+function saveImageToHistory(
+imageData
+){
+
+try{
+
+let history =
+JSON.parse(
+localStorage.getItem(
+"aaru_image_history"
+) || "[]"
+);
+
+
+history.unshift(
+imageData
+);
+
+
+history =
+history.slice(0,10);
+
+
+localStorage.setItem(
+"aaru_image_history",
+JSON.stringify(history)
+);
+
+}catch(error){
+
+console.log(
+"Image history save failed",
+error
+);
+
+}
 
 }
 
@@ -1797,6 +2462,7 @@ MEMORY UI
 function openMemory(){
 
 renderMemory();
+
 
 document
 .getElementById(
@@ -1827,10 +2493,13 @@ document.getElementById(
 "memoryList"
 );
 
+
 const memory =
 getMemory();
 
+
 container.innerHTML = "";
+
 
 if(!memory.length){
 
@@ -1841,6 +2510,7 @@ return;
 
 }
 
+
 memory.forEach(
 item => {
 
@@ -1850,17 +2520,23 @@ document.createElement("div");
 row.className =
 "memory-row";
 
+
 const text =
 document.createElement("span");
 
 text.textContent =
 item.text;
 
+
 const button =
 document.createElement("button");
 
 button.textContent =
 "×";
+
+button.type =
+"button";
+
 
 button.onclick =
 function(){
@@ -1871,11 +2547,18 @@ item.id
 
 };
 
-row.appendChild(text);
 
-row.appendChild(button);
+row.appendChild(
+text
+);
 
-container.appendChild(row);
+row.appendChild(
+button
+);
+
+container.appendChild(
+row
+);
 
 }
 );
@@ -1888,10 +2571,13 @@ function deleteMemory(id){
 let memory =
 getMemory();
 
+
 memory =
 memory.filter(
-m => m.id !== id
+item =>
+item.id !== id
 );
+
 
 saveMemory(memory);
 
@@ -1902,15 +2588,21 @@ renderMemory();
 
 function clearMemory(){
 
-if(
-!confirm(
+const confirmed =
+confirm(
 "क्या आप सभी saved memories हटाना चाहते हैं?"
-)
-)return;
+);
+
+
+if(!confirmed){
+return;
+}
+
 
 localStorage.removeItem(
 "aaru_memory"
 );
+
 
 renderMemory();
 
@@ -1957,8 +2649,13 @@ setTimeout(
 function(){
 
 chat.scrollTo({
-top:chat.scrollHeight,
-behavior:"smooth"
+
+top:
+chat.scrollHeight,
+
+behavior:
+"smooth"
+
 });
 
 },
