@@ -25,9 +25,7 @@ body{
   overflow-x:hidden;
 }
 
-button,
-textarea,
-input{
+button,textarea,input{
   font-family:inherit;
 }
 
@@ -35,16 +33,12 @@ button{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* APP */
-
 .app{
   width:100%;
   min-height:100vh;
   max-width:900px;
   margin:auto;
 }
-
-/* HEADER */
 
 .header{
   position:sticky;
@@ -92,8 +86,6 @@ button{
   color:#666;
 }
 
-/* CHAT */
-
 .chat{
   width:100%;
   padding:10px 12px 170px;
@@ -136,8 +128,6 @@ button{
   line-height:1.6;
 }
 
-/* MESSAGES */
-
 .message{
   display:flex;
   width:100%;
@@ -178,8 +168,6 @@ button{
   border-bottom-left-radius:5px;
 }
 
-/* USER PHOTO */
-
 .photo-user{
   width:min(330px,80vw);
   margin-bottom:7px;
@@ -193,8 +181,6 @@ button{
   border-radius:16px;
   border:1px solid #292929;
 }
-
-/* GENERATED IMAGE */
 
 .generated{
   width:min(560px,88vw);
@@ -227,8 +213,6 @@ button{
   font-size:12px;
   cursor:pointer;
 }
-
-/* TYPING */
 
 .typing{
   display:flex;
@@ -268,8 +252,6 @@ button{
   }
 }
 
-/* COMPOSER */
-
 .composer-area{
   position:fixed;
   left:0;
@@ -290,8 +272,6 @@ button{
   padding:9px;
   box-shadow:0 -10px 35px rgba(0,0,0,.25);
 }
-
-/* ATTACHMENT */
 
 .attachment{
   display:none;
@@ -322,8 +302,6 @@ button{
   font-size:18px;
   cursor:pointer;
 }
-
-/* INPUT */
 
 .input-row{
   display:flex;
@@ -377,8 +355,6 @@ button{
 #prompt::placeholder{
   color:#666;
 }
-
-/* TOOLS */
 
 .tools{
   display:flex;
@@ -486,8 +462,12 @@ button{
 .history-tools{
   padding:12px 14px;
   border-bottom:1px solid #1c1c1c;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
+.new-chat-btn,
 .delete-all{
   width:100%;
   border:1px solid #333;
@@ -497,6 +477,13 @@ button{
   border-radius:10px;
   font-size:12px;
   cursor:pointer;
+}
+
+.new-chat-btn{
+  background:#fff;
+  color:#000;
+  border-color:#fff;
+  font-weight:700;
 }
 
 .history-list{
@@ -535,6 +522,7 @@ button{
   align-items:center;
   color:#999;
   font-size:12px;
+  padding-right:25px;
 }
 
 .history-delete{
@@ -549,6 +537,17 @@ button{
   color:#aaa;
   cursor:pointer;
   font-size:15px;
+}
+
+.chat-memory-info{
+  padding:9px 12px;
+  margin:0 12px 10px;
+  border:1px solid #222;
+  border-radius:10px;
+  background:#101010;
+  color:#666;
+  font-size:11px;
+  line-height:1.4;
 }
 
 /* MOBILE */
@@ -617,7 +616,6 @@ button{
 
 </header>
 
-
 <main class="chat" id="chat">
 
   <section class="welcome" id="welcome">
@@ -656,7 +654,7 @@ button{
   <div class="history-head">
 
     <div class="history-head-title">
-      Recent Creations
+      Aaru AI
     </div>
 
     <button
@@ -670,13 +668,33 @@ button{
   <div class="history-tools">
 
     <button
+      class="new-chat-btn"
+      id="newChatBtn"
+      type="button"
+    >
+      ＋ New Chat
+    </button>
+
+    <button
+      class="delete-all"
+      id="deleteChatBtn"
+      type="button"
+    >
+      🗑 Clear Current Chat
+    </button>
+
+    <button
       class="delete-all"
       id="deleteAllBtn"
       type="button"
     >
-      🗑 Delete All
+      🗑 Delete Images
     </button>
 
+  </div>
+
+  <div class="chat-memory-info">
+    🧠 Aaru इस conversation का context याद रखता है।
   </div>
 
   <div
@@ -711,7 +729,6 @@ button{
 
     </div>
 
-
     <div class="input-row">
 
       <button
@@ -733,7 +750,6 @@ button{
       >↑</button>
 
     </div>
-
 
     <div class="tools">
 
@@ -763,7 +779,6 @@ button{
 
     </div>
 
-
     <input
       type="file"
       id="imageInput"
@@ -782,28 +797,145 @@ button{
 
 <script>
 
-/* =====================================================
-   AARU AI FRONTEND
-===================================================== */
-
 "use strict";
 
-
-/* =========================
-   CONFIG
-========================= */
+/* =====================================================
+   AARU AI FRONTEND
+   MEMORY VERSION
+===================================================== */
 
 const API_URL =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
-
-/* =========================
-   STATE
-========================= */
+const CHAT_STORAGE_KEY =
+  "aaru_conversation_v2";
 
 let selectedImageDataUrl = "";
 let imageMode = false;
 let busy = false;
+
+
+/* =========================
+   CONVERSATION MEMORY
+========================= */
+
+let conversation = [];
+
+function loadConversation(){
+
+  try{
+
+    const saved =
+      localStorage.getItem(
+        CHAT_STORAGE_KEY
+      );
+
+    if(!saved){
+      conversation = [];
+      return;
+    }
+
+    const parsed =
+      JSON.parse(saved);
+
+    if(Array.isArray(parsed)){
+
+      conversation =
+        parsed.filter(function(item){
+
+          return (
+            item &&
+            (
+              item.role === "user" ||
+              item.role === "assistant"
+            ) &&
+            typeof item.content === "string"
+          );
+
+        }).slice(-50);
+
+    }else{
+
+      conversation = [];
+
+    }
+
+  }catch(error){
+
+    console.log(
+      "Conversation load failed:",
+      error
+    );
+
+    conversation = [];
+
+  }
+
+}
+
+
+function saveConversation(){
+
+  try{
+
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify(
+        conversation.slice(-50)
+      )
+    );
+
+  }catch(error){
+
+    console.log(
+      "Conversation save failed:",
+      error
+    );
+
+  }
+
+}
+
+
+function addMemoryMessage(
+  role,
+  content
+){
+
+  if(
+    !content ||
+    (
+      role !== "user" &&
+      role !== "assistant"
+    )
+  ){
+
+    return;
+
+  }
+
+  conversation.push({
+    role:role,
+    content:String(content).slice(0,8000)
+  });
+
+  conversation =
+    conversation.slice(-50);
+
+  saveConversation();
+
+}
+
+
+function clearConversation(){
+
+  conversation = [];
+
+  localStorage.removeItem(
+    CHAT_STORAGE_KEY
+  );
+
+}
 
 
 /* =========================
@@ -867,26 +999,16 @@ const historyList =
 const deleteAllBtn =
   document.getElementById("deleteAllBtn");
 
+const newChatBtn =
+  document.getElementById("newChatBtn");
 
-/* =========================
-   SAFETY CHECK
-========================= */
-
-console.log("Aaru AI frontend loaded");
+const deleteChatBtn =
+  document.getElementById("deleteChatBtn");
 
 
-if(
-  !chat ||
-  !promptInput ||
-  !imageInput ||
-  !sendBtn
-){
-
-  console.error(
-    "Aaru AI: Required elements missing."
-  );
-
-}
+console.log(
+  "Aaru AI memory frontend loaded"
+);
 
 
 /* =========================
@@ -933,7 +1055,7 @@ promptInput.addEventListener(
 
 
 /* =========================
-   BUTTON EVENTS
+   EVENTS
 ========================= */
 
 menuBtn.addEventListener(
@@ -941,60 +1063,60 @@ menuBtn.addEventListener(
   openHistory
 );
 
-
 closeHistoryBtn.addEventListener(
   "click",
   closeHistory
 );
-
 
 overlay.addEventListener(
   "click",
   closeHistory
 );
 
-
 deleteAllBtn.addEventListener(
   "click",
   deleteAllHistory
 );
 
+newChatBtn.addEventListener(
+  "click",
+  startNewChat
+);
+
+deleteChatBtn.addEventListener(
+  "click",
+  clearCurrentChat
+);
 
 attachBtn.addEventListener(
   "click",
   openPhotoPicker
 );
 
-
 photoTool.addEventListener(
   "click",
   openPhotoPicker
 );
-
 
 removePhotoBtn.addEventListener(
   "click",
   removePhoto
 );
 
-
 imageTool.addEventListener(
   "click",
   toggleImageMode
 );
-
 
 exampleTool.addEventListener(
   "click",
   insertExample
 );
 
-
 sendBtn.addEventListener(
   "click",
   sendMessage
 );
-
 
 imageInput.addEventListener(
   "change",
@@ -1115,7 +1237,6 @@ function preparePhoto(file){
 
         };
 
-
       reader.onload =
         function(){
 
@@ -1133,7 +1254,6 @@ function preparePhoto(file){
 
             };
 
-
           img.onload =
             function(){
 
@@ -1145,7 +1265,6 @@ function preparePhoto(file){
               let height =
                 img.naturalHeight;
 
-
               const scale =
                 Math.min(
                   1,
@@ -1156,7 +1275,6 @@ function preparePhoto(file){
                   )
                 );
 
-
               width =
                 Math.max(
                   1,
@@ -1164,7 +1282,6 @@ function preparePhoto(file){
                     width * scale
                   )
                 );
-
 
               height =
                 Math.max(
@@ -1174,19 +1291,16 @@ function preparePhoto(file){
                   )
                 );
 
-
               const canvas =
                 document.createElement(
                   "canvas"
                 );
-
 
               canvas.width =
                 width;
 
               canvas.height =
                 height;
-
 
               const ctx =
                 canvas.getContext(
@@ -1196,7 +1310,6 @@ function preparePhoto(file){
                   }
                 );
 
-
               ctx.drawImage(
                 img,
                 0,
@@ -1205,7 +1318,6 @@ function preparePhoto(file){
                 height
               );
 
-
               let quality = 0.68;
 
               let data =
@@ -1213,11 +1325,6 @@ function preparePhoto(file){
                   "image/jpeg",
                   quality
                 );
-
-
-              /*
-               * Keep base64 request small.
-               */
 
               while(
                 data.length > 600000 &&
@@ -1233,11 +1340,6 @@ function preparePhoto(file){
                   );
 
               }
-
-
-              /*
-               * Final fallback.
-               */
 
               if(
                 data.length > 600000
@@ -1255,12 +1357,10 @@ function preparePhoto(file){
                     )
                   );
 
-
                 const canvas2 =
                   document.createElement(
                     "canvas"
                   );
-
 
                 canvas2.width =
                   Math.max(
@@ -1271,7 +1371,6 @@ function preparePhoto(file){
                     )
                   );
 
-
                 canvas2.height =
                   Math.max(
                     1,
@@ -1281,7 +1380,6 @@ function preparePhoto(file){
                     )
                   );
 
-
                 const ctx2 =
                   canvas2.getContext(
                     "2d",
@@ -1289,7 +1387,6 @@ function preparePhoto(file){
                       alpha:false
                     }
                   );
-
 
                 ctx2.drawImage(
                   img,
@@ -1299,7 +1396,6 @@ function preparePhoto(file){
                   canvas2.height
                 );
 
-
                 data =
                   canvas2.toDataURL(
                     "image/jpeg",
@@ -1308,17 +1404,14 @@ function preparePhoto(file){
 
               }
 
-
               resolve(data);
 
             };
-
 
           img.src =
             reader.result;
 
         };
-
 
       reader.readAsDataURL(file);
 
@@ -1370,7 +1463,6 @@ function toggleImageMode(){
   imageMode =
     !imageMode;
 
-
   if(imageMode){
 
     imageTool.classList.add(
@@ -1413,11 +1505,9 @@ function insertExample(){
   promptInput.value =
     "एक भारतीय गाँव का photorealistic दृश्य, सुबह की सुनहरी रोशनी, खेत और दूर पहाड़";
 
-
   promptInput.dispatchEvent(
     new Event("input")
   );
-
 
   promptInput.focus();
 
@@ -1434,7 +1524,6 @@ function isImageRequest(text){
     String(text || "")
       .toLowerCase();
 
-
   const words = [
 
     "create image",
@@ -1446,6 +1535,8 @@ function isImageRequest(text){
     "draw a picture",
     "draw an image",
     "image generate",
+    "generate an image",
+    "create an image",
 
     "image बनाओ",
     "image बना",
@@ -1462,13 +1553,9 @@ function isImageRequest(text){
     "cinematic realistic",
     "cinematic photo",
     "photorealistic image",
-    "realistic image",
-
-    "generate an image",
-    "create an image"
+    "realistic image"
 
   ];
-
 
   return words.some(
     function(word){
@@ -1482,7 +1569,7 @@ function isImageRequest(text){
 
 
 /* =========================
-   SEND MESSAGE
+   SEND
 ========================= */
 
 async function sendMessage(){
@@ -1491,10 +1578,8 @@ async function sendMessage(){
     return;
   }
 
-
   const text =
     promptInput.value.trim();
-
 
   if(!text){
 
@@ -1516,17 +1601,14 @@ async function sendMessage(){
 
   }
 
-
   const shouldGenerate =
     !!selectedImageDataUrl ||
     imageMode ||
     isImageRequest(text);
 
-
   busy = true;
 
   sendBtn.disabled = true;
-
 
   try{
 
@@ -1570,7 +1652,6 @@ function addUserMessage(
   welcome.style.display =
     "none";
 
-
   const message =
     document.createElement(
       "div"
@@ -1579,7 +1660,6 @@ function addUserMessage(
   message.className =
     "message user";
 
-
   const inner =
     document.createElement(
       "div"
@@ -1587,7 +1667,6 @@ function addUserMessage(
 
   inner.className =
     "message-inner";
-
 
   if(photo){
 
@@ -1599,7 +1678,6 @@ function addUserMessage(
     photoBox.className =
       "photo-user";
 
-
     const img =
       document.createElement(
         "img"
@@ -1608,18 +1686,15 @@ function addUserMessage(
     img.src =
       photo;
 
-
     photoBox.appendChild(
       img
     );
-
 
     inner.appendChild(
       photoBox
     );
 
   }
-
 
   const bubble =
     document.createElement(
@@ -1629,25 +1704,20 @@ function addUserMessage(
   bubble.className =
     "bubble";
 
-
   bubble.textContent =
     text;
-
 
   inner.appendChild(
     bubble
   );
 
-
   message.appendChild(
     inner
   );
 
-
   chat.appendChild(
     message
   );
-
 
   scrollBottom();
 
@@ -1659,7 +1729,8 @@ function addUserMessage(
 ========================= */
 
 function addAssistantMessage(
-  text
+  text,
+  saveMemory = true
 ){
 
   const message =
@@ -1670,7 +1741,6 @@ function addAssistantMessage(
   message.className =
     "message assistant";
 
-
   const inner =
     document.createElement(
       "div"
@@ -1678,7 +1748,6 @@ function addAssistantMessage(
 
   inner.className =
     "message-inner";
-
 
   const bubble =
     document.createElement(
@@ -1688,25 +1757,29 @@ function addAssistantMessage(
   bubble.className =
     "bubble";
 
-
   bubble.textContent =
     text;
-
 
   inner.appendChild(
     bubble
   );
 
-
   message.appendChild(
     inner
   );
-
 
   chat.appendChild(
     message
   );
 
+  if(saveMemory){
+
+    addMemoryMessage(
+      "assistant",
+      text
+    );
+
+  }
 
   scrollBottom();
 
@@ -1721,7 +1794,6 @@ function showTyping(){
 
   removeTyping();
 
-
   const message =
     document.createElement(
       "div"
@@ -1733,7 +1805,6 @@ function showTyping(){
   message.className =
     "message assistant";
 
-
   const inner =
     document.createElement(
       "div"
@@ -1742,22 +1813,18 @@ function showTyping(){
   inner.className =
     "message-inner";
 
-
   inner.innerHTML =
     '<div class="typing">' +
     '<i></i><i></i><i></i>' +
     '</div>';
 
-
   message.appendChild(
     inner
   );
 
-
   chat.appendChild(
     message
   );
-
 
   scrollBottom();
 
@@ -1771,18 +1838,15 @@ function removeTyping(){
       "typingMessage"
     );
 
-
   if(item){
-
     item.remove();
-
   }
 
 }
 
 
 /* =========================
-   CHAT API
+   CHAT API + MEMORY
 ========================= */
 
 async function sendChat(text){
@@ -1791,21 +1855,42 @@ async function sendChat(text){
     text
   );
 
+  /*
+   * Save user message BEFORE sending.
+   */
+
+  addMemoryMessage(
+    "user",
+    text
+  );
 
   promptInput.value = "";
 
   resetTextarea();
 
-
   showTyping();
-
 
   setStatus(
     "Aaru सोच रहा है..."
   );
 
-
   try{
+
+    /*
+     * Send complete conversation context.
+     */
+
+    const messages =
+      conversation
+        .slice(-30)
+        .map(function(item){
+
+          return {
+            role:item.role,
+            content:item.content
+          };
+
+        });
 
     const response =
       await fetch(
@@ -1819,15 +1904,17 @@ async function sendChat(text){
           },
 
           body:JSON.stringify({
-            message:text
+
+            message:text,
+
+            messages:messages
+
           })
 
         }
       );
 
-
     let data = null;
-
 
     try{
 
@@ -1840,7 +1927,6 @@ async function sendChat(text){
 
     }
 
-
     if(!response.ok){
 
       throw new Error(
@@ -1852,17 +1938,24 @@ async function sendChat(text){
 
     }
 
-
     removeTyping();
 
+    const answer =
+      data &&
+      (
+        data.reply ||
+        data.answer
+      )
+      ? (
+          data.reply ||
+          data.answer
+        )
+      : "मुझे अभी कोई response नहीं मिला।";
 
     addAssistantMessage(
-      data &&
-      data.reply
-      ? data.reply
-      : "मुझे अभी कोई response नहीं मिला।"
+      answer,
+      true
     );
-
 
   }catch(error){
 
@@ -1871,20 +1964,36 @@ async function sendChat(text){
       error
     );
 
+    /*
+     * Remove user message from memory if
+     * request itself failed.
+     */
+
+    if(
+      conversation.length &&
+      conversation[
+        conversation.length - 1
+      ].role === "user"
+    ){
+
+      conversation.pop();
+
+      saveConversation();
+
+    }
 
     removeTyping();
-
 
     addAssistantMessage(
       "❌ " +
       (
         error.message ||
         "Chat failed."
-      )
+      ),
+      false
     );
 
   }
-
 
   setStatus("");
 
@@ -1900,20 +2009,25 @@ async function generateImage(text){
   const sourcePhoto =
     selectedImageDataUrl;
 
-
   addUserMessage(
     text,
     sourcePhoto
   );
 
+  /*
+   * Remember image request as conversation context.
+   */
+
+  addMemoryMessage(
+    "user",
+    text
+  );
 
   promptInput.value = "";
 
   resetTextarea();
 
-
   showTyping();
-
 
   setStatus(
     sourcePhoto
@@ -1921,15 +2035,11 @@ async function generateImage(text){
     : "✨ आपकी image तैयार हो रही है..."
   );
 
-
   try{
 
     let response;
 
-
-    /* =====================
-       PHOTO TO IMAGE
-    ===================== */
+    /* PHOTO */
 
     if(sourcePhoto){
 
@@ -1937,7 +2047,6 @@ async function generateImage(text){
         cleanBase64(
           sourcePhoto
         );
-
 
       if(!base64){
 
@@ -1947,7 +2056,6 @@ async function generateImage(text){
 
       }
 
-
       if(base64.length > 650000){
 
         throw new Error(
@@ -1955,7 +2063,6 @@ async function generateImage(text){
         );
 
       }
-
 
       response =
         await fetch(
@@ -1987,34 +2094,27 @@ async function generateImage(text){
 
     }
 
-
-    /* =====================
-       TEXT TO IMAGE
-    ===================== */
+    /* TEXT IMAGE */
 
     else{
 
       const params =
         new URLSearchParams();
 
-
       params.set(
         "prompt",
         text
       );
-
 
       params.set(
         "ratio",
         "1:1"
       );
 
-
       params.set(
         "quality",
         "hd"
       );
-
 
       response =
         await fetch(
@@ -2025,22 +2125,15 @@ async function generateImage(text){
 
     }
 
-
-    /* =====================
-       RESPONSE
-    ===================== */
-
     if(!response.ok){
 
       let message =
         "Image generation failed.";
 
-
       try{
 
         const data =
           await response.json();
-
 
         if(
           data &&
@@ -2054,19 +2147,16 @@ async function generateImage(text){
 
       }catch(e){}
 
-
       throw new Error(
         message
       );
 
     }
 
-
     const type =
       response.headers.get(
         "content-type"
       ) || "";
-
 
     if(
       !type.toLowerCase().includes(
@@ -2080,33 +2170,35 @@ async function generateImage(text){
 
     }
 
-
     const blob =
       await response.blob();
-
 
     const url =
       URL.createObjectURL(
         blob
       );
 
-
     removeTyping();
-
 
     addGeneratedImage(
       url,
       blob
     );
 
+    /*
+     * Keep image context in conversation.
+     */
+
+    addMemoryMessage(
+      "assistant",
+      "[Image successfully generated for the user's request.]"
+    );
 
     removePhoto();
-
 
     setStatus(
       "✅ Image तैयार है!"
     );
-
 
   }catch(error){
 
@@ -2115,18 +2207,33 @@ async function generateImage(text){
       error
     );
 
+    /*
+     * Remove failed image request from memory.
+     */
+
+    if(
+      conversation.length &&
+      conversation[
+        conversation.length - 1
+      ].role === "user"
+    ){
+
+      conversation.pop();
+
+      saveConversation();
+
+    }
 
     removeTyping();
-
 
     addAssistantMessage(
       "❌ " +
       (
         error.message ||
         "Image generation failed."
-      )
+      ),
+      false
     );
-
 
     setStatus("");
 
@@ -2152,7 +2259,6 @@ function addGeneratedImage(
   message.className =
     "message assistant";
 
-
   const inner =
     document.createElement(
       "div"
@@ -2160,7 +2266,6 @@ function addGeneratedImage(
 
   inner.className =
     "message-inner";
-
 
   const generated =
     document.createElement(
@@ -2170,7 +2275,6 @@ function addGeneratedImage(
   generated.className =
     "generated";
 
-
   const img =
     document.createElement(
       "img"
@@ -2178,7 +2282,6 @@ function addGeneratedImage(
 
   img.src =
     url;
-
 
   const actions =
     document.createElement(
@@ -2188,7 +2291,6 @@ function addGeneratedImage(
   actions.className =
     "image-actions";
 
-
   const download =
     document.createElement(
       "a"
@@ -2197,30 +2299,24 @@ function addGeneratedImage(
   download.href =
     url;
 
-
   download.download =
     "aaru-ai-" +
     Date.now() +
     ".png";
 
-
   download.textContent =
     "⬇️ Download";
-
 
   const another =
     document.createElement(
       "button"
     );
 
-
   another.type =
     "button";
 
-
   another.textContent =
     "🎨 Create another";
-
 
   another.addEventListener(
     "click",
@@ -2240,46 +2336,37 @@ function addGeneratedImage(
     }
   );
 
-
   actions.appendChild(
     download
   );
-
 
   actions.appendChild(
     another
   );
 
-
   generated.appendChild(
     img
   );
-
 
   generated.appendChild(
     actions
   );
 
-
   inner.appendChild(
     generated
   );
-
 
   message.appendChild(
     inner
   );
 
-
   chat.appendChild(
     message
   );
 
-
   saveHistory(
     blob
   );
-
 
   scrollBottom();
 
@@ -2298,14 +2385,12 @@ function cleanBase64(
     return "";
   }
 
-
   if(
     value.startsWith("data:")
   ){
 
     const comma =
       value.indexOf(",");
-
 
     if(comma >= 0){
 
@@ -2318,7 +2403,6 @@ function cleanBase64(
 
   }
 
-
   return value.replace(
     /\s/g,
     ""
@@ -2328,7 +2412,7 @@ function cleanBase64(
 
 
 /* =========================
-   HISTORY SAVE
+   IMAGE HISTORY
 ========================= */
 
 function saveHistory(
@@ -2337,7 +2421,6 @@ function saveHistory(
 
   const reader =
     new FileReader();
-
 
   reader.onloadend =
     async function(){
@@ -2349,7 +2432,6 @@ function saveHistory(
             reader.result
           );
 
-
         let history =
           JSON.parse(
             localStorage.getItem(
@@ -2357,19 +2439,16 @@ function saveHistory(
             ) || "[]"
           );
 
-
         history.unshift({
           id:Date.now(),
           image:thumbnail
         });
-
 
         history =
           history.slice(
             0,
             20
           );
-
 
         localStorage.setItem(
           "aaru_history",
@@ -2378,9 +2457,7 @@ function saveHistory(
           )
         );
 
-
         loadHistory();
-
 
       }catch(error){
 
@@ -2393,17 +2470,12 @@ function saveHistory(
 
     };
 
-
   reader.readAsDataURL(
     blob
   );
 
 }
 
-
-/* =========================
-   THUMBNAIL
-========================= */
 
 function makeThumbnail(
   dataUrl
@@ -2415,13 +2487,11 @@ function makeThumbnail(
       const img =
         new Image();
 
-
       img.onload =
         function(){
 
           const max =
             500;
-
 
           let width =
             img.width;
@@ -2429,18 +2499,15 @@ function makeThumbnail(
           let height =
             img.height;
 
-
           if(width > max){
 
             const scale =
               max / width;
 
-
             width =
               Math.round(
                 width * scale
               );
-
 
             height =
               Math.round(
@@ -2449,12 +2516,10 @@ function makeThumbnail(
 
           }
 
-
           const canvas =
             document.createElement(
               "canvas"
             );
-
 
           canvas.width =
             width;
@@ -2462,12 +2527,10 @@ function makeThumbnail(
           canvas.height =
             height;
 
-
           const ctx =
             canvas.getContext(
               "2d"
             );
-
 
           ctx.drawImage(
             img,
@@ -2477,7 +2540,6 @@ function makeThumbnail(
             height
           );
 
-
           resolve(
             canvas.toDataURL(
               "image/jpeg",
@@ -2486,7 +2548,6 @@ function makeThumbnail(
           );
 
         };
-
 
       img.src =
         dataUrl;
@@ -2498,13 +2559,12 @@ function makeThumbnail(
 
 
 /* =========================
-   LOAD HISTORY
+   LOAD IMAGE HISTORY
 ========================= */
 
 function loadHistory(){
 
   let history = [];
-
 
   try{
 
@@ -2521,10 +2581,8 @@ function loadHistory(){
 
   }
 
-
   historyList.innerHTML =
     "";
-
 
   if(!history.length){
 
@@ -2537,7 +2595,6 @@ function loadHistory(){
 
   }
 
-
   history.forEach(
     function(item,index){
 
@@ -2546,36 +2603,29 @@ function loadHistory(){
         ? item
         : item.image;
 
-
       const id =
         typeof item === "string"
         ? index
         : item.id;
-
 
       const card =
         document.createElement(
           "div"
         );
 
-
       card.className =
         "history-card";
-
 
       const img =
         document.createElement(
           "img"
         );
 
-
       img.src =
         image;
 
-
       img.loading =
         "lazy";
-
 
       img.addEventListener(
         "click",
@@ -2590,39 +2640,31 @@ function loadHistory(){
         }
       );
 
-
       const info =
         document.createElement(
           "div"
         );
 
-
       info.className =
         "history-card-info";
-
 
       info.textContent =
         "Creation " +
         (index + 1);
-
 
       const del =
         document.createElement(
           "button"
         );
 
-
       del.className =
         "history-delete";
-
 
       del.type =
         "button";
 
-
       del.textContent =
         "🗑";
-
 
       del.addEventListener(
         "click",
@@ -2638,21 +2680,17 @@ function loadHistory(){
         }
       );
 
-
       card.appendChild(
         img
       );
-
 
       card.appendChild(
         info
       );
 
-
       card.appendChild(
         del
       );
-
 
       historyList.appendChild(
         card
@@ -2665,7 +2703,7 @@ function loadHistory(){
 
 
 /* =========================
-   SHOW HISTORY IMAGE
+   HISTORY IMAGE
 ========================= */
 
 function showHistoryImage(
@@ -2677,98 +2715,78 @@ function showHistoryImage(
       "div"
     );
 
-
   message.className =
     "message assistant";
-
 
   const inner =
     document.createElement(
       "div"
     );
 
-
   inner.className =
     "message-inner";
-
 
   const generated =
     document.createElement(
       "div"
     );
 
-
   generated.className =
     "generated";
-
 
   const img =
     document.createElement(
       "img"
     );
 
-
   img.src =
     image;
-
 
   const actions =
     document.createElement(
       "div"
     );
 
-
   actions.className =
     "image-actions";
-
 
   const download =
     document.createElement(
       "a"
     );
 
-
   download.href =
     image;
-
 
   download.download =
     "aaru-history.jpg";
 
-
   download.textContent =
     "⬇️ Download";
-
 
   actions.appendChild(
     download
   );
 
-
   generated.appendChild(
     img
   );
-
 
   generated.appendChild(
     actions
   );
 
-
   inner.appendChild(
     generated
   );
-
 
   message.appendChild(
     inner
   );
 
-
   chat.appendChild(
     message
   );
-
 
   scrollBottom();
 
@@ -2776,7 +2794,7 @@ function showHistoryImage(
 
 
 /* =========================
-   DELETE ONE
+   DELETE IMAGE
 ========================= */
 
 function deleteHistoryItem(
@@ -2785,7 +2803,6 @@ function deleteHistoryItem(
 ){
 
   let history = [];
-
 
   try{
 
@@ -2801,7 +2818,6 @@ function deleteHistoryItem(
     history = [];
 
   }
-
 
   if(
     typeof history[index] === "object" &&
@@ -2826,7 +2842,6 @@ function deleteHistoryItem(
 
   }
 
-
   localStorage.setItem(
     "aaru_history",
     JSON.stringify(
@@ -2834,14 +2849,13 @@ function deleteHistoryItem(
     )
   );
 
-
   loadHistory();
 
 }
 
 
 /* =========================
-   DELETE ALL
+   DELETE ALL IMAGES
 ========================= */
 
 function deleteAllHistory(){
@@ -2851,11 +2865,9 @@ function deleteAllHistory(){
       "aaru_history"
     );
 
-
   if(!history){
     return;
   }
-
 
   if(
     !confirm(
@@ -2867,11 +2879,9 @@ function deleteAllHistory(){
 
   }
 
-
   localStorage.removeItem(
     "aaru_history"
   );
-
 
   loadHistory();
 
@@ -2879,18 +2889,122 @@ function deleteAllHistory(){
 
 
 /* =========================
-   HISTORY OPEN
+   NEW CHAT
+========================= */
+
+function startNewChat(){
+
+  if(busy){
+    return;
+  }
+
+  if(
+    conversation.length > 0 &&
+    !confirm(
+      "क्या नई chat शुरू करनी है? Current conversation साफ हो जाएगी।"
+    )
+  ){
+
+    return;
+
+  }
+
+  clearConversation();
+
+  chat.innerHTML = "";
+
+  const newWelcome =
+    document.createElement(
+      "section"
+    );
+
+  newWelcome.className =
+    "welcome";
+
+  newWelcome.id =
+    "welcome";
+
+  newWelcome.innerHTML =
+    '<div class="welcome-logo">A</div>' +
+    '<h1>What can I help with?</h1>' +
+    '<p>Chat करें, photo edit करें या अपनी कल्पना से नई image बनाएं।</p>';
+
+  chat.appendChild(
+    newWelcome
+  );
+
+  /*
+   * Reconnect welcome reference.
+   */
+
+  window.location.hash =
+    "";
+
+  removePhoto();
+
+  imageMode = false;
+
+  imageTool.classList.remove(
+    "active"
+  );
+
+  closeHistory();
+
+  setStatus("");
+
+  promptInput.value = "";
+
+  resetTextarea();
+
+  console.log(
+    "Aaru AI: New chat started"
+  );
+
+}
+
+
+/* =========================
+   CLEAR CURRENT CHAT
+========================= */
+
+function clearCurrentChat(){
+
+  if(
+    !conversation.length
+  ){
+
+    closeHistory();
+
+    return;
+
+  }
+
+  if(
+    !confirm(
+      "क्या current chat साफ करनी है?"
+    )
+  ){
+
+    return;
+
+  }
+
+  startNewChat();
+
+}
+
+
+/* =========================
+   HISTORY OPEN/CLOSE
 ========================= */
 
 function openHistory(){
 
   loadHistory();
 
-
   historyDrawer.classList.add(
     "show"
   );
-
 
   overlay.classList.add(
     "show"
@@ -2899,16 +3013,11 @@ function openHistory(){
 }
 
 
-/* =========================
-   HISTORY CLOSE
-========================= */
-
 function closeHistory(){
 
   historyDrawer.classList.remove(
     "show"
   );
-
 
   overlay.classList.remove(
     "show"
@@ -2918,7 +3027,57 @@ function closeHistory(){
 
 
 /* =========================
-   RESET TEXTAREA
+   RESTORE CHAT UI
+========================= */
+
+function restoreConversation(){
+
+  if(
+    !conversation.length
+  ){
+
+    return;
+
+  }
+
+  welcome.style.display =
+    "none";
+
+  conversation.forEach(
+    function(item){
+
+      if(
+        item.role === "user"
+      ){
+
+        addUserMessage(
+          item.content
+        );
+
+      }else if(
+        item.role === "assistant"
+      ){
+
+        addAssistantMessage(
+          item.content,
+          false
+        );
+
+      }
+
+    }
+  );
+
+  setTimeout(
+    scrollBottom,
+    100
+  );
+
+}
+
+
+/* =========================
+   RESET
 ========================= */
 
 function resetTextarea(){
@@ -2970,10 +3129,14 @@ function scrollBottom(){
    INITIAL
 ========================= */
 
+loadConversation();
+
 loadHistory();
 
+restoreConversation();
+
 console.log(
-  "Aaru AI ready."
+  "Aaru AI ready with conversation memory."
 );
 
 </script>
