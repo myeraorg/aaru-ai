@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -2689,4 +2688,2769 @@ function deleteAllChats(){
     confirm(
       "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
     );
-<
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats = [];
+
+  currentChatId =
+    null;
+
+  messages = [];
+
+
+  safeRemove(
+    CHAT_LIST_KEY
+  );
+
+  safeRemove(
+    OLD_CHAT_KEY
+  );
+
+
+  createNewChat(
+    false
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  showToast(
+    "सभी चैट डिलीट कर दी गईं।"
+  );
+}
+
+
+/* =========================================================
+   IMAGE HISTORY
+========================================================= */
+
+function getStoredCreations(){
+
+  if(!HAS_STORAGE){
+    return [];
+  }
+
+
+  const raw =
+    safeGet(
+      IMAGE_KEY
+    );
+
+
+  if(!raw){
+    return [];
+  }
+
+
+  try{
+
+    const parsed =
+      JSON.parse(
+        raw
+      );
+
+
+    if(!Array.isArray(parsed)){
+      return [];
+    }
+
+
+    return parsed
+      .filter(
+        item =>
+          item &&
+          typeof item.image === "string"
+      )
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Image history invalid:",
+      error
+    );
+
+    safeRemove(
+      IMAGE_KEY
+    );
+
+    return [];
+  }
+}
+
+
+/* =========================================================
+   CREATIONS
+========================================================= */
+
+function getCreations(){
+
+  const stored =
+    getStoredCreations();
+
+
+  const all = [
+    ...volatileCreations,
+    ...stored
+  ];
+
+
+  const seen =
+    new Set();
+
+
+  return all
+    .filter(item => {
+
+      if(
+        !item ||
+        !item.image ||
+        !item.id
+      ){
+        return false;
+      }
+
+
+      if(
+        seen.has(
+          item.id
+        )
+      ){
+        return false;
+      }
+
+
+      seen.add(
+        item.id
+      );
+
+      return true;
+    })
+    .sort(
+      (a,b) =>
+        (b.time || b.createdAt || 0) -
+        (a.time || a.createdAt || 0)
+    )
+    .slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+}
+
+
+function findCreationById(id){
+
+  if(!id){
+    return null;
+  }
+
+
+  const volatile =
+    volatileCreations.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(volatile){
+    return volatile;
+  }
+
+
+  return getStoredCreations()
+    .find(
+      item =>
+        item.id === id
+    ) || null;
+}
+
+
+/* =========================================================
+   SAVE CREATIONS
+========================================================= */
+
+function saveCreations(list){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+
+  try{
+
+    const clean =
+      list
+        .filter(
+          item =>
+            item &&
+            item.image &&
+            item.image.length <=
+              MAX_HISTORY_IMAGE_CHARS
+        )
+        .slice(
+          0,
+          MAX_SAVED_CREATIONS
+        );
+
+
+    return safeSet(
+      IMAGE_KEY,
+      JSON.stringify(
+        clean
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Creation save failed:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   IMAGE BLOB HELPERS
+========================================================= */
+
+async function dataURLToBlob(
+  dataURL
+){
+
+  if(!dataURL){
+    throw new Error(
+      "Image data missing"
+    );
+  }
+
+
+  /*
+    data:image/...;base64,...
+  */
+
+  if(
+    dataURL.startsWith(
+      "data:"
+    )
+  ){
+
+    const parts =
+      dataURL.split(",");
+
+    const header =
+      parts[0];
+
+    const body =
+      parts.slice(1).join(",");
+
+
+    const mime =
+      (
+        header.match(
+          /data:([^;]+)/
+        ) || []
+      )[1] ||
+      "image/png";
+
+
+    const binary =
+      atob(body);
+
+
+    const bytes =
+      new Uint8Array(
+        binary.length
+      );
+
+
+    for(
+      let i=0;
+      i<binary.length;
+      i++
+    ){
+
+      bytes[i] =
+        binary.charCodeAt(i);
+    }
+
+
+    return new Blob(
+      [bytes],
+      {
+        type:mime
+      }
+    );
+  }
+
+
+  const response =
+    await fetch(
+      dataURL
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Image fetch failed"
+    );
+  }
+
+
+  return response.blob();
+}
+
+
+async function blobToDataURL(
+  blob
+){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        blob
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESIZE
+   IMPORTANT FOR FLUX.2 KLEIN REFERENCE IMAGE
+========================================================= */
+
+async function resizeImageDataURL(
+  dataURL,
+  maxSize = MAX_MODEL_IMAGE_SIZE,
+  quality = .78
+){
+
+  if(!dataURL){
+    return null;
+  }
+
+
+  const img =
+    new Image();
+
+
+  await new Promise(
+    (resolve,reject) => {
+
+      img.onload =
+        resolve;
+
+      img.onerror =
+        reject;
+
+      img.src =
+        dataURL;
+    }
+  );
+
+
+  const sourceWidth =
+    img.naturalWidth ||
+    img.width;
+
+
+  const sourceHeight =
+    img.naturalHeight ||
+    img.height;
+
+
+  if(
+    !sourceWidth ||
+    !sourceHeight
+  ){
+
+    return dataURL;
+  }
+
+
+  const scale =
+    Math.min(
+      1,
+      maxSize /
+      Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+
+  const width =
+    Math.max(
+      1,
+      Math.round(
+        sourceWidth * scale
+      )
+    );
+
+
+  const height =
+    Math.max(
+      1,
+      Math.round(
+        sourceHeight * scale
+      )
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  if(!ctx){
+    return dataURL;
+  }
+
+
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    JPEG reference image काफी छोटा रहेगा।
+  */
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    quality
+  );
+}
+
+
+/* =========================================================
+   HISTORY IMAGE
+========================================================= */
+
+async function blobToHistoryDataURL(
+  blob,
+  maxSize = 560
+){
+
+  try{
+
+    const bitmap =
+      await createImageBitmap(
+        blob
+      );
+
+
+    /*
+      IMPORTANT:
+      dimensions close() से पहले save करें।
+    */
+
+    const originalWidth =
+      bitmap.width;
+
+    const originalHeight =
+      bitmap.height;
+
+
+    const scale =
+      Math.min(
+        1,
+        maxSize /
+        Math.max(
+          originalWidth,
+          originalHeight
+        )
+      );
+
+
+    const width =
+      Math.max(
+        1,
+        Math.round(
+          originalWidth * scale
+        )
+      );
+
+
+    const height =
+      Math.max(
+        1,
+        Math.round(
+          originalHeight * scale
+        )
+      );
+
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+
+    canvas.width =
+      width;
+
+    canvas.height =
+      height;
+
+
+    const ctx =
+      canvas.getContext(
+        "2d"
+      );
+
+
+    if(!ctx){
+
+      bitmap.close();
+
+      return null;
+    }
+
+
+    ctx.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+
+    bitmap.close();
+
+
+    /*
+      WebP preferred.
+    */
+
+    let dataURL =
+      canvas.toDataURL(
+        "image/webp",
+        .70
+      );
+
+
+    /*
+      Browser WebP support न करे तो JPEG।
+    */
+
+    if(
+      !dataURL.startsWith(
+        "data:image/webp"
+      )
+    ){
+
+      dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          .70
+        );
+    }
+
+
+    /*
+      History के लिए hard limit।
+    */
+
+    if(
+      dataURL.length >
+      MAX_HISTORY_IMAGE_CHARS
+    ){
+
+      const smallerCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      const smallerMax =
+        420;
+
+
+      const smallerScale =
+        Math.min(
+          1,
+          smallerMax /
+          Math.max(
+            originalWidth,
+            originalHeight
+          )
+        );
+
+
+      const smallWidth =
+        Math.max(
+          1,
+          Math.round(
+            originalWidth *
+            smallerScale
+          )
+        );
+
+
+      const smallHeight =
+        Math.max(
+          1,
+          Math.round(
+            originalHeight *
+            smallerScale
+          )
+        );
+
+
+      smallerCanvas.width =
+        smallWidth;
+
+      smallerCanvas.height =
+        smallHeight;
+
+
+      const smallerCtx =
+        smallerCanvas.getContext(
+          "2d"
+        );
+
+
+      if(!smallerCtx){
+        return null;
+      }
+
+
+      /*
+        Original bitmap बंद हो चुका है,
+        इसलिए current canvas से downscale करें।
+      */
+
+      smallerCtx.drawImage(
+        canvas,
+        0,
+        0,
+        smallWidth,
+        smallHeight
+      );
+
+
+      dataURL =
+        smallerCanvas.toDataURL(
+          "image/jpeg",
+          .62
+        );
+
+
+      if(
+        dataURL.length >
+        MAX_HISTORY_IMAGE_CHARS
+      ){
+
+        return null;
+      }
+    }
+
+
+    return dataURL;
+
+  }catch(error){
+
+    console.warn(
+      "History image compression failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   SAVE CREATION
+========================================================= */
+
+async function saveCreation(
+  imageData,
+  promptText
+){
+
+  if(!imageData){
+    return null;
+  }
+
+
+  const imageId =
+    makeImageId();
+
+
+  /*
+    Original image को localStorage में नहीं डालेंगे।
+    पहले छोटा history copy बनाएँगे।
+  */
+
+  let historyImage =
+    null;
+
+
+  try{
+
+    const blob =
+      await dataURLToBlob(
+        imageData
+      );
+
+
+    historyImage =
+      await blobToHistoryDataURL(
+        blob,
+        560
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Creation history conversion failed:",
+      error
+    );
+  }
+
+
+  /*
+    अगर compressed history नहीं बनी,
+    तो current session में full image रहेगी।
+    localStorage में नहीं जाएगी।
+  */
+
+  const record = {
+
+    id:
+      imageId,
+
+    image:
+      historyImage ||
+      imageData,
+
+    prompt:
+      String(
+        promptText || ""
+      ).slice(
+        0,
+        MAX_CREATION_PROMPT_CHARS
+      ),
+
+    time:
+      Date.now()
+  };
+
+
+  volatileCreations.unshift(
+    record
+  );
+
+
+  volatileCreations =
+    volatileCreations.slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+
+
+  /*
+    केवल compressed image storage में save करें।
+  */
+
+  if(historyImage){
+
+    const existing =
+      getStoredCreations();
+
+
+    const list =
+      [
+        {
+          ...record,
+          image:
+            historyImage
+        },
+        ...existing
+      ]
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+    if(
+      saveCreations(
+        list
+      )
+    ){
+
+      /*
+        Storage में successfully save हो गई,
+        इसलिए duplicate volatile copy हटा दें।
+      */
+
+      volatileCreations =
+        volatileCreations.filter(
+          item =>
+            item.id !== imageId
+        );
+    }
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+
+
+  return imageId;
+}
+
+
+/* =========================================================
+   RENDER CREATIONS
+========================================================= */
+
+function renderCreations(){
+
+  creationGrid.innerHTML = "";
+
+
+  const list =
+    getCreations()
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+  if(!list.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई image creation नहीं है।";
+
+    creationGrid.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "creation-card";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.src =
+      item.image;
+
+    img.alt =
+      item.prompt ||
+      "Creation";
+
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          item.image
+        )
+    );
+
+
+    const caption =
+      document.createElement(
+        "div"
+      );
+
+    caption.className =
+      "creation-prompt";
+
+    caption.textContent =
+      item.prompt ||
+      "Image";
+
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      caption
+    );
+
+
+    creationGrid.appendChild(
+      card
+    );
+  });
+}
+
+
+/* =========================================================
+   LAZY CREATION LOAD
+========================================================= */
+
+function loadCreationsLazy(){
+
+  if(creationsLoaded){
+    renderCreations();
+    return;
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+}
+
+
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
+function openImageViewer(src){
+
+  if(!src){
+    return;
+  }
+
+
+  viewerImg.src =
+    src;
+
+
+  imageViewer.classList.add(
+    "open"
+  );
+}
+
+
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+  viewerImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESPONSE NORMALIZATION
+========================================================= */
+
+function normalizeImageResult(
+  value
+){
+
+  if(!value){
+    return null;
+  }
+
+
+  /*
+    Direct data URL.
+  */
+
+  if(
+    typeof value === "string"
+  ){
+
+    const s =
+      value.trim();
+
+
+    if(!s){
+      return null;
+    }
+
+
+    if(
+      s.startsWith(
+        "data:image/"
+      )
+    ){
+
+      return s;
+    }
+
+
+    /*
+      URL भी स्वीकार करें।
+    */
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      return s;
+    }
+
+
+    /*
+      Raw Base64।
+    */
+
+    if(
+      /^[A-Za-z0-9+/=\r\n]+$/.test(
+        s
+      )
+    ){
+
+      return (
+        "data:image/png;base64," +
+        s.replace(
+          /\s/g,
+          ""
+        )
+      );
+    }
+
+
+    return null;
+  }
+
+
+  /*
+    Array response।
+  */
+
+  if(
+    Array.isArray(value)
+  ){
+
+    for(
+      const item of value
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+
+    return null;
+  }
+
+
+  if(
+    typeof value === "object"
+  ){
+
+    const candidates = [
+
+      value.image,
+
+      value.image_url,
+
+      value.imageUrl,
+
+      value.url,
+
+      value.result,
+
+      value.data
+    ];
+
+
+    for(
+      const item of candidates
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  photoPreviewImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+
+    "बैकग्राउंड बदल",
+
+    "बैकग्राउंड हटा",
+
+    "पृष्ठभूमि बदल",
+
+    "पृष्ठभूमि हटा",
+
+    "इस फोटो",
+
+    "इस तस्वीर",
+
+    "इस इमेज",
+
+    "इस चित्र",
+
+    "इसमें बदलाव",
+
+    "इसमें बदल",
+
+    "इसको एडिट",
+
+    "इसे एडिट",
+
+    "background change",
+
+    "change background",
+
+    "remove background",
+
+    "replace background",
+
+    "edit this",
+
+    "edit the photo",
+
+    "edit image",
+
+    "replace the background",
+
+    "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+      s.includes("background") ||
+      s.includes("बदल दो") ||
+      s.includes("हटा दो") ||
+      s.includes("replace") ||
+      s.includes("remove")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
+}
+
+
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
+
+async function generateImage(
+  prompt
+){
+
+  const payload = {
+
+    prompt:
+      String(
+        prompt || ""
+      ).trim(),
+
+    ratio:
+      "1:1",
+
+    quality:
+      "standard"
+  };
+
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
+
+  return responseToImage(
+    response
+  );
+}
+
+
+/* =========================================================
+   CHAT IMAGE NORMALIZATION
+========================================================= */
+
+function normalizeChatResult(
+  data
+){
+
+  /*
+    Worker JSON object।
+  */
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    const text =
+      data.response ??
+      data.answer ??
+      data.text ??
+      data.message ??
+      data.output ??
+      data.content ??
+      "";
+
+
+    const image =
+      normalizeImageResult(
+        data.image ??
+        data.image_url ??
+        data.imageUrl ??
+        data.result?.image ??
+        null
+      );
+
+
+    return {
+
+      text:
+        String(
+          text || ""
+        ),
+
+      image:
+        image
+    };
+  }
+
+
+  /*
+    Plain string response।
+  */
+
+  return {
+
+    text:
+      String(
+        data || ""
+      ),
+
+    image:
+      null
+  };
+}
+
+
+/* =========================================================
+   CHAT API
+========================================================= */
+
+async function sendChatRequest(){
+
+  const recentMessages =
+    messages
+      .slice(
+        -19
+      )
+      .map(item => ({
+
+        role:
+          item.role === "user"
+            ? "user"
+            : "assistant",
+
+        content:
+          String(
+            item.content || ""
+          ).slice(
+            0,
+            MAX_MESSAGE_CHARS
+          )
+      }));
+
+
+  const lastUserMessage =
+    messages
+      .slice()
+      .reverse()
+      .find(
+        item =>
+          item.role === "user"
+      );
+
+
+  const payload = {
+
+    message:
+      lastUserMessage?.content ||
+      "",
+
+    prompt:
+      lastUserMessage?.content ||
+      "",
+
+    messages:
+      recentMessages
+  };
+
+
+  /*
+    अगर chat mode में photo attached है,
+    तो Worker को reference भेजें।
+  */
+
+  if(selectedPhotoBase64){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        selectedPhotoBase64,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "chat",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    अगर Worker /chat से भी direct image
+    return कर दे।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const image =
+      await blobToDataURL(
+        await response.blob()
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Chat image request failed."
+      );
+    }
+
+
+    return {
+
+      text:
+        "इमेज तैयार है।",
+
+      image
+    };
+  }
+
+
+  const raw =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      raw
+        ? JSON.parse(raw)
+        : null;
+
+  }catch(error){
+
+    if(!response.ok){
+
+      throw new Error(
+        raw ||
+        "Chat request failed."
+      );
+    }
+
+
+    return {
+
+      text:
+        raw || "",
+
+      image:
+        null
+    };
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Chat request failed."
+    );
+  }
+
+
+  return normalizeChatResult(
+    data
+  );
+}
+
+
+/* =========================================================
+   HANDLE SEND
+========================================================= */
+
+async function handleSend(){
+
+  if(isBusy){
+    return;
+  }
+
+
+  const prompt =
+    promptEl.value.trim();
+
+
+  if(!prompt){
+
+    showToast(
+      "पहले कुछ लिखें।"
+    );
+
+    return;
+  }
+
+
+  ensureCurrentChat();
+
+
+  isBusy =
+    true;
+
+  sendBtn.disabled =
+    true;
+
+
+  addUserMessage(
+    prompt,
+    true
+  );
+
+
+  promptEl.value =
+    "";
+
+  autoResize();
+
+
+  scrollBottom();
+
+
+  try{
+
+    if(imageMode){
+
+      showTyping();
+
+
+      const image =
+        await generateImage(
+          prompt
+        );
+
+
+      hideTyping();
+
+
+      const imageId =
+        await saveCreation(
+          image,
+          prompt
+        );
+
+
+      addAssistantMessage(
+        "🖼️ Image generated successfully.",
+        true,
+        imageId
+      );
+
+
+      /*
+        Edit के बाद selected reference हटाएँ।
+      */
+
+      clearSelectedPhoto();
+
+
+    }else{
+
+      showTyping();
+
+
+      const result =
+        await sendChatRequest();
+
+
+      hideTyping();
+
+
+      /*
+        सबसे जरूरी fix:
+        /chat से image आने पर उसे भी दिखाएँ।
+      */
+
+      if(
+        result &&
+        result.image
+      ){
+
+        const imageId =
+          await saveCreation(
+            result.image,
+            prompt
+          );
+
+
+        addAssistantMessage(
+          result.text ||
+          "🖼️ Image generated successfully.",
+          true,
+          imageId
+        );
+
+
+      }else{
+
+        addAssistantMessage(
+          result?.text ||
+          "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।",
+          true
+        );
+      }
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "Aaru request failed:",
+      error
+    );
+
+
+    hideTyping();
+
+
+    addAssistantMessage(
+      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      true
+    );
+
+
+    showToast(
+      error?.message ||
+      "Request failed"
+    );
+
+
+  }finally{
+
+    isBusy =
+      false;
+
+    sendBtn.disabled =
+      false;
+
+
+    scrollBottom();
+
+
+    try{
+
+      promptEl.focus();
+
+    }catch(error){}
+  }
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+function autoResize(){
+
+  promptEl.style.height =
+    "auto";
+
+
+  promptEl.style.height =
+    Math.min(
+      promptEl.scrollHeight,
+      150
+    ) + "px";
+}
+
+
+promptEl.addEventListener(
+  "input",
+  autoResize
+);
+
+
+/* =========================================================
+   ENTER
+========================================================= */
+
+promptEl.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" &&
+      !event.shiftKey
+    ){
+
+      event.preventDefault();
+
+      handleSend();
+    }
+  }
+);
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+sendBtn.addEventListener(
+  "click",
+  handleSend
+);
+
+
+/* =========================================================
+   PHOTO BUTTON
+========================================================= */
+
+document
+  .getElementById("photoBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      photoInput.click();
+    }
+  );
+
+
+/* =========================================================
+   PHOTO UPLOAD
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if(!file){
+      return;
+    }
+
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      showToast(
+        "कृपया image file चुनें।"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      const original =
+        await fileToDataURL(
+          file
+        );
+
+
+      /*
+        IMPORTANT:
+        Preview और API दोनों के लिए
+        छोटा image रखें।
+      */
+
+      const resized =
+        await resizeImageDataURL(
+          original,
+          MAX_MODEL_IMAGE_SIZE,
+          .80
+        );
+
+
+      selectedPhotoBase64 =
+        resized;
+
+
+      selectedPhotoUrl =
+        resized;
+
+
+      photoPreviewImg.src =
+        selectedPhotoUrl;
+
+
+      photoPreview.classList.add(
+        "show"
+      );
+
+
+      /*
+        Photo चुनते ही Image mode।
+      */
+
+      imageMode =
+        true;
+
+
+      updateModeButtons();
+
+
+      showToast(
+        "Photo तैयार है। अब edit instruction भेजें।"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Photo processing failed:",
+        error
+      );
+
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
+      );
+
+    }finally{
+
+      /*
+        Same file दोबारा select हो सके।
+      */
+
+      photoInput.value =
+        "";
+    }
+  });
+
+
+function fileToDataURL(file){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE PHOTO
+========================================================= */
+
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    clearSelectedPhoto
+  );
+
+
+/* =========================================================
+   MODE BUTTONS
+========================================================= */
+
+function updateModeButtons(){
+
+  chatModeBtn.classList.toggle(
+    "active",
+    !imageMode
+  );
+
+
+  imageModeBtn.classList.toggle(
+    "active",
+    imageMode
+  );
+}
+
+
+chatModeBtn.addEventListener(
+  "click",
+  () => {
+
+    imageMode =
+      false;
+
+    updateModeButtons();
+  }
+);
+
+
+imageModeBtn.addEventListener(
+  "click",
+  () => {
+
+    imageMode =
+      true;
+
+    updateModeButtons();
+  }
+);
+
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+function openDrawer(){
+
+  drawer.classList.add(
+    "open"
+  );
+
+  drawerOverlay.classList.add(
+    "open"
+  );
+
+
+  /*
+    Image history केवल drawer खोलने पर।
+  */
+
+  setTimeout(
+    loadCreationsLazy,
+    0
+  );
+}
+
+
+function closeDrawer(){
+
+  drawer.classList.remove(
+    "open"
+  );
+
+  drawerOverlay.classList.remove(
+    "open"
+  );
+}
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener(
+    "click",
+    openDrawer
+  );
+
+
+document
+  .getElementById("closeDrawer")
+  .addEventListener(
+    "click",
+    closeDrawer
+  );
+
+
+drawerOverlay.addEventListener(
+  "click",
+  closeDrawer
+);
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function startNewChat(){
+
+  if(isBusy){
+    return;
+  }
+
+
+  if(currentChatId){
+
+    saveCurrentChat();
+  }
+
+
+  createNewChat(
+    true
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+  imageMode =
+    false;
+
+
+  updateModeButtons();
+
+
+  clearSelectedPhoto();
+
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  setTimeout(
+    () =>
+      promptEl.focus(),
+    100
+  );
+}
+
+
+document
+  .getElementById("newChatBtn")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+document
+  .getElementById("newChatTop")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+/* =========================================================
+   VIEWER
+========================================================= */
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closeImageViewer
+  );
+
+
+imageViewer.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target === imageViewer
+    ){
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape"
+    ){
+
+      closeDrawer();
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   PAGE RECOVERY
+========================================================= */
+
+function recoverPage(){
+
+  const now =
+    Date.now();
+
+
+  if(
+    now -
+    lastPageShowRecovery <
+    300
+  ){
+
+    return;
+  }
+
+
+  lastPageShowRecovery =
+    now;
+
+
+  try{
+
+    hideTyping();
+
+  }catch(error){}
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  try{
+
+    closeDrawer();
+
+    closeImageViewer();
+
+  }catch(error){}
+
+
+  try{
+
+    const current =
+      chats.find(
+        item =>
+          item.id ===
+          currentChatId
+      );
+
+
+    if(current){
+
+      messages =
+        Array.isArray(
+          current.messages
+        )
+          ? current.messages
+              .slice(
+                -MAX_MESSAGES_PER_CHAT
+              )
+          : [];
+    }
+
+
+    renderCurrentChat();
+
+    renderChatHistory();
+
+    updateModeButtons();
+
+    autoResize();
+
+  }catch(error){
+
+    console.error(
+      "Recovery failed:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   PAGESHOW
+========================================================= */
+
+window.addEventListener(
+  "pageshow",
+  event => {
+
+    if(!appReady){
+      return;
+    }
+
+
+    if(event.persisted){
+
+      recoverPage();
+
+      return;
+    }
+
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      setTimeout(
+        recoverPage,
+        50
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   VISIBILITY
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState ===
+      "visible" &&
+      appReady
+    ){
+
+      setTimeout(
+        () => {
+
+          try{
+
+            hideTyping();
+
+            isBusy =
+              false;
+
+            sendBtn.disabled =
+              false;
+
+          }catch(error){}
+
+        },
+        80
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+function safeInitialLoad(){
+
+  try{
+
+    loadChatHistory();
+
+  }catch(error){
+
+    console.error(
+      "Chat history load failed:",
+      error
+    );
+
+    chats = [];
+
+    currentChatId =
+      null;
+
+    messages = [];
+  }
+
+
+  try{
+
+    if(!chats.length){
+
+      /*
+        Startup पर localStorage write नहीं।
+      */
+
+      createNewChat(
+        false
+      );
+
+    }else{
+
+      const latest =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )[0];
+
+
+      if(latest){
+
+        currentChatId =
+          latest.id;
+
+
+        messages =
+          Array.isArray(
+            latest.messages
+          )
+            ? latest.messages
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
+            : [];
+      }
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "Chat initialization failed:",
+      error
+    );
+
+    chats = [];
+
+    messages = [];
+
+    currentChatId =
+      null;
+
+
+    createNewChat(
+      false
+    );
+  }
+
+
+  /*
+    Chat पहले render।
+  */
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+  /*
+    Image history startup पर parse नहीं।
+  */
+
+  creationGrid.innerHTML =
+    `
+      <div class="empty-history">
+        Images देखने के लिए Menu खोलें।
+      </div>
+    `;
+
+
+  updateModeButtons();
+
+  autoResize();
+
+
+  setTimeout(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:"auto"
+        });
+
+      }catch(error){}
+
+    },
+    80
+  );
+
+
+  appReady =
+    true;
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+if(
+  document.readyState ===
+  "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
+    }
+  );
+
+}else{
+
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
+
+
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
+
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
+</script>
+
+</body>
+</html>
