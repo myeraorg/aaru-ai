@@ -327,7 +327,6 @@ main{
   line-height:1.55;
   word-break:break-word;
 
-  /* Android Chrome long-press text selection */
   -webkit-user-select:text;
   user-select:text;
   -webkit-touch-callout:default;
@@ -772,7 +771,6 @@ main{
 
 <div class="app">
 
-  <!-- HEADER -->
   <header class="header">
     <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
 
@@ -786,10 +784,8 @@ main{
     </button>
   </header>
 
-  <!-- DRAWER OVERLAY -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
 
-  <!-- DRAWER -->
   <aside class="drawer" id="drawer">
 
     <div class="drawer-head">
@@ -818,7 +814,6 @@ main{
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main>
 
     <div class="chat-wrap">
@@ -827,7 +822,6 @@ main{
 
   </main>
 
-  <!-- COMPOSER -->
   <div class="composer-shell">
 
     <div class="composer">
@@ -911,6 +905,20 @@ const OLD_CHAT_KEY =
 
 const IMAGE_KEY =
   "aaru_history";
+
+
+/* =========================================================
+   STORAGE LIMITS
+   छोटा रखा गया है ताकि reload पर browser storage
+   भारी न हो।
+========================================================= */
+
+const MAX_SAVED_CHATS = 8;
+const MAX_MESSAGES_PER_CHAT = 30;
+const MAX_MESSAGE_CHARS = 4000;
+
+const MAX_SAVED_CREATIONS = 4;
+const MAX_CREATION_PROMPT_CHARS = 300;
 
 
 /* =========================================================
@@ -1358,6 +1366,30 @@ function safeRemove(key){
 }
 
 
+function safeSet(key,value){
+
+  try{
+
+    localStorage.setItem(
+      key,
+      value
+    );
+
+    return true;
+
+  }catch(error){
+
+    console.warn(
+      "localStorage set failed:",
+      key,
+      error
+    );
+
+    return false;
+  }
+}
+
+
 /* =========================================================
    CHAT NORMALIZATION
 ========================================================= */
@@ -1383,7 +1415,7 @@ function normalizeChat(chat){
   const normalizedMessages =
     rawMessages
       .filter(Boolean)
-      .slice(-60)
+      .slice(-MAX_MESSAGES_PER_CHAT)
       .map(msg => {
 
         const role =
@@ -1393,7 +1425,7 @@ function normalizeChat(chat){
 
         const content =
           String(msg.content ?? "")
-            .slice(0,8000);
+            .slice(0,MAX_MESSAGE_CHARS);
 
         const result = {
           role,
@@ -1457,24 +1489,21 @@ function normalizeChat(chat){
 
 /* =========================================================
    SAVE CHAT HISTORY
-   Quota-resilient
+   छोटा और quota-resilient
 ========================================================= */
 
 function saveChatHistory(showError = true){
 
-  const attempts = [
-    40,
-    30,
-    25,
-    20,
-    15,
-    10,
-    5,
+  const limits = [
+    MAX_SAVED_CHATS,
+    6,
+    4,
     3,
+    2,
     1
   ];
 
-  for(const limit of attempts){
+  for(const limit of limits){
 
     try{
 
@@ -1486,14 +1515,28 @@ function saveChatHistory(showError = true){
               (b.updatedAt || 0) -
               (a.updatedAt || 0)
           )
-          .slice(0,limit);
+          .slice(0,limit)
+          .map(chat => {
 
-      localStorage.setItem(
-        CHAT_LIST_KEY,
-        JSON.stringify(data)
-      );
+            const normalized =
+              normalizeChat(chat);
 
-      return true;
+            return normalized;
+          })
+          .filter(Boolean);
+
+      const json =
+        JSON.stringify(data);
+
+      if(
+        safeSet(
+          CHAT_LIST_KEY,
+          json
+        )
+      ){
+
+        return true;
+      }
 
     }catch(error){
 
@@ -1552,20 +1595,37 @@ function loadChatHistory(){
               seen.add(chat.id);
 
               return true;
-            });
+            })
+            .sort(
+              (a,b) =>
+                (b.updatedAt || 0) -
+                (a.updatedAt || 0)
+            )
+            .slice(0,MAX_SAVED_CHATS);
       }
 
     }catch(error){
 
       console.warn(
-        "Invalid chat history:",
+        "Invalid chat history. Clearing corrupted data:",
         error
       );
 
       chats = [];
+
+      safeRemove(
+        CHAT_LIST_KEY
+      );
     }
 
-    saveChatHistory(false);
+    /*
+      अगर पुराना storage बहुत बड़ा था,
+      तो normalized छोटा version save होगा।
+    */
+    if(chats.length){
+
+      saveChatHistory(false);
+    }
 
     return;
   }
@@ -1611,9 +1671,13 @@ function loadChatHistory(){
       );
     }
 
-    safeRemove(OLD_CHAT_KEY);
+    safeRemove(
+      OLD_CHAT_KEY
+    );
 
-    saveChatHistory(false);
+    if(chats.length){
+      saveChatHistory(false);
+    }
   }
 }
 
@@ -1652,7 +1716,21 @@ function createNewChat(){
 
   messages = [];
 
-  saveChatHistory();
+  /*
+    नया chat बनाते समय पुराने chats की
+    सीमित संख्या ही storage में जाती है।
+  */
+  chats =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(0,MAX_SAVED_CHATS);
+
+  saveChatHistory(false);
 
   return item;
 }
@@ -1688,7 +1766,7 @@ function saveCurrentChat(){
 
   chat.messages =
     messages
-      .slice(-60)
+      .slice(-MAX_MESSAGES_PER_CHAT)
       .map(msg => {
 
         const result = {
@@ -1700,7 +1778,7 @@ function saveCurrentChat(){
 
           content:
             String(msg.content ?? "")
-              .slice(0,8000)
+              .slice(0,MAX_MESSAGE_CHARS)
         };
 
         if(msg.imageId){
@@ -1725,6 +1803,7 @@ function saveCurrentChat(){
         .trim()
         .slice(0,80)
         || "नई चैट";
+
   }else{
 
     chat.title =
@@ -1960,10 +2039,20 @@ function scrollBottom(){
 
   requestAnimationFrame(() => {
 
-    window.scrollTo({
-      top:document.documentElement.scrollHeight,
-      behavior:"smooth"
-    });
+    try{
+
+      window.scrollTo({
+        top:document.documentElement.scrollHeight,
+        behavior:"smooth"
+      });
+
+    }catch(error){
+
+      console.warn(
+        "scroll failed:",
+        error
+      );
+    }
 
   });
 }
@@ -2076,8 +2165,6 @@ function renderChatHistory(){
     info.appendChild(meta);
 
 
-    /* हर history का अलग delete button */
-
     const deleteBtn =
       document.createElement("button");
 
@@ -2150,7 +2237,7 @@ function openChat(id){
 
   messages =
     Array.isArray(chat.messages)
-      ? chat.messages.slice(-60)
+      ? chat.messages.slice(-MAX_MESSAGES_PER_CHAT)
       : [];
 
   renderCurrentChat();
@@ -2289,14 +2376,17 @@ function getCreations(){
         item =>
           item &&
           item.image
-      );
+      )
+      .slice(0,MAX_SAVED_CREATIONS);
 
   }catch(error){
 
     console.warn(
-      "Image history parse failed:",
+      "Image history parse failed. Clearing invalid data:",
       error
     );
+
+    safeRemove(IMAGE_KEY);
 
     return [];
   }
@@ -2306,12 +2396,8 @@ function getCreations(){
 function saveCreations(list){
 
   const attempts = [
-    20,
-    12,
-    10,
-    8,
-    6,
-    4,
+    MAX_SAVED_CREATIONS,
+    3,
     2,
     1
   ];
@@ -2320,14 +2406,29 @@ function saveCreations(list){
 
     try{
 
-      localStorage.setItem(
-        IMAGE_KEY,
-        JSON.stringify(
-          list.slice(0,limit)
-        )
-      );
+      const cleanList =
+        list
+          .filter(
+            item =>
+              item &&
+              item.image
+          )
+          .slice(0,limit);
 
-      return true;
+      const json =
+        JSON.stringify(
+          cleanList
+        );
+
+      if(
+        safeSet(
+          IMAGE_KEY,
+          json
+        )
+      ){
+
+        return true;
+      }
 
     }catch(error){
 
@@ -2509,7 +2610,10 @@ async function saveCreation(
 
     prompt:
       String(promptText || "")
-        .slice(0,300),
+        .slice(
+          0,
+          MAX_CREATION_PROMPT_CHARS
+        ),
 
     time:
       Date.now()
@@ -2523,10 +2627,17 @@ async function saveCreation(
 
   if(!saveCreations(list)){
 
-    /* अंतिम fallback */
+    /*
+      अगर quota फिर भी भर चुका है,
+      तो पुराने image records हटाकर
+      सिर्फ नई image बचाने की कोशिश।
+    */
+
     try{
 
-      localStorage.setItem(
+      safeRemove(IMAGE_KEY);
+
+      safeSet(
         IMAGE_KEY,
         JSON.stringify([record])
       );
@@ -2555,7 +2666,8 @@ function renderCreations(){
   creationGrid.innerHTML = "";
 
   const list =
-    getCreations();
+    getCreations()
+      .slice(0,MAX_SAVED_CREATIONS);
 
   if(!list.length){
 
@@ -2574,7 +2686,7 @@ function renderCreations(){
   }
 
 
-  list.slice(0,20).forEach(
+  list.forEach(
     item => {
 
       const card =
@@ -2955,7 +3067,7 @@ async function sendChatRequest(){
 
         content:
           String(msg.content || "")
-            .slice(0,8000)
+            .slice(0,MAX_MESSAGE_CHARS)
       }));
 
 
@@ -3291,6 +3403,11 @@ function startNewChat(){
     return;
   }
 
+  /*
+    अब pagehide/visibility पर save नहीं होता,
+    इसलिए नया chat शुरू करने से पहले
+    current chat को explicitly save करते हैं।
+  */
   saveCurrentChat();
 
   createNewChat();
@@ -3401,107 +3518,256 @@ document.addEventListener(
 
 
 /* =========================================================
-   INITIAL LOAD
+   SAFE INITIAL LOAD
 ========================================================= */
 
-loadChatHistory();
+function safeInitialLoad(){
 
+  /*
+    पूरा startup एक ही try में नहीं रखा गया है।
+    किसी एक पुराने/corrupt storage item के कारण
+    पूरी app blank न हो।
+  */
 
-if(!chats.length){
+  try{
 
-  createNewChat();
+    loadChatHistory();
 
-}else{
+  }catch(error){
 
-  const latest =
-    chats
-      .slice()
-      .sort(
-        (a,b) =>
-          (b.updatedAt || 0) -
-          (a.updatedAt || 0)
-      )[0];
+    console.error(
+      "Chat history startup failed:",
+      error
+    );
 
-  if(latest){
+    chats = [];
 
-    currentChatId =
-      latest.id;
+    currentChatId = null;
 
-    messages =
-      Array.isArray(latest.messages)
-        ? latest.messages.slice(-60)
-        : [];
+    messages = [];
+
+    safeRemove(
+      CHAT_LIST_KEY
+    );
+
+    safeRemove(
+      OLD_CHAT_KEY
+    );
   }
-}
 
 
-renderCurrentChat();
+  try{
 
-renderChatHistory();
+    if(!chats.length){
 
-renderCreations();
+      createNewChat();
 
-updateModeButtons();
+    }else{
 
-autoResize();
+      const latest =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )[0];
 
-scrollBottom();
+      if(latest){
 
+        currentChatId =
+          latest.id;
 
-/* =========================================================
-   SAVE BEFORE PAGE LEAVE
-========================================================= */
+        messages =
+          Array.isArray(latest.messages)
+            ? latest.messages
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
+            : [];
+      }
+    }
 
-window.addEventListener(
-  "pagehide",
-  () => {
+  }catch(error){
+
+    console.error(
+      "Chat initialization failed:",
+      error
+    );
+
+    chats = [];
+
+    currentChatId = null;
+
+    messages = [];
 
     try{
 
-      if(currentChatId){
-        saveCurrentChat();
-      }
+      createNewChat();
+
+    }catch(createError){
+
+      console.error(
+        "New chat creation failed:",
+        createError
+      );
+    }
+  }
+
+
+  try{
+
+    renderCurrentChat();
+
+  }catch(error){
+
+    console.error(
+      "Chat render failed:",
+      error
+    );
+
+    messagesEl.innerHTML = "";
+  }
+
+
+  try{
+
+    renderChatHistory();
+
+  }catch(error){
+
+    console.error(
+      "History render failed:",
+      error
+    );
+
+    chatHistoryEl.innerHTML = "";
+  }
+
+
+  try{
+
+    renderCreations();
+
+  }catch(error){
+
+    console.error(
+      "Creation render failed:",
+      error
+    );
+
+    creationGrid.innerHTML = "";
+
+    /*
+      अगर image storage खराब/बहुत भारी हो,
+      तो उसे हटाकर app को बाकी features के लिए
+      चलने देते हैं।
+    */
+
+    safeRemove(
+      IMAGE_KEY
+    );
+
+    try{
+      renderCreations();
+    }catch(secondError){
+      console.error(
+        "Creation recovery render failed:",
+        secondError
+      );
+    }
+  }
+
+
+  try{
+
+    updateModeButtons();
+
+  }catch(error){
+
+    console.error(
+      "Mode button initialization failed:",
+      error
+    );
+  }
+
+
+  try{
+
+    autoResize();
+
+  }catch(error){
+
+    console.error(
+      "Textarea initialization failed:",
+      error
+    );
+  }
+
+
+  /*
+    Startup के समय smooth scroll नहीं।
+    इससे Android Chrome पर unnecessary animation
+    और layout work कम होता है।
+  */
+
+  setTimeout(() => {
+
+    try{
+
+      window.scrollTo({
+        top:document.documentElement.scrollHeight,
+        behavior:"auto"
+      });
 
     }catch(error){
 
       console.warn(
-        "pagehide save failed:",
+        "Initial scroll failed:",
         error
       );
     }
-  }
-);
+
+  },100);
+}
 
 
 /* =========================================================
-   VISIBILITY SAVE
+   STARTUP
 ========================================================= */
 
-document.addEventListener(
-  "visibilitychange",
-  () => {
+if(
+  document.readyState === "loading"
+){
 
-    if(
-      document.visibilityState ===
-      "hidden"
-    ){
-
-      try{
-
-        if(currentChatId){
-          saveCurrentChat();
-        }
-
-      }catch(error){
-
-        console.warn(
-          "visibility save failed:",
-          error
-        );
-      }
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
     }
-  }
-);
+  );
+
+}else{
+
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
+
+
+/*
+  IMPORTANT:
+  पुराने pagehide और visibilitychange heavy-save
+  handlers जानबूझकर हटाए गए हैं।
+
+  Reload/navigation के समय बड़े localStorage
+  JSON को synchronous तरीके से लिखने की जरूरत नहीं।
+  Normal chat actions saveCurrentChat() के जरिए
+  पहले ही save हो जाती हैं।
+*/
+
 
 </script>
 
