@@ -61,10 +61,6 @@ main{
   flex-direction:column;
 }
 
-/* =========================
-   HEADER
-========================= */
-
 .header{
   position:sticky;
   top:0;
@@ -117,10 +113,6 @@ main{
   font-size:21px;
   cursor:pointer;
 }
-
-/* =========================
-   DRAWER
-========================= */
 
 .drawer-overlay{
   position:fixed;
@@ -217,10 +209,6 @@ main{
   opacity:.4;
 }
 
-/* =========================
-   CHAT HISTORY
-========================= */
-
 .chat-history{
   display:flex;
   flex-direction:column;
@@ -289,10 +277,6 @@ main{
   line-height:1.5;
 }
 
-/* =========================
-   CHAT AREA
-========================= */
-
 .chat-wrap{
   width:100%;
   max-width:900px;
@@ -326,7 +310,6 @@ main{
   font-size:15px;
   line-height:1.55;
   word-break:break-word;
-
   -webkit-user-select:text;
   user-select:text;
   -webkit-touch-callout:default;
@@ -357,10 +340,6 @@ main{
   background:rgba(255,255,255,.05);
 }
 
-/* =========================
-   MARKDOWN
-========================= */
-
 .md h1,
 .md h2,
 .md h3{
@@ -368,17 +347,9 @@ main{
   line-height:1.25;
 }
 
-.md h1{
-  font-size:22px;
-}
-
-.md h2{
-  font-size:19px;
-}
-
-.md h3{
-  font-size:17px;
-}
+.md h1{font-size:22px}
+.md h2{font-size:19px}
+.md h3{font-size:17px}
 
 .md p{
   margin:0 0 9px;
@@ -434,10 +405,6 @@ main{
   background:transparent;
 }
 
-/* =========================
-   IMAGES
-========================= */
-
 .generated-image{
   display:block;
   width:100%;
@@ -453,10 +420,6 @@ main{
   font-size:11px;
   opacity:.42;
 }
-
-/* =========================
-   TYPING
-========================= */
 
 .typing{
   display:flex;
@@ -474,13 +437,8 @@ main{
   animation:typing 1s infinite;
 }
 
-.typing span:nth-child(2){
-  animation-delay:.15s;
-}
-
-.typing span:nth-child(3){
-  animation-delay:.3s;
-}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
 
 @keyframes typing{
   0%,70%,100%{
@@ -492,10 +450,6 @@ main{
     opacity:.8;
   }
 }
-
-/* =========================
-   COMPOSER
-========================= */
 
 .composer-shell{
   position:fixed;
@@ -635,10 +589,6 @@ main{
   display:none;
 }
 
-/* =========================
-   CREATIONS
-========================= */
-
 .creation-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -666,10 +616,6 @@ main{
   opacity:.6;
   line-height:1.35;
 }
-
-/* =========================
-   IMAGE VIEWER
-========================= */
 
 .image-viewer{
   position:fixed;
@@ -706,10 +652,6 @@ main{
   font-size:23px;
 }
 
-/* =========================
-   TOAST
-========================= */
-
 .toast{
   position:fixed;
   left:50%;
@@ -732,10 +674,6 @@ main{
   opacity:1;
   transform:translate(-50%,0);
 }
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media(max-width:600px){
 
@@ -771,124 +709,167 @@ main{
 
 <div class="app">
 
-  <header class="header">
-    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+<header class="header">
 
-    <div class="brand">
-      <div class="brand-name">Aaru AI</div>
-      <div class="brand-sub">Fast • Smart • Indian AI</div>
-    </div>
+<button class="menu-btn" id="menuBtn" aria-label="Menu">
+☰
+</button>
 
-    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
-      ＋
-    </button>
-  </header>
+<div class="brand">
+<div class="brand-name">Aaru AI</div>
+<div class="brand-sub">Fast • Smart • Indian AI</div>
+</div>
 
-  <div class="drawer-overlay" id="drawerOverlay"></div>
+<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
+＋
+</button>
 
-  <aside class="drawer" id="drawer">
+</header>
 
-    <div class="drawer-head">
-      <div class="drawer-title">Aaru AI</div>
-      <button class="close-drawer" id="closeDrawer">×</button>
-    </div>
 
-    <div class="drawer-body">
+<div class="drawer-overlay" id="drawerOverlay"></div>
 
-      <button class="drawer-action" id="newChatBtn">
-        <span>＋</span>
-        <span>नई चैट</span>
-      </button>
 
-      <button class="drawer-action" id="deleteAllBtn">
-        <span>🗑️</span>
-        <span>सभी चैट डिलीट करें</span>
-      </button>
+<aside class="drawer" id="drawer">
 
-      <div class="section-title">Recent Chats</div>
-      <div class="chat-history" id="chatHistory"></div>
+<div class="drawer-head">
 
-      <div class="section-title">Recent Creations</div>
-      <div class="creation-grid" id="creationGrid"></div>
+<div class="drawer-title">
+Aaru AI
+</div>
 
-    </div>
-  </aside>
-
-  <main>
-
-    <div class="chat-wrap">
-      <div class="messages" id="messages"></div>
-    </div>
-
-  </main>
-
-  <div class="composer-shell">
-
-    <div class="composer">
-
-      <div class="photo-preview" id="photoPreview">
-        <img id="photoPreviewImg" alt="Selected image">
-        <button class="remove-photo" id="removePhoto">×</button>
-      </div>
-
-      <div class="input-row">
-
-        <button class="icon-btn" id="photoBtn" title="Photo">
-          📎
-        </button>
-
-        <textarea
-          id="prompt"
-          rows="1"
-          placeholder="Aaru से कुछ भी पूछें..."
-          autocomplete="off"
-          spellcheck="true"></textarea>
-
-        <button class="icon-btn send-btn" id="sendBtn" title="Send">
-          ➤
-        </button>
-
-      </div>
-
-      <div class="mode-row">
-
-        <button
-          class="mode-pill"
-          id="chatModeBtn"
-          type="button">
-          💬 Chat
-        </button>
-
-        <button
-          class="mode-pill"
-          id="imageModeBtn"
-          type="button">
-          🎨 Image
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
+<button class="close-drawer" id="closeDrawer">
+×
+</button>
 
 </div>
+
+
+<div class="drawer-body">
+
+<button class="drawer-action" id="newChatBtn">
+<span>＋</span>
+<span>नई चैट</span>
+</button>
+
+<button class="drawer-action" id="deleteAllBtn">
+<span>🗑️</span>
+<span>सभी चैट डिलीट करें</span>
+</button>
+
+
+<div class="section-title">
+Recent Chats
+</div>
+
+<div class="chat-history" id="chatHistory"></div>
+
+
+<div class="section-title">
+Recent Creations
+</div>
+
+<div class="creation-grid" id="creationGrid"></div>
+
+</div>
+
+</aside>
+
+
+<main>
+
+<div class="chat-wrap">
+
+<div class="messages" id="messages"></div>
+
+</div>
+
+</main>
+
+
+<div class="composer-shell">
+
+<div class="composer">
+
+<div class="photo-preview" id="photoPreview">
+
+<img id="photoPreviewImg" alt="Selected image">
+
+<button class="remove-photo" id="removePhoto">
+×
+</button>
+
+</div>
+
+
+<div class="input-row">
+
+<button class="icon-btn" id="photoBtn" title="Photo">
+📎
+</button>
+
+<textarea
+id="prompt"
+rows="1"
+placeholder="Aaru से कुछ भी पूछें..."
+autocomplete="off"
+spellcheck="true"></textarea>
+
+<button class="icon-btn send-btn" id="sendBtn" title="Send">
+➤
+</button>
+
+</div>
+
+
+<div class="mode-row">
+
+<button
+class="mode-pill"
+id="chatModeBtn"
+type="button">
+💬 Chat
+</button>
+
+<button
+class="mode-pill"
+id="imageModeBtn"
+type="button">
+🎨 Image
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 
 <input
-  type="file"
-  id="photoInput"
-  accept="image/*">
+type="file"
+id="photoInput"
+accept="image/*">
+
 
 <div class="image-viewer" id="imageViewer">
-  <button class="close-viewer" id="closeViewer">×</button>
-  <img id="viewerImg" alt="Image preview">
+
+<button class="close-viewer" id="closeViewer">
+×
+</button>
+
+<img id="viewerImg" alt="Image preview">
+
 </div>
+
 
 <div class="toast" id="toast"></div>
 
 
 <script>
 "use strict";
+
 
 /* =========================================================
    CONFIG
@@ -897,19 +878,18 @@ main{
 const API =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
+
 const CHAT_LIST_KEY =
   "aaru_chat_history_v2";
+
 
 const OLD_CHAT_KEY =
   "aaru_chat_messages";
 
+
 const IMAGE_KEY =
   "aaru_history";
 
-
-/* =========================================================
-   SAFE STORAGE LIMITS
-========================================================= */
 
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 30;
@@ -917,12 +897,16 @@ const MAX_MESSAGE_CHARS = 4000;
 
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
+const MAX_HISTORY_IMAGE_CHARS = 420000;
+
 
 /*
-  localStorage में image बहुत बड़ी नहीं होने देंगे।
-  Base64 character limit जानबूझकर काफी छोटा रखा गया है।
+  Cloudflare FLUX.2 Klein 4B के लिए
+  reference image 512x512 से छोटी होनी चाहिए।
+
+  इसलिए 511 रखा गया है।
 */
-const MAX_HISTORY_IMAGE_CHARS = 420000;
+const MAX_MODEL_IMAGE_SIZE = 511;
 
 
 /* =========================================================
@@ -940,25 +924,12 @@ let selectedPhotoUrl = null;
 
 let isBusy = false;
 
-/*
-  localStorage में image save न हो सके तो
-  current session में image रहेगी।
-*/
 let volatileCreations = [];
 
-/*
-  Image history startup पर तुरंत load नहीं होगी।
-*/
 let creationsLoaded = false;
 
-/*
-  Initial startup पूरा हुआ या नहीं।
-*/
 let appReady = false;
 
-/*
-  pageshow recovery को duplicate होने से रोकना।
-*/
 let lastPageShowRecovery = 0;
 
 
@@ -1013,7 +984,7 @@ const imageModeBtn =
 
 
 /* =========================================================
-   BASIC HELPERS
+   HELPERS
 ========================================================= */
 
 function makeChatId(){
@@ -1049,7 +1020,11 @@ function showToast(text){
 
   showToast.timer =
     setTimeout(() => {
-      toastEl.classList.remove("show");
+
+      toastEl.classList.remove(
+        "show"
+      );
+
     },2200);
 }
 
@@ -1072,37 +1047,44 @@ function escapeHTML(value){
 
 function inlineMarkdown(text){
 
-  let s = escapeHTML(text);
+  let s =
+    escapeHTML(text);
 
-  s = s.replace(
-    /`([^`]+)`/g,
-    "<code>$1</code>"
-  );
+  s =
+    s.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
 
-  s = s.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-  );
+  s =
+    s.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
 
-  s = s.replace(
-    /\*\*([^*]+)\*\*/g,
-    "<strong>$1</strong>"
-  );
+  s =
+    s.replace(
+      /\*\*([^*]+)\*\*/g,
+      "<strong>$1</strong>"
+    );
 
-  s = s.replace(
-    /__([^_]+)__/g,
-    "<strong>$1</strong>"
-  );
+  s =
+    s.replace(
+      /__([^_]+)__/g,
+      "<strong>$1</strong>"
+    );
 
-  s = s.replace(
-    /(?<!\*)\*([^*]+)\*(?!\*)/g,
-    "<em>$1</em>"
-  );
+  s =
+    s.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      "<em>$1</em>"
+    );
 
-  s = s.replace(
-    /(?<!_)_([^_]+)_(?!_)/g,
-    "<em>$1</em>"
-  );
+  s =
+    s.replace(
+      /(?<!_)_([^_]+)_(?!_)/g,
+      "<em>$1</em>"
+    );
 
   return s;
 }
@@ -1119,50 +1101,72 @@ function renderMarkdown(text){
     source.split("\n");
 
   let html = "";
+
   let inCode = false;
+
   let codeBuffer = [];
-  let codeLang = "";
 
   let inUl = false;
+
   let inOl = false;
+
+  let paragraph = [];
+
 
   function closeLists(){
 
     if(inUl){
+
       html += "</ul>";
+
       inUl = false;
     }
 
     if(inOl){
+
       html += "</ol>";
+
       inOl = false;
     }
   }
 
+
   function flushParagraph(buffer){
 
-    if(!buffer.length) return;
+    if(!buffer.length){
+      return;
+    }
 
     const value =
-      buffer.join("\n").trim();
+      buffer.join("\n")
+        .trim();
 
-    if(!value) return;
+    if(!value){
+      return;
+    }
 
     html +=
       "<p>" +
       inlineMarkdown(
-        value.replace(/\n/g,"<br>")
+        value.replace(
+          /\n/g,
+          "<br>"
+        )
       ) +
       "</p>";
   }
 
-  let paragraph = [];
 
   for(let i=0;i<lines.length;i++){
 
-    const line = lines[i];
+    const line =
+      lines[i];
 
-    if(line.trim().startsWith("```")){
+
+    if(
+      line.trim()
+        .startsWith("```")
+    ){
 
       if(inCode){
 
@@ -1174,36 +1178,42 @@ function renderMarkdown(text){
           "</code></pre>";
 
         codeBuffer = [];
-        codeLang = "";
+
         inCode = false;
 
       }else{
 
-        flushParagraph(paragraph);
+        flushParagraph(
+          paragraph
+        );
+
         paragraph = [];
 
         closeLists();
 
         inCode = true;
-
-        codeLang =
-          line.trim()
-            .slice(3)
-            .trim();
       }
 
       continue;
     }
 
+
     if(inCode){
 
-      codeBuffer.push(line);
+      codeBuffer.push(
+        line
+      );
+
       continue;
     }
 
+
     if(!line.trim()){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
 
       closeLists();
@@ -1211,19 +1221,31 @@ function renderMarkdown(text){
       continue;
     }
 
+
     const h3 =
-      line.match(/^###\s+(.+)$/);
+      line.match(
+        /^###\s+(.+)$/
+      );
 
     const h2 =
-      line.match(/^##\s+(.+)$/);
+      line.match(
+        /^##\s+(.+)$/
+      );
 
     const h1 =
-      line.match(/^#\s+(.+)$/);
+      line.match(
+        /^#\s+(.+)$/
+      );
+
 
     if(h1){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
+
       closeLists();
 
       html +=
@@ -1234,10 +1256,15 @@ function renderMarkdown(text){
       continue;
     }
 
+
     if(h2){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
+
       closeLists();
 
       html +=
@@ -1248,10 +1275,15 @@ function renderMarkdown(text){
       continue;
     }
 
+
     if(h3){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
+
       closeLists();
 
       html +=
@@ -1262,25 +1294,37 @@ function renderMarkdown(text){
       continue;
     }
 
+
     const ul =
-      line.match(/^\s*[-*+]\s+(.+)$/);
+      line.match(
+        /^\s*[-*+]\s+(.+)$/
+      );
 
     const ol =
-      line.match(/^\s*\d+[.)]\s+(.+)$/);
+      line.match(
+        /^\s*\d+[.)]\s+(.+)$/
+      );
+
 
     if(ul){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
 
       if(inOl){
+
         html += "</ol>";
+
         inOl = false;
       }
 
       if(!inUl){
 
         html += "<ul>";
+
         inUl = true;
       }
 
@@ -1292,19 +1336,26 @@ function renderMarkdown(text){
       continue;
     }
 
+
     if(ol){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
 
       if(inUl){
+
         html += "</ul>";
+
         inUl = false;
       }
 
       if(!inOl){
 
         html += "<ol>";
+
         inOl = true;
       }
 
@@ -1316,13 +1367,21 @@ function renderMarkdown(text){
       continue;
     }
 
+
     const quote =
-      line.match(/^\s*>\s?(.*)$/);
+      line.match(
+        /^\s*>\s?(.*)$/
+      );
+
 
     if(quote){
 
-      flushParagraph(paragraph);
+      flushParagraph(
+        paragraph
+      );
+
       paragraph = [];
+
       closeLists();
 
       html +=
@@ -1333,8 +1392,12 @@ function renderMarkdown(text){
       continue;
     }
 
-    paragraph.push(line);
+
+    paragraph.push(
+      line
+    );
   }
+
 
   if(inCode){
 
@@ -1346,15 +1409,19 @@ function renderMarkdown(text){
       "</code></pre>";
   }
 
-  flushParagraph(paragraph);
+
+  flushParagraph(
+    paragraph
+  );
+
   closeLists();
 
-  return html || "";
+  return html;
 }
 
 
 /* =========================================================
-   STORAGE HELPERS
+   STORAGE
 ========================================================= */
 
 function storageAvailable(){
@@ -1368,26 +1435,21 @@ function storageAvailable(){
       return false;
     }
 
-    const testKey =
-      "__aaru_storage_test__";
+    const key =
+      "__aaru_test__";
 
     storage.setItem(
-      testKey,
+      key,
       "1"
     );
 
     storage.removeItem(
-      testKey
+      key
     );
 
     return true;
 
   }catch(error){
-
-    console.warn(
-      "localStorage unavailable:",
-      error
-    );
 
     return false;
   }
@@ -1406,38 +1468,13 @@ function safeGet(key){
 
   try{
 
-    return localStorage.getItem(key);
-
-  }catch(e){
-
-    console.warn(
-      "localStorage get failed:",
-      key,
-      e
+    return localStorage.getItem(
+      key
     );
+
+  }catch(error){
 
     return null;
-  }
-}
-
-
-function safeRemove(key){
-
-  if(!HAS_STORAGE){
-    return;
-  }
-
-  try{
-
-    localStorage.removeItem(key);
-
-  }catch(e){
-
-    console.warn(
-      "localStorage remove failed:",
-      key,
-      e
-    );
   }
 }
 
@@ -1460,7 +1497,7 @@ function safeSet(key,value){
   }catch(error){
 
     console.warn(
-      "localStorage set failed:",
+      "Storage write failed:",
       key,
       error
     );
@@ -1470,13 +1507,29 @@ function safeSet(key,value){
 }
 
 
+function safeRemove(key){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+  try{
+
+    localStorage.removeItem(
+      key
+    );
+
+  }catch(error){}
+}
+
+
 /* =========================================================
-   CHAT NORMALIZATION
+   CHAT NORMALIZE
 ========================================================= */
 
 function normalizeChat(chat){
 
-  if(!chat || typeof chat !== "object"){
+  if(!chat){
     return null;
   }
 
@@ -1487,201 +1540,98 @@ function normalizeChat(chat){
     return null;
   }
 
-  const rawMessages =
+
+  const raw =
     Array.isArray(chat.messages)
       ? chat.messages
       : [];
 
-  const normalizedMessages =
-    rawMessages
-      .filter(Boolean)
+
+  const normalized =
+    raw
       .slice(-MAX_MESSAGES_PER_CHAT)
-      .map(msg => {
-
-        const role =
-          msg.role === "user"
-            ? "user"
-            : "assistant";
-
-        const content =
-          String(msg.content ?? "")
-            .slice(0,MAX_MESSAGE_CHARS);
+      .map(item => {
 
         const result = {
-          role,
-          content
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content ??
+              item.text ??
+              ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
         };
 
-        if(msg.imageId){
+
+        if(item.imageId){
 
           result.imageId =
-            String(msg.imageId)
-              .slice(0,100);
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
         }
+
 
         return result;
       });
 
+
   let title =
-    String(chat.title || "")
-      .trim()
-      .slice(0,80);
+    String(
+      chat.title || ""
+    )
+    .trim()
+    .slice(0,80);
 
-  if(!title || title === "नई चैट"){
-
-    const firstUser =
-      normalizedMessages.find(
-        m => m.role === "user"
-      );
-
-    if(firstUser){
-
-      title =
-        firstUser.content
-          .replace(/\s+/g," ")
-          .trim()
-          .slice(0,80);
-    }
-  }
 
   if(!title){
-    title = "नई चैट";
+
+    const firstUser =
+      normalized.find(
+        item =>
+          item.role === "user"
+      );
+
+    title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
   }
 
-  const now =
-    Date.now();
 
   return {
 
     id,
 
-    title,
+    title:
+      title || "नई चैट",
 
     messages:
-      normalizedMessages,
+      normalized,
 
     createdAt:
-      Number(chat.createdAt) || now,
+      Number(
+        chat.createdAt
+      ) || Date.now(),
 
     updatedAt:
-      Number(chat.updatedAt) || now
+      Number(
+        chat.updatedAt
+      ) || Date.now()
   };
-}
-
-
-/* =========================================================
-   CHAT SAVE
-========================================================= */
-
-function saveChatHistory(showError = true){
-
-  if(!HAS_STORAGE){
-    return false;
-  }
-
-  const sorted =
-    chats
-      .slice()
-      .sort(
-        (a,b) =>
-          (b.updatedAt || 0) -
-          (a.updatedAt || 0)
-      );
-
-  const limits = [
-    MAX_SAVED_CHATS,
-    6,
-    4,
-    3,
-    2,
-    1
-  ];
-
-  for(const limit of limits){
-
-    try{
-
-      const data =
-        sorted
-          .slice(0,limit)
-          .map(normalizeChat)
-          .filter(Boolean);
-
-      const json =
-        JSON.stringify(data);
-
-      if(
-        safeSet(
-          CHAT_LIST_KEY,
-          json
-        )
-      ){
-
-        chats =
-          sorted
-            .slice(0,MAX_SAVED_CHATS)
-            .map(normalizeChat)
-            .filter(Boolean);
-
-        return true;
-      }
-
-    }catch(error){
-
-      console.warn(
-        "Chat history save failed:",
-        error
-      );
-    }
-  }
-
-  /*
-    अगर storage quota भर गया है,
-    image history हटाकर chat को बचाएँ।
-  */
-
-  try{
-
-    safeRemove(IMAGE_KEY);
-
-    const emergency =
-      sorted
-        .slice(0,3)
-        .map(normalizeChat)
-        .filter(Boolean);
-
-    if(
-      safeSet(
-        CHAT_LIST_KEY,
-        JSON.stringify(emergency)
-      )
-    ){
-
-      chats =
-        sorted
-          .slice(0,MAX_SAVED_CHATS)
-          .map(normalizeChat)
-          .filter(Boolean);
-
-      return true;
-    }
-
-  }catch(error){
-
-    console.warn(
-      "Emergency chat save failed:",
-      error
-    );
-  }
-
-  if(showError){
-
-    showToast(
-      "Chat history save नहीं हो पाई।"
-    );
-  }
-
-  return false;
 }
 
 
@@ -1694,7 +1644,10 @@ function loadChatHistory(){
   chats = [];
 
   const raw =
-    safeGet(CHAT_LIST_KEY);
+    safeGet(
+      CHAT_LIST_KEY
+    );
+
 
   if(raw){
 
@@ -1721,61 +1674,62 @@ function loadChatHistory(){
               seen.add(chat.id);
 
               return true;
-
             })
             .sort(
               (a,b) =>
                 (b.updatedAt || 0) -
                 (a.updatedAt || 0)
             )
-            .slice(0,MAX_SAVED_CHATS);
+            .slice(
+              0,
+              MAX_SAVED_CHATS
+            );
       }
 
     }catch(error){
 
       console.warn(
-        "Invalid chat history. Clearing corrupted data:",
+        "Chat history corrupted:",
         error
       );
-
-      chats = [];
 
       safeRemove(
         CHAT_LIST_KEY
       );
     }
 
-    /*
-      IMPORTANT:
-      Startup पर saveChatHistory() नहीं चलाया जा रहा।
-      इससे refresh के समय synchronous write नहीं होगा।
-    */
-
     return;
   }
 
 
-  /* पुराने single-chat storage की migration */
+  /*
+    पुराने storage की migration।
+  */
 
   const oldRaw =
-    safeGet(OLD_CHAT_KEY);
+    safeGet(
+      OLD_CHAT_KEY
+    );
+
 
   if(oldRaw){
 
     try{
 
-      const oldMessages =
-        JSON.parse(oldRaw);
+      const old =
+        JSON.parse(
+          oldRaw
+        );
 
       if(
-        Array.isArray(oldMessages) &&
-        oldMessages.length
+        Array.isArray(old) &&
+        old.length
       ){
 
         const now =
           Date.now();
 
-        const item =
+        const migrated =
           normalizeChat({
 
             id:
@@ -1785,7 +1739,7 @@ function loadChatHistory(){
               "पुरानी चैट",
 
             messages:
-              oldMessages,
+              old,
 
             createdAt:
               now,
@@ -1794,33 +1748,121 @@ function loadChatHistory(){
               now
           });
 
-        if(item){
-          chats = [item];
+
+        if(migrated){
+          chats = [migrated];
         }
       }
 
-    }catch(error){
-
-      console.warn(
-        "Old chat migration failed:",
-        error
-      );
-    }
+    }catch(error){}
 
     safeRemove(
       OLD_CHAT_KEY
     );
-
-    /*
-      Migration के बाद भी startup पर तुरंत save नहीं।
-      अगली user action पर save होगा।
-    */
   }
 }
 
 
 /* =========================================================
-   CREATE NEW CHAT
+   SAVE CHAT HISTORY
+========================================================= */
+
+function saveChatHistory(){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  /*
+    पहले सामान्य save।
+  */
+
+  if(
+    safeSet(
+      CHAT_LIST_KEY,
+      JSON.stringify(sorted)
+    )
+  ){
+
+    chats = sorted;
+
+    return;
+  }
+
+
+  /*
+    Storage quota भरने पर कम chats।
+  */
+
+  for(
+    const count of [6,4,3,2,1]
+  ){
+
+    const smaller =
+      sorted.slice(
+        0,
+        count
+      );
+
+    if(
+      safeSet(
+        CHAT_LIST_KEY,
+        JSON.stringify(smaller)
+      )
+    ){
+
+      chats = sorted;
+
+      return;
+    }
+  }
+
+
+  /*
+    Last resort:
+    image history हटाकर chat बचाएँ।
+  */
+
+  safeRemove(
+    IMAGE_KEY
+  );
+
+
+  const emergency =
+    sorted.slice(
+      0,
+      3
+    );
+
+
+  safeSet(
+    CHAT_LIST_KEY,
+    JSON.stringify(
+      emergency
+    )
+  );
+
+  chats = sorted;
+}
+
+
+/* =========================================================
+   NEW CHAT
 ========================================================= */
 
 function createNewChat(
@@ -1830,7 +1872,8 @@ function createNewChat(
   const now =
     Date.now();
 
-  const item = {
+
+  const chat = {
 
     id:
       makeChatId(),
@@ -1848,112 +1891,139 @@ function createNewChat(
       now
   };
 
-  chats.unshift(item);
 
-  currentChatId =
-    item.id;
+  chats.unshift(
+    chat
+  );
 
-  messages = [];
 
   chats =
     chats
-      .slice()
       .sort(
         (a,b) =>
           (b.updatedAt || 0) -
           (a.updatedAt || 0)
       )
-      .slice(0,MAX_SAVED_CHATS);
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  currentChatId =
+    chat.id;
+
+  messages = [];
+
 
   if(persist){
 
-    saveChatHistory(false);
+    saveChatHistory();
   }
 
-  return item;
+
+  return chat;
 }
 
 
 /* =========================================================
-   CURRENT CHAT
+   ENSURE CURRENT CHAT
 ========================================================= */
 
 function ensureCurrentChat(){
 
   if(currentChatId){
 
-    const found =
+    const existing =
       chats.find(
         chat =>
           chat.id === currentChatId
       );
 
-    if(found){
-      return found;
+    if(existing){
+      return existing;
     }
   }
 
-  return createNewChat(true);
+
+  return createNewChat(
+    true
+  );
 }
 
+
+/* =========================================================
+   SAVE CURRENT CHAT
+========================================================= */
 
 function saveCurrentChat(){
 
   const chat =
     ensureCurrentChat();
 
+
   chat.messages =
     messages
-      .slice(-MAX_MESSAGES_PER_CHAT)
-      .map(msg => {
+      .slice(
+        -MAX_MESSAGES_PER_CHAT
+      )
+      .map(item => {
 
         const result = {
 
           role:
-            msg.role === "user"
+            item.role === "user"
               ? "user"
               : "assistant",
 
           content:
-            String(msg.content ?? "")
-              .slice(0,MAX_MESSAGE_CHARS)
+            String(
+              item.content || ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
         };
 
-        if(msg.imageId){
+
+        if(item.imageId){
 
           result.imageId =
-            String(msg.imageId)
-              .slice(0,100);
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
         }
+
 
         return result;
       });
 
+
   const firstUser =
     chat.messages.find(
-      msg =>
-        msg.role === "user"
+      item =>
+        item.role === "user"
     );
 
-  if(firstUser){
 
-    chat.title =
-      firstUser.content
-        .replace(/\s+/g," ")
-        .trim()
-        .slice(0,80)
-        || "नई चैट";
+  chat.title =
+    firstUser
+      ? firstUser.content
+          .replace(/\s+/g," ")
+          .slice(0,80)
+      : "नई चैट";
 
-  }else{
-
-    chat.title =
-      "नई चैट";
-  }
 
   chat.updatedAt =
     Date.now();
 
+
   saveChatHistory();
+
+  renderChatHistory();
 }
 
 
@@ -1965,34 +2035,44 @@ function renderCurrentChat(){
 
   messagesEl.innerHTML = "";
 
+
   const list =
     Array.isArray(messages)
-      ? messages.slice(-MAX_MESSAGES_PER_CHAT)
+      ? messages.slice(
+          -MAX_MESSAGES_PER_CHAT
+        )
       : [];
 
-  for(const msg of list){
 
-    if(msg.role === "user"){
+  if(!list.length){
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    if(item.role === "user"){
 
       addUserMessage(
-        msg.content,
+        item.content,
         false
       );
 
     }else{
 
       addAssistantMessage(
-        msg.content,
+        item.content,
         false,
-        msg.imageId || null
+        item.imageId || null
       );
     }
-  }
+  });
 }
 
 
 /* =========================================================
-   ADD USER MESSAGE
+   USER MESSAGE
 ========================================================= */
 
 function addUserMessage(
@@ -2001,42 +2081,59 @@ function addUserMessage(
 ){
 
   const value =
-    String(text ?? "");
+    String(text || "");
+
 
   messages.push({
 
-    role:"user",
+    role:
+      "user",
 
-    content:value
+    content:
+      value
   });
 
-  const message =
-    document.createElement("div");
 
-  message.className =
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
     "message user";
 
+
   const bubble =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   bubble.className =
     "bubble";
 
+
   bubble.textContent =
     value;
 
-  message.appendChild(bubble);
 
-  messagesEl.appendChild(message);
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
 
   if(persist){
+
     saveCurrentChat();
   }
 }
 
 
 /* =========================================================
-   ADD ASSISTANT MESSAGE
+   ASSISTANT MESSAGE
 ========================================================= */
 
 function addAssistantMessage(
@@ -2046,43 +2143,69 @@ function addAssistantMessage(
 ){
 
   const value =
-    String(text ?? "");
+    String(text || "");
 
-  messages.push({
 
-    role:"assistant",
+  const record = {
 
-    content:value,
+    role:
+      "assistant",
 
-    ...(imageId
-      ? {imageId}
-      : {})
-  });
+    content:
+      value
+  };
 
-  const message =
-    document.createElement("div");
 
-  message.className =
+  if(imageId){
+
+    record.imageId =
+      imageId;
+  }
+
+
+  messages.push(
+    record
+  );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
     "message assistant";
 
+
   const bubble =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   bubble.className =
     "bubble md";
 
+
   bubble.innerHTML =
-    renderMarkdown(value);
+    renderMarkdown(
+      value
+    );
+
 
   if(imageId){
 
     const creation =
-      findCreationById(imageId);
+      findCreationById(
+        imageId
+      );
 
-    if(creation){
+
+    if(creation?.image){
 
       const img =
-        document.createElement("img");
+        document.createElement(
+          "img"
+        );
 
       img.className =
         "generated-image";
@@ -2094,17 +2217,25 @@ function addAssistantMessage(
         creation.prompt ||
         "Generated image";
 
+
       img.addEventListener(
         "click",
-        () => openImageViewer(
-          creation.image
-        )
+        () =>
+          openImageViewer(
+            creation.image
+          )
       );
 
-      bubble.appendChild(img);
+
+      bubble.appendChild(
+        img
+      );
+
 
       const note =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       note.className =
         "image-note";
@@ -2112,15 +2243,24 @@ function addAssistantMessage(
       note.textContent =
         "Image generated successfully.";
 
-      bubble.appendChild(note);
+      bubble.appendChild(
+        note
+      );
     }
   }
 
-  message.appendChild(bubble);
 
-  messagesEl.appendChild(message);
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
 
   if(persist){
+
     saveCurrentChat();
   }
 }
@@ -2132,29 +2272,29 @@ function addAssistantMessage(
 
 function showTyping(){
 
-  const old =
-    document.getElementById(
-      "typingMessage"
+  hideTyping();
+
+
+  const row =
+    document.createElement(
+      "div"
     );
 
-  if(old){
-    old.remove();
-  }
-
-  const message =
-    document.createElement("div");
-
-  message.className =
+  row.className =
     "message assistant";
 
-  message.id =
+  row.id =
     "typingMessage";
 
+
   const bubble =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   bubble.className =
     "bubble";
+
 
   bubble.innerHTML = `
     <div class="typing">
@@ -2164,9 +2304,15 @@ function showTyping(){
     </div>
   `;
 
-  message.appendChild(bubble);
 
-  messagesEl.appendChild(message);
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
 
   scrollBottom();
 }
@@ -2191,24 +2337,23 @@ function hideTyping(){
 
 function scrollBottom(){
 
-  requestAnimationFrame(() => {
+  requestAnimationFrame(
+    () => {
 
-    try{
+      try{
 
-      window.scrollTo({
-        top:document.documentElement.scrollHeight,
-        behavior:"smooth"
-      });
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
 
-    }catch(error){
+          behavior:
+            "smooth"
+        });
 
-      console.warn(
-        "scroll failed:",
-        error
-      );
+      }catch(error){}
     }
-
-  });
+  );
 }
 
 
@@ -2222,24 +2367,32 @@ function formatTime(timestamp){
     return "";
   }
 
-  const date =
-    new Date(timestamp);
 
-  return date.toLocaleString(
-    "hi-IN",
-    {
-      day:"2-digit",
-      month:"short",
-      hour:"2-digit",
-      minute:"2-digit"
-    }
-  );
+  try{
+
+    return new Date(
+      timestamp
+    ).toLocaleString(
+      "hi-IN",
+      {
+        day:"2-digit",
+        month:"short",
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  }catch(error){
+
+    return "";
+  }
 }
 
 
 function renderChatHistory(){
 
   chatHistoryEl.innerHTML = "";
+
 
   const sorted =
     chats
@@ -2250,10 +2403,13 @@ function renderChatHistory(){
           (a.updatedAt || 0)
       );
 
+
   if(!sorted.length){
 
     const empty =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     empty.className =
       "empty-history";
@@ -2261,16 +2417,20 @@ function renderChatHistory(){
     empty.textContent =
       "अभी कोई पुरानी चैट नहीं है।";
 
-    chatHistoryEl.appendChild(empty);
+    chatHistoryEl.appendChild(
+      empty
+    );
 
     return;
   }
 
 
-  for(const item of sorted){
+  sorted.forEach(item => {
 
     const row =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     row.className =
       "chat-history-item" +
@@ -2282,45 +2442,63 @@ function renderChatHistory(){
 
 
     const info =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     info.className =
       "chat-history-info";
 
 
     const title =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     title.className =
       "chat-history-title";
 
     title.textContent =
-      item.title || "नई चैट";
+      item.title ||
+      "नई चैट";
 
 
     const meta =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     meta.className =
       "chat-history-meta";
 
-    const count =
-      Array.isArray(item.messages)
-        ? item.messages.length
-        : 0;
 
     meta.textContent =
-      count +
+      (
+        Array.isArray(
+          item.messages
+        )
+          ? item.messages.length
+          : 0
+      ) +
       " messages • " +
-      formatTime(item.updatedAt);
+      formatTime(
+        item.updatedAt
+      );
 
 
-    info.appendChild(title);
-    info.appendChild(meta);
+    info.appendChild(
+      title
+    );
+
+    info.appendChild(
+      meta
+    );
 
 
     const deleteBtn =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
     deleteBtn.className =
       "delete-chat";
@@ -2328,46 +2506,52 @@ function renderChatHistory(){
     deleteBtn.type =
       "button";
 
-    deleteBtn.title =
-      "इस चैट को डिलीट करें";
-
-    deleteBtn.setAttribute(
-      "aria-label",
-      "Delete chat"
-    );
-
     deleteBtn.textContent =
       "🗑️";
+
+    deleteBtn.title =
+      "इस चैट को डिलीट करें";
 
 
     deleteBtn.addEventListener(
       "click",
       event => {
 
-        event.preventDefault();
         event.stopPropagation();
 
-        deleteChat(item.id);
+        deleteChat(
+          item.id
+        );
       }
     );
 
 
-    row.appendChild(info);
-    row.appendChild(deleteBtn);
+    row.appendChild(
+      info
+    );
+
+    row.appendChild(
+      deleteBtn
+    );
 
 
     row.addEventListener(
       "click",
       () => {
 
-        openChat(item.id);
+        openChat(
+          item.id
+        );
+
         closeDrawer();
       }
     );
 
 
-    chatHistoryEl.appendChild(row);
-  }
+    chatHistoryEl.appendChild(
+      row
+    );
+  });
 }
 
 
@@ -2379,29 +2563,42 @@ function openChat(id){
 
   const chat =
     chats.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
+
 
   if(!chat){
     return;
   }
 
+
   currentChatId =
     chat.id;
 
+
   messages =
-    Array.isArray(chat.messages)
+    Array.isArray(
+      chat.messages
+    )
       ? chat.messages
-          .slice(-MAX_MESSAGES_PER_CHAT)
+          .slice(
+            -MAX_MESSAGES_PER_CHAT
+          )
       : [];
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
 
   hideTyping();
 
-  isBusy = false;
-
-  sendBtn.disabled = false;
-
   renderCurrentChat();
+
   renderChatHistory();
 
   scrollBottom();
@@ -2416,25 +2613,31 @@ function deleteChat(id){
 
   const chat =
     chats.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
+
 
   if(!chat){
     return;
   }
+
 
   const ok =
     confirm(
       `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
     );
 
+
   if(!ok){
     return;
   }
 
+
   chats =
     chats.filter(
-      item => item.id !== id
+      item =>
+        item.id !== id
     );
 
 
@@ -2445,7 +2648,9 @@ function deleteChat(id){
 
     messages = [];
 
-    createNewChat(true);
+    createNewChat(
+      true
+    );
 
     renderCurrentChat();
 
@@ -2453,6 +2658,7 @@ function deleteChat(id){
 
     saveChatHistory();
   }
+
 
   renderChatHistory();
 
@@ -2469,20 +2675,25 @@ function deleteChat(id){
 function deleteAllChats(){
 
   if(!chats.length){
+
     showToast(
       "डिलीट करने के लिए कोई चैट नहीं है।"
     );
+
     return;
   }
+
 
   const ok =
     confirm(
       "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
     );
 
+
   if(!ok){
     return;
   }
+
 
   chats = [];
 
@@ -2491,20 +2702,33 @@ function deleteAllChats(){
 
   messages = [];
 
-  safeRemove(CHAT_LIST_KEY);
-  safeRemove(OLD_CHAT_KEY);
 
-  createNewChat(false);
+  safeRemove(
+    CHAT_LIST_KEY
+  );
+
+  safeRemove(
+    OLD_CHAT_KEY
+  );
+
+
+  createNewChat(
+    false
+  );
+
 
   renderCurrentChat();
+
   renderChatHistory();
 
   closeDrawer();
 
+
   window.scrollTo({
     top:0,
-    behavior:"smooth"
+    behavior:"auto"
   });
+
 
   showToast(
     "सभी चैट डिलीट कर दी गईं।"
@@ -2522,151 +2746,114 @@ function getStoredCreations(){
     return [];
   }
 
+
   const raw =
-    safeGet(IMAGE_KEY);
+    safeGet(
+      IMAGE_KEY
+    );
+
 
   if(!raw){
     return [];
   }
 
-  /*
-    बहुत बड़ा image-history data मिला तो उसे
-    startup को block करने से रोकने के लिए discard करें।
-  */
-
-  if(
-    raw.length >
-    MAX_HISTORY_IMAGE_CHARS *
-    MAX_SAVED_CREATIONS
-  ){
-
-    console.warn(
-      "Image history too large. Clearing it."
-    );
-
-    safeRemove(IMAGE_KEY);
-
-    return [];
-  }
 
   try{
 
     const parsed =
-      JSON.parse(raw);
+      JSON.parse(
+        raw
+      );
+
 
     if(!Array.isArray(parsed)){
       return [];
     }
 
+
     return parsed
       .filter(
         item =>
           item &&
-          typeof item.image === "string" &&
-          item.image.length <= MAX_HISTORY_IMAGE_CHARS
+          typeof item.image === "string"
       )
-      .slice(0,MAX_SAVED_CREATIONS);
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
 
   }catch(error){
 
     console.warn(
-      "Image history parse failed. Clearing invalid data:",
+      "Image history invalid:",
       error
     );
 
-    safeRemove(IMAGE_KEY);
+    safeRemove(
+      IMAGE_KEY
+    );
 
     return [];
   }
 }
 
+
+/* =========================================================
+   CREATIONS
+========================================================= */
 
 function getCreations(){
 
   const stored =
     getStoredCreations();
 
-  const combined = [
+
+  const all = [
     ...volatileCreations,
     ...stored
   ];
 
+
   const seen =
     new Set();
 
-  return combined
+
+  return all
     .filter(item => {
 
-      if(!item || !item.image){
+      if(
+        !item ||
+        !item.image ||
+        !item.id
+      ){
         return false;
       }
 
-      if(seen.has(item.id)){
-        return false;
-      }
-
-      seen.add(item.id);
-
-      return true;
-
-    })
-    .slice(0,MAX_SAVED_CREATIONS);
-}
-
-
-function saveCreations(list){
-
-  if(!HAS_STORAGE){
-    return false;
-  }
-
-  const attempts = [
-    MAX_SAVED_CREATIONS,
-    3,
-    2,
-    1
-  ];
-
-  for(const limit of attempts){
-
-    try{
-
-      const cleanList =
-        list
-          .filter(
-            item =>
-              item &&
-              typeof item.image === "string" &&
-              item.image.length <=
-                MAX_HISTORY_IMAGE_CHARS
-          )
-          .slice(0,limit);
-
-      const json =
-        JSON.stringify(
-          cleanList
-        );
 
       if(
-        safeSet(
-          IMAGE_KEY,
-          json
+        seen.has(
+          item.id
         )
       ){
-
-        return true;
+        return false;
       }
 
-    }catch(error){
 
-      console.warn(
-        "Image history save failed:",
-        error
+      seen.add(
+        item.id
       );
-    }
-  }
 
-  return false;
+      return true;
+    })
+    .sort(
+      (a,b) =>
+        (b.time || b.createdAt || 0) -
+        (a.time || a.createdAt || 0)
+    )
+    .slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
 }
 
 
@@ -2676,9 +2863,6 @@ function findCreationById(id){
     return null;
   }
 
-  /*
-    पहले volatile memory check करें।
-  */
 
   const volatile =
     volatileCreations.find(
@@ -2686,27 +2870,318 @@ function findCreationById(id){
         item.id === id
     );
 
+
   if(volatile){
     return volatile;
   }
 
-  /*
-    उसके बाद storage check करें।
-  */
 
-  if(!creationsLoaded){
-    return null;
-  }
-
-  return getStoredCreations().find(
-    item =>
-      item.id === id
-  ) || null;
+  return getStoredCreations()
+    .find(
+      item =>
+        item.id === id
+    ) || null;
 }
 
 
 /* =========================================================
-   IMAGE COMPRESSION
+   SAVE CREATIONS
+========================================================= */
+
+function saveCreations(list){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+
+  try{
+
+    const clean =
+      list
+        .filter(
+          item =>
+            item &&
+            item.image &&
+            item.image.length <=
+              MAX_HISTORY_IMAGE_CHARS
+        )
+        .slice(
+          0,
+          MAX_SAVED_CREATIONS
+        );
+
+
+    return safeSet(
+      IMAGE_KEY,
+      JSON.stringify(
+        clean
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Creation save failed:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   IMAGE BLOB HELPERS
+========================================================= */
+
+async function dataURLToBlob(
+  dataURL
+){
+
+  if(!dataURL){
+    throw new Error(
+      "Image data missing"
+    );
+  }
+
+
+  /*
+    data:image/...;base64,...
+  */
+
+  if(
+    dataURL.startsWith(
+      "data:"
+    )
+  ){
+
+    const parts =
+      dataURL.split(",");
+
+    const header =
+      parts[0];
+
+    const body =
+      parts.slice(1).join(",");
+
+
+    const mime =
+      (
+        header.match(
+          /data:([^;]+)/
+        ) || []
+      )[1] ||
+      "image/png";
+
+
+    const binary =
+      atob(body);
+
+
+    const bytes =
+      new Uint8Array(
+        binary.length
+      );
+
+
+    for(
+      let i=0;
+      i<binary.length;
+      i++
+    ){
+
+      bytes[i] =
+        binary.charCodeAt(i);
+    }
+
+
+    return new Blob(
+      [bytes],
+      {
+        type:mime
+      }
+    );
+  }
+
+
+  const response =
+    await fetch(
+      dataURL
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Image fetch failed"
+    );
+  }
+
+
+  return response.blob();
+}
+
+
+async function blobToDataURL(
+  blob
+){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        blob
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESIZE
+   IMPORTANT FOR FLUX.2 KLEIN REFERENCE IMAGE
+========================================================= */
+
+async function resizeImageDataURL(
+  dataURL,
+  maxSize = MAX_MODEL_IMAGE_SIZE,
+  quality = .78
+){
+
+  if(!dataURL){
+    return null;
+  }
+
+
+  const img =
+    new Image();
+
+
+  await new Promise(
+    (resolve,reject) => {
+
+      img.onload =
+        resolve;
+
+      img.onerror =
+        reject;
+
+      img.src =
+        dataURL;
+    }
+  );
+
+
+  const sourceWidth =
+    img.naturalWidth ||
+    img.width;
+
+
+  const sourceHeight =
+    img.naturalHeight ||
+    img.height;
+
+
+  if(
+    !sourceWidth ||
+    !sourceHeight
+  ){
+
+    return dataURL;
+  }
+
+
+  const scale =
+    Math.min(
+      1,
+      maxSize /
+      Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+
+  const width =
+    Math.max(
+      1,
+      Math.round(
+        sourceWidth * scale
+      )
+    );
+
+
+  const height =
+    Math.max(
+      1,
+      Math.round(
+        sourceHeight * scale
+      )
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  if(!ctx){
+    return dataURL;
+  }
+
+
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    JPEG reference image काफी छोटा रहेगा।
+  */
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    quality
+  );
+}
+
+
+/* =========================================================
+   HISTORY IMAGE
 ========================================================= */
 
 async function blobToHistoryDataURL(
@@ -2717,35 +3192,57 @@ async function blobToHistoryDataURL(
   try{
 
     const bitmap =
-      await createImageBitmap(blob);
+      await createImageBitmap(
+        blob
+      );
 
-    let width =
+
+    /*
+      IMPORTANT:
+      dimensions close() से पहले save करें।
+    */
+
+    const originalWidth =
       bitmap.width;
 
-    let height =
+    const originalHeight =
       bitmap.height;
+
 
     const scale =
       Math.min(
         1,
         maxSize /
-        Math.max(width,height)
+        Math.max(
+          originalWidth,
+          originalHeight
+        )
       );
 
-    width =
+
+    const width =
       Math.max(
         1,
-        Math.round(width * scale)
+        Math.round(
+          originalWidth * scale
+        )
       );
 
-    height =
+
+    const height =
       Math.max(
         1,
-        Math.round(height * scale)
+        Math.round(
+          originalHeight * scale
+        )
       );
+
 
     const canvas =
-      document.createElement("canvas");
+      document.createElement(
+        "canvas"
+      );
+
 
     canvas.width =
       width;
@@ -2753,8 +3250,12 @@ async function blobToHistoryDataURL(
     canvas.height =
       height;
 
+
     const ctx =
-      canvas.getContext("2d");
+      canvas.getContext(
+        "2d"
+      );
+
 
     if(!ctx){
 
@@ -2762,6 +3263,7 @@ async function blobToHistoryDataURL(
 
       return null;
     }
+
 
     ctx.drawImage(
       bitmap,
@@ -2771,94 +3273,144 @@ async function blobToHistoryDataURL(
       height
     );
 
+
     bitmap.close();
 
+
     /*
-      WebP छोटा रखने की कोशिश।
+      WebP preferred.
     */
 
     let dataURL =
       canvas.toDataURL(
         "image/webp",
-        .68
+        .70
       );
 
+
     /*
-      अगर WebP supported नहीं है,
-      JPEG इस्तेमाल करें।
+      Browser WebP support न करे तो JPEG।
     */
 
     if(
-      !dataURL ||
-      dataURL.indexOf(
+      !dataURL.startsWith(
         "data:image/webp"
-      ) !== 0
+      )
     ){
 
       dataURL =
         canvas.toDataURL(
           "image/jpeg",
-          .68
+          .70
         );
     }
 
+
     /*
-      Final hard limit.
-      बहुत बड़ी history image कभी save नहीं होगी।
+      History के लिए hard limit।
     */
 
     if(
-      !dataURL ||
       dataURL.length >
-        MAX_HISTORY_IMAGE_CHARS
+      MAX_HISTORY_IMAGE_CHARS
     ){
 
-      /*
-        एक और छोटी कोशिश।
-      */
-
       const smallerCanvas =
-        document.createElement("canvas");
+        document.createElement(
+          "canvas"
+        );
 
-      const smallerSize =
+
+      const smallerMax =
         420;
 
-      const scale2 =
+
+      const smallerScale =
         Math.min(
           1,
-          smallerSize /
+          smallerMax /
           Math.max(
-            bitmap?.width || width,
-            bitmap?.height || height
+            originalWidth,
+            originalHeight
           )
         );
 
-      smallerCanvas.width =
+
+      const smallWidth =
         Math.max(
           1,
-          Math.round(width * scale2)
+          Math.round(
+            originalWidth *
+            smallerScale
+          )
         );
+
+
+      const smallHeight =
+        Math.max(
+          1,
+          Math.round(
+            originalHeight *
+            smallerScale
+          )
+        );
+
+
+      smallerCanvas.width =
+        smallWidth;
 
       smallerCanvas.height =
-        Math.max(
-          1,
-          Math.round(height * scale2)
+        smallHeight;
+
+
+      const smallerCtx =
+        smallerCanvas.getContext(
+          "2d"
         );
 
+
+      if(!smallerCtx){
+        return null;
+      }
+
+
       /*
-        अगर पहली image पहले ही बनाई जा चुकी है,
-        तो current dataURL को ही reject करना सुरक्षित है।
+        Original bitmap बंद हो चुका है,
+        इसलिए current canvas से downscale करें।
       */
 
-      return null;
+      smallerCtx.drawImage(
+        canvas,
+        0,
+        0,
+        smallWidth,
+        smallHeight
+      );
+
+
+      dataURL =
+        smallerCanvas.toDataURL(
+          "image/jpeg",
+          .62
+        );
+
+
+      if(
+        dataURL.length >
+        MAX_HISTORY_IMAGE_CHARS
+      ){
+
+        return null;
+      }
     }
+
 
     return dataURL;
 
   }catch(error){
 
     console.warn(
-      "Image compression failed:",
+      "History image compression failed:",
       error
     );
 
@@ -2880,204 +3432,136 @@ async function saveCreation(
     return null;
   }
 
+
   const imageId =
     makeImageId();
+
+
+  /*
+    Original image को localStorage में नहीं डालेंगे।
+    पहले छोटा history copy बनाएँगे।
+  */
 
   let historyImage =
     null;
 
 
-  /*
-    IMPORTANT:
-    Original full-size Base64 को localStorage में
-    कभी fallback नहीं करेंगे।
-  */
-
   try{
 
-    const response =
-      await fetch(imageData);
+    const blob =
+      await dataURLToBlob(
+        imageData
+      );
 
-    if(response.ok){
 
-      const blob =
-        await response.blob();
-
-      historyImage =
-        await blobToHistoryDataURL(
-          blob,
-          560
-        );
-    }
+    historyImage =
+      await blobToHistoryDataURL(
+        blob,
+        560
+      );
 
   }catch(error){
 
     console.warn(
-      "Image history compression failed:",
+      "Creation history conversion failed:",
       error
     );
   }
 
 
   /*
-    अगर compression fail हुई तो image को
-    localStorage में बिल्कुल save नहीं करेंगे।
-    Current chat में volatile memory में रहेगी।
+    अगर compressed history नहीं बनी,
+    तो current session में full image रहेगी।
+    localStorage में नहीं जाएगी।
   */
-
-  if(!historyImage){
-
-    const volatileRecord = {
-
-      id:imageId,
-
-      image:imageData,
-
-      prompt:
-        String(promptText || "")
-          .slice(
-            0,
-            MAX_CREATION_PROMPT_CHARS
-          ),
-
-      time:
-        Date.now()
-    };
-
-    volatileCreations =
-      [
-        volatileRecord,
-        ...volatileCreations
-      ]
-      .slice(0,MAX_SAVED_CREATIONS);
-
-    renderCreations();
-
-    showToast(
-      "Image बनी है। History में temporary रखी गई है।"
-    );
-
-    return imageId;
-  }
-
 
   const record = {
 
-    id:imageId,
+    id:
+      imageId,
 
-    image:historyImage,
+    image:
+      historyImage ||
+      imageData,
 
     prompt:
-      String(promptText || "")
-        .slice(
-          0,
-          MAX_CREATION_PROMPT_CHARS
-        ),
+      String(
+        promptText || ""
+      ).slice(
+        0,
+        MAX_CREATION_PROMPT_CHARS
+      ),
 
     time:
       Date.now()
   };
 
 
-  /*
-    पहले memory में।
-  */
+  volatileCreations.unshift(
+    record
+  );
+
 
   volatileCreations =
-    [
-      record,
-      ...volatileCreations
-    ]
-    .slice(0,MAX_SAVED_CREATIONS);
-
-
-  let storedList =
-    getStoredCreations();
-
-  storedList =
-    [
-      record,
-      ...storedList
-    ]
-    .slice(0,MAX_SAVED_CREATIONS);
-
-
-  const saved =
-    saveCreations(
-      storedList
+    volatileCreations.slice(
+      0,
+      MAX_SAVED_CREATIONS
     );
 
 
-  if(saved){
+  /*
+    केवल compressed image storage में save करें।
+  */
 
-    volatileCreations =
-      volatileCreations.filter(
-        item =>
-          item.id !== imageId
+  if(historyImage){
+
+    const existing =
+      getStoredCreations();
+
+
+    const list =
+      [
+        {
+          ...record,
+          image:
+            historyImage
+        },
+        ...existing
+      ]
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
       );
 
-  }else{
 
-    /*
-      केवल compressed image की एक copy try करें।
-      Full-size image कभी नहीं।
-    */
+    if(
+      saveCreations(
+        list
+      )
+    ){
 
-    safeRemove(IMAGE_KEY);
-
-    const one =
-      saveCreations([record]);
-
-    if(one){
+      /*
+        Storage में successfully save हो गई,
+        इसलिए duplicate volatile copy हटा दें।
+      */
 
       volatileCreations =
         volatileCreations.filter(
           item =>
             item.id !== imageId
         );
-
-    }else{
-
-      showToast(
-        "Image बनी है, लेकिन History में save नहीं हो सकी।"
-      );
     }
   }
 
 
+  creationsLoaded =
+    true;
+
+
   renderCreations();
 
+
   return imageId;
-}
-
-
-/* =========================================================
-   LOAD CREATIONS LAZILY
-========================================================= */
-
-function loadCreationsLazy(){
-
-  if(creationsLoaded){
-    return;
-  }
-
-  creationsLoaded = true;
-
-  try{
-
-    renderCreations();
-
-  }catch(error){
-
-    console.error(
-      "Lazy creation load failed:",
-      error
-    );
-
-    safeRemove(IMAGE_KEY);
-
-    creationGrid.innerHTML = "";
-  }
 }
 
 
@@ -3089,14 +3573,21 @@ function renderCreations(){
 
   creationGrid.innerHTML = "";
 
+
   const list =
     getCreations()
-      .slice(0,MAX_SAVED_CREATIONS);
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
 
   if(!list.length){
 
     const empty =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     empty.className =
       "empty-history";
@@ -3104,58 +3595,93 @@ function renderCreations(){
     empty.textContent =
       "अभी कोई image creation नहीं है।";
 
-    creationGrid.appendChild(empty);
+    creationGrid.appendChild(
+      empty
+    );
 
     return;
   }
 
 
-  list.forEach(
-    item => {
+  list.forEach(item => {
 
-      const card =
-        document.createElement("div");
-
-      card.className =
-        "creation-card";
-
-
-      const img =
-        document.createElement("img");
-
-      img.src =
-        item.image;
-
-      img.alt =
-        item.prompt || "Creation";
-
-
-      img.addEventListener(
-        "click",
-        () =>
-          openImageViewer(
-            item.image
-          )
+    const card =
+      document.createElement(
+        "div"
       );
 
-
-      const prompt =
-        document.createElement("div");
-
-      prompt.className =
-        "creation-prompt";
-
-      prompt.textContent =
-        item.prompt ||
-        "Image";
+    card.className =
+      "creation-card";
 
 
-      card.appendChild(img);
-      card.appendChild(prompt);
+    const img =
+      document.createElement(
+        "img"
+      );
 
-      creationGrid.appendChild(card);
-    }
-  );
+    img.src =
+      item.image;
+
+    img.alt =
+      item.prompt ||
+      "Creation";
+
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          item.image
+        )
+    );
+
+
+    const caption =
+      document.createElement(
+        "div"
+      );
+
+    caption.className =
+      "creation-prompt";
+
+    caption.textContent =
+      item.prompt ||
+      "Image";
+
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      caption
+    );
+
+
+    creationGrid.appendChild(
+      card
+    );
+  });
+}
+
+
+/* =========================================================
+   LAZY CREATION LOAD
+========================================================= */
+
+function loadCreationsLazy(){
+
+  if(creationsLoaded){
+    renderCreations();
+    return;
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
 }
 
 
@@ -3169,8 +3695,10 @@ function openImageViewer(src){
     return;
   }
 
+
   viewerImg.src =
     src;
+
 
   imageViewer.classList.add(
     "open"
@@ -3191,199 +3719,417 @@ function closeImageViewer(){
 
 
 /* =========================================================
-   PHOTO INPUT
+   IMAGE RESPONSE NORMALIZATION
 ========================================================= */
 
-photoInput.addEventListener(
-  "change",
-  async event => {
+function normalizeImageResult(
+  value
+){
 
-    const file =
-      event.target.files &&
-      event.target.files[0];
-
-    if(!file){
-      return;
-    }
-
-    if(!file.type.startsWith("image/")){
-
-      showToast(
-        "कृपया image file चुनें।"
-      );
-
-      return;
-    }
-
-    try{
-
-      selectedPhotoBase64 =
-        await fileToDataURL(file);
-
-      selectedPhotoUrl =
-        selectedPhotoBase64;
-
-      photoPreviewImg.src =
-        selectedPhotoUrl;
-
-      photoPreview.classList.add(
-        "show"
-      );
-
-      imageMode = true;
-
-      updateModeButtons();
-
-      showToast(
-        "Photo तैयार है। अब edit instruction भेजें।"
-      );
-
-    }catch(error){
-
-      console.error(error);
-
-      showToast(
-        "Photo पढ़ने में समस्या हुई।"
-      );
-    }
-  }
-);
-
-
-function fileToDataURL(file){
-
-  return new Promise(
-    (resolve,reject) => {
-
-      const reader =
-        new FileReader();
-
-      reader.onload =
-        () => resolve(
-          reader.result
-        );
-
-      reader.onerror =
-        reject;
-
-      reader.readAsDataURL(file);
-    }
-  );
-}
-
-
-/* =========================================================
-   REMOVE PHOTO
-========================================================= */
-
-document
-  .getElementById("removePhoto")
-  .addEventListener(
-    "click",
-    () => {
-
-      selectedPhotoBase64 =
-        null;
-
-      selectedPhotoUrl =
-        null;
-
-      photoInput.value =
-        "";
-
-      photoPreview.classList.remove(
-        "show"
-      );
-    }
-  );
-
-
-/* =========================================================
-   MODE
-========================================================= */
-
-function updateModeButtons(){
-
-  chatModeBtn.classList.toggle(
-    "active",
-    !imageMode
-  );
-
-  imageModeBtn.classList.toggle(
-    "active",
-    imageMode
-  );
-}
-
-
-chatModeBtn.addEventListener(
-  "click",
-  () => {
-
-    imageMode = false;
-
-    updateModeButtons();
-  }
-);
-
-
-imageModeBtn.addEventListener(
-  "click",
-  () => {
-
-    imageMode = true;
-
-    updateModeButtons();
-  }
-);
-
-
-/* =========================================================
-   IMAGE DATA NORMALIZATION
-========================================================= */
-
-function normalizeImageResult(data){
-
-  if(!data){
+  if(!value){
     return null;
   }
 
-  if(typeof data === "string"){
 
-    if(
-      data.startsWith("data:image/")
-    ){
-      return data;
+  /*
+    Direct data URL.
+  */
+
+  if(
+    typeof value === "string"
+  ){
+
+    const s =
+      value.trim();
+
+
+    if(!s){
+      return null;
     }
 
-    return (
-      "data:image/png;base64," +
-      data
-    );
+
+    if(
+      s.startsWith(
+        "data:image/"
+      )
+    ){
+
+      return s;
+    }
+
+
+    /*
+      URL भी स्वीकार करें।
+    */
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      return s;
+    }
+
+
+    /*
+      Raw Base64।
+    */
+
+    if(
+      /^[A-Za-z0-9+/=\r\n]+$/.test(
+        s
+      )
+    ){
+
+      return (
+        "data:image/png;base64," +
+        s.replace(
+          /\s/g,
+          ""
+        )
+      );
+    }
+
+
+    return null;
   }
 
-  if(data.image){
 
-    return normalizeImageResult(
-      data.image
-    );
+  /*
+    Array response।
+  */
+
+  if(
+    Array.isArray(value)
+  ){
+
+    for(
+      const item of value
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+
+    return null;
   }
 
-  if(data.result){
 
-    return normalizeImageResult(
-      data.result
-    );
+  if(
+    typeof value === "object"
+  ){
+
+    const candidates = [
+
+      value.image,
+
+      value.image_url,
+
+      value.imageUrl,
+
+      value.url,
+
+      value.result,
+
+      value.data
+    ];
+
+
+    for(
+      const item of candidates
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
   }
 
-  if(data.data){
-
-    return normalizeImageResult(
-      data.data
-    );
-  }
 
   return null;
+}
+
+
+/* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  photoPreviewImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+
+    "बैकग्राउंड बदल",
+
+    "बैकग्राउंड हटा",
+
+    "पृष्ठभूमि बदल",
+
+    "पृष्ठभूमि हटा",
+
+    "इस फोटो",
+
+    "इस तस्वीर",
+
+    "इस इमेज",
+
+    "इस चित्र",
+
+    "इसमें बदलाव",
+
+    "इसमें बदल",
+
+    "इसको एडिट",
+
+    "इसे एडिट",
+
+    "background change",
+
+    "change background",
+
+    "remove background",
+
+    "replace background",
+
+    "edit this",
+
+    "edit the photo",
+
+    "edit image",
+
+    "replace the background",
+
+    "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+      s.includes("background") ||
+      s.includes("बदल दो") ||
+      s.includes("हटा दो") ||
+      s.includes("replace") ||
+      s.includes("remove")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
+}
+
+
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
 }
 
 
@@ -3398,7 +4144,9 @@ async function generateImage(
   const payload = {
 
     prompt:
-      String(prompt || ""),
+      String(
+        prompt || ""
+      ).trim(),
 
     ratio:
       "1:1",
@@ -3407,10 +4155,44 @@ async function generateImage(
       "standard"
   };
 
-  if(selectedPhotoBase64){
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
 
     payload.image_b64 =
-      selectedPhotoBase64;
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
   }
 
 
@@ -3426,51 +4208,87 @@ async function generateImage(
         },
 
         body:
-          JSON.stringify(payload)
+          JSON.stringify(
+            payload
+          )
       }
     );
 
 
-  const text =
-    await response.text();
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
 
-  let data = null;
+  return responseToImage(
+    response
+  );
+}
 
-  try{
 
-    data =
-      JSON.parse(text);
+/* =========================================================
+   CHAT IMAGE NORMALIZATION
+========================================================= */
 
-  }catch(error){
+function normalizeChatResult(
+  data
+){
 
-    data = null;
+  /*
+    Worker JSON object।
+  */
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    const text =
+      data.response ??
+      data.answer ??
+      data.text ??
+      data.message ??
+      data.output ??
+      data.content ??
+      "";
+
+
+    const image =
+      normalizeImageResult(
+        data.image ??
+        data.image_url ??
+        data.imageUrl ??
+        data.result?.image ??
+        null
+      );
+
+
+    return {
+
+      text:
+        String(
+          text || ""
+        ),
+
+      image:
+        image
+    };
   }
 
 
-  if(!response.ok){
+  /*
+    Plain string response।
+  */
 
-    throw new Error(
-      data?.error ||
-      data?.message ||
-      text ||
-      "Image generation failed"
-    );
-  }
+  return {
 
+    text:
+      String(
+        data || ""
+      ),
 
-  const image =
-    normalizeImageResult(
-      data
-    );
-
-  if(!image){
-
-    throw new Error(
-      "Image response में image नहीं मिली।"
-    );
-  }
-
-  return image;
+    image:
+      null
+  };
 }
 
 
@@ -3480,19 +4298,67 @@ async function generateImage(
 
 async function sendChatRequest(){
 
-  const cleanMessages =
+  const recentMessages =
     messages
-      .slice(-19)
-      .map(msg => ({
+      .slice(
+        -19
+      )
+      .map(item => ({
+
         role:
-          msg.role === "user"
+          item.role === "user"
             ? "user"
             : "assistant",
 
         content:
-          String(msg.content || "")
-            .slice(0,MAX_MESSAGE_CHARS)
+          String(
+            item.content || ""
+          ).slice(
+            0,
+            MAX_MESSAGE_CHARS
+          )
       }));
+
+
+  const lastUserMessage =
+    messages
+      .slice()
+      .reverse()
+      .find(
+        item =>
+          item.role === "user"
+      );
+
+
+  const payload = {
+
+    message:
+      lastUserMessage?.content ||
+      "",
+
+    prompt:
+      lastUserMessage?.content ||
+      "",
+
+    messages:
+      recentMessages
+  };
+
+
+  /*
+    अगर chat mode में photo attached है,
+    तो Worker को reference भेजें।
+  */
+
+  if(selectedPhotoBase64){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        selectedPhotoBase64,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
 
 
   const response =
@@ -3507,32 +4373,89 @@ async function sendChatRequest(){
         },
 
         body:
-          JSON.stringify({
-
-            message:
-              messages[messages.length - 1]
-                ?.content || "",
-
-            messages:
-              cleanMessages
-          })
+          JSON.stringify(
+            payload
+          )
       }
     );
 
 
-  const text =
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    अगर Worker /chat से भी direct image
+    return कर दे।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const image =
+      await blobToDataURL(
+        await response.blob()
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Chat image request failed."
+      );
+    }
+
+
+    return {
+
+      text:
+        "इमेज तैयार है।",
+
+      image
+    };
+  }
+
+
+  const raw =
     await response.text();
 
+
   let data = null;
+
 
   try{
 
     data =
-      JSON.parse(text);
+      raw
+        ? JSON.parse(raw)
+        : null;
 
   }catch(error){
 
-    data = null;
+    if(!response.ok){
+
+      throw new Error(
+        raw ||
+        "Chat request failed."
+      );
+    }
+
+
+    return {
+
+      text:
+        raw || "",
+
+      image:
+        null
+    };
   }
 
 
@@ -3541,31 +4464,20 @@ async function sendChatRequest(){
     throw new Error(
       data?.error ||
       data?.message ||
-      text ||
-      "Chat request failed"
+      data?.response ||
+      "Chat request failed."
     );
   }
 
 
-  if(typeof data === "string"){
-    return data;
-  }
-
-
-  return (
-    data?.response ??
-    data?.answer ??
-    data?.text ??
-    data?.message ??
-    data?.output ??
-    data?.content ??
-    ""
+  return normalizeChatResult(
+    data
   );
 }
 
 
 /* =========================================================
-   SEND
+   HANDLE SEND
 ========================================================= */
 
 async function handleSend(){
@@ -3574,8 +4486,10 @@ async function handleSend(){
     return;
   }
 
+
   const prompt =
     promptEl.value.trim();
+
 
   if(!prompt){
 
@@ -3590,7 +4504,8 @@ async function handleSend(){
   ensureCurrentChat();
 
 
-  isBusy = true;
+  isBusy =
+    true;
 
   sendBtn.disabled =
     true;
@@ -3602,9 +4517,11 @@ async function handleSend(){
   );
 
 
-  promptEl.value = "";
+  promptEl.value =
+    "";
 
   autoResize();
+
 
   scrollBottom();
 
@@ -3615,12 +4532,15 @@ async function handleSend(){
 
       showTyping();
 
+
       const image =
         await generateImage(
           prompt
         );
 
+
       hideTyping();
+
 
       const imageId =
         await saveCreation(
@@ -3631,83 +4551,119 @@ async function handleSend(){
 
       addAssistantMessage(
         "🖼️ Image generated successfully.",
-        false,
+        true,
         imageId
       );
 
-      saveCurrentChat();
 
+      /*
+        Edit के बाद selected reference हटाएँ।
+      */
 
-      selectedPhotoBase64 =
-        null;
+      clearSelectedPhoto();
 
-      selectedPhotoUrl =
-        null;
-
-      photoInput.value =
-        "";
-
-      photoPreview.classList.remove(
-        "show"
-      );
 
     }else{
 
       showTyping();
 
-      const answer =
+
+      const result =
         await sendChatRequest();
+
 
       hideTyping();
 
-      addAssistantMessage(
-        answer ||
-        "माफ़ कीजिए, अभी कोई जवाब नहीं मिला।",
-        true
-      );
+
+      /*
+        सबसे जरूरी fix:
+        /chat से image आने पर उसे भी दिखाएँ।
+      */
+
+      if(
+        result &&
+        result.image
+      ){
+
+        const imageId =
+          await saveCreation(
+            result.image,
+            prompt
+          );
+
+
+        addAssistantMessage(
+          result.text ||
+          "🖼️ Image generated successfully.",
+          true,
+          imageId
+        );
+
+
+      }else{
+
+        addAssistantMessage(
+          result?.text ||
+          "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।",
+          true
+        );
+      }
     }
 
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "Aaru request failed:",
+      error
+    );
+
 
     hideTyping();
+
 
     addAssistantMessage(
       "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
       true
     );
 
+
     showToast(
       error?.message ||
       "Request failed"
     );
 
+
   }finally{
 
-    isBusy = false;
+    isBusy =
+      false;
 
     sendBtn.disabled =
       false;
 
+
     scrollBottom();
 
+
     try{
+
       promptEl.focus();
-    }catch(e){}
+
+    }catch(error){}
   }
 }
 
 
 /* =========================================================
-   TEXTAREA AUTO RESIZE
+   TEXTAREA
 ========================================================= */
 
 function autoResize(){
 
   promptEl.style.height =
     "auto";
+
 
   promptEl.style.height =
     Math.min(
@@ -3724,7 +4680,7 @@ promptEl.addEventListener(
 
 
 /* =========================================================
-   ENTER TO SEND
+   ENTER
 ========================================================= */
 
 promptEl.addEventListener(
@@ -3770,6 +4726,199 @@ document
 
 
 /* =========================================================
+   PHOTO UPLOAD
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if(!file){
+      return;
+    }
+
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      showToast(
+        "कृपया image file चुनें।"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      const original =
+        await fileToDataURL(
+          file
+        );
+
+
+      /*
+        IMPORTANT:
+        Preview और API दोनों के लिए
+        छोटा image रखें।
+      */
+
+      const resized =
+        await resizeImageDataURL(
+          original,
+          MAX_MODEL_IMAGE_SIZE,
+          .80
+        );
+
+
+      selectedPhotoBase64 =
+        resized;
+
+
+      selectedPhotoUrl =
+        resized;
+
+
+      photoPreviewImg.src =
+        selectedPhotoUrl;
+
+
+      photoPreview.classList.add(
+        "show"
+      );
+
+
+      /*
+        Photo चुनते ही Image mode।
+      */
+
+      imageMode =
+        true;
+
+
+      updateModeButtons();
+
+
+      showToast(
+        "Photo तैयार है। अब edit instruction भेजें।"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Photo processing failed:",
+        error
+      );
+
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
+      );
+
+    }finally{
+
+      /*
+        Same file दोबारा select हो सके।
+      */
+
+      photoInput.value =
+        "";
+    }
+  });
+
+
+function fileToDataURL(file){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE PHOTO
+========================================================= */
+
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    clearSelectedPhoto
+  );
+
+
+/* =========================================================
+   MODE BUTTONS
+========================================================= */
+
+function updateModeButtons(){
+
+  chatModeBtn.classList.toggle(
+    "active",
+    !imageMode
+  );
+
+
+  imageModeBtn.classList.toggle(
+    "active",
+    imageMode
+  );
+}
+
+
+chatModeBtn.addEventListener(
+  "click",
+  () => {
+
+    imageMode =
+      false;
+
+    updateModeButtons();
+  }
+);
+
+
+imageModeBtn.addEventListener(
+  "click",
+  () => {
+
+    imageMode =
+      true;
+
+    updateModeButtons();
+  }
+);
+
+
+/* =========================================================
    DRAWER
 ========================================================= */
 
@@ -3783,9 +4932,9 @@ function openDrawer(){
     "open"
   );
 
+
   /*
-    Drawer खुलने पर ही image history load करें।
-    Startup पर नहीं।
+    Image history केवल drawer खोलने पर।
   */
 
   setTimeout(
@@ -3839,42 +4988,45 @@ function startNewChat(){
     return;
   }
 
+
   if(currentChatId){
+
     saveCurrentChat();
   }
 
-  createNewChat(true);
+
+  createNewChat(
+    true
+  );
+
 
   renderCurrentChat();
 
   renderChatHistory();
 
-  imageMode = false;
+
+  imageMode =
+    false;
+
 
   updateModeButtons();
 
-  selectedPhotoBase64 =
-    null;
 
-  selectedPhotoUrl =
-    null;
+  clearSelectedPhoto();
 
-  photoInput.value =
-    "";
-
-  photoPreview.classList.remove(
-    "show"
-  );
 
   closeDrawer();
 
+
   window.scrollTo({
     top:0,
-    behavior:"smooth"
+    behavior:"auto"
   });
 
+
   setTimeout(
-    () => promptEl.focus(),
+    () =>
+      promptEl.focus(),
     100
   );
 }
@@ -3897,19 +5049,7 @@ document
 
 
 /* =========================================================
-   DELETE ALL
-========================================================= */
-
-document
-  .getElementById("deleteAllBtn")
-  .addEventListener(
-    "click",
-    deleteAllChats
-  );
-
-
-/* =========================================================
-   IMAGE VIEWER EVENTS
+   VIEWER
 ========================================================= */
 
 document
@@ -3927,6 +5067,7 @@ imageViewer.addEventListener(
     if(
       event.target === imageViewer
     ){
+
       closeImageViewer();
     }
   }
@@ -3934,46 +5075,21 @@ imageViewer.addEventListener(
 
 
 /* =========================================================
-   ESC KEY
+   ESC
 ========================================================= */
 
 document.addEventListener(
   "keydown",
   event => {
 
-    if(event.key === "Escape"){
+    if(
+      event.key === "Escape"
+    ){
 
       closeDrawer();
+
       closeImageViewer();
     }
-  }
-);
-
-
-/* =========================================================
-   GLOBAL ERROR LOGGING
-========================================================= */
-
-window.addEventListener(
-  "error",
-  event => {
-
-    console.error(
-      "Aaru AI runtime error:",
-      event.error || event.message
-    );
-  }
-);
-
-
-window.addEventListener(
-  "unhandledrejection",
-  event => {
-
-    console.error(
-      "Aaru AI promise error:",
-      event.reason
-    );
   }
 );
 
@@ -3982,29 +5098,21 @@ window.addEventListener(
    PAGE RECOVERY
 ========================================================= */
 
-/*
-  Mobile Chrome में Back/Forward से लौटने पर
-  pageshow fire होता है।
-
-  अगर page bfcache से restore हुआ है,
-  तो UI को दोबारा साफ state में लाते हैं।
-*/
-
 function recoverPage(){
 
   const now =
     Date.now();
 
-  /*
-    Duplicate recovery को रोकें।
-  */
 
   if(
-    now - lastPageShowRecovery <
+    now -
+    lastPageShowRecovery <
     300
   ){
+
     return;
   }
+
 
   lastPageShowRecovery =
     now;
@@ -4014,21 +5122,11 @@ function recoverPage(){
 
     hideTyping();
 
-  }catch(error){
-
-    console.warn(
-      "Typing recovery failed:",
-      error
-    );
-  }
+  }catch(error){}
 
 
-  /*
-    Network request वापस आने पर कभी-कभी
-    stale busy state रह सकती है।
-  */
-
-  isBusy = false;
+  isBusy =
+    false;
 
   sendBtn.disabled =
     false;
@@ -4038,168 +5136,56 @@ function recoverPage(){
 
     closeDrawer();
 
-  }catch(error){}
-
-
-  try{
-
     closeImageViewer();
 
   }catch(error){}
 
 
-  /*
-    अगर current chat memory में है तो उसी को
-    वापस render करें।
-  */
-
   try{
 
-    const chat =
+    const current =
       chats.find(
         item =>
-          item.id === currentChatId
+          item.id ===
+          currentChatId
       );
 
-    if(chat){
+
+    if(current){
 
       messages =
-        Array.isArray(chat.messages)
-          ? chat.messages
-              .slice(-MAX_MESSAGES_PER_CHAT)
+        Array.isArray(
+          current.messages
+        )
+          ? current.messages
+              .slice(
+                -MAX_MESSAGES_PER_CHAT
+              )
           : [];
-
     }
 
+
     renderCurrentChat();
+
+    renderChatHistory();
+
+    updateModeButtons();
+
+    autoResize();
 
   }catch(error){
 
     console.error(
-      "Page recovery render failed:",
-      error
-    );
-
-    /*
-      Last-resort recovery:
-      storage से chat फिर पढ़ने की कोशिश।
-    */
-
-    try{
-
-      loadChatHistory();
-
-      const latest =
-        chats
-          .slice()
-          .sort(
-            (a,b) =>
-              (b.updatedAt || 0) -
-              (a.updatedAt || 0)
-          )[0];
-
-      if(latest){
-
-        currentChatId =
-          latest.id;
-
-        messages =
-          Array.isArray(latest.messages)
-            ? latest.messages
-                .slice(-MAX_MESSAGES_PER_CHAT)
-            : [];
-
-      }else{
-
-        createNewChat(false);
-      }
-
-      renderCurrentChat();
-
-    }catch(secondError){
-
-      console.error(
-        "Last recovery failed:",
-        secondError
-      );
-
-      messagesEl.innerHTML = "";
-    }
-  }
-
-
-  try{
-
-    renderChatHistory();
-
-  }catch(error){
-
-    console.warn(
-      "History recovery failed:",
+      "Recovery failed:",
       error
     );
   }
-
-
-  try{
-
-    updateModeButtons();
-
-  }catch(error){}
-
-
-  try{
-
-    autoResize();
-
-  }catch(error){}
-
-
-  /*
-    Image history Back पर तुरंत parse नहीं होगी।
-    Drawer खोलने पर lazy-load होगी।
-  */
-
-  try{
-
-    if(
-      drawer.classList.contains("open")
-    ){
-
-      setTimeout(
-        loadCreationsLazy,
-        0
-      );
-    }
-
-  }catch(error){}
-
-
-  /*
-    Mobile browser में restored page का scroll
-    कभी गलत position पर जा सकता है।
-  */
-
-  setTimeout(() => {
-
-    try{
-
-      window.scrollTo({
-        top:document.documentElement.scrollHeight,
-        behavior:"auto"
-      });
-
-    }catch(error){}
-
-  },50);
 }
 
 
-/*
-  pageshow initial load पर भी आता है।
-  Initial load में safeInitialLoad() मुख्य काम करेगा।
-  उसके बाद केवल persisted/bfcache recovery की जरूरत है।
-*/
+/* =========================================================
+   PAGESHOW
+========================================================= */
 
 window.addEventListener(
   "pageshow",
@@ -4209,9 +5195,6 @@ window.addEventListener(
       return;
     }
 
-    /*
-      खास तौर पर Back/Forward/bfcache restore।
-    */
 
     if(event.persisted){
 
@@ -4220,14 +5203,10 @@ window.addEventListener(
       return;
     }
 
-    /*
-      कुछ mobile browsers persisted=false के साथ भी
-      page को history navigation से वापस activate कर सकते हैं।
-      इसलिए visible state में हल्का recovery रखें।
-    */
 
     if(
-      document.visibilityState === "visible"
+      document.visibilityState ===
+      "visible"
     ){
 
       setTimeout(
@@ -4239,18 +5218,17 @@ window.addEventListener(
 );
 
 
-/*
-  visibilitychange पर कोई भारी storage save नहीं।
-  केवल अगर page वापस visible हो तो stale loading state
-  को recover करें।
-*/
+/* =========================================================
+   VISIBILITY
+========================================================= */
 
 document.addEventListener(
   "visibilitychange",
   () => {
 
     if(
-      document.visibilityState === "visible" &&
+      document.visibilityState ===
+      "visible" &&
       appReady
     ){
 
@@ -4261,18 +5239,13 @@ document.addEventListener(
 
             hideTyping();
 
-            isBusy = false;
+            isBusy =
+              false;
 
             sendBtn.disabled =
               false;
 
-          }catch(error){
-
-            console.warn(
-              "Visibility recovery failed:",
-              error
-            );
-          }
+          }catch(error){}
 
         },
         80
@@ -4283,31 +5256,10 @@ document.addEventListener(
 
 
 /* =========================================================
-   SAFE INITIAL LOAD
+   INITIAL LOAD
 ========================================================= */
 
 function safeInitialLoad(){
-
-  /*
-    पहले सबसे हल्का possible UI state।
-  */
-
-  try{
-
-    isBusy = false;
-
-    sendBtn.disabled =
-      false;
-
-    hideTyping();
-
-  }catch(error){}
-
-
-  /*
-    Chat history load करें।
-    यह bounded है।
-  */
 
   try{
 
@@ -4316,23 +5268,16 @@ function safeInitialLoad(){
   }catch(error){
 
     console.error(
-      "Chat history startup failed:",
+      "Chat history load failed:",
       error
     );
 
     chats = [];
 
-    currentChatId = null;
+    currentChatId =
+      null;
 
     messages = [];
-
-    safeRemove(
-      CHAT_LIST_KEY
-    );
-
-    safeRemove(
-      OLD_CHAT_KEY
-    );
   }
 
 
@@ -4341,12 +5286,12 @@ function safeInitialLoad(){
     if(!chats.length){
 
       /*
-        IMPORTANT:
-        Startup पर नया chat बनाते समय
-        localStorage write नहीं होगी।
+        Startup पर localStorage write नहीं।
       */
 
-      createNewChat(false);
+      createNewChat(
+        false
+      );
 
     }else{
 
@@ -4359,18 +5304,25 @@ function safeInitialLoad(){
               (a.updatedAt || 0)
           )[0];
 
+
       if(latest){
 
         currentChatId =
           latest.id;
 
+
         messages =
-          Array.isArray(latest.messages)
+          Array.isArray(
+            latest.messages
+          )
             ? latest.messages
-                .slice(-MAX_MESSAGES_PER_CHAT)
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
             : [];
       }
     }
+
 
   }catch(error){
 
@@ -4381,186 +5333,76 @@ function safeInitialLoad(){
 
     chats = [];
 
-    currentChatId = null;
-
     messages = [];
 
-    try{
-
-      createNewChat(false);
-
-    }catch(createError){
-
-      console.error(
-        "New chat creation failed:",
-        createError
-      );
-    }
-  }
+    currentChatId =
+      null;
 
 
-  /*
-    Chat UI पहले render होगा।
-  */
-
-  try{
-
-    renderCurrentChat();
-
-  }catch(error){
-
-    console.error(
-      "Chat render failed:",
-      error
-    );
-
-    messagesEl.innerHTML = "";
-  }
-
-
-  try{
-
-    renderChatHistory();
-
-  }catch(error){
-
-    console.error(
-      "History render failed:",
-      error
-    );
-
-    chatHistoryEl.innerHTML = "";
-  }
-
-
-  /*
-    IMPORTANT:
-    renderCreations() startup पर नहीं।
-    इससे बड़े Base64 image history के कारण
-    first paint block नहीं होगा।
-  */
-
-  try{
-
-    creationGrid.innerHTML = "";
-
-    const empty =
-      document.createElement("div");
-
-    empty.className =
-      "empty-history";
-
-    empty.textContent =
-      "Images देखने के लिए Menu खोलें।";
-
-    creationGrid.appendChild(empty);
-
-  }catch(error){
-
-    creationGrid.innerHTML = "";
-  }
-
-
-  try{
-
-    updateModeButtons();
-
-  }catch(error){
-
-    console.error(
-      "Mode button initialization failed:",
-      error
-    );
-  }
-
-
-  try{
-
-    autoResize();
-
-  }catch(error){
-
-    console.error(
-      "Textarea initialization failed:",
-      error
+    createNewChat(
+      false
     );
   }
 
 
   /*
-    Startup scroll.
-    Smooth नहीं, ताकि mobile browser layout को
-    बार-बार animate न करना पड़े।
+    Chat पहले render।
   */
 
-  setTimeout(() => {
+  renderCurrentChat();
 
-    try{
-
-      window.scrollTo({
-        top:document.documentElement.scrollHeight,
-        behavior:"auto"
-      });
-
-    }catch(error){
-
-      console.warn(
-        "Initial scroll failed:",
-        error
-      );
-    }
-
-  },80);
+  renderChatHistory();
 
 
   /*
-    अब app को ready mark करें।
+    Image history startup पर parse नहीं।
   */
 
-  appReady = true;
+  creationGrid.innerHTML =
+    `
+      <div class="empty-history">
+        Images देखने के लिए Menu खोलें।
+      </div>
+    `;
 
 
-  /*
-    Browser को थोड़ा समय दें।
-    Image history केवल background में load होगी,
-    लेकिन पहले paint के बाद।
-  */
+  updateModeButtons();
+
+  autoResize();
+
 
   setTimeout(
     () => {
 
-      if(!appReady){
-        return;
-      }
-
-      /*
-        केवल बहुत हल्का check।
-        Actual image history तब parse होगी
-        जब drawer खोला जाएगा।
-      */
-
       try{
 
-        if(
-          drawer.classList.contains("open")
-        ){
-          loadCreationsLazy();
-        }
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:"auto"
+        });
 
       }catch(error){}
 
     },
-    1200
+    80
   );
+
+
+  appReady =
+    true;
 }
 
 
 /* =========================================================
-   STARTUP
+   START
 ========================================================= */
 
 if(
-  document.readyState === "loading"
+  document.readyState ===
+  "loading"
 ){
 
   document.addEventListener(
@@ -4580,16 +5422,34 @@ if(
 }
 
 
-/*
-  IMPORTANT:
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
 
-  pagehide / beforeunload पर भारी localStorage save
-  जानबूझकर नहीं लगाया गया है।
+window.addEventListener(
+  "error",
+  event => {
 
-  Normal chat actions saveCurrentChat() से save होती हैं।
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
 
-  pageshow + visibilitychange केवल UI recovery के लिए हैं।
-*/
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
 </script>
 
 </body>
