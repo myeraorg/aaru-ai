@@ -908,9 +908,7 @@ const IMAGE_KEY =
 
 
 /* =========================================================
-   STORAGE LIMITS
-   छोटा रखा गया है ताकि reload पर browser storage
-   भारी न हो।
+   SAFE STORAGE LIMITS
 ========================================================= */
 
 const MAX_SAVED_CHATS = 8;
@@ -935,6 +933,13 @@ let selectedPhotoBase64 = null;
 let selectedPhotoUrl = null;
 
 let isBusy = false;
+
+
+/*
+  अगर localStorage में image save न हो सके,
+  तो current session में image फिर भी उपलब्ध रहेगी।
+*/
+let volatileCreations = [];
 
 
 /* =========================================================
@@ -1042,7 +1047,7 @@ function escapeHTML(value){
 
 /* =========================================================
    MARKDOWN RENDERER
-   IMPORTANT: MAIN MARKDOWN LOGIC KEPT INTACT
+   IMPORTANT: UNCHANGED
 ========================================================= */
 
 function inlineMarkdown(text){
@@ -1488,11 +1493,19 @@ function normalizeChat(chat){
 
 
 /* =========================================================
-   SAVE CHAT HISTORY
-   छोटा और quota-resilient
+   CHAT SAVE
 ========================================================= */
 
 function saveChatHistory(showError = true){
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      );
 
   const limits = [
     MAX_SAVED_CHATS,
@@ -1508,21 +1521,9 @@ function saveChatHistory(showError = true){
     try{
 
       const data =
-        chats
-          .slice()
-          .sort(
-            (a,b) =>
-              (b.updatedAt || 0) -
-              (a.updatedAt || 0)
-          )
+        sorted
           .slice(0,limit)
-          .map(chat => {
-
-            const normalized =
-              normalizeChat(chat);
-
-            return normalized;
-          })
+          .map(normalizeChat)
           .filter(Boolean);
 
       const json =
@@ -1535,6 +1536,12 @@ function saveChatHistory(showError = true){
         )
       ){
 
+        chats =
+          sorted
+            .slice(0,MAX_SAVED_CHATS)
+            .map(normalizeChat)
+            .filter(Boolean);
+
         return true;
       }
 
@@ -1542,11 +1549,51 @@ function saveChatHistory(showError = true){
 
       console.warn(
         "Chat history save failed:",
-        limit,
         error
       );
     }
   }
+
+
+  /*
+    अगर image history localStorage quota खा रही है,
+    तो पहले image history हटाकर chat बचाने की कोशिश।
+  */
+
+  try{
+
+    safeRemove(IMAGE_KEY);
+
+    const emergency =
+      sorted
+        .slice(0,3)
+        .map(normalizeChat)
+        .filter(Boolean);
+
+    if(
+      safeSet(
+        CHAT_LIST_KEY,
+        JSON.stringify(emergency)
+      )
+    ){
+
+      chats =
+        sorted
+          .slice(0,MAX_SAVED_CHATS)
+          .map(normalizeChat)
+          .filter(Boolean);
+
+      return true;
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Emergency chat save failed:",
+      error
+    );
+  }
+
 
   if(showError){
 
@@ -1618,12 +1665,11 @@ function loadChatHistory(){
       );
     }
 
-    /*
-      अगर पुराना storage बहुत बड़ा था,
-      तो normalized छोटा version save होगा।
-    */
     if(chats.length){
 
+      /*
+        पुराने बड़े storage को compact किया जाएगा।
+      */
       saveChatHistory(false);
     }
 
@@ -1643,8 +1689,10 @@ function loadChatHistory(){
       const oldMessages =
         JSON.parse(oldRaw);
 
-      if(Array.isArray(oldMessages) &&
-         oldMessages.length){
+      if(
+        Array.isArray(oldMessages) &&
+        oldMessages.length
+      ){
 
         const now =
           Date.now();
@@ -1716,10 +1764,6 @@ function createNewChat(){
 
   messages = [];
 
-  /*
-    नया chat बनाते समय पुराने chats की
-    सीमित संख्या ही storage में जाती है।
-  */
   chats =
     chats
       .slice()
@@ -1982,7 +2026,7 @@ function addAssistantMessage(
 
 
 /* =========================================================
-   TYPING INDICATOR
+   TYPING
 ========================================================= */
 
 function showTyping(){
@@ -2302,7 +2346,7 @@ function deleteChat(id){
 
 
 /* =========================================================
-   DELETE ALL CHATS
+   DELETE ALL
 ========================================================= */
 
 function deleteAllChats(){
@@ -2353,7 +2397,7 @@ function deleteAllChats(){
    IMAGE HISTORY
 ========================================================= */
 
-function getCreations(){
+function getStoredCreations(){
 
   const raw =
     safeGet(IMAGE_KEY);
@@ -2390,6 +2434,44 @@ function getCreations(){
 
     return [];
   }
+}
+
+
+function getCreations(){
+
+  const stored =
+    getStoredCreations();
+
+  /*
+    Volatile images पहले दिखाई जाएँगी।
+    ये केवल तभी रहती हैं जब storage quota भर जाए।
+  */
+
+  const combined = [
+    ...volatileCreations,
+    ...stored
+  ];
+
+  const seen =
+    new Set();
+
+  return combined
+    .filter(item => {
+
+      if(!item || !item.image){
+        return false;
+      }
+
+      if(seen.has(item.id)){
+        return false;
+      }
+
+      seen.add(item.id);
+
+      return true;
+
+    })
+    .slice(0,MAX_SAVED_CREATIONS);
 }
 
 
@@ -2434,7 +2516,6 @@ function saveCreations(list){
 
       console.warn(
         "Image history save failed:",
-        limit,
         error
       );
     }
@@ -2459,11 +2540,13 @@ function findCreationById(id){
 
 /* =========================================================
    IMAGE COMPRESSION
+   History के लिए छोटा रखा गया है।
+   Generated original image पर असर नहीं पड़ेगा।
 ========================================================= */
 
 async function blobToHistoryDataURL(
   blob,
-  maxSize = 900
+  maxSize = 640
 ){
 
   try{
@@ -2508,6 +2591,13 @@ async function blobToHistoryDataURL(
     const ctx =
       canvas.getContext("2d");
 
+    if(!ctx){
+
+      bitmap.close();
+
+      return null;
+    }
+
     ctx.drawImage(
       bitmap,
       0,
@@ -2521,7 +2611,7 @@ async function blobToHistoryDataURL(
     let dataURL =
       canvas.toDataURL(
         "image/webp",
-        .86
+        .72
       );
 
     if(
@@ -2534,7 +2624,7 @@ async function blobToHistoryDataURL(
       dataURL =
         canvas.toDataURL(
           "image/jpeg",
-          .84
+          .72
         );
     }
 
@@ -2571,6 +2661,7 @@ async function saveCreation(
   let historyImage =
     imageData;
 
+
   try{
 
     const response =
@@ -2584,7 +2675,7 @@ async function saveCreation(
       const compressed =
         await blobToHistoryDataURL(
           blob,
-          900
+          640
         );
 
       if(compressed){
@@ -2620,27 +2711,75 @@ async function saveCreation(
   };
 
 
-  let list =
-    getCreations();
+  /*
+    पहले current session memory में रखो।
+    इसलिए storage fail होने पर भी generated image
+    तुरंत chat में दिखाई देगी।
+  */
 
-  list.unshift(record);
+  volatileCreations =
+    [
+      record,
+      ...volatileCreations
+    ]
+    .slice(0,MAX_SAVED_CREATIONS);
 
-  if(!saveCreations(list)){
+
+  let storedList =
+    getStoredCreations();
+
+  storedList =
+    [
+      record,
+      ...storedList
+    ]
+    .slice(0,MAX_SAVED_CREATIONS);
+
+
+  const saved =
+    saveCreations(
+      storedList
+    );
+
+
+  if(saved){
 
     /*
-      अगर quota फिर भी भर चुका है,
-      तो पुराने image records हटाकर
-      सिर्फ नई image बचाने की कोशिश।
+      Successfully saved होने पर volatile copy हटाओ,
+      क्योंकि localStorage में copy मौजूद है।
+    */
+
+    volatileCreations =
+      volatileCreations.filter(
+        item =>
+          item.id !== imageId
+      );
+
+  }else{
+
+    /*
+      Quota भरने पर पुराने image history को
+      साफ करके केवल नई image save करने की कोशिश।
     */
 
     try{
 
       safeRemove(IMAGE_KEY);
 
-      safeSet(
-        IMAGE_KEY,
-        JSON.stringify([record])
-      );
+      const one =
+        safeSet(
+          IMAGE_KEY,
+          JSON.stringify([record])
+        );
+
+      if(one){
+
+        volatileCreations =
+          volatileCreations.filter(
+            item =>
+              item.id !== imageId
+          );
+      }
 
     }catch(error){
 
@@ -2650,6 +2789,7 @@ async function saveCreation(
       );
     }
   }
+
 
   renderCreations();
 
@@ -3404,11 +3544,13 @@ function startNewChat(){
   }
 
   /*
-    अब pagehide/visibility पर save नहीं होता,
-    इसलिए नया chat शुरू करने से पहले
-    current chat को explicitly save करते हैं।
+    Current chat को explicitly save करते हैं।
+    pagehide/visibility heavy save नहीं है।
   */
-  saveCurrentChat();
+
+  if(currentChatId){
+    saveCurrentChat();
+  }
 
   createNewChat();
 
@@ -3518,16 +3660,38 @@ document.addEventListener(
 
 
 /* =========================================================
+   GLOBAL ERROR LOGGING
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "Aaru AI runtime error:",
+      event.error || event.message
+    );
+  }
+);
+
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
+
+/* =========================================================
    SAFE INITIAL LOAD
 ========================================================= */
 
 function safeInitialLoad(){
-
-  /*
-    पूरा startup एक ही try में नहीं रखा गया है।
-    किसी एक पुराने/corrupt storage item के कारण
-    पूरी app blank न हो।
-  */
 
   try{
 
@@ -3581,9 +3745,7 @@ function safeInitialLoad(){
         messages =
           Array.isArray(latest.messages)
             ? latest.messages
-                .slice(
-                  -MAX_MESSAGES_PER_CHAT
-                )
+                .slice(-MAX_MESSAGES_PER_CHAT)
             : [];
       }
     }
@@ -3658,19 +3820,16 @@ function safeInitialLoad(){
 
     creationGrid.innerHTML = "";
 
-    /*
-      अगर image storage खराब/बहुत भारी हो,
-      तो उसे हटाकर app को बाकी features के लिए
-      चलने देते हैं।
-    */
-
     safeRemove(
       IMAGE_KEY
     );
 
     try{
+
       renderCreations();
+
     }catch(secondError){
+
       console.error(
         "Creation recovery render failed:",
         secondError
@@ -3706,9 +3865,7 @@ function safeInitialLoad(){
 
 
   /*
-    Startup के समय smooth scroll नहीं।
-    इससे Android Chrome पर unnecessary animation
-    और layout work कम होता है।
+    Startup पर smooth animation नहीं।
   */
 
   setTimeout(() => {
@@ -3759,16 +3916,11 @@ if(
 
 /*
   IMPORTANT:
-  पुराने pagehide और visibilitychange heavy-save
-  handlers जानबूझकर हटाए गए हैं।
+  pagehide और visibilitychange पर भारी localStorage
+  save जानबूझकर नहीं लगाया गया है।
 
-  Reload/navigation के समय बड़े localStorage
-  JSON को synchronous तरीके से लिखने की जरूरत नहीं।
-  Normal chat actions saveCurrentChat() के जरिए
-  पहले ही save हो जाती हैं।
+  Normal chat actions saveCurrentChat() से save होती हैं।
 */
-
-
 </script>
 
 </body>
