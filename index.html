@@ -381,12 +381,6 @@ main{
   border:1px solid rgba(255,255,255,.08);
 }
 
-.image-note{
-  margin-top:7px;
-  font-size:11px;
-  opacity:.42;
-}
-
 .typing{
   display:flex;
   align-items:center;
@@ -623,7 +617,7 @@ main{
 }
 </style>
 
-<!-- PDF.js library for PDF reading support -->
+<!-- PDF.js library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -698,30 +692,27 @@ main{
 "use strict";
 
 const API = "https://aaru-ai-api.myera-org.workers.dev/";
-const CHAT_LIST_KEY = "aaru_chat_history_v2";
-const OLD_CHAT_KEY = "aaru_chat_messages";
-const IMAGE_KEY = "aaru_history";
+const CHAT_LIST_KEY = "aaru_chat_history_v3";
+const IMAGE_KEY = "aaru_history_v3";
 
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 30;
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
-const MAX_HISTORY_IMAGE_CHARS = 420000;
+const MAX_HISTORY_IMAGE_CHARS = 150000; 
 const MAX_MODEL_IMAGE_SIZE = 511;
 
 let chats = [];
 let currentChatId = null;
 let messages = [];
 
-let selectedFileContent = null; // Base64 image or extracted PDF text
-let selectedFileType = null; // 'image' or 'pdf'
+let selectedFileContent = null; 
+let selectedFileType = null; 
 let selectedFileUrl = null;
 let isBusy = false;
 let volatileCreations = [];
 let creationsLoaded = false;
-let appReady = false;
-let lastPageShowRecovery = 0;
 
 const messagesEl = document.getElementById("messages");
 const promptEl = document.getElementById("prompt");
@@ -758,7 +749,7 @@ let recognition = null;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();
-  recognition.lang = 'hi-IN'; // हिंदी सपोर्ट के लिए, जरूरत पड़ने पर बदला जा सकता है
+  recognition.lang = 'hi-IN';
   recognition.interimResults = false;
   
   recognition.onstart = () => { micBtn.classList.add("recording"); showToast("सुन रहे हैं... बोलिए"); };
@@ -776,11 +767,7 @@ micBtn.addEventListener("click", () => {
     showToast("आपका ब्राउज़र वॉयस इनपुट सपोर्ट नहीं करता।");
     return;
   }
-  try {
-    recognition.start();
-  } catch(e) {
-    recognition.stop();
-  }
+  try { recognition.start(); } catch(e) { recognition.stop(); }
 });
 
 /* ================= VOICE OUTPUT (Text-to-Speech) ================= */
@@ -796,7 +783,7 @@ function speakText(text) {
   showToast("बोला जा रहा है...");
 }
 
-/* ================= PDF READER (PDF to Text) ================= */
+/* ================= PDF READER ================= */
 async function parsePdfFile(file) {
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -811,7 +798,6 @@ async function parsePdfFile(file) {
     }
     return fullText;
   } catch (err) {
-    console.error("PDF parse error:", err);
     throw new Error("PDF फाइल को पढ़ा नहीं जा सका।");
   }
 }
@@ -896,6 +882,7 @@ function safeGet(key){ return HAS_STORAGE ? localStorage.getItem(key) : null; }
 function safeSet(key,value){ if(!HAS_STORAGE) return false; try{ localStorage.setItem(key, value); return true; }catch(e){ return false; } }
 function safeRemove(key){ if(HAS_STORAGE) localStorage.removeItem(key); }
 
+/* ================= 100% FIXED LOCALSTORAGE FUNCTIONS ================= */
 function normalizeChat(chat){
   if(!chat) return null;
   const id = String(chat.id || "");
@@ -904,6 +891,7 @@ function normalizeChat(chat){
   const normalized = raw.slice(-MAX_MESSAGES_PER_CHAT).map(item => ({
     role: item.role === "user" ? "user" : "assistant",
     content: String(item.content ?? "").slice(0, MAX_MESSAGE_CHARS),
+    imageUrl: item.imageUrl ? String(item.imageUrl).slice(0, MAX_HISTORY_IMAGE_CHARS) : undefined,
     imageId: item.imageId ? String(item.imageId).slice(0, 100) : undefined
   }));
   let title = String(chat.title || "").trim().slice(0, 80);
@@ -928,7 +916,6 @@ function loadChatHistory(){
         }).sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, MAX_SAVED_CHATS);
       }
     }catch(e){ safeRemove(CHAT_LIST_KEY); }
-    return;
   }
 }
 
@@ -963,6 +950,7 @@ function saveCurrentChat(){
   chat.messages = messages.slice(-MAX_MESSAGES_PER_CHAT).map(item => ({
     role: item.role === "user" ? "user" : "assistant",
     content: String(item.content || "").slice(0, MAX_MESSAGE_CHARS),
+    imageUrl: item.imageUrl ? String(item.imageUrl).slice(0, MAX_HISTORY_IMAGE_CHARS) : undefined,
     imageId: item.imageId ? String(item.imageId).slice(0, 100) : undefined
   }));
   const firstUser = chat.messages.find(item => item.role === "user");
@@ -977,7 +965,7 @@ function renderCurrentChat(){
   const list = Array.isArray(messages) ? messages.slice(-MAX_MESSAGES_PER_CHAT) : [];
   list.forEach(item => {
     if(item.role === "user"){
-      addUserMessage(item.content, false);
+      addUserMessage(item.content, false, item.imageUrl || null);
     }else{
       addAssistantMessage(item.content, false, item.imageId || null);
     }
@@ -986,7 +974,7 @@ function renderCurrentChat(){
 
 function addUserMessage(text, persist = true, imageUrl = null){
   const value = String(text || "");
-  messages.push({ role: "user", content: value });
+  messages.push({ role: "user", content: value, imageUrl: imageUrl });
   const row = document.createElement("div");
   row.className = "message user";
   const bubble = document.createElement("div");
@@ -1032,7 +1020,6 @@ function addAssistantMessage(text, persist = true, imageId = null){
   }
   row.appendChild(bubble);
 
-  // Audio / Voice Output button जोड़ा गया है
   const actionsDiv = document.createElement("div");
   actionsDiv.className = "msg-actions";
   const speakBtn = document.createElement("button");
@@ -1087,7 +1074,7 @@ function renderChatHistory(){
   }
   sorted.forEach(item => {
     const row = document.createElement("div");
-    row.className = "message-history-item chat-history-item" + (item.id === currentChatId ? " active" : "");
+    row.className = "chat-history-item" + (item.id === currentChatId ? " active" : "");
     const info = document.createElement("div");
     info.className = "chat-history-info";
     const title = document.createElement("div");
@@ -1164,14 +1151,6 @@ function findCreationById(id){
   return volatileCreations.find(item => item.id === id) || getStoredCreations().find(item => item.id === id) || null;
 }
 
-function saveCreations(list){
-  if(!HAS_STORAGE) return false;
-  try{
-    const clean = list.filter(item => item && item.image && item.image.length <= MAX_HISTORY_IMAGE_CHARS).slice(0, MAX_SAVED_CREATIONS);
-    return safeSet(IMAGE_KEY, JSON.stringify(clean));
-  }catch(e){ return false; }
-}
-
 async function dataURLToBlob(dataURL){
   const parts = dataURL.split(",");
   const mime = (parts[0].match(/data:([^;]+)/) || [])[1] || "image/png";
@@ -1230,6 +1209,11 @@ async function saveCreation(imageData, promptText){
   
   const record = { id: imageId, image: historyImage || imageData, prompt: String(promptText || "").slice(0, MAX_CREATION_PROMPT_CHARS), time: Date.now() };
   volatileCreations.unshift(record);
+  
+  const existingStored = getStoredCreations();
+  const updatedStored = [record, ...existingStored].slice(0, MAX_SAVED_CREATIONS);
+  safeSet(IMAGE_KEY, JSON.stringify(updatedStored));
+
   creationsLoaded = true;
   renderCreations();
   return imageId;
@@ -1280,27 +1264,6 @@ function normalizeImageResult(value){
     if(/^[A-Za-z0-9+/=\r\n]+$/.test(s)) return "data:image/png;base64," + s.replace(/\s/g, "");
   }
   return null;
-}
-
-async function responseToImage(response){
-  const contentType = (response.headers.get("content-type") || "").toLowerCase();
-  if(contentType.startsWith("image/")){
-    const blob = await response.blob();
-    return blobToDataURL(blob);
-  }
-  const text = await response.text();
-  let data = JSON.parse(text);
-  return normalizeImageResult(data);
-}
-
-function clearSelectedFile(){
-  selectedFileContent = null;
-  selectedFileType = null;
-  selectedFileUrl = null;
-  fileInput.value = "";
-  filePreview.classList.remove("show");
-  filePreviewImg.style.display = "none";
-  filePreviewText.textContent = "";
 }
 
 async function sendChatRequest(){
@@ -1441,6 +1404,16 @@ function startNewChat(){
 document.getElementById("newChatBtn").addEventListener("click", startNewChat);
 document.getElementById("newChatTop").addEventListener("click", startNewChat);
 document.getElementById("closeViewer").addEventListener("click", closeImageViewer);
+document.getElementById("deleteAllBtn").addEventListener("click", () => {
+  if(!confirm("क्या आप सभी चैट्स डिलीट करना चाहते हैं?")) return;
+  chats = [];
+  safeRemove(CHAT_LIST_KEY);
+  createNewChat(true);
+  renderCurrentChat();
+  renderChatHistory();
+  closeDrawer();
+  showToast("सभी चैट्स डिलीट कर दी गई हैं।");
+});
 
 function safeInitialLoad(){
   loadChatHistory();
@@ -1454,7 +1427,6 @@ function safeInitialLoad(){
   renderChatHistory();
   creationGrid.innerHTML = `<div class="empty-history">Images देखने के लिए Menu खोलें।</div>`;
   autoResize();
-  appReady = true;
 }
 
 document.addEventListener("DOMContentLoaded", safeInitialLoad);
