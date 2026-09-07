@@ -2,643 +2,99 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Aaru AI</title>
-
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
-  overflow-x:clip;
-  overflow-y:auto;
-  overscroll-behavior-y:auto;
-}
-
-body{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100dvh;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#0f1117;
-  color:#fff;
-  overflow-x:clip;
-  overflow-y:auto;
-  overscroll-behavior-y:auto;
-}
-
-button,
-input,
-textarea{
-  font:inherit;
-}
-
-button{
-  -webkit-user-select:none;
-  user-select:none;
-}
-
-main{
-  position:relative;
-  flex:1 0 auto;
-  min-height:calc(100dvh - 58px);
-  overflow:visible;
-  scroll-behavior:smooth;
-}
-
-.app{
-  min-height:100dvh;
-  display:flex;
-  flex-direction:column;
-}
-
-.header{
-  position:sticky;
-  top:0;
-  z-index:100;
-  height:58px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:0 12px;
-  background:rgba(15,17,23,.96);
-  border-bottom:1px solid rgba(255,255,255,.07);
-  backdrop-filter:blur(14px);
-}
-
-.menu-btn{
-  width:40px;
-  height:40px;
-  border:0;
-  border-radius:12px;
-  background:rgba(255,255,255,.07);
-  color:#fff;
-  font-size:22px;
-  cursor:pointer;
-}
-
-.brand{
-  min-width:0;
-  flex:1;
-}
-
-.brand-name{
-  font-size:18px;
-  font-weight:800;
-  letter-spacing:.2px;
-}
-
-.brand-sub{
-  margin-top:1px;
-  font-size:10px;
-  opacity:.45;
-}
-
-.new-chat-top{
-  width:40px;
-  height:40px;
-  border:0;
-  border-radius:12px;
-  background:rgba(255,255,255,.07);
-  color:#fff;
-  font-size:21px;
-  cursor:pointer;
-}
-
-.drawer-overlay{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  background:rgba(0,0,0,.58);
-  opacity:0;
-  pointer-events:none;
-  transition:.2s;
-}
-
-.drawer-overlay.open{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.drawer{
-  position:fixed;
-  z-index:210;
-  top:0;
-  left:0;
-  bottom:0;
-  width:min(88vw,340px);
-  background:#151821;
-  border-right:1px solid rgba(255,255,255,.07);
-  transform:translateX(-105%);
-  transition:.22s ease;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-.drawer.open{
-  transform:translateX(0);
-}
-
-.drawer-head{
-  height:58px;
-  flex:none;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:0 12px;
-  border-bottom:1px solid rgba(255,255,255,.07);
-}
-
-.drawer-title{
-  flex:1;
-  font-size:17px;
-  font-weight:800;
-}
-
-.close-drawer{
-  width:38px;
-  height:38px;
-  border:0;
-  border-radius:11px;
-  background:rgba(255,255,255,.07);
-  color:#fff;
-  font-size:21px;
-}
-
-.drawer-body{
-  flex:1;
-  overflow-y:auto;
-  padding:12px;
-}
-
-.drawer-action{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  border:0;
-  color:#fff;
-  background:rgba(255,255,255,.055);
-  border-radius:12px;
-  padding:12px;
-  margin-bottom:8px;
-  text-align:left;
-  cursor:pointer;
-}
-
-.drawer-action:hover{
-  background:rgba(255,255,255,.09);
-}
-
-.section-title{
-  margin:18px 4px 9px;
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-  opacity:.4;
-}
-
-.chat-history{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.chat-history-item{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:10px;
-  border-radius:11px;
-  cursor:pointer;
-  transition:.15s;
-}
-
-.chat-history-item:hover{
-  background:rgba(255,255,255,.055);
-}
-
-.chat-history-item.active{
-  background:rgba(255,255,255,.085);
-}
-
-.chat-history-info{
-  min-width:0;
-  flex:1;
-}
-
-.chat-history-title{
-  font-size:13px;
-  font-weight:600;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.chat-history-meta{
-  margin-top:3px;
-  font-size:10px;
-  opacity:.4;
-}
-
-.delete-chat{
-  width:30px;
-  height:30px;
-  flex:none;
-  border:0;
-  border-radius:8px;
-  background:transparent;
-  color:#fff;
-  opacity:.48;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.delete-chat:hover{
-  opacity:1;
-  background:rgba(255,70,70,.13);
-}
-
-.empty-history{
-  padding:15px 10px;
-  font-size:12px;
-  opacity:.4;
-  line-height:1.5;
-}
-
-.chat-wrap{
-  width:100%;
-  max-width:900px;
-  margin:0 auto;
-  padding:18px 12px 155px;
-}
-
-.messages{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.message{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-.message.user{
-  align-items:flex-end;
-}
-
-.message.assistant{
-  align-items:flex-start;
-}
-
-.bubble{
-  max-width:min(85%,720px);
-  padding:11px 14px;
-  border-radius:17px;
-  font-size:15px;
-  line-height:1.55;
-  word-break:break-word;
-  -webkit-user-select:text;
-  user-select:text;
-}
-
-.message.user .bubble{
-  background:#245eea;
-  border-bottom-right-radius:5px;
-}
-
-.message.assistant .bubble{
-  background:#191d27;
-  border:1px solid rgba(255,255,255,.055);
-  border-bottom-left-radius:5px;
-}
-
-.msg-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-  font-size: 12px;
-}
-
-.msg-action-btn {
-  background: rgba(255,255,255,0.08);
-  border: none;
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.msg-action-btn:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.md h1, .md h2, .md h3{ margin:14px 0 8px; line-height:1.25; }
-.md h1{font-size:22px}
-.md h2{font-size:19px}
-.md h3{font-size:17px}
-.md p{ margin:0 0 9px; }
-.md p:last-child{ margin-bottom:0; }
-.md ul, .md ol{ margin:7px 0 10px; padding-left:22px; }
-.md li{ margin:4px 0; }
-.md blockquote{ margin:10px 0; padding:7px 12px; border-left:3px solid #777; background:rgba(255,255,255,.04); opacity:.9; }
-.md a{ color:#71a7ff; text-decoration:underline; }
-.md code{ padding:2px 5px; border-radius:5px; background:#0d1016; font-family:monospace; font-size:.92em; }
-.md pre{ margin:10px 0; padding:12px; overflow:auto; border-radius:10px; background:#0b0e13; border:1px solid rgba(255,255,255,.07); white-space:pre; }
-.md pre code{ padding:0; background:transparent; }
-
-.attached-user-image{
-  display:block;
-  width:min(100%,320px);
-  max-height:360px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:7px;
-  cursor:pointer;
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.generated-image{
-  display:block;
-  width:100%;
-  max-width:720px;
-  border-radius:14px;
-  margin-top:8px;
-  cursor:pointer;
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.typing{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  padding:5px 2px;
-}
-
-.typing span{
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:#fff;
-  opacity:.35;
-  animation:typing 1s infinite;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;width:100%;min-height:100dvh;font-family:Arial,Helvetica,sans-serif;background:#0f1117;color:#fff;overflow-x:clip;}
+button,input,textarea{font:inherit;}
+button{-webkit-user-select:none;user-select:none;}
+main{position:relative;flex:1 0 auto;min-height:calc(100dvh - 58px);overflow:visible;scroll-behavior:smooth;}
+.app{min-height:100dvh;display:flex;flex-direction:column;}
+.header{position:sticky;top:0;z-index:100;height:58px;display:flex;align-items:center;gap:10px;padding:0 12px;background:rgba(15,17,23,.96);border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:blur(14px);}
+.menu-btn,.new-chat-top{width:40px;height:40px;border:0;border-radius:12px;background:rgba(255,255,255,.07);color:#fff;font-size:21px;cursor:pointer;}
+.brand{min-width:0;flex:1;}
+.brand-name{font-size:18px;font-weight:800;}
+.brand-sub{margin-top:1px;font-size:10px;opacity:.45;}
+.drawer-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.58);opacity:0;pointer-events:none;transition:.2s;}
+.drawer-overlay.open{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;z-index:210;top:0;left:0;bottom:0;width:min(88vw,340px);background:#151821;border-right:1px solid rgba(255,255,255,.07);transform:translateX(-105%);transition:.22s ease;display:flex;flex-direction:column;overflow:hidden;}
+.drawer.open{transform:translateX(0);}
+.drawer-head{height:58px;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid rgba(255,255,255,.07);}
+.drawer-title{flex:1;font-size:17px;font-weight:800;}
+.close-drawer{width:38px;height:38px;border:0;border-radius:11px;background:rgba(255,255,255,.07);color:#fff;font-size:21px;}
+.drawer-body{flex:1;overflow-y:auto;padding:12px;}
+.drawer-action{width:100%;display:flex;align-items:center;gap:10px;border:0;color:#fff;background:rgba(255,255,255,.055);border-radius:12px;padding:12px;margin-bottom:8px;text-align:left;cursor:pointer;}
+.drawer-action:hover{background:rgba(255,255,255,.09);}
+.section-title{margin:18px 4px 9px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.4;}
+.chat-history{display:flex;flex-direction:column;gap:4px;}
+.chat-history-item{display:flex;align-items:center;gap:7px;padding:10px;border-radius:11px;cursor:pointer;transition:.15s;}
+.chat-history-item:hover{background:rgba(255,255,255,.055);}
+.chat-history-item.active{background:rgba(255,255,255,.085);}
+.chat-history-info{min-width:0;flex:1;}
+.chat-history-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-history-meta{margin-top:3px;font-size:10px;opacity:.4;}
+.delete-chat{width:30px;height:30px;flex:none;border:0;border-radius:8px;background:transparent;color:#fff;opacity:.48;font-size:16px;cursor:pointer;}
+.delete-chat:hover{opacity:1;background:rgba(255,70,70,.13);}
+.empty-history{padding:15px 10px;font-size:12px;opacity:.4;line-height:1.5;}
+.chat-wrap{width:100%;max-width:900px;margin:0 auto;padding:18px 12px 155px;}
+.messages{display:flex;flex-direction:column;gap:14px;}
+.message{width:100%;display:flex;flex-direction:column;}
+.message.user{align-items:flex-end;}
+.message.assistant{align-items:flex-start;}
+.bubble{max-width:min(85%,720px);padding:11px 14px;border-radius:17px;font-size:15px;line-height:1.55;word-break:break-word;user-select:text;}
+.message.user .bubble{background:#245eea;border-bottom-right-radius:5px;}
+.message.assistant .bubble{background:#191d27;border:1px solid rgba(255,255,255,.055);border-bottom-left-radius:5px;}
+.msg-actions{display:flex;gap:8px;margin-top:4px;font-size:12px;}
+.msg-action-btn{background:rgba(255,255,255,0.08);border:none;color:#fff;padding:2px 8px;border-radius:6px;cursor:pointer;}
+.msg-action-btn:hover{background:rgba(255,255,255,0.15);}
+.md h1,.md h2,.md h3{margin:14px 0 8px;line-height:1.25;}
+.md p{margin:0 0 9px;}
+.md ul,.md ol{margin:7px 0 10px;padding-left:22px;}
+.attached-user-image,.generated-image{display:block;width:100%;max-width:320px;border-radius:12px;margin-bottom:7px;cursor:pointer;border:1px solid rgba(255,255,255,.08);}
+.typing{display:flex;align-items:center;gap:5px;padding:5px 2px;}
+.typing span{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.35;animation:typing 1s infinite;}
 .typing span:nth-child(2){animation-delay:.15s}
 .typing span:nth-child(3){animation-delay:.3s}
-
-@keyframes typing{
-  0%,70%,100%{ transform:translateY(0); opacity:.25; }
-  35%{ transform:translateY(-4px); opacity:.8; }
-}
-
-.composer-shell{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:120;
-  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
-  background:linear-gradient(to bottom, rgba(15,17,23,0), rgba(15,17,23,.94) 22%, #0f1117 48%);
-}
-
-.composer{
-  width:100%;
-  max-width:900px;
-  margin:0 auto;
-  border:1px solid rgba(255,255,255,.1);
-  background:#171a23;
-  border-radius:18px;
-  padding:8px;
-  box-shadow:0 8px 35px rgba(0,0,0,.25);
-}
-
-.file-preview{
-  display:none;
-  position:relative;
-  padding:6px 10px;
-  margin:3px 3px 8px;
-  background:rgba(255,255,255,0.05);
-  border-radius:10px;
-  font-size:12px;
-  align-items:center;
-  gap:8px;
-}
-.file-preview.show{
-  display:flex;
-}
-.file-preview img{
-  width:40px;
-  height:40px;
-  object-fit:cover;
-  border-radius:6px;
-}
-
-.remove-file{
-  margin-left:auto;
-  background:#ef4444;
-  color:#fff;
-  border:none;
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  font-size:12px;
-  cursor:pointer;
-}
-
-.input-row{
-  display:flex;
-  align-items:flex-end;
-  gap:7px;
-}
-
-#prompt{
-  flex:1;
-  min-width:0;
-  min-height:42px;
-  max-height:150px;
-  resize:none;
-  border:0;
-  outline:0;
-  color:#fff;
-  background:transparent;
-  padding:10px 8px;
-  line-height:1.4;
-}
-
-#prompt::placeholder{
-  color:#fff;
-  opacity:.38;
-}
-
-.icon-btn{
-  width:40px;
-  height:40px;
-  flex:none;
-  border:0;
-  border-radius:12px;
-  background:rgba(255,255,255,.065);
-  color:#fff;
-  cursor:pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn:hover{
-  background:rgba(255,255,255,.1);
-}
-
-.icon-btn.recording{
-  background: #ef4444;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-.send-btn{
-  background:#2864e8;
-}
-
-.send-btn:hover{
-  background:#3570ed;
-}
-
-.send-btn:disabled{
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-#fileInput{
-  display:none;
-}
-
-.creation-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px;
-}
-
-.creation-card{
-  position:relative;
-  overflow:hidden;
-  border-radius:11px;
-  background:#0e1117;
-  border:1px solid rgba(255,255,255,.06);
-}
-
-.creation-card img{
-  display:block;
-  width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
-}
-
-.creation-prompt{
-  padding:7px;
-  font-size:10px;
-  opacity:.6;
-  line-height:1.35;
-}
-
-.image-viewer{
-  position:fixed;
-  inset:0;
-  z-index:500;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  background:rgba(0,0,0,.9);
-}
-
-.image-viewer.open{
-  display:flex;
-}
-
-.image-viewer img{
-  max-width:100%;
-  max-height:90dvh;
-  object-fit:contain;
-  border-radius:10px;
-}
-
-.close-viewer{
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:40px;
-  height:40px;
-  border:0;
-  border-radius:12px;
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  font-size:23px;
-}
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:92px;
-  z-index:700;
-  transform:translate(-50%,20px);
-  max-width:90vw;
-  padding:10px 14px;
-  border-radius:11px;
-  background:#252a36;
-  color:#fff;
-  font-size:12px;
-  opacity:0;
-  pointer-events:none;
-  transition:.2s;
-  box-shadow:0 7px 25px rgba(0,0,0,.3);
-}
-
-.toast.show{
-  opacity:1;
-  transform:translate(-50%,0);
-}
+@keyframes typing{0%,70%,100%{transform:translateY(0);opacity:.25;}35%{transform:translateY(-4px);opacity:.8;}}
+.composer-shell{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(to bottom, rgba(15,17,23,0), rgba(15,17,23,.94) 22%, #0f1117 48%);}
+.composer{width:100%;max-width:900px;margin:0 auto;border:1px solid rgba(255,255,255,.1);background:#171a23;border-radius:18px;padding:8px;box-shadow:0 8px 35px rgba(0,0,0,.25);}
+.file-preview{display:none;position:relative;padding:6px 10px;margin:3px 3px 8px;background:rgba(255,255,255,0.05);border-radius:10px;font-size:12px;align-items:center;gap:8px;}
+.file-preview.show{display:flex;}
+.file-preview img{width:40px;height:40px;object-fit:cover;border-radius:6px;}
+.remove-file{margin-left:auto;background:#ef4444;color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;}
+.input-row{display:flex;align-items:flex-end;gap:7px;}
+#prompt{flex:1;min-width:0;min-height:42px;max-height:150px;resize:none;border:0;outline:0;color:#fff;background:transparent;padding:10px 8px;}
+.icon-btn{width:40px;height:40px;flex:none;border:0;border-radius:12px;background:rgba(255,255,255,.065);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.send-btn{background:#2864e8;}
+#fileInput{display:none;}
+.creation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.creation-card{position:relative;overflow:hidden;border-radius:11px;background:#0e1117;border:1px solid rgba(255,255,255,.06);}
+.creation-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;}
+.creation-prompt{padding:7px;font-size:10px;opacity:.6;}
+.image-viewer{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.9);}
+.image-viewer.open{display:flex;}
+.image-viewer img{max-width:100%;max-height:90dvh;object-fit:contain;border-radius:10px;}
+.close-viewer{position:absolute;top:14px;right:14px;width:40px;height:40px;border:0;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-size:23px;}
+.toast{position:fixed;left:50%;bottom:92px;z-index:700;transform:translate(-50%,20px);max-width:90vw;padding:10px 14px;border-radius:11px;background:#252a36;color:#fff;font-size:12px;opacity:0;pointer-events:none;transition:.2s;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
 </style>
-
-<!-- PDF.js library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 </head>
-
 <body>
-
 <div class="app">
-
 <header class="header">
-<button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+<button class="menu-btn" id="menuBtn">☰</button>
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
 <div class="brand-sub">Fast • Smart • Indian AI</div>
 </div>
-<button class="new-chat-top" id="newChatTop" aria-label="New Chat">＋</button>
+<button class="new-chat-top" id="newChatTop">＋</button>
 </header>
-
 <div class="drawer-overlay" id="drawerOverlay"></div>
-
 <aside class="drawer" id="drawer">
 <div class="drawer-head">
 <div class="drawer-title">Aaru AI</div>
@@ -653,13 +109,9 @@ main{
 <div class="creation-grid" id="creationGrid"></div>
 </div>
 </aside>
-
 <main>
-<div class="chat-wrap">
-<div class="messages" id="messages"></div>
-</div>
+<div class="chat-wrap"><div class="messages" id="messages"></div></div>
 </main>
-
 <div class="composer-shell">
 <div class="composer">
 <div class="file-preview" id="filePreview">
@@ -667,52 +119,38 @@ main{
 <span id="filePreviewText"></span>
 <button class="remove-file" id="removeFile">×</button>
 </div>
-
 <div class="input-row">
-<button class="icon-btn" id="fileBtn" title="Photo/PDF अपलोड करें">📎</button>
-<button class="icon-btn" id="micBtn" title="बोलकर टाइप करें">🎤</button>
-<textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें या 'image banao' कहें..." autocomplete="off" spellcheck="true"></textarea>
-<button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
+<button class="icon-btn" id="fileBtn">📎</button>
+<button class="icon-btn" id="micBtn">🎤</button>
+<textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..." autocomplete="off"></textarea>
+<button class="icon-btn send-btn" id="sendBtn">➤</button>
 </div>
 </div>
 </div>
-
 </div>
-
 <input type="file" id="fileInput" accept="image/*,.pdf">
-
-<div class="image-viewer" id="imageViewer">
-<button class="close-viewer" id="closeViewer">×</button>
-<img id="viewerImg" alt="Image preview">
-</div>
-
+<div class="image-viewer" id="imageViewer"><button class="close-viewer" id="closeViewer">×</button><img id="viewerImg" alt=""></div>
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
-
 const API = "https://aaru-ai-api.myera-org.workers.dev/";
 const CHAT_LIST_KEY = "aaru_chat_history_v3";
 const IMAGE_KEY = "aaru_history_v3";
-
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 30;
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_SAVED_CREATIONS = 4;
-const MAX_CREATION_PROMPT_CHARS = 300;
-const MAX_HISTORY_IMAGE_CHARS = 150000; 
 const MAX_MODEL_IMAGE_SIZE = 511;
 
 let chats = [];
 let currentChatId = null;
 let messages = [];
-
-let selectedFileContent = null; 
-let selectedFileType = null; 
+let selectedFileContent = null;
+let selectedFileType = null;
 let selectedFileUrl = null;
 let isBusy = false;
 let volatileCreations = [];
-let creationsLoaded = false;
 
 const messagesEl = document.getElementById("messages");
 const promptEl = document.getElementById("prompt");
@@ -744,134 +182,37 @@ function escapeHTML(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
 
-/* ================= VOICE INPUT (Speech-to-Text) ================= */
 let recognition = null;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();
   recognition.lang = 'hi-IN';
-  recognition.interimResults = false;
-  
-  recognition.onstart = () => { micBtn.classList.add("recording"); showToast("सुन रहे हैं... बोलिए"); };
   recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    promptEl.value += (promptEl.value ? " " : "") + transcript;
+    promptEl.value += (promptEl.value ? " " : "") + event.results[0][0].transcript;
     autoResize();
   };
-  recognition.onerror = () => { showToast("वॉयस रिकग्निशन में त्रुटि हुई।"); };
-  recognition.onend = () => { micBtn.classList.remove("recording"); };
 }
-
 micBtn.addEventListener("click", () => {
-  if (!recognition) {
-    showToast("आपका ब्राउज़र वॉयस इनपुट सपोर्ट नहीं करता।");
-    return;
-  }
+  if (!recognition) return showToast("वॉयस सपोर्ट नहीं है।");
   try { recognition.start(); } catch(e) { recognition.stop(); }
 });
 
-/* ================= VOICE OUTPUT (Text-to-Speech) ================= */
 function speakText(text) {
-  if (!('speechSynthesis' in window)) {
-    showToast("आपका ब्राउज़र स्पीच आउटपुट सपोर्ट नहीं करता।");
-    return;
-  }
+  if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'hi-IN';
   window.speechSynthesis.speak(utterance);
-  showToast("बोला जा रहा है...");
-}
-
-/* ================= PDF READER ================= */
-async function parsePdfFile(file) {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-    const pdfDoc = await loadingTask.promise;
-    let fullText = "";
-    for (let i = 1; i <= pdfDoc.numPages; i++) {
-      const page = await pdfDoc.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map(item => item.str).join(" ");
-      fullText += `--- Page ${i} ---\n` + pageText + "\n\n";
-    }
-    return fullText;
-  } catch (err) {
-    throw new Error("PDF फाइल को पढ़ा नहीं जा सका।");
-  }
-}
-
-/* ================= MARKDOWN RENDERER ================= */
-function inlineMarkdown(text){
-  let s = escapeHTML(text);
-  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
-  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  s = s.replace(/__([^_]+)__/g, "<strong>$1</strong>");
-  s = s.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, "<em>$1</em>");
-  s = s.replace(/(?<!_)_([^_]+)_(?!_)/g, "<em>$1</em>");
-  return s;
 }
 
 function renderMarkdown(text){
-  const source = String(text ?? "").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  const source = String(text ?? "").replace(/\r\n/g,"\n");
   const lines = source.split("\n");
-  let html = "", inCode = false, codeBuffer = [], inUl = false, inOl = false, paragraph = [];
-
-  function closeLists(){
-    if(inUl){ html += "</ul>"; inUl = false; }
-    if(inOl){ html += "</ol>"; inOl = false; }
-  }
-  function flushParagraph(buffer){
-    if(!buffer.length) return;
-    const value = buffer.join("\n").trim();
-    if(!value) return;
-    html += "<p>" + inlineMarkdown(value.replace(/\n/g, "<br>")) + "</p>";
-  }
-
-  for(let i=0;i<lines.length;i++){
-    const line = lines[i];
-    if(line.trim().startsWith("```")){
-      if(inCode){
-        html += "<pre><code>" + escapeHTML(codeBuffer.join("\n")) + "</code></pre>";
-        codeBuffer = []; inCode = false;
-      }else{
-        flushParagraph(paragraph); paragraph = []; closeLists(); inCode = true;
-      }
-      continue;
-    }
-    if(inCode){ codeBuffer.push(line); continue; }
-    if(!line.trim()){ flushParagraph(paragraph); paragraph = []; closeLists(); continue; }
-
-    const h3 = line.match(/^###\s+(.+)$/);
-    const h2 = line.match(/^##\s+(.+)$/);
-    const h1 = line.match(/^#\s+(.+)$/);
-
-    if(h1){ flushParagraph(paragraph); paragraph = []; closeLists(); html += "<h1>" + inlineMarkdown(h1[1]) + "</h1>"; continue; }
-    if(h2){ flushParagraph(paragraph); paragraph = []; closeLists(); html += "<h2>" + inlineMarkdown(h2[1]) + "</h2>"; continue; }
-    if(h3){ flushParagraph(paragraph); paragraph = []; closeLists(); html += "<h3>" + inlineMarkdown(h3[1]) + "</h3>"; continue; }
-
-    const ul = line.match(/^\s*[-*+]\s+(.+)$/);
-    const ol = line.match(/^\s*\d+[.)]\s+(.+)$/);
-
-    if(ul){
-      flushParagraph(paragraph); paragraph = [];
-      if(inOl){ html += "</ol>"; inOl = false; }
-      if(!inUl){ html += "<ul>"; inUl = true; }
-      html += "<li>" + inlineMarkdown(ul[1]) + "</li>"; continue;
-    }
-    if(ol){
-      flushParagraph(paragraph); paragraph = [];
-      if(inUl){ html += "</ul>"; inUl = false; }
-      if(!inOl){ html += "<ol>"; inOl = true; }
-      html += "<li>" + inlineMarkdown(ol[1]) + "</li>"; continue;
-    }
-    paragraph.push(line);
-  }
-  if(inCode){ html += "<pre><code>" + escapeHTML(codeBuffer.join("\n")) + "</code></pre>"; }
-  flushParagraph(paragraph); closeLists();
-  return html;
+  let html = "";
+  lines.forEach(line => {
+    if(line.trim()) html += "<p>" + escapeHTML(line) + "</p>";
+  });
+  return html || escapeHTML(source);
 }
 
 function storageAvailable(){
@@ -879,28 +220,8 @@ function storageAvailable(){
 }
 const HAS_STORAGE = storageAvailable();
 function safeGet(key){ return HAS_STORAGE ? localStorage.getItem(key) : null; }
-function safeSet(key,value){ if(!HAS_STORAGE) return false; try{ localStorage.setItem(key, value); return true; }catch(e){ return false; } }
+function safeSet(key,value){ if(HAS_STORAGE) try{ localStorage.setItem(key, value); }catch(e){} }
 function safeRemove(key){ if(HAS_STORAGE) localStorage.removeItem(key); }
-
-/* ================= 100% FIXED LOCALSTORAGE FUNCTIONS ================= */
-function normalizeChat(chat){
-  if(!chat) return null;
-  const id = String(chat.id || "");
-  if(!id) return null;
-  const raw = Array.isArray(chat.messages) ? chat.messages : [];
-  const normalized = raw.slice(-MAX_MESSAGES_PER_CHAT).map(item => ({
-    role: item.role === "user" ? "user" : "assistant",
-    content: String(item.content ?? "").slice(0, MAX_MESSAGE_CHARS),
-    imageUrl: item.imageUrl ? String(item.imageUrl).slice(0, MAX_HISTORY_IMAGE_CHARS) : undefined,
-    imageId: item.imageId ? String(item.imageId).slice(0, 100) : undefined
-  }));
-  let title = String(chat.title || "").trim().slice(0, 80);
-  if(!title){
-    const firstUser = normalized.find(item => item.role === "user");
-    title = firstUser ? firstUser.content.replace(/\s+/g," ").slice(0,80) : "नई चैट";
-  }
-  return { id, title: title || "नई चैट", messages: normalized, createdAt: Number(chat.createdAt) || Date.now(), updatedAt: Number(chat.updatedAt) || Date.now() };
-}
 
 function loadChatHistory(){
   chats = [];
@@ -908,29 +229,19 @@ function loadChatHistory(){
   if(raw){
     try{
       const parsed = JSON.parse(raw);
-      if(Array.isArray(parsed)){
-        const seen = new Set();
-        chats = parsed.map(normalizeChat).filter(Boolean).filter(chat => {
-          if(seen.has(chat.id)) return false;
-          seen.add(chat.id); return true;
-        }).sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, MAX_SAVED_CHATS);
-      }
+      if(Array.isArray(parsed)) chats = parsed.slice(0, MAX_SAVED_CHATS);
     }catch(e){ safeRemove(CHAT_LIST_KEY); }
   }
 }
 
 function saveChatHistory(){
   if(!HAS_STORAGE) return;
-  const sorted = chats.slice().sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, MAX_SAVED_CHATS);
-  safeSet(CHAT_LIST_KEY, JSON.stringify(sorted));
-  chats = sorted;
+  safeSet(CHAT_LIST_KEY, JSON.stringify(chats.slice(0, MAX_SAVED_CHATS)));
 }
 
 function createNewChat(persist = true){
-  const now = Date.now();
-  const chat = { id: makeChatId(), title: "नई चैट", messages: [], createdAt: now, updatedAt: now };
+  const chat = { id: makeChatId(), title: "नई चैट", messages: [], createdAt: Date.now(), updatedAt: Date.now() };
   chats.unshift(chat);
-  chats = chats.slice(0, MAX_SAVED_CHATS);
   currentChatId = chat.id;
   messages = [];
   if(persist) saveChatHistory();
@@ -947,14 +258,9 @@ function ensureCurrentChat(){
 
 function saveCurrentChat(){
   const chat = ensureCurrentChat();
-  chat.messages = messages.slice(-MAX_MESSAGES_PER_CHAT).map(item => ({
-    role: item.role === "user" ? "user" : "assistant",
-    content: String(item.content || "").slice(0, MAX_MESSAGE_CHARS),
-    imageUrl: item.imageUrl ? String(item.imageUrl).slice(0, MAX_HISTORY_IMAGE_CHARS) : undefined,
-    imageId: item.imageId ? String(item.imageId).slice(0, 100) : undefined
-  }));
+  chat.messages = messages.slice(-MAX_MESSAGES_PER_CHAT);
   const firstUser = chat.messages.find(item => item.role === "user");
-  chat.title = firstUser ? firstUser.content.replace(/\s+/g," ").slice(0,80) : "नई चैट";
+  chat.title = firstUser ? firstUser.content.slice(0,50) : "नई चैट";
   chat.updatedAt = Date.now();
   saveChatHistory();
   renderChatHistory();
@@ -962,380 +268,176 @@ function saveCurrentChat(){
 
 function renderCurrentChat(){
   messagesEl.innerHTML = "";
-  const list = Array.isArray(messages) ? messages.slice(-MAX_MESSAGES_PER_CHAT) : [];
-  list.forEach(item => {
-    if(item.role === "user"){
-      addUserMessage(item.content, false, item.imageUrl || null);
-    }else{
-      addAssistantMessage(item.content, false, item.imageId || null);
-    }
+  messages.forEach(item => {
+    if(item.role === "user") addUserMessage(item.content, false, item.imageUrl);
+    else addAssistantMessage(item.content, false, item.imageId);
   });
 }
 
 function addUserMessage(text, persist = true, imageUrl = null){
-  const value = String(text || "");
-  messages.push({ role: "user", content: value, imageUrl: imageUrl });
-  const row = document.createElement("div");
-  row.className = "message user";
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-
+  messages.push({ role: "user", content: text, imageUrl });
+  const row = document.createElement("div"); row.className = "message user";
+  const bubble = document.createElement("div"); bubble.className = "bubble";
   if(imageUrl){
-    const img = document.createElement("img");
-    img.className = "attached-user-image";
-    img.src = imageUrl;
-    img.alt = "Attached image";
-    img.addEventListener("click", () => openImageViewer(imageUrl));
-    bubble.appendChild(img);
+    const img = document.createElement("img"); img.className = "attached-user-image"; img.src = imageUrl;
+    img.onclick = () => openImageViewer(imageUrl); bubble.appendChild(img);
   }
-  if(value){
-    const textNode = document.createElement("div");
-    textNode.textContent = value;
-    bubble.appendChild(textNode);
-  }
-  row.appendChild(bubble);
-  messagesEl.appendChild(row);
+  if(text){ const div = document.createElement("div"); div.textContent = text; bubble.appendChild(div); }
+  row.appendChild(bubble); messagesEl.appendChild(row);
   if(persist) saveCurrentChat();
 }
 
 function addAssistantMessage(text, persist = true, imageId = null){
-  const value = String(text || "");
-  messages.push({ role: "assistant", content: value, imageId });
-  const row = document.createElement("div");
-  row.className = "message assistant";
-  const bubble = document.createElement("div");
-  bubble.className = "bubble md";
-  bubble.innerHTML = renderMarkdown(value);
-
+  messages.push({ role: "assistant", content: text, imageId });
+  const row = document.createElement("div"); row.className = "message assistant";
+  const bubble = document.createElement("div"); bubble.className = "bubble md";
+  bubble.innerHTML = renderMarkdown(text);
   if(imageId){
     const creation = findCreationById(imageId);
     if(creation?.image){
-      const img = document.createElement("img");
-      img.className = "generated-image";
-      img.src = creation.image;
-      img.alt = creation.prompt || "Generated image";
-      img.addEventListener("click", () => openImageViewer(creation.image));
-      bubble.appendChild(img);
+      const img = document.createElement("img"); img.className = "generated-image"; img.src = creation.image;
+      img.onclick = () => openImageViewer(creation.image); bubble.appendChild(img);
     }
   }
   row.appendChild(bubble);
-
-  const actionsDiv = document.createElement("div");
-  actionsDiv.className = "msg-actions";
-  const speakBtn = document.createElement("button");
-  speakBtn.className = "msg-action-btn";
-  speakBtn.textContent = "🔊 सुनें";
-  speakBtn.addEventListener("click", () => speakText(value));
-  actionsDiv.appendChild(speakBtn);
-  row.appendChild(actionsDiv);
-
-  messagesEl.appendChild(row);
+  const actions = document.createElement("div"); actions.className = "msg-actions";
+  const speakBtn = document.createElement("button"); speakBtn.className = "msg-action-btn"; speakBtn.textContent = "🔊 सुनें";
+  speakBtn.onclick = () => speakText(text); actions.appendChild(speakBtn);
+  row.appendChild(actions); messagesEl.appendChild(row);
   if(persist) saveCurrentChat();
 }
 
 function showTyping(){
   hideTyping();
-  const row = document.createElement("div");
-  row.className = "message assistant";
-  row.id = "typingMessage";
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  bubble.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
-  row.appendChild(bubble);
-  messagesEl.appendChild(row);
-  scrollBottom();
+  const row = document.createElement("div"); row.className = "message assistant"; row.id = "typingMessage";
+  row.innerHTML = `<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  messagesEl.appendChild(row); scrollBottom();
 }
-
-function hideTyping(){
-  const item = document.getElementById("typingMessage");
-  if(item) item.remove();
-}
-
-function scrollBottom(){
-  requestAnimationFrame(() => {
-    try{ window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" }); }catch(e){}
-  });
-}
-
-function formatTime(timestamp){
-  if(!timestamp) return "";
-  try{ return new Date(timestamp).toLocaleString("hi-IN", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }); }catch(e){ return ""; }
-}
+function hideTyping(){ document.getElementById("typingMessage")?.remove(); }
+function scrollBottom(){ requestAnimationFrame(() => { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" }); }); }
 
 function renderChatHistory(){
   chatHistoryEl.innerHTML = "";
-  const sorted = chats.slice().sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-  if(!sorted.length){
-    const empty = document.createElement("div");
-    empty.className = "empty-history";
-    empty.textContent = "अभी कोई पुरानी चैट नहीं है।";
-    chatHistoryEl.appendChild(empty);
+  if(!chats.length){
+    chatHistoryEl.innerHTML = `<div class="empty-history">कोई चैट नहीं है।</div>`;
     return;
   }
-  sorted.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "chat-history-item" + (item.id === currentChatId ? " active" : "");
-    const info = document.createElement("div");
-    info.className = "chat-history-info";
-    const title = document.createElement("div");
-    title.className = "chat-history-title";
-    title.textContent = item.title || "नई चैट";
-    const meta = document.createElement("div");
-    meta.className = "chat-history-meta";
-    meta.textContent = (Array.isArray(item.messages) ? item.messages.length : 0) + " messages • " + formatTime(item.updatedAt);
-    info.appendChild(title);
-    info.appendChild(meta);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "delete-chat";
-    deleteBtn.type = "button";
-    deleteBtn.textContent = "🗑️";
-    deleteBtn.addEventListener("click", e => { e.stopPropagation(); deleteChat(item.id); });
-
-    row.appendChild(info);
-    row.appendChild(deleteBtn);
-    row.addEventListener("click", () => { openChat(item.id); closeDrawer(); });
+  chats.forEach(item => {
+    const row = document.createElement("div"); row.className = "chat-history-item" + (item.id === currentChatId ? " active" : "");
+    row.innerHTML = `<div class="chat-history-info"><div class="chat-history-title">${escapeHTML(item.title)}</div><div class="chat-history-meta">${new Date(item.updatedAt).toLocaleTimeString()}</div></div>`;
+    const del = document.createElement("button"); del.className = "delete-chat"; del.textContent = "🗑️";
+    del.onclick = (e) => { e.stopPropagation(); deleteChat(item.id); };
+    row.appendChild(del);
+    row.onclick = () => { currentChatId = item.id; messages = item.messages || []; renderCurrentChat(); renderChatHistory(); drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); };
     chatHistoryEl.appendChild(row);
   });
 }
 
-function openChat(id){
-  const chat = chats.find(item => item.id === id);
-  if(!chat) return;
-  currentChatId = chat.id;
-  messages = Array.isArray(chat.messages) ? chat.messages.slice(-MAX_MESSAGES_PER_CHAT) : [];
-  isBusy = false;
-  sendBtn.disabled = false;
-  hideTyping();
-  renderCurrentChat();
-  renderChatHistory();
-  scrollBottom();
-}
-
 function deleteChat(id){
-  const chat = chats.find(item => item.id === id);
-  if(!chat) return;
-  if(!confirm(`क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`)) return;
-  chats = chats.filter(item => item.id !== id);
-  if(currentChatId === id){
-    currentChatId = null; messages = []; createNewChat(true); renderCurrentChat();
-  }else{
-    saveChatHistory();
-  }
+  chats = chats.filter(i => i.id !== id);
+  if(currentChatId === id) createNewChat(true);
+  else saveChatHistory();
   renderChatHistory();
-  showToast("चैट डिलीट कर दी गई।");
+  renderCurrentChat();
 }
 
 function getStoredCreations(){
-  if(!HAS_STORAGE) return [];
   const raw = safeGet(IMAGE_KEY);
   if(!raw) return [];
-  try{
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(item => item && typeof item.image === "string").slice(0, MAX_SAVED_CREATIONS) : [];
-  }catch(e){ safeRemove(IMAGE_KEY); return []; }
-}
-
-function getCreations(){
-  const stored = getStoredCreations();
-  const all = [...volatileCreations, ...stored];
-  const seen = new Set();
-  return all.filter(item => {
-    if(!item || !item.image || !item.id || seen.has(item.id)) return false;
-    seen.add(item.id); return true;
-  }).sort((a,b) => (b.time || b.createdAt || 0) - (a.time || a.createdAt || 0)).slice(0, MAX_SAVED_CREATIONS);
+  try { return JSON.parse(raw); } catch(e){ return []; }
 }
 
 function findCreationById(id){
-  if(!id) return null;
-  return volatileCreations.find(item => item.id === id) || getStoredCreations().find(item => item.id === id) || null;
-}
-
-async function dataURLToBlob(dataURL){
-  const parts = dataURL.split(",");
-  const mime = (parts[0].match(/data:([^;]+)/) || [])[1] || "image/png";
-  const binary = atob(parts[1]);
-  const bytes = new Uint8Array(binary.length);
-  for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
-
-async function blobToDataURL(blob){
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function resizeImageDataURL(dataURL, maxSize = MAX_MODEL_IMAGE_SIZE, quality = .78){
-  if(!dataURL) return null;
-  const img = new Image();
-  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = dataURL; });
-  const scale = Math.min(1, maxSize / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
-  const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
-  const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0, width, height);
-  return canvas.toDataURL("image/jpeg", quality);
-}
-
-async function blobToHistoryDataURL(blob, maxSize = 560){
-  try{
-    const bitmap = await createImageBitmap(blob);
-    const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width; canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close();
-    return canvas.toDataURL("image/jpeg", .70);
-  }catch(e){ return null; }
+  return volatileCreations.find(i => i.id === id) || getStoredCreations().find(i => i.id === id);
 }
 
 async function saveCreation(imageData, promptText){
   if(!imageData) return null;
   const imageId = makeImageId();
-  let historyImage = null;
-  try{
-    const blob = await dataURLToBlob(imageData);
-    historyImage = await blobToHistoryDataURL(blob, 560);
-  }catch(e){}
-  
-  const record = { id: imageId, image: historyImage || imageData, prompt: String(promptText || "").slice(0, MAX_CREATION_PROMPT_CHARS), time: Date.now() };
+  const record = { id: imageId, image: imageData, prompt: promptText, time: Date.now() };
   volatileCreations.unshift(record);
-  
-  const existingStored = getStoredCreations();
-  const updatedStored = [record, ...existingStored].slice(0, MAX_SAVED_CREATIONS);
-  safeSet(IMAGE_KEY, JSON.stringify(updatedStored));
-
-  creationsLoaded = true;
+  safeSet(IMAGE_KEY, JSON.stringify([record, ...getStoredCreations()].slice(0, MAX_SAVED_CREATIONS)));
   renderCreations();
   return imageId;
 }
 
 function renderCreations(){
   creationGrid.innerHTML = "";
-  const list = getCreations().slice(0, MAX_SAVED_CREATIONS);
-  if(!list.length){
-    creationGrid.innerHTML = `<div class="empty-history">अभी कोई image creation नहीं है।</div>`;
-    return;
-  }
+  const list = [...volatileCreations, ...getStoredCreations()].slice(0, MAX_SAVED_CREATIONS);
+  if(!list.length){ creationGrid.innerHTML = `<div class="empty-history">कोई इमेज नहीं है।</div>`; return; }
   list.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "creation-card";
-    const img = document.createElement("img");
-    img.src = item.image;
-    img.alt = item.prompt || "Creation";
-    img.addEventListener("click", () => openImageViewer(item.image));
-    const caption = document.createElement("div");
-    caption.className = "creation-prompt";
-    caption.textContent = item.prompt || "Image";
-    card.appendChild(img); card.appendChild(caption);
+    const card = document.createElement("div"); card.className = "creation-card";
+    card.innerHTML = `<img src="${item.image}" alt=""><div class="creation-prompt">${escapeHTML(item.prompt)}</div>`;
+    card.onclick = () => openImageViewer(item.image);
     creationGrid.appendChild(card);
   });
 }
 
-function loadCreationsLazy(){
-  creationsLoaded = true;
-  renderCreations();
-}
-
-function openImageViewer(src){
-  if(!src) return;
-  viewerImg.src = src;
-  imageViewer.classList.add("open");
-}
-function closeImageViewer(){
-  imageViewer.classList.remove("open");
-  viewerImg.removeAttribute("src");
-}
-
-function normalizeImageResult(value){
-  if(!value) return null;
-  if(typeof value === "string"){
-    const s = value.trim();
-    if(s.startsWith("data:image/") || /^https?:\/\//i.test(s)) return s;
-    if(/^[A-Za-z0-9+/=\r\n]+$/.test(s)) return "data:image/png;base64," + s.replace(/\s/g, "");
-  }
-  return null;
-}
+function openImageViewer(src){ viewerImg.src = src; imageViewer.classList.add("open"); }
+function closeImageViewer(){ imageViewer.classList.remove("open"); }
 
 async function sendChatRequest(){
-  const recentMessages = messages.slice(-19).map(item => ({
-    role: item.role === "user" ? "user" : "assistant",
-    content: String(item.content || "").slice(0, MAX_MESSAGE_CHARS)
-  }));
-  const lastUserMessage = messages.slice().reverse().find(item => item.role === "user");
-
-  const payload = {
-    message: lastUserMessage?.content || "",
-    prompt: lastUserMessage?.content || "",
-    messages: recentMessages
-  };
-
-  if(selectedFileType === 'image' && selectedFileContent){
-    payload.image_b64 = await resizeImageDataURL(selectedFileContent, MAX_MODEL_IMAGE_SIZE, .76);
-  } else if(selectedFileType === 'pdf' && selectedFileContent){
-    payload.message = `PDF Document Content:\n${selectedFileContent}\n\nUser query: ${payload.message}`;
-  }
-
-  const response = await fetch(API + "chat", {
+  const lastUser = messages.slice().reverse().find(i => i.role === "user");
+  const res = await fetch(API + "chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ message: lastUser?.content || "", prompt: lastUser?.content || "", messages })
   });
-
-  const raw = await response.text();
-  let data = JSON.parse(raw);
+  const data = await res.json();
   return {
-    text: data.response || data.answer || data.text || data.message || data,
-    image: normalizeImageResult(data.image || data.image_url)
+    text: data.response || data.answer || data.text || data.message || "जवाब मिल गया।",
+    image: data.image || data.image_url || null
   };
 }
 
 async function handleSend(){
   if(isBusy) return;
   const prompt = promptEl.value.trim();
-  if(!prompt && !selectedFileContent){
-    showToast("कुछ लिखें या फाइल/फोटो जोड़ें।");
+  if(!prompt && !selectedFileContent) return showToast("कुछ लिखें।");
+
+  // === डेवलपर और फोटो वाला कस्टम चेक ===
+  const lower = prompt.toLowerCase();
+  if(lower.includes("किसने बनाया") || lower.includes("who made you") || lower.includes("who created you")){
+    ensureCurrentChat();
+    isBusy = true; sendBtn.disabled = true;
+    addUserMessage(prompt, true, selectedFileUrl);
+    promptEl.value = ""; autoResize(); scrollBottom();
+    showTyping();
+    setTimeout(async () => {
+      hideTyping();
+      // यहाँ अपनी फोटो का डायरेक्ट लिंक या base64 डालें
+      const myPhotoUrl = "https://via.placeholder.com/300"; 
+      const responseText = "मुझे **अभिषेक त्रिपाठी जी बिहार वाले** ने बनाया है। आप नीचे उनकी तस्वीर देख सकते हैं:";
+      const imageId = await saveCreation(myPhotoUrl, "Developer: Abhishek Tripathi");
+      addAssistantMessage(responseText, true, imageId);
+      isBusy = false; sendBtn.disabled = false; scrollBottom();
+    }, 500);
     return;
   }
+  // ===================================
+
   ensureCurrentChat();
-  isBusy = true;
-  sendBtn.disabled = true;
-  
-  const attachedPreviewUrl = selectedFileUrl;
-  addUserMessage(prompt, true, attachedPreviewUrl);
-  promptEl.value = "";
-  autoResize();
-  scrollBottom();
+  isBusy = true; sendBtn.disabled = true;
+  const attached = selectedFileUrl;
+  addUserMessage(prompt, true, attached);
+  promptEl.value = ""; autoResize(); scrollBottom();
 
   try{
     showTyping();
     const result = await sendChatRequest();
     hideTyping();
-
     if(result && result.image){
-      const imageId = await saveCreation(result.image, prompt || "Image generation");
-      addAssistantMessage(result.text || "🖼️ Image generated successfully.", true, imageId);
+      const imgId = await saveCreation(result.image, prompt);
+      addAssistantMessage(result.text, true, imgId);
     } else {
-      addAssistantMessage(result?.text || "माफ़ कीजिए, उत्तर प्राप्त नहीं हुआ।", true);
+      addAssistantMessage(result?.text || "उत्तर नहीं मिला।", true);
     }
-    clearSelectedFile();
-  }catch(error){
+    selectedFileContent = null; selectedFileUrl = null; filePreview.classList.remove("show");
+  }catch(e){
     hideTyping();
     addAssistantMessage("⚠️ अभी request पूरी नहीं हो सकी।", true);
-    showToast("Request failed");
   }finally{
-    isBusy = false;
-    sendBtn.disabled = false;
-    scrollBottom();
+    isBusy = false; sendBtn.disabled = false; scrollBottom();
   }
 }
 
@@ -1344,92 +446,32 @@ function autoResize(){
   promptEl.style.height = Math.min(promptEl.scrollHeight, 150) + "px";
 }
 
-promptEl.addEventListener("input", autoResize);
-promptEl.addEventListener("keydown", e => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); handleSend(); } });
-sendBtn.addEventListener("click", handleSend);
+promptEl.oninput = autoResize;
+promptEl.onkeydown = (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); handleSend(); } };
+sendBtn.onclick = handleSend;
 
-document.getElementById("fileBtn").addEventListener("click", () => fileInput.click());
+document.getElementById("menuBtn").onclick = () => { drawer.classList.add("open"); drawerOverlay.classList.add("open"); renderCreations(); };
+document.getElementById("closeDrawer").onclick = () => { drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); };
+drawerOverlay.onclick = () => { drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); };
+document.getElementById("closeViewer").onclick = closeImageViewer;
 
-fileInput.addEventListener("change", async e => {
-  const file = e.target.files?.[0];
-  if(!file) return;
+document.getElementById("newChatBtn").onclick = () => { createNewChat(true); renderCurrentChat(); renderChatHistory(); drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); };
+document.getElementById("newChatTop").onclick = () => { createNewChat(true); renderCurrentChat(); renderChatHistory(); };
+document.getElementById("deleteAllBtn").onclick = () => {
+  if(!confirm("सभी चैट्स डिलीट करें?")) return;
+  chats = []; safeRemove(CHAT_LIST_KEY); createNewChat(true); renderCurrentChat(); renderChatHistory();
+  drawer.classList.remove("open"); drawerOverlay.classList.remove("open");
+};
 
-  if(file.type.startsWith("image/")){
-    try{
-      const original = await blobToDataURL(file);
-      const resized = await resizeImageDataURL(original, MAX_MODEL_IMAGE_SIZE, .80);
-      selectedFileContent = resized;
-      selectedFileType = 'image';
-      selectedFileUrl = resized;
-      filePreviewImg.src = selectedFileUrl;
-      filePreviewImg.style.display = "block";
-      filePreviewText.textContent = file.name;
-      filePreview.classList.add("show");
-      showToast("फोटो संलग्न हो गई है।");
-    }catch(err){ showToast("फोटो पढ़ने में समस्या हुई।"); }
-  } else if(file.type === "application/pdf" || file.name.endsWith(".pdf")){
-    try{
-      showToast("PDF पढ़ी जा रही है...");
-      const text = await parsePdfFile(file);
-      selectedFileContent = text;
-      selectedFileType = 'pdf';
-      selectedFileUrl = null;
-      filePreviewImg.style.display = "none";
-      filePreviewText.textContent = "📄 " + file.name;
-      filePreview.classList.add("show");
-      showToast("PDF सफलतापूर्वक लोड हो गई!");
-    }catch(err){ showToast("PDF पढ़ने में असमर्थ।"); }
-  } else {
-    showToast("कृपया इमेज या PDF फाइल चुनें।");
-  }
-  fileInput.value = "";
-});
-
-document.getElementById("removeFile").addEventListener("click", clearSelectedFile);
-
-document.getElementById("menuBtn").addEventListener("click", () => { drawer.classList.add("open"); drawerOverlay.classList.add("open"); loadCreationsLazy(); });
-document.getElementById("closeDrawer").addEventListener("click", () => { drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); });
-drawerOverlay.addEventListener("click", () => { drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); });
-
-function startNewChat(){
-  if(isBusy) return;
-  if(currentChatId) saveCurrentChat();
-  createNewChat(true);
-  renderCurrentChat();
-  renderChatHistory();
-  clearSelectedFile();
-  closeDrawer();
-}
-
-document.getElementById("newChatBtn").addEventListener("click", startNewChat);
-document.getElementById("newChatTop").addEventListener("click", startNewChat);
-document.getElementById("closeViewer").addEventListener("click", closeImageViewer);
-document.getElementById("deleteAllBtn").addEventListener("click", () => {
-  if(!confirm("क्या आप सभी चैट्स डिलीट करना चाहते हैं?")) return;
-  chats = [];
-  safeRemove(CHAT_LIST_KEY);
-  createNewChat(true);
-  renderCurrentChat();
-  renderChatHistory();
-  closeDrawer();
-  showToast("सभी चैट्स डिलीट कर दी गई हैं।");
-});
-
-function safeInitialLoad(){
+function init(){
   loadChatHistory();
   if(!chats.length) createNewChat(false);
-  else {
-    const latest = chats[0];
-    currentChatId = latest.id;
-    messages = latest.messages || [];
-  }
+  else { currentChatId = chats[0].id; messages = chats[0].messages || []; }
   renderCurrentChat();
   renderChatHistory();
-  creationGrid.innerHTML = `<div class="empty-history">Images देखने के लिए Menu खोलें।</div>`;
-  autoResize();
+  renderCreations();
 }
-
-document.addEventListener("DOMContentLoaded", safeInitialLoad);
+init();
 </script>
 </body>
 </html>
