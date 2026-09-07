@@ -1,226 +1,5344 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+
 <title>Aaru AI</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+
 <style>
-:root{--bg:#f7f8fb;--card:#fff;--text:#171923;--muted:#737887;--line:#e5e7ee;--accent:#246bfd;--user:#eaf1ff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,sans-serif}
-.app{min-height:100vh;max-width:900px;margin:auto;background:var(--bg)}
-header{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;position:sticky;top:0;z-index:20}
-.brand{font-weight:800;font-size:18px}.brand small{display:block;font-size:10px;color:var(--muted);font-weight:500}
-button{border:0;background:none;cursor:pointer;color:inherit}.topbtn{width:40px;height:40px;border-radius:12px;font-size:20px}.topbtn:hover{background:#f0f2f7}
-main{padding:16px 12px 150px}.messages{display:flex;flex-direction:column;gap:12px}
-.msg{display:flex}.msg.user{justify-content:flex-end}.bubble{max-width:min(84%,700px);padding:11px 13px;border-radius:16px;white-space:pre-wrap;line-height:1.5;font-size:15px}.assistant .bubble{background:#fff;border:1px solid var(--line)}.user .bubble{background:var(--user)}
-.msg img{max-width:100%;border-radius:12px;display:block;margin-top:8px}
-.typing{color:var(--muted);font-size:13px;padding:8px}
-.composer-wrap{position:fixed;bottom:0;left:0;right:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 18%);z-index:15}
-.composer{max-width:876px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px;box-shadow:0 8px 30px #00000012}
-.preview{display:none;position:relative;margin:2px 2px 8px}.preview.show{display:block}.preview img{width:74px;height:74px;object-fit:cover;border-radius:12px}.remove{position:absolute;top:-5px;left:65px;background:#222;color:#fff;border-radius:50%;width:22px;height:22px}
-.row{display:flex;align-items:flex-end;gap:6px}.row textarea{flex:1;border:0;outline:0;resize:none;min-height:42px;max-height:140px;font:inherit;padding:10px;background:transparent}.ico{width:42px;height:42px;border-radius:13px;font-size:20px}.ico:hover{background:#f1f3f8}.send{background:var(--accent);color:#fff}.send:disabled{opacity:.45}
-.panel{position:fixed;inset:0;background:#0005;z-index:50;display:none}.panel.open{display:block}.drawer{position:absolute;left:0;top:0;bottom:0;width:min(350px,88vw);background:#fff;padding:16px;overflow:auto}.drawer h3{margin:6px 0 14px}.drawer button.action{width:100%;padding:12px;border-radius:12px;background:#f2f4f8;text-align:left;margin-bottom:8px}.list{display:flex;flex-direction:column;gap:7px}.item{padding:10px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.item small{display:block;color:var(--muted);margin-top:3px}.section{margin-top:18px;color:var(--muted);font-size:12px;font-weight:700}
-#file{display:none}.status{font-size:11px;color:var(--muted);padding:2px 8px;min-height:16px}.creation{width:100%;border-radius:12px;margin-top:8px}
-.empty{height:65vh;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:30px}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  overflow-x:clip;
+  overflow-y:auto;
+  overscroll-behavior-y:auto;
+}
+
+body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100dvh;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#0f1117;
+  color:#fff;
+  overflow-x:clip;
+  overflow-y:auto;
+  overscroll-behavior-y:auto;
+}
+
+button,
+input,
+textarea{
+  font:inherit;
+}
+
+button{
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+main{
+  position:relative;
+  flex:1 0 auto;
+  min-height:calc(100dvh - 58px);
+  overflow:visible;
+  scroll-behavior:smooth;
+}
+
+.app{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:58px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  background:rgba(15,17,23,.96);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(14px);
+}
+
+.menu-btn{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.brand{
+  min-width:0;
+  flex:1;
+}
+
+.brand-name{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.brand-sub{
+  margin-top:1px;
+  font-size:10px;
+  opacity:.45;
+}
+
+.new-chat-top{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:21px;
+  cursor:pointer;
+}
+
+.drawer-overlay{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(0,0,0,.58);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+}
+
+.drawer-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.drawer{
+  position:fixed;
+  z-index:210;
+  top:0;
+  left:0;
+  bottom:0;
+  width:min(88vw,340px);
+  background:#151821;
+  border-right:1px solid rgba(255,255,255,.07);
+  transform:translateX(-105%);
+  transition:.22s ease;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.drawer.open{
+  transform:translateX(0);
+}
+
+.drawer-head{
+  height:58px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.drawer-title{
+  flex:1;
+  font-size:17px;
+  font-weight:800;
+}
+
+.close-drawer{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:11px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:21px;
+}
+
+.drawer-body{
+  flex:1;
+  overflow-y:auto;
+  padding:12px;
+}
+
+.drawer-action{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:0;
+  color:#fff;
+  background:rgba(255,255,255,.055);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:8px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.drawer-action:hover{
+  background:rgba(255,255,255,.09);
+}
+
+.section-title{
+  margin:18px 4px 9px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  opacity:.4;
+}
+
+.chat-history{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.chat-history-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:10px;
+  border-radius:11px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.chat-history-item:hover{
+  background:rgba(255,255,255,.055);
+}
+
+.chat-history-item.active{
+  background:rgba(255,255,255,.085);
+}
+
+.chat-history-info{
+  min-width:0;
+  flex:1;
+}
+
+.chat-history-title{
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-history-meta{
+  margin-top:3px;
+  font-size:10px;
+  opacity:.4;
+}
+
+.delete-chat{
+  width:30px;
+  height:30px;
+  flex:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#fff;
+  opacity:.48;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.delete-chat:hover{
+  opacity:1;
+  background:rgba(255,70,70,.13);
+}
+
+.empty-history{
+  padding:15px 10px;
+  font-size:12px;
+  opacity:.4;
+  line-height:1.5;
+}
+
+.chat-wrap{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:18px 12px 155px;
+}
+
+.messages{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.message{
+  width:100%;
+  display:flex;
+}
+
+.message.user{
+  justify-content:flex-end;
+}
+
+.message.assistant{
+  justify-content:flex-start;
+}
+
+.bubble{
+  max-width:min(85%,720px);
+  padding:11px 14px;
+  border-radius:17px;
+  font-size:15px;
+  line-height:1.55;
+  word-break:break-word;
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
+  cursor:text;
+}
+
+.message.user .bubble,
+.message.assistant .bubble{
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
+}
+
+.message.user .bubble{
+  background:#245eea;
+  border-bottom-right-radius:5px;
+}
+
+.message.assistant .bubble{
+  background:#191d27;
+  border:1px solid rgba(255,255,255,.055);
+  border-bottom-left-radius:5px;
+}
+
+.message.system .bubble{
+  background:rgba(255,255,255,.05);
+}
+
+.md h1,
+.md h2,
+.md h3{
+  margin:14px 0 8px;
+  line-height:1.25;
+}
+
+.md h1{font-size:22px}
+.md h2{font-size:19px}
+.md h3{font-size:17px}
+
+.md p{
+  margin:0 0 9px;
+}
+
+.md p:last-child{
+  margin-bottom:0;
+}
+
+.md ul,
+.md ol{
+  margin:7px 0 10px;
+  padding-left:22px;
+}
+
+.md li{
+  margin:4px 0;
+}
+
+.md blockquote{
+  margin:10px 0;
+  padding:7px 12px;
+  border-left:3px solid #777;
+  background:rgba(255,255,255,.04);
+  opacity:.9;
+}
+
+.md a{
+  color:#71a7ff;
+  text-decoration:underline;
+}
+
+.md code{
+  padding:2px 5px;
+  border-radius:5px;
+  background:#0d1016;
+  font-family:monospace;
+  font-size:.92em;
+}
+
+.md pre{
+  margin:10px 0;
+  padding:12px;
+  overflow:auto;
+  border-radius:10px;
+  background:#0b0e13;
+  border:1px solid rgba(255,255,255,.07);
+  white-space:pre;
+}
+
+.md pre code{
+  padding:0;
+  background:transparent;
+}
+
+.attached-user-image{
+  display:block;
+  width:min(100%,320px);
+  max-height:360px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:7px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.generated-image{
+  display:block;
+  width:100%;
+  max-width:720px;
+  border-radius:14px;
+  margin-top:8px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.image-note{
+  margin-top:7px;
+  font-size:11px;
+  opacity:.42;
+}
+
+.typing{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 2px;
+}
+
+.typing span{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#fff;
+  opacity:.35;
+  animation:typing 1s infinite;
+}
+
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+
+@keyframes typing{
+  0%,70%,100%{
+    transform:translateY(0);
+    opacity:.25;
+  }
+  35%{
+    transform:translateY(-4px);
+    opacity:.8;
+  }
+}
+
+.composer-shell{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:120;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:linear-gradient(
+    to bottom,
+    rgba(15,17,23,0),
+    rgba(15,17,23,.94) 22%,
+    #0f1117 48%
+  );
+}
+
+.composer{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  border:1px solid rgba(255,255,255,.1);
+  background:#171a23;
+  border-radius:18px;
+  padding:8px;
+  box-shadow:0 8px 35px rgba(0,0,0,.25);
+}
+
+.photo-preview{
+  display:none;
+  position:relative;
+  width:74px;
+  height:74px;
+  margin:3px 3px 8px;
+}
+
+.photo-preview.show{
+  display:block;
+}
+
+.photo-preview img{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.remove-photo{
+  position:absolute;
+  right:-6px;
+  top:-6px;
+  width:23px;
+  height:23px;
+  border:0;
+  border-radius:50%;
+  background:#ef4444;
+  color:#fff;
+  font-size:15px;
+}
+
+.input-row{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+}
+
+#prompt{
+  flex:1;
+  min-width:0;
+  min-height:42px;
+  max-height:150px;
+  resize:none;
+  border:0;
+  outline:0;
+  color:#fff;
+  background:transparent;
+  padding:10px 8px;
+  line-height:1.4;
+}
+
+#prompt::placeholder{
+  color:#fff;
+  opacity:.38;
+}
+
+.icon-btn{
+  width:40px;
+  height:40px;
+  flex:none;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.065);
+  color:#fff;
+  cursor:pointer;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.1);
+}
+
+.send-btn{
+  background:#2864e8;
+}
+
+.send-btn:hover{
+  background:#3570ed;
+}
+
+.send-btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+#photoInput{
+  display:none;
+}
+
+.creation-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+.creation-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:11px;
+  background:#0e1117;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.creation-card img{
+  display:block;
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+}
+
+.creation-prompt{
+  padding:7px;
+  font-size:10px;
+  opacity:.6;
+  line-height:1.35;
+}
+
+.image-viewer{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.9);
+}
+
+.image-viewer.open{
+  display:flex;
+}
+
+.image-viewer img{
+  max-width:100%;
+  max-height:90dvh;
+  object-fit:contain;
+  border-radius:10px;
+}
+
+.close-viewer{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  font-size:23px;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:92px;
+  z-index:700;
+  transform:translate(-50%,20px);
+  max-width:90vw;
+  padding:10px 14px;
+  border-radius:11px;
+  background:#252a36;
+  color:#fff;
+  font-size:12px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  box-shadow:0 7px 25px rgba(0,0,0,.3);
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+@media(max-width:600px){
+
+  .header{
+    height:55px;
+  }
+
+  .brand-name{
+    font-size:17px;
+  }
+
+  .chat-wrap{
+    padding:14px 9px 155px;
+  }
+
+  .bubble{
+    max-width:90%;
+    font-size:15px;
+  }
+
+  .composer{
+    border-radius:17px;
+  }
+
+  .creation-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="app">
-<header>
-<button class="topbtn" id="menu">☰</button>
-<div class="brand">Aaru AI<small>Fast • Smart • Multilingual</small></div>
-<button class="topbtn" id="new">＋</button>
+
+<header class="header">
+
+<button class="menu-btn" id="menuBtn" aria-label="Menu">
+☰
+</button>
+
+<div class="brand">
+<div class="brand-name">Aaru AI</div>
+<div class="brand-sub">Fast • Smart • Indian AI</div>
+</div>
+
+<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
+＋
+</button>
+
 </header>
+
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+
+<aside class="drawer" id="drawer">
+
+<div class="drawer-head">
+
+<div class="drawer-title">
+Aaru AI
+</div>
+
+<button class="close-drawer" id="closeDrawer">
+×
+</button>
+
+</div>
+
+
+<div class="drawer-body">
+
+<button class="drawer-action" id="newChatBtn">
+<span>＋</span>
+<span>नई चैट</span>
+</button>
+
+<button class="drawer-action" id="deleteAllBtn">
+<span>🗑️</span>
+<span>सभी चैट डिलीट करें</span>
+</button>
+
+
+<div class="section-title">
+Recent Chats
+</div>
+
+<div class="chat-history" id="chatHistory"></div>
+
+
+<div class="section-title">
+Recent Creations
+</div>
+
+<div class="creation-grid" id="creationGrid"></div>
+
+</div>
+
+</aside>
+
+
 <main>
-<div id="messages" class="messages"><div class="empty">नमस्ते! मैं Aaru AI हूँ।<br>आप लिखकर, बोलकर, फोटो या PDF के साथ बात कर सकते हैं।</div></div>
+
+<div class="chat-wrap">
+
+<div class="messages" id="messages"></div>
+
+</div>
+
 </main>
 
-<div class="composer-wrap">
+
+<div class="composer-shell">
+
 <div class="composer">
-<div id="preview" class="preview"><img id="previewImg"><button class="remove" id="remove">×</button></div>
-<div class="status" id="status"></div>
-<div class="row">
-<button class="ico" id="attach" title="फोटो/PDF">📎</button>
-<button class="ico" id="mic" title="बोलें">🎙️</button>
-<textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..."></textarea>
-<button class="ico" id="speak" title="आवाज़ चालू/बंद">🔊</button>
-<button class="ico send" id="send">➤</button>
-</div>
-</div>
-</div>
 
-<input id="file" type="file" accept="image/*,.pdf,application/pdf">
+<div class="photo-preview" id="photoPreview">
 
-<div class="panel" id="panel"><aside class="drawer">
-<button class="action" id="close">✕ बंद करें</button>
-<button class="action" id="drawerNew">＋ नई चैट</button>
-<button class="action" id="clear">🗑️ सभी चैट हटाएँ</button>
-<div class="section">Recent Chats</div><div id="chatList" class="list"></div>
-<div class="section">Recent Creations</div><div id="creationList" class="list"></div>
-</aside></div>
+<img id="photoPreviewImg" alt="Selected image">
+
+<button class="remove-photo" id="removePhoto">
+×
+</button>
+
 </div>
 
-<script type="module">
-const API="https://aaru-ai-api.myera-org.workers.dev/";
-const CHAT_KEY="aaru_v3_chats";
-const CREATION_KEY="aaru_v3_creations";
-const MAX_CHATS=12, MAX_MSG=40, MAX_CONTEXT=20;
 
-const $=id=>document.getElementById(id);
-const messagesEl=$("messages"), promptEl=$("prompt"), statusEl=$("status");
-let chats=[], currentId=null, messages=[];
-let attachedImage=null, attachedText="";
-let speaking=true, busy=false, recognition=null;
+<div class="input-row">
 
-function id(){return "c_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
-function load(){
-  try{chats=JSON.parse(localStorage.getItem(CHAT_KEY)||"[]")}catch{chats=[]}
-  if(!chats.length) newChat(false); else {currentId=chats[0].id;messages=chats[0].messages||[]}
-  render(); renderLists();
+<button class="icon-btn" id="photoBtn" title="Photo">
+📎
+</button>
+
+<textarea
+id="prompt"
+rows="1"
+placeholder="Aaru से कुछ भी पूछें..."
+autocomplete="off"
+spellcheck="true"></textarea>
+
+<button class="icon-btn send-btn" id="sendBtn" title="Send">
+➤
+</button>
+
+</div>
+
+
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<input
+type="file"
+id="photoInput"
+accept="image/*">
+
+
+<div class="image-viewer" id="imageViewer">
+
+<button class="close-viewer" id="closeViewer">
+×
+</button>
+
+<img id="viewerImg" alt="Image preview">
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+"use strict";
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API =
+  "https://aaru-ai-api.myera-org.workers.dev/";
+
+
+const CHAT_LIST_KEY =
+  "aaru_chat_history_v2";
+
+
+const OLD_CHAT_KEY =
+  "aaru_chat_messages";
+
+
+const IMAGE_KEY =
+  "aaru_history";
+
+
+const MAX_SAVED_CHATS = 8;
+const MAX_MESSAGES_PER_CHAT = 30;
+const MAX_MESSAGE_CHARS = 4000;
+
+const MAX_SAVED_CREATIONS = 4;
+const MAX_CREATION_PROMPT_CHARS = 300;
+const MAX_HISTORY_IMAGE_CHARS = 420000;
+
+
+/*
+  Cloudflare FLUX.2 Klein 4B के लिए
+  reference image 512x512 से छोटी होनी चाहिए।
+
+  इसलिए 511 रखा गया है।
+*/
+const MAX_MODEL_IMAGE_SIZE = 511;
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let chats = [];
+let currentChatId = null;
+let messages = [];
+
+let selectedPhotoBase64 = null;
+let selectedPhotoUrl = null;
+
+let isBusy = false;
+
+let volatileCreations = [];
+
+let creationsLoaded = false;
+
+let appReady = false;
+
+let lastPageShowRecovery = 0;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const messagesEl =
+  document.getElementById("messages");
+
+const promptEl =
+  document.getElementById("prompt");
+
+const sendBtn =
+  document.getElementById("sendBtn");
+
+const photoInput =
+  document.getElementById("photoInput");
+
+const photoPreview =
+  document.getElementById("photoPreview");
+
+const photoPreviewImg =
+  document.getElementById("photoPreviewImg");
+
+const chatHistoryEl =
+  document.getElementById("chatHistory");
+
+const creationGrid =
+  document.getElementById("creationGrid");
+
+const drawer =
+  document.getElementById("drawer");
+
+const drawerOverlay =
+  document.getElementById("drawerOverlay");
+
+const imageViewer =
+  document.getElementById("imageViewer");
+
+const viewerImg =
+  document.getElementById("viewerImg");
+
+const toastEl =
+  document.getElementById("toast");
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function makeChatId(){
+
+  return "chat_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,9);
 }
-function save(){
-  const i=chats.findIndex(c=>c.id===currentId);
-  const item={id:currentId,title:messages.find(x=>x.role==="user")?.content?.slice(0,42)||"नई चैट",updatedAt:Date.now(),messages:messages.slice(-MAX_MSG)};
-  if(i>=0)chats[i]=item;else chats.unshift(item);
-  chats.sort((a,b)=>b.updatedAt-a.updatedAt);chats=chats.slice(0,MAX_CHATS);
-  localStorage.setItem(CHAT_KEY,JSON.stringify(chats));renderLists();
+
+
+function makeImageId(){
+
+  return "img_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,10);
 }
-function newChat(persist=true){
-  currentId=id();messages=[];attachedImage=null;attachedText="";clearAttachment();render();if(persist)save();
+
+
+function showToast(text){
+
+  toastEl.textContent =
+    String(text || "");
+
+  toastEl.classList.add("show");
+
+  clearTimeout(showToast.timer);
+
+  showToast.timer =
+    setTimeout(() => {
+
+      toastEl.classList.remove(
+        "show"
+      );
+
+    },2200);
 }
-function render(){
-  messagesEl.innerHTML="";
-  if(!messages.length){messagesEl.innerHTML='<div class="empty">नमस्ते! मैं Aaru AI हूँ।<br>आप लिखकर, बोलकर, फोटो या PDF के साथ बात कर सकते हैं।</div>';return}
-  for(const m of messages){
-    const wrap=document.createElement("div");wrap.className="msg "+m.role;
-    const b=document.createElement("div");b.className="bubble";b.textContent=m.content||"";
-    if(m.image){const img=document.createElement("img");img.src=m.image;b.appendChild(img)}
-    wrap.appendChild(b);messagesEl.appendChild(wrap);
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+/* =========================================================
+   MARKDOWN RENDERER
+   IMPORTANT: UNCHANGED
+========================================================= */
+
+function inlineMarkdown(text){
+
+  let s =
+    escapeHTML(text);
+
+  s =
+    s.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
+
+  s =
+    s.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+  s =
+    s.replace(
+      /\*\*([^*]+)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /__([^_]+)__/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      "<em>$1</em>"
+    );
+
+  s =
+    s.replace(
+      /(?<!_)_([^_]+)_(?!_)/g,
+      "<em>$1</em>"
+    );
+
+  return s;
+}
+
+
+function renderMarkdown(text){
+
+  const source =
+    String(text ?? "")
+      .replace(/\r\n/g,"\n")
+      .replace(/\r/g,"\n");
+
+  const lines =
+    source.split("\n");
+
+  let html = "";
+
+  let inCode = false;
+
+  let codeBuffer = [];
+
+  let inUl = false;
+
+  let inOl = false;
+
+  let paragraph = [];
+
+
+  function closeLists(){
+
+    if(inUl){
+
+      html += "</ul>";
+
+      inUl = false;
+    }
+
+    if(inOl){
+
+      html += "</ol>";
+
+      inOl = false;
+    }
   }
-  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-}
-function add(role,content,image=null){messages.push({role,content:String(content||""),image});render();save()}
-function setStatus(s){statusEl.textContent=s||""}
-function escapeSize(data,max=511){
-  return new Promise(resolve=>{
-    const img=new Image();img.onload=()=>{
-      const scale=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
-      c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/jpeg",.78));
-    };img.onerror=()=>resolve(data);img.src=data;
-  })
-}
-function clearAttachment(){ $("preview").classList.remove("show");$("previewImg").src="";attachedImage=null;attachedText="";$("file").value=""}
-async function imageData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
 
-async function pdfText(file){
-  setStatus("PDF पढ़ा जा रहा है…");
-  const pdfjs=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
-  pdfjs.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-  const data=new Uint8Array(await file.arrayBuffer()),pdf=await pdfjs.getDocument({data}).promise;
-  let out="";
-  for(let p=1;p<=pdf.numPages;p++){
-    const page=await pdf.getPage(p),content=await page.getTextContent();
-    out+=`\n\n--- Page ${p} ---\n`+content.items.map(x=>x.str).join(" ");
-    if(out.length>90000)break;
-  }
-  return out.trim();
-}
-async function attachFile(file){
-  try{
-    if(file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")){
-      attachedText=await pdfText(file);attachedImage=null;setStatus(`PDF तैयार: ${attachedText.length.toLocaleString()} अक्षर`);
+
+  function flushParagraph(buffer){
+
+    if(!buffer.length){
       return;
     }
-    if(file.type.startsWith("image/")){
-      const raw=await imageData(file);attachedImage=await escapeSize(raw);attachedText="";
-      $("previewImg").src=attachedImage;$("preview").classList.add("show");setStatus("तस्वीर तैयार है — अब पूछें क्या जानना है।");
+
+    const value =
+      buffer.join("\n")
+        .trim();
+
+    if(!value){
+      return;
     }
-  }catch(e){setStatus("फ़ाइल पढ़ने में समस्या: "+e.message)}
-}
-async function send(){
-  if(busy)return;
-  const text=promptEl.value.trim();
-  if(!text && !attachedImage && !attachedText)return;
-  busy=true;$("send").disabled=true;
-  const display=text || (attachedText?"इस PDF को पढ़कर बताइए।":"इस तस्वीर को समझाइए।");
-  const contextText=attachedText?`\n\n[PDF TEXT]\n${attachedText.slice(0,90000)}`:"";
-  const userContent=display+contextText;
-  add("user",display,attachedImage);
-  promptEl.value="";setStatus("सोच रहा हूँ…");
-  try{
-    const payload={
-      message:display,
-      messages:messages.filter(m=>!m.image).slice(-MAX_CONTEXT).map(m=>({role:m.role,content:m.content})),
-      image_b64:attachedImage||undefined
-    };
-    if(attachedText)payload.document_text=attachedText.slice(0,90000);
-    const r=await fetch(API+"chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const ct=r.headers.get("content-type")||"";
-    if(ct.includes("image/")){
-      const blob=await r.blob(),url=URL.createObjectURL(blob);
-      add("assistant","इमेज तैयार है।",url);storeCreation(url,display);
-    }else{
-      const d=await r.json();
-      if(!r.ok||d.ok===false)throw new Error(d.error||"Server error");
-      add("assistant",d.response||d.reply||"जवाब नहीं मिला।");
-      if(speaking) speak(d.response||d.reply||"");
-    }
-  }catch(e){add("assistant","माफ़ कीजिए, अभी समस्या हुई: "+e.message)}
-  finally{clearAttachment();setStatus("");busy=false;$("send").disabled=false;promptEl.focus()}
-}
-function speak(text){
-  if(!("speechSynthesis"in window)||!text)return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang=/[\u0900-\u097F]/.test(text)?"hi-IN":"en-US";u.rate=.98;speechSynthesis.speak(u);
-}
-function startVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){setStatus("इस ब्राउज़र में voice input उपलब्ध नहीं है।");return}
-  if(recognition){recognition.stop();recognition=null;return}
-  recognition=new SR();recognition.lang="hi-IN";recognition.interimResults=false;recognition.continuous=false;
-  recognition.onstart=()=>setStatus("सुन रहा हूँ…");
-  recognition.onresult=e=>{promptEl.value=e.results[0][0].transcript;setStatus("आवाज़ text में बदल दी गई।");promptEl.focus()};
-  recognition.onerror=e=>setStatus("Voice error: "+e.error);
-  recognition.onend=()=>{recognition=null};
-  recognition.start();
-}
-function storeCreation(url,prompt){
-  try{
-    const arr=JSON.parse(localStorage.getItem(CREATION_KEY)||"[]");
-    arr.unshift({url,prompt,at:Date.now()});
-    localStorage.setItem(CREATION_KEY,JSON.stringify(arr.slice(0,6)));
-  }catch{}
-  renderLists();
-}
-function renderLists(){
-  $("chatList").innerHTML="";
-  for(const c of chats){
-    const d=document.createElement("div");d.className="item";d.textContent=c.title||"नई चैट";
-    d.onclick=()=>{currentId=c.id;messages=c.messages||[];render();$("panel").classList.remove("open")};$("chatList").appendChild(d);
+
+    html +=
+      "<p>" +
+      inlineMarkdown(
+        value.replace(
+          /\n/g,
+          "<br>"
+        )
+      ) +
+      "</p>";
   }
-  $("creationList").innerHTML="";
-  try{
-    const arr=JSON.parse(localStorage.getItem(CREATION_KEY)||"[]");
-    for(const x of arr){
-      const d=document.createElement("div");d.className="item";d.textContent=x.prompt.slice(0,55);
-      d.onclick=()=>window.open(x.url,"_blank");$("creationList").appendChild(d);
+
+
+  for(let i=0;i<lines.length;i++){
+
+    const line =
+      lines[i];
+
+
+    if(
+      line.trim()
+        .startsWith("```")
+    ){
+
+      if(inCode){
+
+        html +=
+          "<pre><code>" +
+          escapeHTML(
+            codeBuffer.join("\n")
+          ) +
+          "</code></pre>";
+
+        codeBuffer = [];
+
+        inCode = false;
+
+      }else{
+
+        flushParagraph(
+          paragraph
+        );
+
+        paragraph = [];
+
+        closeLists();
+
+        inCode = true;
+      }
+
+      continue;
     }
-  }catch{}
+
+
+    if(inCode){
+
+      codeBuffer.push(
+        line
+      );
+
+      continue;
+    }
+
+
+    if(!line.trim()){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      continue;
+    }
+
+
+    const h3 =
+      line.match(
+        /^###\s+(.+)$/
+      );
+
+    const h2 =
+      line.match(
+        /^##\s+(.+)$/
+      );
+
+    const h1 =
+      line.match(
+        /^#\s+(.+)$/
+      );
+
+
+    if(h1){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h1>" +
+        inlineMarkdown(h1[1]) +
+        "</h1>";
+
+      continue;
+    }
+
+
+    if(h2){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h2>" +
+        inlineMarkdown(h2[1]) +
+        "</h2>";
+
+      continue;
+    }
+
+
+    if(h3){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h3>" +
+        inlineMarkdown(h3[1]) +
+        "</h3>";
+
+      continue;
+    }
+
+
+    const ul =
+      line.match(
+        /^\s*[-*+]\s+(.+)$/
+      );
+
+    const ol =
+      line.match(
+        /^\s*\d+[.)]\s+(.+)$/
+      );
+
+
+    if(ul){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inOl){
+
+        html += "</ol>";
+
+        inOl = false;
+      }
+
+      if(!inUl){
+
+        html += "<ul>";
+
+        inUl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ul[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    if(ol){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inUl){
+
+        html += "</ul>";
+
+        inUl = false;
+      }
+
+      if(!inOl){
+
+        html += "<ol>";
+
+        inOl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ol[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    const quote =
+      line.match(
+        /^\s*>\s?(.*)$/
+      );
+
+
+    if(quote){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<blockquote>" +
+        inlineMarkdown(quote[1]) +
+        "</blockquote>";
+
+      continue;
+    }
+
+
+    paragraph.push(
+      line
+    );
+  }
+
+
+  if(inCode){
+
+    html +=
+      "<pre><code>" +
+      escapeHTML(
+        codeBuffer.join("\n")
+      ) +
+      "</code></pre>";
+  }
+
+
+  flushParagraph(
+    paragraph
+  );
+
+  closeLists();
+
+  return html;
 }
 
-$("send").onclick=send;$("new").onclick=()=>newChat(true);$("drawerNew").onclick=()=>{newChat(true);$("panel").classList.remove("open")};
-$("menu").onclick=()=>$("panel").classList.add("open");$("close").onclick=()=>$("panel").classList.remove("open");
-$("panel").onclick=e=>{if(e.target===$("panel"))$("panel").classList.remove("open")};
-$("clear").onclick=()=>{if(confirm("सभी चैट हटाएँ?")){chats=[];localStorage.removeItem(CHAT_KEY);newChat(false);renderLists()}};
-$("attach").onclick=()=>$("file").click();$("file").onchange=e=>e.target.files[0]&&attachFile(e.target.files[0]);
-$("remove").onclick=clearAttachment;$("mic").onclick=startVoice;$("speak").onclick=()=>{speaking=!speaking;$("speak").textContent=speaking?"🔊":"🔇";if(!speaking)speechSynthesis?.cancel()};
-promptEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
-promptEl.addEventListener("input",()=>{promptEl.style.height="auto";promptEl.style.height=Math.min(promptEl.scrollHeight,140)+"px"});
 
-load();
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function storageAvailable(){
+
+  try{
+
+    const storage =
+      window.localStorage;
+
+    if(!storage){
+      return false;
+    }
+
+    const key =
+      "__aaru_test__";
+
+    storage.setItem(
+      key,
+      "1"
+    );
+
+    storage.removeItem(
+      key
+    );
+
+    return true;
+
+  }catch(error){
+
+    return false;
+  }
+}
+
+
+const HAS_STORAGE =
+  storageAvailable();
+
+
+function safeGet(key){
+
+  if(!HAS_STORAGE){
+    return null;
+  }
+
+  try{
+
+    return localStorage.getItem(
+      key
+    );
+
+  }catch(error){
+
+    return null;
+  }
+}
+
+
+function safeSet(key,value){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+  try{
+
+    localStorage.setItem(
+      key,
+      value
+    );
+
+    return true;
+
+  }catch(error){
+
+    console.warn(
+      "Storage write failed:",
+      key,
+      error
+    );
+
+    return false;
+  }
+}
+
+
+function safeRemove(key){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+  try{
+
+    localStorage.removeItem(
+      key
+    );
+
+  }catch(error){}
+}
+
+
+/* =========================================================
+   CHAT NORMALIZE
+========================================================= */
+
+function normalizeChat(chat){
+
+  if(!chat){
+    return null;
+  }
+
+  const id =
+    String(chat.id || "");
+
+  if(!id){
+    return null;
+  }
+
+
+  const raw =
+    Array.isArray(chat.messages)
+      ? chat.messages
+      : [];
+
+
+  const normalized =
+    raw
+      .slice(-MAX_MESSAGES_PER_CHAT)
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content ??
+              item.text ??
+              ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  let title =
+    String(
+      chat.title || ""
+    )
+    .trim()
+    .slice(0,80);
+
+
+  if(!title){
+
+    const firstUser =
+      normalized.find(
+        item =>
+          item.role === "user"
+      );
+
+    title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
+  }
+
+
+  return {
+
+    id,
+
+    title:
+      title || "नई चैट",
+
+    messages:
+      normalized,
+
+    createdAt:
+      Number(
+        chat.createdAt
+      ) || Date.now(),
+
+    updatedAt:
+      Number(
+        chat.updatedAt
+      ) || Date.now()
+  };
+}
+
+
+/* =========================================================
+   LOAD CHAT HISTORY
+========================================================= */
+
+function loadChatHistory(){
+
+  chats = [];
+
+  const raw =
+    safeGet(
+      CHAT_LIST_KEY
+    );
+
+
+  if(raw){
+
+    try{
+
+      const parsed =
+        JSON.parse(raw);
+
+      if(Array.isArray(parsed)){
+
+        const seen =
+          new Set();
+
+        chats =
+          parsed
+            .map(normalizeChat)
+            .filter(Boolean)
+            .filter(chat => {
+
+              if(seen.has(chat.id)){
+                return false;
+              }
+
+              seen.add(chat.id);
+
+              return true;
+            })
+            .sort(
+              (a,b) =>
+                (b.updatedAt || 0) -
+                (a.updatedAt || 0)
+            )
+            .slice(
+              0,
+              MAX_SAVED_CHATS
+            );
+      }
+
+    }catch(error){
+
+      console.warn(
+        "Chat history corrupted:",
+        error
+      );
+
+      safeRemove(
+        CHAT_LIST_KEY
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+    पुराने storage की migration।
+  */
+
+  const oldRaw =
+    safeGet(
+      OLD_CHAT_KEY
+    );
+
+
+  if(oldRaw){
+
+    try{
+
+      const old =
+        JSON.parse(
+          oldRaw
+        );
+
+      if(
+        Array.isArray(old) &&
+        old.length
+      ){
+
+        const now =
+          Date.now();
+
+        const migrated =
+          normalizeChat({
+
+            id:
+              makeChatId(),
+
+            title:
+              "पुरानी चैट",
+
+            messages:
+              old,
+
+            createdAt:
+              now,
+
+            updatedAt:
+              now
+          });
+
+
+        if(migrated){
+          chats = [migrated];
+        }
+      }
+
+    }catch(error){}
+
+    safeRemove(
+      OLD_CHAT_KEY
+    );
+  }
+}
+
+
+/* =========================================================
+   SAVE CHAT HISTORY
+========================================================= */
+
+function saveChatHistory(){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  /*
+    पहले सामान्य save।
+  */
+
+  if(
+    safeSet(
+      CHAT_LIST_KEY,
+      JSON.stringify(sorted)
+    )
+  ){
+
+    chats = sorted;
+
+    return;
+  }
+
+
+  /*
+    Storage quota भरने पर कम chats।
+  */
+
+  for(
+    const count of [6,4,3,2,1]
+  ){
+
+    const smaller =
+      sorted.slice(
+        0,
+        count
+      );
+
+    if(
+      safeSet(
+        CHAT_LIST_KEY,
+        JSON.stringify(smaller)
+      )
+    ){
+
+      chats = sorted;
+
+      return;
+    }
+  }
+
+
+  /*
+    Last resort:
+    image history हटाकर chat बचाएँ।
+  */
+
+  safeRemove(
+    IMAGE_KEY
+  );
+
+
+  const emergency =
+    sorted.slice(
+      0,
+      3
+    );
+
+
+  safeSet(
+    CHAT_LIST_KEY,
+    JSON.stringify(
+      emergency
+    )
+  );
+
+  chats = sorted;
+}
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function createNewChat(
+  persist = true
+){
+
+  const now =
+    Date.now();
+
+
+  const chat = {
+
+    id:
+      makeChatId(),
+
+    title:
+      "नई चैट",
+
+    messages:
+      [],
+
+    createdAt:
+      now,
+
+    updatedAt:
+      now
+  };
+
+
+  chats.unshift(
+    chat
+  );
+
+
+  chats =
+    chats
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  currentChatId =
+    chat.id;
+
+  messages = [];
+
+
+  if(persist){
+
+    saveChatHistory();
+  }
+
+
+  return chat;
+}
+
+
+/* =========================================================
+   ENSURE CURRENT CHAT
+========================================================= */
+
+function ensureCurrentChat(){
+
+  if(currentChatId){
+
+    const existing =
+      chats.find(
+        chat =>
+          chat.id === currentChatId
+      );
+
+    if(existing){
+      return existing;
+    }
+  }
+
+
+  return createNewChat(
+    true
+  );
+}
+
+
+/* =========================================================
+   SAVE CURRENT CHAT
+========================================================= */
+
+function saveCurrentChat(){
+
+  const chat =
+    ensureCurrentChat();
+
+
+  chat.messages =
+    messages
+      .slice(
+        -MAX_MESSAGES_PER_CHAT
+      )
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content || ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  const firstUser =
+    chat.messages.find(
+      item =>
+        item.role === "user"
+    );
+
+
+  chat.title =
+    firstUser
+      ? firstUser.content
+          .replace(/\s+/g," ")
+          .slice(0,80)
+      : "नई चैट";
+
+
+  chat.updatedAt =
+    Date.now();
+
+
+  saveChatHistory();
+
+  renderChatHistory();
+}
+
+
+/* =========================================================
+   RENDER CURRENT CHAT
+========================================================= */
+
+function renderCurrentChat(){
+
+  messagesEl.innerHTML = "";
+
+
+  const list =
+    Array.isArray(messages)
+      ? messages.slice(
+          -MAX_MESSAGES_PER_CHAT
+        )
+      : [];
+
+
+  if(!list.length){
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    if(item.role === "user"){
+
+      addUserMessage(
+        item.content,
+        false
+      );
+
+    }else{
+
+      addAssistantMessage(
+        item.content,
+        false,
+        item.imageId || null
+      );
+    }
+  });
+}
+
+
+/* =========================================================
+   USER MESSAGE
+========================================================= */
+
+function addUserMessage(
+  text,
+  persist = true,
+  imageUrl = null
+){
+
+  const value =
+    String(text || "");
+
+  messages.push({
+    role:
+      "user",
+    content:
+      value
+  });
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message user";
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+  if(imageUrl){
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.className =
+      "attached-user-image";
+
+    img.src =
+      imageUrl;
+
+    img.alt =
+      "Attached image";
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          imageUrl
+        )
+    );
+
+    bubble.appendChild(
+      img
+    );
+  }
+
+  if(value){
+
+    const textNode =
+      document.createElement(
+        "div"
+      );
+
+    textNode.textContent =
+      value;
+
+    bubble.appendChild(
+      textNode
+    );
+  }
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+  if(persist){
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   ASSISTANT MESSAGE
+========================================================= */
+
+function addAssistantMessage(
+  text,
+  persist = true,
+  imageId = null
+){
+
+  const value =
+    String(text || "");
+
+
+  const record = {
+
+    role:
+      "assistant",
+
+    content:
+      value
+  };
+
+
+  if(imageId){
+
+    record.imageId =
+      imageId;
+  }
+
+
+  messages.push(
+    record
+  );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble md";
+
+
+  bubble.innerHTML =
+    renderMarkdown(
+      value
+    );
+
+
+  if(imageId){
+
+    const creation =
+      findCreationById(
+        imageId
+      );
+
+
+    if(creation?.image){
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.className =
+        "generated-image";
+
+      img.src =
+        creation.image;
+
+      img.alt =
+        creation.prompt ||
+        "Generated image";
+
+
+      img.addEventListener(
+        "click",
+        () =>
+          openImageViewer(
+            creation.image
+          )
+      );
+
+
+      bubble.appendChild(
+        img
+      );
+
+
+      const note =
+        document.createElement(
+          "div"
+        );
+
+      note.className =
+        "image-note";
+
+      note.textContent =
+        "Image generated successfully.";
+
+      bubble.appendChild(
+        note
+      );
+    }
+  }
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  if(persist){
+
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   TYPING
+========================================================= */
+
+function showTyping(){
+
+  hideTyping();
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+  row.id =
+    "typingMessage";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.innerHTML = `
+    <div class="typing">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  scrollBottom();
+}
+
+
+function hideTyping(){
+
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
+
+  if(item){
+    item.remove();
+  }
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollBottom(){
+
+  requestAnimationFrame(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:
+            "smooth"
+        });
+
+      }catch(error){}
+    }
+  );
+}
+
+
+/* =========================================================
+   CHAT HISTORY UI
+========================================================= */
+
+function formatTime(timestamp){
+
+  if(!timestamp){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      timestamp
+    ).toLocaleString(
+      "hi-IN",
+      {
+        day:"2-digit",
+        month:"short",
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  }catch(error){
+
+    return "";
+  }
+}
+
+
+function renderChatHistory(){
+
+  chatHistoryEl.innerHTML = "";
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      );
+
+
+  if(!sorted.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई पुरानी चैट नहीं है।";
+
+    chatHistoryEl.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  sorted.forEach(item => {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "chat-history-item" +
+      (
+        item.id === currentChatId
+          ? " active"
+          : ""
+      );
+
+
+    const info =
+      document.createElement(
+        "div"
+      );
+
+    info.className =
+      "chat-history-info";
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "chat-history-title";
+
+    title.textContent =
+      item.title ||
+      "नई चैट";
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "chat-history-meta";
+
+
+    meta.textContent =
+      (
+        Array.isArray(
+          item.messages
+        )
+          ? item.messages.length
+          : 0
+      ) +
+      " messages • " +
+      formatTime(
+        item.updatedAt
+      );
+
+
+    info.appendChild(
+      title
+    );
+
+    info.appendChild(
+      meta
+    );
+
+
+    const deleteBtn =
+      document.createElement(
+        "button"
+      );
+
+    deleteBtn.className =
+      "delete-chat";
+
+    deleteBtn.type =
+      "button";
+
+    deleteBtn.textContent =
+      "🗑️";
+
+    deleteBtn.title =
+      "इस चैट को डिलीट करें";
+
+
+    deleteBtn.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        deleteChat(
+          item.id
+        );
+      }
+    );
+
+
+    row.appendChild(
+      info
+    );
+
+    row.appendChild(
+      deleteBtn
+    );
+
+
+    row.addEventListener(
+      "click",
+      () => {
+
+        openChat(
+          item.id
+        );
+
+        closeDrawer();
+      }
+    );
+
+
+    chatHistoryEl.appendChild(
+      row
+    );
+  });
+}
+
+
+/* =========================================================
+   OPEN CHAT
+========================================================= */
+
+function openChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  currentChatId =
+    chat.id;
+
+
+  messages =
+    Array.isArray(
+      chat.messages
+    )
+      ? chat.messages
+          .slice(
+            -MAX_MESSAGES_PER_CHAT
+          )
+      : [];
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  hideTyping();
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  scrollBottom();
+}
+
+
+/* =========================================================
+   DELETE CHAT
+========================================================= */
+
+function deleteChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats =
+    chats.filter(
+      item =>
+        item.id !== id
+    );
+
+
+  if(currentChatId === id){
+
+    currentChatId =
+      null;
+
+    messages = [];
+
+    createNewChat(
+      true
+    );
+
+    renderCurrentChat();
+
+  }else{
+
+    saveChatHistory();
+  }
+
+
+  renderChatHistory();
+
+  showToast(
+    "चैट डिलीट कर दी गई।"
+  );
+}
+
+
+/* =========================================================
+   DELETE ALL
+========================================================= */
+
+function deleteAllChats(){
+
+  if(!chats.length){
+
+    showToast(
+      "डिलीट करने के लिए कोई चैट नहीं है।"
+    );
+
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats = [];
+
+  currentChatId =
+    null;
+
+  messages = [];
+
+
+  safeRemove(
+    CHAT_LIST_KEY
+  );
+
+  safeRemove(
+    OLD_CHAT_KEY
+  );
+
+
+  createNewChat(
+    false
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  showToast(
+    "सभी चैट डिलीट कर दी गईं।"
+  );
+}
+
+
+/* =========================================================
+   IMAGE HISTORY
+========================================================= */
+
+function getStoredCreations(){
+
+  if(!HAS_STORAGE){
+    return [];
+  }
+
+
+  const raw =
+    safeGet(
+      IMAGE_KEY
+    );
+
+
+  if(!raw){
+    return [];
+  }
+
+
+  try{
+
+    const parsed =
+      JSON.parse(
+        raw
+      );
+
+
+    if(!Array.isArray(parsed)){
+      return [];
+    }
+
+
+    return parsed
+      .filter(
+        item =>
+          item &&
+          typeof item.image === "string"
+      )
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Image history invalid:",
+      error
+    );
+
+    safeRemove(
+      IMAGE_KEY
+    );
+
+    return [];
+  }
+}
+
+
+/* =========================================================
+   CREATIONS
+========================================================= */
+
+function getCreations(){
+
+  const stored =
+    getStoredCreations();
+
+
+  const all = [
+    ...volatileCreations,
+    ...stored
+  ];
+
+
+  const seen =
+    new Set();
+
+
+  return all
+    .filter(item => {
+
+      if(
+        !item ||
+        !item.image ||
+        !item.id
+      ){
+        return false;
+      }
+
+
+      if(
+        seen.has(
+          item.id
+        )
+      ){
+        return false;
+      }
+
+
+      seen.add(
+        item.id
+      );
+
+      return true;
+    })
+    .sort(
+      (a,b) =>
+        (b.time || b.createdAt || 0) -
+        (a.time || a.createdAt || 0)
+    )
+    .slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+}
+
+
+function findCreationById(id){
+
+  if(!id){
+    return null;
+  }
+
+
+  const volatile =
+    volatileCreations.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(volatile){
+    return volatile;
+  }
+
+
+  return getStoredCreations()
+    .find(
+      item =>
+        item.id === id
+    ) || null;
+}
+
+
+/* =========================================================
+   SAVE CREATIONS
+========================================================= */
+
+function saveCreations(list){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+
+  try{
+
+    const clean =
+      list
+        .filter(
+          item =>
+            item &&
+            item.image &&
+            item.image.length <=
+              MAX_HISTORY_IMAGE_CHARS
+        )
+        .slice(
+          0,
+          MAX_SAVED_CREATIONS
+        );
+
+
+    return safeSet(
+      IMAGE_KEY,
+      JSON.stringify(
+        clean
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Creation save failed:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   IMAGE BLOB HELPERS
+========================================================= */
+
+async function dataURLToBlob(
+  dataURL
+){
+
+  if(!dataURL){
+    throw new Error(
+      "Image data missing"
+    );
+  }
+
+
+  /*
+    data:image/...;base64,...
+  */
+
+  if(
+    dataURL.startsWith(
+      "data:"
+    )
+  ){
+
+    const parts =
+      dataURL.split(",");
+
+    const header =
+      parts[0];
+
+    const body =
+      parts.slice(1).join(",");
+
+
+    const mime =
+      (
+        header.match(
+          /data:([^;]+)/
+        ) || []
+      )[1] ||
+      "image/png";
+
+
+    const binary =
+      atob(body);
+
+
+    const bytes =
+      new Uint8Array(
+        binary.length
+      );
+
+
+    for(
+      let i=0;
+      i<binary.length;
+      i++
+    ){
+
+      bytes[i] =
+        binary.charCodeAt(i);
+    }
+
+
+    return new Blob(
+      [bytes],
+      {
+        type:mime
+      }
+    );
+  }
+
+
+  const response =
+    await fetch(
+      dataURL
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Image fetch failed"
+    );
+  }
+
+
+  return response.blob();
+}
+
+
+async function blobToDataURL(
+  blob
+){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        blob
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESIZE
+   IMPORTANT FOR FLUX.2 KLEIN REFERENCE IMAGE
+========================================================= */
+
+async function resizeImageDataURL(
+  dataURL,
+  maxSize = MAX_MODEL_IMAGE_SIZE,
+  quality = .78
+){
+
+  if(!dataURL){
+    return null;
+  }
+
+
+  const img =
+    new Image();
+
+
+  await new Promise(
+    (resolve,reject) => {
+
+      img.onload =
+        resolve;
+
+      img.onerror =
+        reject;
+
+      img.src =
+        dataURL;
+    }
+  );
+
+
+  const sourceWidth =
+    img.naturalWidth ||
+    img.width;
+
+
+  const sourceHeight =
+    img.naturalHeight ||
+    img.height;
+
+
+  if(
+    !sourceWidth ||
+    !sourceHeight
+  ){
+
+    return dataURL;
+  }
+
+
+  const scale =
+    Math.min(
+      1,
+      maxSize /
+      Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+
+  const width =
+    Math.max(
+      1,
+      Math.round(
+        sourceWidth * scale
+      )
+    );
+
+
+  const height =
+    Math.max(
+      1,
+      Math.round(
+        sourceHeight * scale
+      )
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  if(!ctx){
+    return dataURL;
+  }
+
+
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    JPEG reference image काफी छोटा रहेगा।
+  */
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    quality
+  );
+}
+
+
+/* =========================================================
+   HISTORY IMAGE
+========================================================= */
+
+async function blobToHistoryDataURL(
+  blob,
+  maxSize = 560
+){
+
+  try{
+
+    const bitmap =
+      await createImageBitmap(
+        blob
+      );
+
+
+    /*
+      IMPORTANT:
+      dimensions close() से पहले save करें।
+    */
+
+    const originalWidth =
+      bitmap.width;
+
+    const originalHeight =
+      bitmap.height;
+
+
+    const scale =
+      Math.min(
+        1,
+        maxSize /
+        Math.max(
+          originalWidth,
+          originalHeight
+        )
+      );
+
+
+    const width =
+      Math.max(
+        1,
+        Math.round(
+          originalWidth * scale
+        )
+      );
+
+
+    const height =
+      Math.max(
+        1,
+        Math.round(
+          originalHeight * scale
+        )
+      );
+
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+
+    canvas.width =
+      width;
+
+    canvas.height =
+      height;
+
+
+    const ctx =
+      canvas.getContext(
+        "2d"
+      );
+
+
+    if(!ctx){
+
+      bitmap.close();
+
+      return null;
+    }
+
+
+    ctx.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+
+    bitmap.close();
+
+
+    /*
+      WebP preferred.
+    */
+
+    let dataURL =
+      canvas.toDataURL(
+        "image/webp",
+        .70
+      );
+
+
+    /*
+      Browser WebP support न करे तो JPEG।
+    */
+
+    if(
+      !dataURL.startsWith(
+        "data:image/webp"
+      )
+    ){
+
+      dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          .70
+        );
+    }
+
+
+    /*
+      History के लिए hard limit।
+    */
+
+    if(
+      dataURL.length >
+      MAX_HISTORY_IMAGE_CHARS
+    ){
+
+      const smallerCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      const smallerMax =
+        420;
+
+
+      const smallerScale =
+        Math.min(
+          1,
+          smallerMax /
+          Math.max(
+            originalWidth,
+            originalHeight
+          )
+        );
+
+
+      const smallWidth =
+        Math.max(
+          1,
+          Math.round(
+            originalWidth *
+            smallerScale
+          )
+        );
+
+
+      const smallHeight =
+        Math.max(
+          1,
+          Math.round(
+            originalHeight *
+            smallerScale
+          )
+        );
+
+
+      smallerCanvas.width =
+        smallWidth;
+
+      smallerCanvas.height =
+        smallHeight;
+
+
+      const smallerCtx =
+        smallerCanvas.getContext(
+          "2d"
+        );
+
+
+      if(!smallerCtx){
+        return null;
+      }
+
+
+      /*
+        Original bitmap बंद हो चुका है,
+        इसलिए current canvas से downscale करें।
+      */
+
+      smallerCtx.drawImage(
+        canvas,
+        0,
+        0,
+        smallWidth,
+        smallHeight
+      );
+
+
+      dataURL =
+        smallerCanvas.toDataURL(
+          "image/jpeg",
+          .62
+        );
+
+
+      if(
+        dataURL.length >
+        MAX_HISTORY_IMAGE_CHARS
+      ){
+
+        return null;
+      }
+    }
+
+
+    return dataURL;
+
+  }catch(error){
+
+    console.warn(
+      "History image compression failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   SAVE CREATION
+========================================================= */
+
+async function saveCreation(
+  imageData,
+  promptText
+){
+
+  if(!imageData){
+    return null;
+  }
+
+
+  const imageId =
+    makeImageId();
+
+
+  /*
+    Original image को localStorage में नहीं डालेंगे।
+    पहले छोटा history copy बनाएँगे।
+  */
+
+  let historyImage =
+    null;
+
+
+  try{
+
+    const blob =
+      await dataURLToBlob(
+        imageData
+      );
+
+
+    historyImage =
+      await blobToHistoryDataURL(
+        blob,
+        560
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Creation history conversion failed:",
+      error
+    );
+  }
+
+
+  /*
+    अगर compressed history नहीं बनी,
+    तो current session में full image रहेगी।
+    localStorage में नहीं जाएगी।
+  */
+
+  const record = {
+
+    id:
+      imageId,
+
+    image:
+      historyImage ||
+      imageData,
+
+    prompt:
+      String(
+        promptText || ""
+      ).slice(
+        0,
+        MAX_CREATION_PROMPT_CHARS
+      ),
+
+    time:
+      Date.now()
+  };
+
+
+  volatileCreations.unshift(
+    record
+  );
+
+
+  volatileCreations =
+    volatileCreations.slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+
+
+  /*
+    केवल compressed image storage में save करें।
+  */
+
+  if(historyImage){
+
+    const existing =
+      getStoredCreations();
+
+
+    const list =
+      [
+        {
+          ...record,
+          image:
+            historyImage
+        },
+        ...existing
+      ]
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+    if(
+      saveCreations(
+        list
+      )
+    ){
+
+      /*
+        Storage में successfully save हो गई,
+        इसलिए duplicate volatile copy हटा दें।
+      */
+
+      volatileCreations =
+        volatileCreations.filter(
+          item =>
+            item.id !== imageId
+        );
+    }
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+
+
+  return imageId;
+}
+
+
+/* =========================================================
+   RENDER CREATIONS
+========================================================= */
+
+function renderCreations(){
+
+  creationGrid.innerHTML = "";
+
+
+  const list =
+    getCreations()
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+  if(!list.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई image creation नहीं है।";
+
+    creationGrid.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "creation-card";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.src =
+      item.image;
+
+    img.alt =
+      item.prompt ||
+      "Creation";
+
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          item.image
+        )
+    );
+
+
+    const caption =
+      document.createElement(
+        "div"
+      );
+
+    caption.className =
+      "creation-prompt";
+
+    caption.textContent =
+      item.prompt ||
+      "Image";
+
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      caption
+    );
+
+
+    creationGrid.appendChild(
+      card
+    );
+  });
+}
+
+
+/* =========================================================
+   LAZY CREATION LOAD
+========================================================= */
+
+function loadCreationsLazy(){
+
+  if(creationsLoaded){
+    renderCreations();
+    return;
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+}
+
+
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
+function openImageViewer(src){
+
+  if(!src){
+    return;
+  }
+
+
+  viewerImg.src =
+    src;
+
+
+  imageViewer.classList.add(
+    "open"
+  );
+}
+
+
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+  viewerImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESPONSE NORMALIZATION
+========================================================= */
+
+function normalizeImageResult(
+  value
+){
+
+  if(!value){
+    return null;
+  }
+
+
+  /*
+    Direct data URL.
+  */
+
+  if(
+    typeof value === "string"
+  ){
+
+    const s =
+      value.trim();
+
+
+    if(!s){
+      return null;
+    }
+
+
+    if(
+      s.startsWith(
+        "data:image/"
+      )
+    ){
+
+      return s;
+    }
+
+
+    /*
+      URL भी स्वीकार करें।
+    */
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      return s;
+    }
+
+
+    /*
+      Raw Base64।
+    */
+
+    if(
+      /^[A-Za-z0-9+/=\r\n]+$/.test(
+        s
+      )
+    ){
+
+      return (
+        "data:image/png;base64," +
+        s.replace(
+          /\s/g,
+          ""
+        )
+      );
+    }
+
+
+    return null;
+  }
+
+
+  /*
+    Array response।
+  */
+
+  if(
+    Array.isArray(value)
+  ){
+
+    for(
+      const item of value
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+
+    return null;
+  }
+
+
+  if(
+    typeof value === "object"
+  ){
+
+    const candidates = [
+
+      value.image,
+
+      value.image_url,
+
+      value.imageUrl,
+
+      value.url,
+
+      value.result,
+
+      value.data
+    ];
+
+
+    for(
+      const item of candidates
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  photoPreviewImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+
+    "बैकग्राउंड बदल",
+
+    "बैकग्राउंड हटा",
+
+    "पृष्ठभूमि बदल",
+
+    "पृष्ठभूमि हटा",
+
+    "इस फोटो",
+
+    "इस तस्वीर",
+
+    "इस इमेज",
+
+    "इस चित्र",
+
+    "इसमें बदलाव",
+
+    "इसमें बदल",
+
+    "इसको एडिट",
+
+    "इसे एडिट",
+
+    "background change",
+
+    "change background",
+
+    "remove background",
+
+    "replace background",
+
+    "edit this",
+
+    "edit the photo",
+
+    "edit image",
+
+    "replace the background",
+
+    "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+      s.includes("background") ||
+      s.includes("बदल दो") ||
+      s.includes("हटा दो") ||
+      s.includes("replace") ||
+      s.includes("remove")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
+}
+
+
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
+
+async function generateImage(
+  prompt
+){
+
+  const payload = {
+
+    prompt:
+      String(
+        prompt || ""
+      ).trim(),
+
+    ratio:
+      "1:1",
+
+    quality:
+      "standard"
+  };
+
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
+
+  return responseToImage(
+    response
+  );
+}
+
+
+/* =========================================================
+   CHAT IMAGE NORMALIZATION
+========================================================= */
+
+function normalizeChatResult(
+  data
+){
+
+  /*
+    Worker JSON object।
+  */
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    const text =
+      data.response ??
+      data.answer ??
+      data.text ??
+      data.message ??
+      data.output ??
+      data.content ??
+      "";
+
+
+    const image =
+      normalizeImageResult(
+        data.image ??
+        data.image_url ??
+        data.imageUrl ??
+        data.result?.image ??
+        null
+      );
+
+
+    return {
+
+      text:
+        String(
+          text || ""
+        ),
+
+      image:
+        image
+    };
+  }
+
+
+  /*
+    Plain string response।
+  */
+
+  return {
+
+    text:
+      String(
+        data || ""
+      ),
+
+    image:
+      null
+  };
+}
+
+
+/* =========================================================
+   CHAT API
+========================================================= */
+
+async function sendChatRequest(onChunk = null){
+
+  const recentMessages =
+    messages
+      .slice(-19)
+      .map(item => ({
+        role: item.role === "user" ? "user" : "assistant",
+        content: String(item.content || "").slice(0, MAX_MESSAGE_CHARS)
+      }));
+
+  const lastUserMessage =
+    messages
+      .slice()
+      .reverse()
+      .find(item => item.role === "user");
+
+  const payload = {
+    message: lastUserMessage?.content || "",
+    prompt: lastUserMessage?.content || "",
+    messages: recentMessages,
+    stream: true
+  };
+
+  if(selectedPhotoBase64){
+    payload.image_b64 = await resizeImageDataURL(
+      selectedPhotoBase64,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+  }
+
+  const response = await fetch(API + "chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+
+  if(contentType.startsWith("image/")){
+    const image = await blobToDataURL(await response.blob());
+    if(!response.ok) throw new Error("Chat image request failed.");
+    return { text: "इमेज तैयार है।", image };
+  }
+
+  /* Fast streaming path */
+  if(contentType.includes("text/event-stream") && response.body){
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+    let fullText = "";
+
+    const pushChunk = chunk => {
+      if(!chunk) return;
+      chunk = cleanAaruText(chunk);
+      if(!chunk) return;
+      fullText += chunk;
+      if(typeof onChunk === "function") onChunk(fullText);
+    };
+
+    while(true){
+      const {value, done} = await reader.read();
+      if(done) break;
+
+      buffer += decoder.decode(value, {stream:true});
+      const events = buffer.split("\n\n");
+      buffer = events.pop() || "";
+
+      for(const event of events){
+        const lines = event.split("\n");
+        for(const line of lines){
+          const trimmed = line.trim();
+          if(!trimmed || !trimmed.startsWith("data:")) continue;
+
+          const data = trimmed.slice(5).trim();
+          if(!data || data === "[DONE]") continue;
+
+          let parsed = null;
+          try { parsed = JSON.parse(data); } catch(error) {}
+
+          let chunk = "";
+
+          if(typeof parsed === "string"){
+            chunk = parsed;
+          }else if(parsed && typeof parsed === "object"){
+            chunk =
+              parsed.response ??
+              parsed.text ??
+              parsed.content ??
+              parsed.delta ??
+              parsed.output_text ??
+              parsed.token ??
+              parsed.choices?.[0]?.delta?.content ??
+              parsed.choices?.[0]?.text ??
+              "";
+          }else{
+            chunk = data;
+          }
+
+          pushChunk(String(chunk || ""));
+        }
+      }
+    }
+
+    /* अंतिम अधूरा SSE frame */
+    if(buffer.trim()){
+      for(const line of buffer.split("\n")){
+        const trimmed = line.trim();
+        if(!trimmed.startsWith("data:")) continue;
+        const data = trimmed.slice(5).trim();
+        if(!data || data === "[DONE]") continue;
+
+        let parsed = null;
+        try { parsed = JSON.parse(data); } catch(error) {}
+
+        let chunk = typeof parsed === "string"
+          ? parsed
+          : parsed?.response ?? parsed?.text ?? parsed?.content ?? parsed?.delta ?? "";
+
+        pushChunk(String(chunk || ""));
+      }
+    }
+
+    return {
+      text: cleanAaruText(fullText),
+      image: null
+    };
+  }
+
+  /* JSON fallback */
+  const raw = await response.text();
+  let data = null;
+
+  try{
+    data = raw ? JSON.parse(raw) : null;
+  }catch(error){
+    if(!response.ok) throw new Error(raw || "Chat request failed.");
+    return { text: cleanAaruText(raw || ""), image: null };
+  }
+
+  if(!response.ok){
+    throw new Error(
+      data?.error || data?.message || data?.response || "Chat request failed."
+    );
+  }
+
+  const result = normalizeChatResult(data);
+  result.text = cleanAaruText(result.text);
+  return result;
+}
+
+
+/* =========================================================
+   STREAM TEXT CLEANER
+========================================================= */
+
+function cleanAaruText(text){
+  return String(text || "")
+    .replace(/\\?\*\*/g, "")
+    .replace(/\\?\*/g, "")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/^[-_=]{3,}\s*$/gm, "")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
+
+
+/* =========================================================
+   HANDLE SEND
+   Unified composer: text + photo + image generation/editing
+========================================================= */
+
+async function handleSend(){
+
+  if(isBusy){
+    return;
+  }
+
+  const prompt =
+    promptEl.value.trim();
+
+  const hasPhoto =
+    !!selectedPhotoBase64;
+
+  /* ChatGPT-style: photo alone can be sent. */
+  if(!prompt && !hasPhoto){
+    showToast(
+      "कुछ लिखें या photo जोड़ें।"
+    );
+    return;
+  }
+
+  ensureCurrentChat();
+
+  isBusy =
+    true;
+
+  sendBtn.disabled =
+    true;
+
+  const attachedPhoto =
+    selectedPhotoUrl;
+
+  addUserMessage(
+    prompt,
+    true,
+    attachedPhoto
+  );
+
+  promptEl.value =
+    "";
+
+  autoResize();
+  scrollBottom();
+
+  try{
+
+    showTyping();
+
+    let streamingRow = null;
+    let streamingBubble = null;
+
+    const updateStream = text => {
+      hideTyping();
+
+      if(!streamingRow){
+        streamingRow = document.createElement("div");
+        streamingRow.className = "message assistant";
+
+        streamingBubble = document.createElement("div");
+        streamingBubble.className = "bubble md";
+
+        streamingRow.appendChild(streamingBubble);
+        messagesEl.appendChild(streamingRow);
+      }
+
+      streamingBubble.innerHTML = renderMarkdown(cleanAaruText(text));
+      scrollBottom();
+    };
+
+    const result =
+      await sendChatRequest(updateStream);
+
+    hideTyping();
+
+    if(streamingRow){
+      streamingRow.remove();
+    }
+
+    if(result && result.image){
+
+      const imageId =
+        await saveCreation(
+          result.image,
+          prompt || "Image generation"
+        );
+
+      addAssistantMessage(
+        result.text ||
+        "🖼️ Image generated successfully.",
+        true,
+        imageId
+      );
+
+    }else{
+
+      addAssistantMessage(
+        result?.text ||
+        "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।",
+        true
+      );
+    }
+
+    clearSelectedPhoto();
+
+  }catch(error){
+
+    console.error(
+      "Aaru request failed:",
+      error
+    );
+
+    hideTyping();
+
+    addAssistantMessage(
+      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      true
+    );
+
+    showToast(
+      error?.message ||
+      "Request failed"
+    );
+
+  }finally{
+
+    isBusy =
+      false;
+
+    sendBtn.disabled =
+      false;
+
+    scrollBottom();
+
+    try{
+      promptEl.focus();
+    }catch(error){}
+  }
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+function autoResize(){
+
+  promptEl.style.height =
+    "auto";
+
+
+  promptEl.style.height =
+    Math.min(
+      promptEl.scrollHeight,
+      150
+    ) + "px";
+}
+
+
+promptEl.addEventListener(
+  "input",
+  autoResize
+);
+
+
+/* =========================================================
+   ENTER
+========================================================= */
+
+promptEl.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" &&
+      !event.shiftKey
+    ){
+
+      event.preventDefault();
+
+      handleSend();
+    }
+  }
+);
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+sendBtn.addEventListener(
+  "click",
+  handleSend
+);
+
+
+/* =========================================================
+   PHOTO BUTTON
+========================================================= */
+
+document
+  .getElementById("photoBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      photoInput.click();
+    }
+  );
+
+
+/* =========================================================
+   PHOTO UPLOAD
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if(!file){
+      return;
+    }
+
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      showToast(
+        "कृपया image file चुनें।"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      const original =
+        await fileToDataURL(
+          file
+        );
+
+
+      /*
+        IMPORTANT:
+        Preview और API दोनों के लिए
+        छोटा image रखें।
+      */
+
+      const resized =
+        await resizeImageDataURL(
+          original,
+          MAX_MODEL_IMAGE_SIZE,
+          .80
+        );
+
+
+      selectedPhotoBase64 =
+        resized;
+
+
+      selectedPhotoUrl =
+        resized;
+
+
+      photoPreviewImg.src =
+        selectedPhotoUrl;
+
+
+      photoPreview.classList.add(
+        "show"
+      );
+
+
+      showToast(
+        "Photo तैयार है। अब सीधे Send दबाएँ या सवाल लिखें।"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Photo processing failed:",
+        error
+      );
+
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
+      );
+
+    }finally{
+
+      /*
+        Same file दोबारा select हो सके।
+      */
+
+      photoInput.value =
+        "";
+    }
+  });
+
+
+function fileToDataURL(file){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE PHOTO
+========================================================= */
+
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    clearSelectedPhoto
+  );
+
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+function openDrawer(){
+
+  drawer.classList.add(
+    "open"
+  );
+
+  drawerOverlay.classList.add(
+    "open"
+  );
+
+
+  /*
+    Image history केवल drawer खोलने पर।
+  */
+
+  setTimeout(
+    loadCreationsLazy,
+    0
+  );
+}
+
+
+function closeDrawer(){
+
+  drawer.classList.remove(
+    "open"
+  );
+
+  drawerOverlay.classList.remove(
+    "open"
+  );
+}
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener(
+    "click",
+    openDrawer
+  );
+
+
+document
+  .getElementById("closeDrawer")
+  .addEventListener(
+    "click",
+    closeDrawer
+  );
+
+
+drawerOverlay.addEventListener(
+  "click",
+  closeDrawer
+);
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function startNewChat(){
+
+  if(isBusy){
+    return;
+  }
+
+
+  if(currentChatId){
+
+    saveCurrentChat();
+  }
+
+
+  createNewChat(
+    true
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+
+  clearSelectedPhoto();
+
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  setTimeout(
+    () =>
+      promptEl.focus(),
+    100
+  );
+}
+
+
+document
+  .getElementById("newChatBtn")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+document
+  .getElementById("newChatTop")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+/* =========================================================
+   VIEWER
+========================================================= */
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closeImageViewer
+  );
+
+
+imageViewer.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target === imageViewer
+    ){
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape"
+    ){
+
+      closeDrawer();
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   PAGE RECOVERY
+========================================================= */
+
+function recoverPage(){
+
+  const now =
+    Date.now();
+
+
+  if(
+    now -
+    lastPageShowRecovery <
+    300
+  ){
+
+    return;
+  }
+
+
+  lastPageShowRecovery =
+    now;
+
+
+  try{
+
+    hideTyping();
+
+  }catch(error){}
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  try{
+
+    closeDrawer();
+
+    closeImageViewer();
+
+  }catch(error){}
+
+
+  try{
+
+    const current =
+      chats.find(
+        item =>
+          item.id ===
+          currentChatId
+      );
+
+
+    if(current){
+
+      messages =
+        Array.isArray(
+          current.messages
+        )
+          ? current.messages
+              .slice(
+                -MAX_MESSAGES_PER_CHAT
+              )
+          : [];
+    }
+
+
+    renderCurrentChat();
+
+    renderChatHistory();
+
+    updateModeButtons();
+
+    autoResize();
+
+  }catch(error){
+
+    console.error(
+      "Recovery failed:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   PAGESHOW
+========================================================= */
+
+window.addEventListener(
+  "pageshow",
+  event => {
+
+    if(!appReady){
+      return;
+    }
+
+
+    if(event.persisted){
+
+      recoverPage();
+
+      return;
+    }
+
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      setTimeout(
+        recoverPage,
+        50
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   VISIBILITY
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState ===
+      "visible" &&
+      appReady
+    ){
+
+      setTimeout(
+        () => {
+
+          try{
+
+            hideTyping();
+
+            isBusy =
+              false;
+
+            sendBtn.disabled =
+              false;
+
+          }catch(error){}
+
+        },
+        80
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+function safeInitialLoad(){
+
+  try{
+
+    loadChatHistory();
+
+  }catch(error){
+
+    console.error(
+      "Chat history load failed:",
+      error
+    );
+
+    chats = [];
+
+    currentChatId =
+      null;
+
+    messages = [];
+  }
+
+
+  try{
+
+    if(!chats.length){
+
+      /*
+        Startup पर localStorage write नहीं।
+      */
+
+      createNewChat(
+        false
+      );
+
+    }else{
+
+      const latest =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )[0];
+
+
+      if(latest){
+
+        currentChatId =
+          latest.id;
+
+
+        messages =
+          Array.isArray(
+            latest.messages
+          )
+            ? latest.messages
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
+            : [];
+      }
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "Chat initialization failed:",
+      error
+    );
+
+    chats = [];
+
+    messages = [];
+
+    currentChatId =
+      null;
+
+
+    createNewChat(
+      false
+    );
+  }
+
+
+  /*
+    Chat पहले render।
+  */
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+  /*
+    Image history startup पर parse नहीं।
+  */
+
+  creationGrid.innerHTML =
+    `
+      <div class="empty-history">
+        Images देखने के लिए Menu खोलें।
+      </div>
+    `;
+
+
+  updateModeButtons();
+
+  autoResize();
+
+
+  setTimeout(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:"auto"
+        });
+
+      }catch(error){}
+
+    },
+    80
+  );
+
+
+  appReady =
+    true;
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+if(
+  document.readyState ===
+  "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
+    }
+  );
+
+}else{
+
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
+
+
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
+
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
 </script>
+
 </body>
 </html>
