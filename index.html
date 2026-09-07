@@ -5,7 +5,7 @@
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — Intelligence 4.0</title>
+<title>Aaru AI — Intelligence 5.0</title>
 
 <style>
 *{
@@ -717,7 +717,7 @@ main{
 
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
-<div class="brand-sub">Fast • Smart • Intelligence 4.0</div>
+<div class="brand-sub">Fast • Smart • Context Intelligence 5.0</div>
 </div>
 
 <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
@@ -891,7 +891,8 @@ const MEMORY_V3_KEY = "aaru_smart_memory_v3";
 const MAX_MEMORY_SUMMARY_CHARS = 3200;
 const MAX_RELEVANT_MEMORY_CHARS = 2600;
 const MAX_SEMANTIC_MEMORIES = 80;
-const CLIENT_INTELLIGENCE_VERSION = "4.0";
+const CLIENT_INTELLIGENCE_VERSION = "5.0";
+const CLIENT_CONTEXT_ENGINE_VERSION = "5.0";
 
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
@@ -4578,6 +4579,13 @@ async function sendChatRequest(){
     semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
     intelligence_layer: CLIENT_INTELLIGENCE_VERSION,
     client_version: CLIENT_INTELLIGENCE_VERSION,
+    context_engine: {
+      version: CLIENT_CONTEXT_ENGINE_VERSION,
+      active_topic: currentQuery.slice(0, 500),
+      recent_turns: recentMessages.slice(-10),
+      relevant_memory: relevantMemory.slice(0, 2600),
+      semantic_memory_count: semanticMemory.length
+    },
     stream: true
   };
 
