@@ -1,574 +1,226 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aaru AI</title>
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --panel-bg: #1e293b;
-      --text-color: #f8fafc;
-      --text-secondary: #94a3b8;
-      --accent-color: #6366f1;
-      --accent-hover: #4f46e5;
-      --border-color: #334155;
-      --bubble-user: #3b82f6;
-      --bubble-assistant: #334155;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Sidebar / History */
-    .sidebar {
-      width: 280px;
-      background-color: var(--panel-bg);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .sidebar-header {
-      padding: 16px;
-      font-size: 18px;
-      font-weight: bold;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .new-chat-btn {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .new-chat-btn:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .chat-history-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-
-    .chat-history-item {
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background 0.2s;
-    }
-
-    .chat-history-item:hover, .chat-history-item.active {
-      background-color: var(--border-color);
-    }
-
-    .chat-history-info {
-      overflow: hidden;
-      flex: 1;
-    }
-
-    .chat-history-title {
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .chat-history-meta {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
-
-    .delete-chat {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      opacity: 0.7;
-    }
-
-    .delete-chat:hover {
-      opacity: 1;
-    }
-
-    /* Main Chat Area */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      position: relative;
-    }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      max-width: 75%;
-    }
-
-    .message.user {
-      align-self: flex-end;
-    }
-
-    .message.assistant {
-      align-self: flex-start;
-    }
-
-    .bubble {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .message.user .bubble {
-      background-color: var(--bubble-user);
-      color: white;
-      border-bottom-right-radius: 2px;
-    }
-
-    .message.assistant .bubble {
-      background-color: var(--bubble-assistant);
-      color: var(--text-color);
-      border-bottom-left-radius: 2px;
-    }
-
-    .msg-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-      font-size: 12px;
-    }
-
-    .msg-action-btn {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-
-    .msg-action-btn:hover {
-      color: var(--text-color);
-    }
-
-    /* Input Area */
-    .chat-input-area {
-      padding: 16px;
-      background-color: var(--panel-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chat-input {
-      flex: 1;
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      color: var(--text-color);
-      font-size: 14px;
-      resize: none;
-      max-height: 150px;
-      outline: none;
-    }
-
-    .chat-input:focus {
-      border-color: var(--accent-color);
-    }
-
-    .send-btn {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .send-btn:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .empty-history {
-      text-align: center;
-      color: var(--text-secondary);
-      padding: 20px;
-      font-size: 13px;
-    }
-
-    .generated-image, .attached-user-image {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-
-    /* Creations Grid Section Panel */
-    .creations-panel {
-      width: 250px;
-      background-color: var(--panel-bg);
-      border-left: 1px solid var(--border-color);
-      padding: 12px;
-      overflow-y: auto;
-    }
-
-    .creation-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .creation-card {
-      background: var(--bg-color);
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-    }
-
-    .creation-card img {
-      width: 100%;
-      height: 80px;
-      object-fit: cover;
-    }
-
-    .creation-prompt {
-      font-size: 10px;
-      padding: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aaru AI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--text:#171923;--muted:#737887;--line:#e5e7ee;--accent:#246bfd;--user:#eaf1ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,sans-serif}
+.app{min-height:100vh;max-width:900px;margin:auto;background:var(--bg)}
+header{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;position:sticky;top:0;z-index:20}
+.brand{font-weight:800;font-size:18px}.brand small{display:block;font-size:10px;color:var(--muted);font-weight:500}
+button{border:0;background:none;cursor:pointer;color:inherit}.topbtn{width:40px;height:40px;border-radius:12px;font-size:20px}.topbtn:hover{background:#f0f2f7}
+main{padding:16px 12px 150px}.messages{display:flex;flex-direction:column;gap:12px}
+.msg{display:flex}.msg.user{justify-content:flex-end}.bubble{max-width:min(84%,700px);padding:11px 13px;border-radius:16px;white-space:pre-wrap;line-height:1.5;font-size:15px}.assistant .bubble{background:#fff;border:1px solid var(--line)}.user .bubble{background:var(--user)}
+.msg img{max-width:100%;border-radius:12px;display:block;margin-top:8px}
+.typing{color:var(--muted);font-size:13px;padding:8px}
+.composer-wrap{position:fixed;bottom:0;left:0;right:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 18%);z-index:15}
+.composer{max-width:876px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px;box-shadow:0 8px 30px #00000012}
+.preview{display:none;position:relative;margin:2px 2px 8px}.preview.show{display:block}.preview img{width:74px;height:74px;object-fit:cover;border-radius:12px}.remove{position:absolute;top:-5px;left:65px;background:#222;color:#fff;border-radius:50%;width:22px;height:22px}
+.row{display:flex;align-items:flex-end;gap:6px}.row textarea{flex:1;border:0;outline:0;resize:none;min-height:42px;max-height:140px;font:inherit;padding:10px;background:transparent}.ico{width:42px;height:42px;border-radius:13px;font-size:20px}.ico:hover{background:#f1f3f8}.send{background:var(--accent);color:#fff}.send:disabled{opacity:.45}
+.panel{position:fixed;inset:0;background:#0005;z-index:50;display:none}.panel.open{display:block}.drawer{position:absolute;left:0;top:0;bottom:0;width:min(350px,88vw);background:#fff;padding:16px;overflow:auto}.drawer h3{margin:6px 0 14px}.drawer button.action{width:100%;padding:12px;border-radius:12px;background:#f2f4f8;text-align:left;margin-bottom:8px}.list{display:flex;flex-direction:column;gap:7px}.item{padding:10px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.item small{display:block;color:var(--muted);margin-top:3px}.section{margin-top:18px;color:var(--muted);font-size:12px;font-weight:700}
+#file{display:none}.status{font-size:11px;color:var(--muted);padding:2px 8px;min-height:16px}.creation{width:100%;border-radius:12px;margin-top:8px}
+.empty{height:65vh;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:30px}
+</style>
 </head>
 <body>
+<div class="app">
+<header>
+<button class="topbtn" id="menu">☰</button>
+<div class="brand">Aaru AI<small>Fast • Smart • Multilingual</small></div>
+<button class="topbtn" id="new">＋</button>
+</header>
+<main>
+<div id="messages" class="messages"><div class="empty">नमस्ते! मैं Aaru AI हूँ।<br>आप लिखकर, बोलकर, फोटो या PDF के साथ बात कर सकते हैं।</div></div>
+</main>
 
-  <!-- Left Sidebar: Chat History -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <span>चैट इतिहास</span>
-      <button class="new-chat-btn" id="newChatBtn" onclick="createNewChat(true)">+ नई चैट</button>
-    </div>
-    <div class="chat-history-list" id="chatHistoryEl">
-      <!-- Chat history items will render here -->
-    </div>
-  </div>
+<div class="composer-wrap">
+<div class="composer">
+<div id="preview" class="preview"><img id="previewImg"><button class="remove" id="remove">×</button></div>
+<div class="status" id="status"></div>
+<div class="row">
+<button class="ico" id="attach" title="फोटो/PDF">📎</button>
+<button class="ico" id="mic" title="बोलें">🎙️</button>
+<textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..."></textarea>
+<button class="ico" id="speak" title="आवाज़ चालू/बंद">🔊</button>
+<button class="ico send" id="send">➤</button>
+</div>
+</div>
+</div>
 
-  <!-- Main Chat Container -->
-  <div class="main-container">
-    <div class="chat-messages" id="messagesEl">
-      <!-- Messages will render here -->
-    </div>
-    
-    <div class="chat-input-area">
-      <textarea class="chat-input" id="promptEl" placeholder="यहाँ अपना संदेश लिखें... (या image banao: लिखें)" rows="1"></textarea>
-      <button class="send-btn" id="sendBtn">भेजें</button>
-    </div>
-  </div>
+<input id="file" type="file" accept="image/*,.pdf,application/pdf">
 
-  <!-- Right Creations Panel (Optional Visual Showcase) -->
-  <div class="creations-panel">
-    <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">इमेज गैलरी</div>
-    <div class="creation-grid" id="creationGrid">
-      <!-- Creations will render here -->
-    </div>
-  </div>
+<div class="panel" id="panel"><aside class="drawer">
+<button class="action" id="close">✕ बंद करें</button>
+<button class="action" id="drawerNew">＋ नई चैट</button>
+<button class="action" id="clear">🗑️ सभी चैट हटाएँ</button>
+<div class="section">Recent Chats</div><div id="chatList" class="list"></div>
+<div class="section">Recent Creations</div><div id="creationList" class="list"></div>
+</aside></div>
+</div>
 
-<script>
-  // Global Constants & State Variables
-  const MAX_SAVED_CREATIONS = 20;
-  const MAX_CREATION_PROMPT_CHARS = 100;
-  const IMAGE_KEY = "aaru_ai_creations";
-  const CHAT_KEY = "aaru_ai_chats";
-  const HAS_STORAGE = typeof localStorage !== 'undefined';
+<script type="module">
+const API="https://aaru-ai-api.myera-org.workers.dev/";
+const CHAT_KEY="aaru_v3_chats";
+const CREATION_KEY="aaru_v3_creations";
+const MAX_CHATS=12, MAX_MSG=40, MAX_CONTEXT=20;
 
-  let chats = [];
-  let currentChatId = null;
-  let messages = [];
-  let volatileCreations = [];
-  let creationsLoaded = false;
+const $=id=>document.getElementById(id);
+const messagesEl=$("messages"), promptEl=$("prompt"), statusEl=$("status");
+let chats=[], currentId=null, messages=[];
+let attachedImage=null, attachedText="";
+let speaking=true, busy=false, recognition=null;
 
-  // DOM Elements
-  const chatHistoryEl = document.getElementById("chatHistoryEl");
-  const creationGrid = document.getElementById("creationGrid");
-  const messagesEl = document.getElementById("messagesEl");
-  const promptEl = document.getElementById("promptEl");
-  const sendBtn = document.getElementById("sendBtn");
-
-  // Utility functions
-  function escapeHTML(str) {
-    return String(str || "").replace(/[&<>'"]/g, 
-      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
+function id(){return "c_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
+function load(){
+  try{chats=JSON.parse(localStorage.getItem(CHAT_KEY)||"[]")}catch{chats=[]}
+  if(!chats.length) newChat(false); else {currentId=chats[0].id;messages=chats[0].messages||[]}
+  render(); renderLists();
+}
+function save(){
+  const i=chats.findIndex(c=>c.id===currentId);
+  const item={id:currentId,title:messages.find(x=>x.role==="user")?.content?.slice(0,42)||"नई चैट",updatedAt:Date.now(),messages:messages.slice(-MAX_MSG)};
+  if(i>=0)chats[i]=item;else chats.unshift(item);
+  chats.sort((a,b)=>b.updatedAt-a.updatedAt);chats=chats.slice(0,MAX_CHATS);
+  localStorage.setItem(CHAT_KEY,JSON.stringify(chats));renderLists();
+}
+function newChat(persist=true){
+  currentId=id();messages=[];attachedImage=null;attachedText="";clearAttachment();render();if(persist)save();
+}
+function render(){
+  messagesEl.innerHTML="";
+  if(!messages.length){messagesEl.innerHTML='<div class="empty">नमस्ते! मैं Aaru AI हूँ।<br>आप लिखकर, बोलकर, फोटो या PDF के साथ बात कर सकते हैं।</div>';return}
+  for(const m of messages){
+    const wrap=document.createElement("div");wrap.className="msg "+m.role;
+    const b=document.createElement("div");b.className="bubble";b.textContent=m.content||"";
+    if(m.image){const img=document.createElement("img");img.src=m.image;b.appendChild(img)}
+    wrap.appendChild(b);messagesEl.appendChild(wrap);
   }
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+function add(role,content,image=null){messages.push({role,content:String(content||""),image});render();save()}
+function setStatus(s){statusEl.textContent=s||""}
+function escapeSize(data,max=511){
+  return new Promise(resolve=>{
+    const img=new Image();img.onload=()=>{
+      const scale=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/jpeg",.78));
+    };img.onerror=()=>resolve(data);img.src=data;
+  })
+}
+function clearAttachment(){ $("preview").classList.remove("show");$("previewImg").src="";attachedImage=null;attachedText="";$("file").value=""}
+async function imageData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
 
-  function makeImageId() {
-    return 'img_' + Math.random().toString(36).substr(2, 9);
+async function pdfText(file){
+  setStatus("PDF पढ़ा जा रहा है…");
+  const pdfjs=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  const data=new Uint8Array(await file.arrayBuffer()),pdf=await pdfjs.getDocument({data}).promise;
+  let out="";
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p),content=await page.getTextContent();
+    out+=`\n\n--- Page ${p} ---\n`+content.items.map(x=>x.str).join(" ");
+    if(out.length>90000)break;
   }
-
-  function showToast(msg) {
-    console.log("Toast:", msg);
-  }
-
-  function speakText(text) {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'hi-IN';
-      window.speechSynthesis.speak(utterance);
-    } else {
-      showToast("स्पीच सिंथेसिस समर्थित नहीं है।");
+  return out.trim();
+}
+async function attachFile(file){
+  try{
+    if(file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")){
+      attachedText=await pdfText(file);attachedImage=null;setStatus(`PDF तैयार: ${attachedText.length.toLocaleString()} अक्षर`);
+      return;
     }
-  }
-
-  function renderMarkdown(content) {
-    return escapeHTML(content).replace(/\n/g, "<br>");
-  }
-
-  function safeGet(key) {
-    try { return HAS_STORAGE ? localStorage.getItem(key) : null; } catch (e) { return null; }
-  }
-
-  function safeSet(key, val) {
-    try { if (HAS_STORAGE) localStorage.setItem(key, val); } catch (e) {}
-  }
-
-  function safeRemove(key) {
-    try { if (HAS_STORAGE) localStorage.removeItem(key); } catch (e) {}
-  }
-
-  function loadChatHistory() {
-    const raw = safeGet(CHAT_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) chats = parsed;
-      } catch (e) { safeRemove(CHAT_KEY); }
+    if(file.type.startsWith("image/")){
+      const raw=await imageData(file);attachedImage=await escapeSize(raw);attachedText="";
+      $("previewImg").src=attachedImage;$("preview").classList.add("show");setStatus("तस्वीर तैयार है — अब पूछें क्या जानना है।");
     }
-  }
-
-  function saveChatHistory() {
-    if (currentChatId) {
-      const chatIndex = chats.findIndex(c => c.id === currentChatId);
-      if (chatIndex !== -1) {
-        chats[chatIndex].messages = messages;
-        chats[chatIndex].updatedAt = Date.now();
-      }
-    }
-    if (HAS_STORAGE) {
-      safeSet(CHAT_KEY, JSON.stringify(chats));
-    }
-  }
-
-  window.createNewChat = function(persist = true) {
-    const newChat = {
-      id: 'chat_' + Math.random().toString(36).substr(2, 9),
-      title: 'नई चैट',
-      messages: [],
-      updatedAt: Date.now()
+  }catch(e){setStatus("फ़ाइल पढ़ने में समस्या: "+e.message)}
+}
+async function send(){
+  if(busy)return;
+  const text=promptEl.value.trim();
+  if(!text && !attachedImage && !attachedText)return;
+  busy=true;$("send").disabled=true;
+  const display=text || (attachedText?"इस PDF को पढ़कर बताइए।":"इस तस्वीर को समझाइए।");
+  const contextText=attachedText?`\n\n[PDF TEXT]\n${attachedText.slice(0,90000)}`:"";
+  const userContent=display+contextText;
+  add("user",display,attachedImage);
+  promptEl.value="";setStatus("सोच रहा हूँ…");
+  try{
+    const payload={
+      message:display,
+      messages:messages.filter(m=>!m.image).slice(-MAX_CONTEXT).map(m=>({role:m.role,content:m.content})),
+      image_b64:attachedImage||undefined
     };
-    chats.unshift(newChat);
-    currentChatId = newChat.id;
-    messages = [];
-    
-    if (persist) {
-      saveChatHistory();
-      renderChatHistoryUI();
+    if(attachedText)payload.document_text=attachedText.slice(0,90000);
+    const r=await fetch(API+"chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const ct=r.headers.get("content-type")||"";
+    if(ct.includes("image/")){
+      const blob=await r.blob(),url=URL.createObjectURL(blob);
+      add("assistant","इमेज तैयार है।",url);storeCreation(url,display);
+    }else{
+      const d=await r.json();
+      if(!r.ok||d.ok===false)throw new Error(d.error||"Server error");
+      add("assistant",d.response||d.reply||"जवाब नहीं मिला।");
+      if(speaking) speak(d.response||d.reply||"");
     }
-    renderMessages();
-    return newChat;
+  }catch(e){add("assistant","माफ़ कीजिए, अभी समस्या हुई: "+e.message)}
+  finally{clearAttachment();setStatus("");busy=false;$("send").disabled=false;promptEl.focus()}
+}
+function speak(text){
+  if(!("speechSynthesis"in window)||!text)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=/[\u0900-\u097F]/.test(text)?"hi-IN":"en-US";u.rate=.98;speechSynthesis.speak(u);
+}
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setStatus("इस ब्राउज़र में voice input उपलब्ध नहीं है।");return}
+  if(recognition){recognition.stop();recognition=null;return}
+  recognition=new SR();recognition.lang="hi-IN";recognition.interimResults=false;recognition.continuous=false;
+  recognition.onstart=()=>setStatus("सुन रहा हूँ…");
+  recognition.onresult=e=>{promptEl.value=e.results[0][0].transcript;setStatus("आवाज़ text में बदल दी गई।");promptEl.focus()};
+  recognition.onerror=e=>setStatus("Voice error: "+e.error);
+  recognition.onend=()=>{recognition=null};
+  recognition.start();
+}
+function storeCreation(url,prompt){
+  try{
+    const arr=JSON.parse(localStorage.getItem(CREATION_KEY)||"[]");
+    arr.unshift({url,prompt,at:Date.now()});
+    localStorage.setItem(CREATION_KEY,JSON.stringify(arr.slice(0,6)));
+  }catch{}
+  renderLists();
+}
+function renderLists(){
+  $("chatList").innerHTML="";
+  for(const c of chats){
+    const d=document.createElement("div");d.className="item";d.textContent=c.title||"नई चैट";
+    d.onclick=()=>{currentId=c.id;messages=c.messages||[];render();$("panel").classList.remove("open")};$("chatList").appendChild(d);
   }
-
-  function renderChatHistoryUI() {
-    if (!chatHistoryEl) return;
-    if (chats.length === 0) {
-      chatHistoryEl.innerHTML = `<div class="empty-history">कोई पुरानी चैट नहीं मिली।</div>`;
-      return;
+  $("creationList").innerHTML="";
+  try{
+    const arr=JSON.parse(localStorage.getItem(CREATION_KEY)||"[]");
+    for(const x of arr){
+      const d=document.createElement("div");d.className="item";d.textContent=x.prompt.slice(0,55);
+      d.onclick=()=>window.open(x.url,"_blank");$("creationList").appendChild(d);
     }
-    
-    chatHistoryEl.innerHTML = chats.map(chat => {
-      const active = chat.id === currentChatId ? "active" : "";
-      const dateStr = new Date(chat.updatedAt || Date.now()).toLocaleDateString("hi-IN", { month: 'short', day: 'numeric' });
-      return `
-        <div class="chat-history-item ${active}" data-id="${escapeHTML(chat.id)}">
-          <div class="chat-history-info">
-            <div class="chat-history-title">${escapeHTML(chat.title)}</div>
-            <div class="chat-history-meta">${dateStr}</div>
-          </div>
-          <button class="delete-chat" data-id="${escapeHTML(chat.id)}" title="डिलीट करें">🗑️</button>
-        </div>
-      `;
-    }).join('');
-  }
+  }catch{}
+}
 
-  function renderCreationsUI() {
-    if (!creationGrid) return;
-    if (!creationsLoaded) {
-      const raw = safeGet(IMAGE_KEY);
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            volatileCreations = parsed.slice(0, MAX_SAVED_CREATIONS);
-          }
-        } catch (e) {
-          safeRemove(IMAGE_KEY);
-        }
-      }
-      creationsLoaded = true;
-    }
-    
-    if (volatileCreations.length === 0) {
-      creationGrid.innerHTML = `<div class="empty-history" style="grid-column:span 2;">कोई जनरेटेड इमेज नहीं है।</div>`;
-      return;
-    }
-    
-    creationGrid.innerHTML = volatileCreations.map(item => `
-      <div class="creation-card">
-        <img src="${escapeHTML(item.url)}" alt="Creation" loading="lazy" data-view="${escapeHTML(item.url)}">
-        <div class="creation-prompt">${escapeHTML(item.prompt)}</div>
-      </div>
-    `).join('');
-  }
+$("send").onclick=send;$("new").onclick=()=>newChat(true);$("drawerNew").onclick=()=>{newChat(true);$("panel").classList.remove("open")};
+$("menu").onclick=()=>$("panel").classList.add("open");$("close").onclick=()=>$("panel").classList.remove("open");
+$("panel").onclick=e=>{if(e.target===$("panel"))$("panel").classList.remove("open")};
+$("clear").onclick=()=>{if(confirm("सभी चैट हटाएँ?")){chats=[];localStorage.removeItem(CHAT_KEY);newChat(false);renderLists()}};
+$("attach").onclick=()=>$("file").click();$("file").onchange=e=>e.target.files[0]&&attachFile(e.target.files[0]);
+$("remove").onclick=clearAttachment;$("mic").onclick=startVoice;$("speak").onclick=()=>{speaking=!speaking;$("speak").textContent=speaking?"🔊":"🔇";if(!speaking)speechSynthesis?.cancel()};
+promptEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+promptEl.addEventListener("input",()=>{promptEl.style.height="auto";promptEl.style.height=Math.min(promptEl.scrollHeight,140)+"px"});
 
-  function saveCreation(url, promptText) {
-    const item = { 
-      id: makeImageId(), 
-      url: String(url), 
-      prompt: String(promptText || "").slice(0, MAX_CREATION_PROMPT_CHARS), 
-      createdAt: Date.now() 
-    };
-    volatileCreations.unshift(item);
-    volatileCreations = volatileCreations.slice(0, MAX_SAVED_CREATIONS);
-    
-    if (HAS_STORAGE) {
-      safeSet(IMAGE_KEY, JSON.stringify(volatileCreations));
-    }
-    renderCreationsUI();
-  }
-
-  function renderMessages() {
-    if (!messagesEl) return;
-    if (messages.length === 0) {
-      messagesEl.innerHTML = `
-        <div style="text-align:center; padding:40px 20px; opacity:0.6;">
-          <div style="font-size:32px; margin-bottom:10px;">👋</div>
-          <div style="font-size:16px; font-weight:700; margin-bottom:6px;">नमस्ते! मैं Aaru AI हूँ।</div>
-          <div style="font-size:13px; line-height:1.5;">मुझसे कोई भी सवाल पूछें, कोडिंग कराएं, या <br><b>'image banao: [विवरण]'</b> लिखकर खूबसूरत तस्वीरें बनाएं।</div>
-        </div>
-      `;
-      return;
-    }
-
-    messagesEl.innerHTML = messages.map(msg => {
-      const isUser = msg.role === "user";
-      const bubbleClass = isUser ? "message user" : "message assistant";
-      
-      let contentHtml = "";
-      if (msg.imageUrl) {
-        contentHtml += `<img src="${escapeHTML(msg.imageUrl)}" class="${isUser ? 'attached-user-image' : 'generated-image'}" alt="Image" data-view="${escapeHTML(msg.imageUrl)}">`;
-      }
-      if (msg.content) {
-        if (isUser) {
-          contentHtml += `<div>${escapeHTML(msg.content).replace(/\n/g, "<br>")}</div>`;
-        } else {
-          contentHtml += `<div class="md">${renderMarkdown(msg.content)}</div>`;
-        }
-      }
-
-      let actionsHtml = "";
-      if (!isUser && msg.content) {
-        const safeContentEsc = escapeHTML(msg.content).replace(/"/g, '&quot;');
-        actionsHtml = `
-          <div class="msg-actions">
-            <button class="msg-action-btn" onclick="copyMessageText(this)" data-text="${safeContentEsc}">कॉपी</button>
-            <button class="msg-action-btn" onclick="speakMessageText(this)" data-text="${safeContentEsc}">बोलें 🔊</button>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="${bubbleClass}">
-          <div class="bubble">${contentHtml}</div>
-          ${actionsHtml}
-        </div>
-      `;
-    }).join('');
-  }
-
-  window.copyModelText = function(btn) {
-    const text = btn.getAttribute("data-text") || "";
-    navigator.clipboard.writeText(text)
-      .then(() => { showToast("टेक्स्ट कॉपी हो गया!"); })
-      .catch(() => { showToast("कॉपी करने में विफल।"); });
-  };
-
-  window.speakModelText = function(btn) {
-    const text = btn.getAttribute("data-text") || "";
-    speakText(text);
-  };
-
-  // Global handlers for message actions
-  window.copyMessageText = window.copyModelText;
-  window.speakMessageText = window.speakModelText;
-
-  function autoResize() {
-    if (!promptEl) return;
-    promptEl.style.height = "auto";
-    promptEl.style.height = Math.min(promptEl.scrollHeight, 150) + "px";
-  }
-
-  if (promptEl) {
-    promptEl.addEventListener("input", autoResize);
-  }
-
-  // Initialization on load
-  loadChatHistory();
-  if (chats.length > 0) {
-    currentChatId = chats[0].id;
-    messages = chats[0].messages.slice();
-  } else {
-    createNewChat(false);
-  }
-
-  renderChatHistoryUI();
-  renderCreationsUI();
-  renderMessages();
+load();
 </script>
 </body>
 </html>
