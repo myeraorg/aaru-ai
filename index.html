@@ -663,6 +663,18 @@ main{
   transform:translate(-50%,0);
 }
 
+
+.voice-active{
+  background:#ef4444 !important;
+  color:#fff !important;
+}
+
+.pdf-status{
+  font-size:11px;
+  opacity:.65;
+  padding:4px 8px;
+}
+
 @media(max-width:600px){
 
   .header{
@@ -792,8 +804,12 @@ Recent Creations
 
 <div class="input-row">
 
-<button class="icon-btn" id="photoBtn" title="Photo">
+<button class="icon-btn" id="photoBtn" title="Photo / PDF">
 📎
+</button>
+
+<button class="icon-btn" id="micBtn" title="Voice Input">
+🎙️
 </button>
 
 <textarea
@@ -802,6 +818,10 @@ rows="1"
 placeholder="Aaru से कुछ भी पूछें..."
 autocomplete="off"
 spellcheck="true"></textarea>
+
+<button class="icon-btn" id="speakBtn" title="Voice Output">
+🔊
+</button>
 
 <button class="icon-btn send-btn" id="sendBtn" title="Send">
 ➤
@@ -822,7 +842,7 @@ spellcheck="true"></textarea>
 <input
 type="file"
 id="photoInput"
-accept="image/*">
+accept="image/*,.pdf,application/pdf">
 
 
 <div class="image-viewer" id="imageViewer">
@@ -891,6 +911,10 @@ let messages = [];
 
 let selectedPhotoBase64 = null;
 let selectedPhotoUrl = null;
+  selectedDocumentText = "";
+let selectedDocumentText = "";
+let voiceOutputEnabled = true;
+let recognition = null;
 
 let isBusy = false;
 
@@ -1008,6 +1032,26 @@ function escapeHTML(value){
    IMPORTANT: UNCHANGED
 ========================================================= */
 
+function cleanAaruText(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<div\s*>/gi,"\n")
+    .replace(/<\/div\s*>/gi,"\n")
+    .replace(/\r\n/g,"\n")
+    .replace(/\r/g,"\n")
+    .replace(/\*\*(.*?)\*\*/gs,"$1")
+    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,"$1")
+    .replace(/\n{3,}/g,"\n\n")
+    .trim();
+}
+
+function cleanAaruChunk(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/\*\*/g,"")
+    .replace(/(?<!\*)\*(?!\*)/g,"");
+}
+
 function inlineMarkdown(text){
 
   let s =
@@ -1055,10 +1099,7 @@ function inlineMarkdown(text){
 
 function renderMarkdown(text){
 
-  const source =
-    String(text ?? "")
-      .replace(/\r\n/g,"\n")
-      .replace(/\r/g,"\n");
+  const source = cleanAaruText(text);
 
   const lines =
     source.split("\n");
@@ -3954,6 +3995,8 @@ async function responseToImage(
 ========================================================= */
 
 function clearSelectedPhoto(){
+  selectedDocumentText = "";
+
 
   selectedPhotoBase64 =
     null;
@@ -4261,7 +4304,7 @@ function normalizeChatResult(
     return {
 
       text:
-        String(
+        cleanAaruText(
           text || ""
         ),
 
@@ -4292,21 +4335,15 @@ function normalizeChatResult(
    CHAT API
 ========================================================= */
 
-async function sendChatRequest(onChunk = null){
+async function sendChatRequest(){
 
   const recentMessages =
-    messages
-      .slice(-19)
-      .map(item => ({
-        role: item.role === "user" ? "user" : "assistant",
-        content: String(item.content || "").slice(0, MAX_MESSAGE_CHARS)
-      }));
+    messages.slice(-19).map(item => ({
+      role: item.role === "user" ? "user" : "assistant",
+      content: cleanAaruText(String(item.content || "")).slice(0, MAX_MESSAGE_CHARS)
+    }));
 
-  const lastUserMessage =
-    messages
-      .slice()
-      .reverse()
-      .find(item => item.role === "user");
+  const lastUserMessage = messages.slice().reverse().find(item => item.role === "user");
 
   const payload = {
     message: lastUserMessage?.content || "",
@@ -4316,17 +4353,17 @@ async function sendChatRequest(onChunk = null){
   };
 
   if(selectedPhotoBase64){
-    payload.image_b64 = await resizeImageDataURL(
-      selectedPhotoBase64,
-      MAX_MODEL_IMAGE_SIZE,
-      .76
-    );
+    payload.image_b64 = await resizeImageDataURL(selectedPhotoBase64, MAX_MODEL_IMAGE_SIZE, .76);
+  }
+
+  if(selectedDocumentText){
+    payload.document_text = selectedDocumentText.slice(0, 90000);
   }
 
   const response = await fetch(API + "chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
   });
 
   const contentType = (response.headers.get("content-type") || "").toLowerCase();
@@ -4334,129 +4371,89 @@ async function sendChatRequest(onChunk = null){
   if(contentType.startsWith("image/")){
     const image = await blobToDataURL(await response.blob());
     if(!response.ok) throw new Error("Chat image request failed.");
-    return { text: "इमेज तैयार है।", image };
-  }
-
-  /* Fast streaming path */
-  if(contentType.includes("text/event-stream") && response.body){
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
-    let fullText = "";
-
-    const pushChunk = chunk => {
-      if(!chunk) return;
-      chunk = cleanAaruText(chunk);
-      if(!chunk) return;
-      fullText += chunk;
-      if(typeof onChunk === "function") onChunk(fullText);
-    };
-
-    while(true){
-      const {value, done} = await reader.read();
-      if(done) break;
-
-      buffer += decoder.decode(value, {stream:true});
-      const events = buffer.split("\n\n");
-      buffer = events.pop() || "";
-
-      for(const event of events){
-        const lines = event.split("\n");
-        for(const line of lines){
-          const trimmed = line.trim();
-          if(!trimmed || !trimmed.startsWith("data:")) continue;
-
-          const data = trimmed.slice(5).trim();
-          if(!data || data === "[DONE]") continue;
-
-          let parsed = null;
-          try { parsed = JSON.parse(data); } catch(error) {}
-
-          let chunk = "";
-
-          if(typeof parsed === "string"){
-            chunk = parsed;
-          }else if(parsed && typeof parsed === "object"){
-            chunk =
-              parsed.response ??
-              parsed.text ??
-              parsed.content ??
-              parsed.delta ??
-              parsed.output_text ??
-              parsed.token ??
-              parsed.choices?.[0]?.delta?.content ??
-              parsed.choices?.[0]?.text ??
-              "";
-          }else{
-            chunk = data;
-          }
-
-          pushChunk(String(chunk || ""));
-        }
-      }
-    }
-
-    /* अंतिम अधूरा SSE frame */
-    if(buffer.trim()){
-      for(const line of buffer.split("\n")){
-        const trimmed = line.trim();
-        if(!trimmed.startsWith("data:")) continue;
-        const data = trimmed.slice(5).trim();
-        if(!data || data === "[DONE]") continue;
-
-        let parsed = null;
-        try { parsed = JSON.parse(data); } catch(error) {}
-
-        let chunk = typeof parsed === "string"
-          ? parsed
-          : parsed?.response ?? parsed?.text ?? parsed?.content ?? parsed?.delta ?? "";
-
-        pushChunk(String(chunk || ""));
-      }
-    }
-
-    return {
-      text: cleanAaruText(fullText),
-      image: null
-    };
-  }
-
-  /* JSON fallback */
-  const raw = await response.text();
-  let data = null;
-
-  try{
-    data = raw ? JSON.parse(raw) : null;
-  }catch(error){
-    if(!response.ok) throw new Error(raw || "Chat request failed.");
-    return { text: cleanAaruText(raw || ""), image: null };
+    return {text:"इमेज तैयार है।", image};
   }
 
   if(!response.ok){
-    throw new Error(
-      data?.error || data?.message || data?.response || "Chat request failed."
-    );
+    const errText = await response.text();
+    let errData = null;
+    try{ errData = errText ? JSON.parse(errText) : null; }catch{}
+    throw new Error(errData?.error || errData?.message || errText || "Chat request failed.");
   }
 
-  const result = normalizeChatResult(data);
-  result.text = cleanAaruText(result.text);
-  return result;
+  const isStream = contentType.includes("text/event-stream") && response.body;
+
+  if(!isStream){
+    const raw = await response.text();
+    let data = null;
+    try{ data = raw ? JSON.parse(raw) : null; }
+    catch{ return {text:cleanAaruText(raw),image:null}; }
+    return normalizeChatResult(data);
+  }
+
+  hideTyping();
+
+  const row = document.createElement("div");
+  row.className = "message assistant";
+  row.id = "streamingMessage";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble md";
+  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  scrollBottom();
+
+  let fullText = "";
+  let buffer = "";
+
+  function extractStreamText(obj){
+    if(obj == null) return "";
+    if(typeof obj === "string") return obj;
+    return obj.response ?? obj.text ?? obj.content ?? obj.delta ?? obj.output_text ?? obj.token ?? obj.choices?.[0]?.delta?.content ?? obj.choices?.[0]?.text ?? obj.result?.response ?? obj.result?.text ?? "";
+  }
+
+  function consumeEvent(eventText){
+    const lines = eventText.split(/\n/);
+    for(const line of lines){
+      const trimmed = line.trim();
+      if(!trimmed || trimmed.startsWith(":")) continue;
+      if(!trimmed.startsWith("data:")) continue;
+      const dataText = trimmed.slice(5).trim();
+      if(!dataText || dataText === "[DONE]") continue;
+      let value = dataText;
+      try{ value = extractStreamText(JSON.parse(dataText)); }catch{}
+      if(value){
+        const chunk = cleanAaruChunk(value);
+        fullText += chunk;
+      }
+    }
+    bubble.innerHTML = renderMarkdown(fullText || "");
+    scrollBottom();
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while(true){
+    const {value,done} = await reader.read();
+    if(done) break;
+    buffer += decoder.decode(value,{stream:true});
+    const events = buffer.split(/\n\n|\r\n\r\n/);
+    buffer = events.pop() || "";
+    for(const event of events) consumeEvent(event);
+  }
+
+  buffer += decoder.decode();
+  if(buffer.trim()) consumeEvent(buffer);
+
+  row.remove();
+
+  return {
+    text: cleanAaruText(fullText),
+    image: null
+  };
 }
-
-
-/* =========================================================
-   STREAM TEXT CLEANER
-========================================================= */
-
-function cleanAaruText(text){
-  return String(text || "")
-    .replace(/\\?\*\*/g, "")
-    .replace(/\\?\*/g, "")
-    .replace(/^#{1,6}\s*/gm, "")
-    .replace(/^[-_=]{3,}\s*$/gm, "")
-    .replace(/\n{3,}/g, "\n\n");
-}
-
 
 
 /* =========================================================
@@ -4476,8 +4473,11 @@ async function handleSend(){
   const hasPhoto =
     !!selectedPhotoBase64;
 
+  const hasDocument =
+    !!selectedDocumentText;
+
   /* ChatGPT-style: photo alone can be sent. */
-  if(!prompt && !hasPhoto){
+  if(!prompt && !hasPhoto && !hasDocument){
     showToast(
       "कुछ लिखें या photo जोड़ें।"
     );
@@ -4495,8 +4495,14 @@ async function handleSend(){
   const attachedPhoto =
     selectedPhotoUrl;
 
+  if(hasDocument && !prompt){
+    promptEl.value = "इस PDF को पढ़कर समझाइए।";
+  }
+
+  const displayPrompt = prompt || (hasDocument ? "इस PDF को पढ़कर समझाइए।" : "इस तस्वीर को समझाइए।");
+
   addUserMessage(
-    prompt,
+    displayPrompt,
     true,
     attachedPhoto
   );
@@ -4511,35 +4517,14 @@ async function handleSend(){
 
     showTyping();
 
-    let streamingRow = null;
-    let streamingBubble = null;
-
-    const updateStream = text => {
-      hideTyping();
-
-      if(!streamingRow){
-        streamingRow = document.createElement("div");
-        streamingRow.className = "message assistant";
-
-        streamingBubble = document.createElement("div");
-        streamingBubble.className = "bubble md";
-
-        streamingRow.appendChild(streamingBubble);
-        messagesEl.appendChild(streamingRow);
-      }
-
-      streamingBubble.innerHTML = renderMarkdown(cleanAaruText(text));
-      scrollBottom();
-    };
-
+    /*
+      One unified route. Worker /chat automatically decides:
+      normal chat, Vision, image generation or image editing.
+    */
     const result =
-      await sendChatRequest(updateStream);
+      await sendChatRequest();
 
     hideTyping();
-
-    if(streamingRow){
-      streamingRow.remove();
-    }
 
     if(result && result.image){
 
@@ -4558,11 +4543,20 @@ async function handleSend(){
 
     }else{
 
+      const finalText =
+        cleanAaruText(
+          result?.text ||
+          "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।"
+        );
+
       addAssistantMessage(
-        result?.text ||
-        "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।",
+        finalText,
         true
       );
+
+      if(voiceOutputEnabled && finalText){
+        speakAaru(finalText);
+      }
     }
 
     clearSelectedPhoto();
@@ -4659,6 +4653,113 @@ sendBtn.addEventListener(
 
 
 /* =========================================================
+   VOICE OUTPUT
+========================================================= */
+
+function speakAaru(text){
+  if(!voiceOutputEnabled || !("speechSynthesis" in window) || !text) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(cleanAaruText(text));
+    u.lang = /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-US";
+    u.rate = .98;
+    speechSynthesis.speak(u);
+  }catch(error){
+    console.warn("Voice output failed:",error);
+  }
+}
+
+/* =========================================================
+   VOICE INPUT
+========================================================= */
+
+function startAaruVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    showToast("इस browser में Voice Input उपलब्ध नहीं है।");
+    return;
+  }
+  if(recognition){
+    try{ recognition.stop(); }catch(error){}
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = "hi-IN";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.onstart = () => {
+    document.getElementById("micBtn")?.classList.add("voice-active");
+    showToast("सुन रहा हूँ…");
+  };
+  recognition.onresult = event => {
+    const text = event.results?.[0]?.[0]?.transcript || "";
+    if(text){
+      promptEl.value = text;
+      autoResize();
+      promptEl.focus();
+    }
+  };
+  recognition.onerror = event => {
+    showToast("Voice error: " + (event.error || "unknown"));
+  };
+  recognition.onend = () => {
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  };
+  try{ recognition.start(); }
+  catch(error){
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  }
+}
+
+/* =========================================================
+   PDF READER
+========================================================= */
+
+async function extractPDFText(file){
+  const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({data}).promise;
+  let output = "";
+  for(let pageNo=1; pageNo<=pdf.numPages; pageNo++){
+    setToastProgress(`PDF पढ़ा जा रहा है… ${pageNo}/${pdf.numPages}`);
+    const page = await pdf.getPage(pageNo);
+    const content = await page.getTextContent();
+    const text = content.items.map(item => item.str || "").join(" ");
+    output += `\n\n--- Page ${pageNo} ---\n${text}`;
+    if(output.length >= 90000) break;
+  }
+  return output.trim().slice(0,90000);
+}
+
+function setToastProgress(text){
+  showToast(text);
+}
+
+async function handlePDFFile(file){
+  try{
+    selectedDocumentText = await extractPDFText(file);
+    if(!selectedDocumentText){
+      showToast("PDF में पढ़ने योग्य text नहीं मिला।");
+      return;
+    }
+    selectedPhotoBase64 = null;
+    selectedPhotoUrl = null;
+    photoPreview.classList.remove("show");
+    photoPreviewImg.src = "";
+    showToast(`PDF तैयार है: ${selectedDocumentText.length.toLocaleString()} अक्षर`);
+  }catch(error){
+    console.error("PDF failed:",error);
+    selectedDocumentText = "";
+    showToast("PDF पढ़ने में समस्या हुई।");
+  }
+}
+
+/* =========================================================
    PHOTO BUTTON
 ========================================================= */
 
@@ -4689,6 +4790,15 @@ photoInput.addEventListener(
       return;
     }
 
+
+    if(
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf")
+    ){
+      await handlePDFFile(file);
+      photoInput.value = "";
+      return;
+    }
 
     if(
       !file.type.startsWith(
@@ -4811,6 +4921,21 @@ document
     clearSelectedPhoto
   );
 
+
+/* =========================================================
+   VOICE BUTTONS
+========================================================= */
+
+document.getElementById("micBtn")?.addEventListener("click",startAaruVoice);
+
+document.getElementById("speakBtn")?.addEventListener("click",()=>{
+  voiceOutputEnabled = !voiceOutputEnabled;
+  const btn = document.getElementById("speakBtn");
+  if(btn) btn.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+  if(!voiceOutputEnabled && "speechSynthesis" in window){
+    speechSynthesis.cancel();
+  }
+});
 
 /* =========================================================
    DRAWER
