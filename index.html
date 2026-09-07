@@ -1,10 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hi">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-  <title>Aaru AI</title>
-  <style>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+
+<title>Aaru AI</title>
+
+<style>
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -688,58 +691,155 @@ main{
   }
 }
 </style>
- </head>
- <body>
-  <div class="app">
-   <header class="header">
-    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
-    <div class="brand">
-     <div class="brand-name">Aaru AI</div>
-     <div class="brand-sub">Fast • Smart • Indian AI</div>
-    </div>
-    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">＋</button>
-   </header>
-   <div class="drawer-overlay" id="drawerOverlay"></div>
-   <aside class="drawer" id="drawer">
-    <div class="drawer-head">
-     <div class="drawer-title">Aaru AI</div>
-     <button class="close-drawer" id="closeDrawer">×</button>
-    </div>
-    <div class="drawer-body">
-     <button class="drawer-action" id="newChatBtn"><span>＋</span> <span>नई चैट</span></button>
-     <button class="drawer-action" id="deleteAllBtn"><span>🗑️</span> <span>सभी चैट डिलीट करें</span></button>
-     <div class="section-title">Recent Chats</div>
-     <div class="chat-history" id="chatHistory"></div>
-     <div class="section-title">Recent Creations</div>
-     <div class="creation-grid" id="creationGrid"></div>
-    </div>
-   </aside>
-   <main>
-    <div class="chat-wrap">
-     <div class="messages" id="messages"></div>
-    </div>
-   </main>
-   <div class="composer-shell">
-    <div class="composer">
-     <div class="photo-preview" id="photoPreview">
-      <img id="photoPreviewImg" alt="Selected image">
-      <button class="remove-photo" id="removePhoto">×</button>
-     </div>
-     <div class="input-row">
-      <button class="icon-btn" id="photoBtn" title="Photo">📎</button>
-      <textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..." autocomplete="off" spellcheck="true"></textarea>
-      <button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
-     </div>
-    </div>
-   </div>
-  </div>
-  <input type="file" id="photoInput" accept="image/*">
-  <div class="image-viewer" id="imageViewer">
-   <button class="close-viewer" id="closeViewer">×</button>
-   <img id="viewerImg" alt="Image preview">
-  </div>
-  <div class="toast" id="toast"></div>
-  <script>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<button class="menu-btn" id="menuBtn" aria-label="Menu">
+☰
+</button>
+
+<div class="brand">
+<div class="brand-name">Aaru AI</div>
+<div class="brand-sub">Fast • Smart • Indian AI</div>
+</div>
+
+<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
+＋
+</button>
+
+</header>
+
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+
+<aside class="drawer" id="drawer">
+
+<div class="drawer-head">
+
+<div class="drawer-title">
+Aaru AI
+</div>
+
+<button class="close-drawer" id="closeDrawer">
+×
+</button>
+
+</div>
+
+
+<div class="drawer-body">
+
+<button class="drawer-action" id="newChatBtn">
+<span>＋</span>
+<span>नई चैट</span>
+</button>
+
+<button class="drawer-action" id="deleteAllBtn">
+<span>🗑️</span>
+<span>सभी चैट डिलीट करें</span>
+</button>
+
+
+<div class="section-title">
+Recent Chats
+</div>
+
+<div class="chat-history" id="chatHistory"></div>
+
+
+<div class="section-title">
+Recent Creations
+</div>
+
+<div class="creation-grid" id="creationGrid"></div>
+
+</div>
+
+</aside>
+
+
+<main>
+
+<div class="chat-wrap">
+
+<div class="messages" id="messages"></div>
+
+</div>
+
+</main>
+
+
+<div class="composer-shell">
+
+<div class="composer">
+
+<div class="photo-preview" id="photoPreview">
+
+<img id="photoPreviewImg" alt="Selected image">
+
+<button class="remove-photo" id="removePhoto">
+×
+</button>
+
+</div>
+
+
+<div class="input-row">
+
+<button class="icon-btn" id="photoBtn" title="Photo">
+📎
+</button>
+
+<textarea
+id="prompt"
+rows="1"
+placeholder="Aaru से कुछ भी पूछें..."
+autocomplete="off"
+spellcheck="true"></textarea>
+
+<button class="icon-btn send-btn" id="sendBtn" title="Send">
+➤
+</button>
+
+</div>
+
+
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<input
+type="file"
+id="photoInput"
+accept="image/*">
+
+
+<div class="image-viewer" id="imageViewer">
+
+<button class="close-viewer" id="closeViewer">
+×
+</button>
+
+<img id="viewerImg" alt="Image preview">
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
 "use strict";
 
 
@@ -5231,5 +5331,6 @@ window.addEventListener(
 );
 
 </script>
- </body>
+
+</body>
 </html>
