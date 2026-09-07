@@ -886,6 +886,9 @@ const IMAGE_KEY =
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 30;
 const MAX_MESSAGE_CHARS = 4000;
+const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
+const MAX_MEMORY_SUMMARY_CHARS = 3200;
+const MAX_RELEVANT_MEMORY_CHARS = 2600;
 
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
@@ -908,6 +911,7 @@ const MAX_MODEL_IMAGE_SIZE = 511;
 let chats = [];
 let currentChatId = null;
 let messages = [];
+let memorySummary = "";
 
 let selectedPhotoBase64 = null;
 let selectedPhotoUrl = null;
@@ -1549,6 +1553,9 @@ function normalizeChat(chat){
       ? chat.messages
       : [];
 
+  const savedMemory =
+    String(chat.memorySummary || "").trim();
+
 
   const normalized =
     raw
@@ -1964,6 +1971,9 @@ function saveCurrentChat(){
   const chat =
     ensureCurrentChat();
 
+
+  chat.memorySummary = buildMemorySummary(messages);
+  memorySummary = chat.memorySummary;
 
   chat.messages =
     messages
@@ -4313,6 +4323,65 @@ function normalizeChatResult(
 
 
 /* =========================================================
+   SMART MEMORY
+========================================================= */
+
+function memoryTokens(text){
+  return cleanAaruText(String(text || "").toLowerCase())
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(w => w.length >= 3)
+    .slice(0, 80);
+}
+
+function buildMemorySummary(list){
+  const older = Array.isArray(list) ? list.slice(0, -12) : [];
+  if(!older.length) return "";
+
+  const seen = new Set();
+  const parts = [];
+  for(const item of older){
+    const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
+    if(!text) continue;
+    const key = text.slice(0, 180).toLowerCase();
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const label = item?.role === "user" ? "यूज़र" : "Aaru";
+    parts.push(`${label}: ${text.slice(0, 260)}`);
+    if(parts.join("\n").length >= MAX_MEMORY_SUMMARY_CHARS) break;
+  }
+  return parts.join("\n").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+}
+
+function getRelevantMemory(query){
+  const qTokens = new Set(memoryTokens(query));
+  if(!qTokens.size || !messages.length) return "";
+
+  const older = messages.slice(0, -12);
+  const scored = older.map((item, index) => {
+    const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
+    const tokens = memoryTokens(text);
+    let score = 0;
+    for(const token of tokens){ if(qTokens.has(token)) score++; }
+    return {item, index, score, text};
+  }).filter(x => x.text && x.score > 0)
+    .sort((a,b) => b.score - a.score || b.index - a.index)
+    .slice(0, 6);
+
+  return scored.map(x => {
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    return `${label}: ${x.text.slice(0, 430)}`;
+  }).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+}
+
+function restoreChatMemory(chat){
+  memorySummary = String(chat?.memorySummary || "").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+  if(!memorySummary && messages.length > 12){
+    memorySummary = buildMemorySummary(messages);
+  }
+}
+
+/* =========================================================
    CHAT API
 ========================================================= */
 
@@ -4334,10 +4403,15 @@ async function sendChatRequest(){
       .reverse()
       .find(item => item.role === "user");
 
+  const currentQuery = lastUserMessage?.content || "";
+  const relevantMemory = getRelevantMemory(currentQuery);
+
   const payload = {
-    message: lastUserMessage?.content || "",
-    prompt: lastUserMessage?.content || "",
+    message: currentQuery,
+    prompt: currentQuery,
     messages: recentMessages,
+    memory_summary: memorySummary || buildMemorySummary(messages),
+    relevant_memory: relevantMemory,
     stream: true
   };
 
