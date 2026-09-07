@@ -4336,13 +4336,21 @@ function normalizeChatResult(
 
 async function sendChatRequest(){
 
+  // Performance: send only the latest 12 messages.
+  // The current user message is already inside messages via handleSend().
   const recentMessages =
-    messages.slice(-19).map(item => ({
+    messages.slice(-12).map(item => ({
       role: item.role === "user" ? "user" : "assistant",
-      content: cleanAaruText(String(item.content || "")).slice(0, MAX_MESSAGE_CHARS)
+      content: cleanAaruText(
+        String(item.content || "")
+      ).slice(0, MAX_MESSAGE_CHARS)
     }));
 
-  const lastUserMessage = messages.slice().reverse().find(item => item.role === "user");
+  const lastUserMessage =
+    messages
+      .slice()
+      .reverse()
+      .find(item => item.role === "user");
 
   const payload = {
     message: lastUserMessage?.content || "",
@@ -4351,54 +4359,106 @@ async function sendChatRequest(){
     stream: true
   };
 
+  // Keep image generation / image understanding path unchanged.
   if(selectedPhotoBase64){
-    payload.image_b64 = await resizeImageDataURL(selectedPhotoBase64, MAX_MODEL_IMAGE_SIZE, .76);
+    payload.image_b64 =
+      await resizeImageDataURL(
+        selectedPhotoBase64,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
   }
 
+  // Keep PDF support unchanged.
   if(selectedDocumentText){
-    payload.document_text = selectedDocumentText.slice(0, 90000);
+    payload.document_text =
+      selectedDocumentText.slice(0, 90000);
   }
 
-  const response = await fetch(API + "chat", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(payload)
-  });
+  const response =
+    await fetch(API + "chat", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(payload)
+    });
 
-  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  const contentType =
+    (response.headers.get("content-type") || "")
+      .toLowerCase();
 
+  // Image response: do not modify the working image path.
   if(contentType.startsWith("image/")){
-    const image = await blobToDataURL(await response.blob());
-    if(!response.ok) throw new Error("Chat image request failed.");
-    return {text:"इमेज तैयार है।", image};
+    const image =
+      await blobToDataURL(await response.blob());
+
+    if(!response.ok){
+      throw new Error("Chat image request failed.");
+    }
+
+    return {
+      text:"इमेज तैयार है।",
+      image
+    };
   }
 
   if(!response.ok){
-    const errText = await response.text();
+    const errText =
+      await response.text();
+
     let errData = null;
-    try{ errData = errText ? JSON.parse(errText) : null; }catch{}
-    throw new Error(errData?.error || errData?.message || errText || "Chat request failed.");
+
+    try{
+      errData =
+        errText ? JSON.parse(errText) : null;
+    }catch{}
+
+    throw new Error(
+      errData?.error ||
+      errData?.message ||
+      errText ||
+      "Chat request failed."
+    );
   }
 
-  const isStream = contentType.includes("text/event-stream") && response.body;
+  const isStream =
+    contentType.includes("text/event-stream") &&
+    response.body;
 
+  // Non-stream response fallback.
   if(!isStream){
     const raw = await response.text();
     let data = null;
-    try{ data = raw ? JSON.parse(raw) : null; }
-    catch{ return {text:cleanAaruText(raw),image:null}; }
+
+    try{
+      data = raw ? JSON.parse(raw) : null;
+    }catch{
+      return {
+        text:cleanAaruText(raw),
+        image:null
+      };
+    }
+
     return normalizeChatResult(data);
   }
 
   hideTyping();
 
-  const row = document.createElement("div");
+  const row =
+    document.createElement("div");
+
   row.className = "message assistant";
   row.id = "streamingMessage";
 
-  const bubble = document.createElement("div");
+  const bubble =
+    document.createElement("div");
+
   bubble.className = "bubble md";
-  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+  bubble.innerHTML =
+    '<div class="typing"><span></span><span></span><span></span></div>';
+
   row.appendChild(bubble);
   messagesEl.appendChild(row);
   scrollBottom();
@@ -4406,51 +4466,140 @@ async function sendChatRequest(){
   let fullText = "";
   let buffer = "";
 
+  // Performance: do not re-render DOM for every SSE chunk.
+  let renderPending = false;
+  let streamFinished = false;
+
   function extractStreamText(obj){
     if(obj == null) return "";
     if(typeof obj === "string") return obj;
-    return obj.response ?? obj.text ?? obj.content ?? obj.delta ?? obj.output_text ?? obj.token ?? obj.choices?.[0]?.delta?.content ?? obj.choices?.[0]?.text ?? obj.result?.response ?? obj.result?.text ?? "";
+
+    return (
+      obj.response ??
+      obj.text ??
+      obj.content ??
+      obj.delta ??
+      obj.output_text ??
+      obj.token ??
+      obj.choices?.[0]?.delta?.content ??
+      obj.choices?.[0]?.text ??
+      obj.result?.response ??
+      obj.result?.text ??
+      ""
+    );
+  }
+
+  function scheduleStreamRender(){
+    if(renderPending) return;
+
+    renderPending = true;
+
+    requestAnimationFrame(() => {
+      renderPending = false;
+
+      bubble.innerHTML =
+        renderMarkdown(fullText || "");
+
+      if(!streamFinished){
+        scrollBottom();
+      }
+    });
   }
 
   function consumeEvent(eventText){
     const lines = eventText.split(/\n/);
+
     for(const line of lines){
       const trimmed = line.trim();
-      if(!trimmed || trimmed.startsWith(":")) continue;
-      if(!trimmed.startsWith("data:")) continue;
-      const dataText = trimmed.slice(5).trim();
-      if(!dataText || dataText === "[DONE]") continue;
+
+      if(!trimmed || trimmed.startsWith(":")){
+        continue;
+      }
+
+      if(!trimmed.startsWith("data:")){
+        continue;
+      }
+
+      const dataText =
+        trimmed.slice(5).trim();
+
+      if(!dataText || dataText === "[DONE]"){
+        continue;
+      }
+
       let value = dataText;
-      try{ value = extractStreamText(JSON.parse(dataText)); }catch{}
+
+      try{
+        value =
+          extractStreamText(
+            JSON.parse(dataText)
+          );
+      }catch{}
+
       if(value){
-        const chunk = cleanAaruChunk(value);
-        fullText += chunk;
+        const chunk =
+          cleanAaruChunk(String(value));
+
+        if(chunk){
+          fullText += chunk;
+          scheduleStreamRender();
+        }
       }
     }
-    bubble.innerHTML = renderMarkdown(fullText || "");
-    scrollBottom();
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
+  const reader =
+    response.body.getReader();
+
+  const decoder =
+    new TextDecoder();
 
   while(true){
-    const {value,done} = await reader.read();
+    const {value,done} =
+      await reader.read();
+
     if(done) break;
-    buffer += decoder.decode(value,{stream:true});
-    const events = buffer.split(/\n\n|\r\n\r\n/);
-    buffer = events.pop() || "";
-    for(const event of events) consumeEvent(event);
+
+    buffer +=
+      decoder.decode(
+        value,
+        {stream:true}
+      );
+
+    const events =
+      buffer.split(/\n\n|\r\n\r\n/);
+
+    buffer =
+      events.pop() || "";
+
+    for(const event of events){
+      consumeEvent(event);
+    }
   }
 
   buffer += decoder.decode();
-  if(buffer.trim()) consumeEvent(buffer);
+
+  if(buffer.trim()){
+    consumeEvent(buffer);
+  }
+
+  // Make sure the final frame is rendered before returning.
+  streamFinished = true;
+
+  await new Promise(resolve =>
+    requestAnimationFrame(resolve)
+  );
+
+  bubble.innerHTML =
+    renderMarkdown(fullText || "");
+
+  scrollBottom();
 
   row.remove();
 
   return {
-    text: cleanAaruText(fullText),
-    image: null
+    text:cleanAaruText(fullText),
+    image:null
   };
 }
 
