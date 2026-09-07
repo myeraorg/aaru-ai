@@ -4042,48 +4042,20 @@ function looksLikePreviousImageEdit(
   */
 
   const strongPhrases = [
-
-    "बैकग्राउंड बदल",
-
-    "बैकग्राउंड हटा",
-
-    "पृष्ठभूमि बदल",
-
-    "पृष्ठभूमि हटा",
-
-    "इस फोटो",
-
-    "इस तस्वीर",
-
-    "इस इमेज",
-
-    "इस चित्र",
-
-    "इसमें बदलाव",
-
-    "इसमें बदल",
-
-    "इसको एडिट",
-
-    "इसे एडिट",
-
-    "background change",
-
-    "change background",
-
-    "remove background",
-
-    "replace background",
-
-    "edit this",
-
-    "edit the photo",
-
-    "edit image",
-
-    "replace the background",
-
-    "remove the background"
+    "बैकग्राउंड बदल", "बैकग्राउंड हटा", "पृष्ठभूमि बदल", "पृष्ठभूमि हटा",
+    "इस फोटो", "इस तस्वीर", "इस इमेज", "इस चित्र", "इसमें बदलाव",
+    "इसमें बदल", "इसको एडिट", "इसे एडिट", "एडिट करो", "बदल दो",
+    "बैकग्राउंड", "पृष्ठभूमि", "रंग बदल", "कलर बदल", "कपड़े बदल",
+    "कपड़ा बदल", "कपड़े का रंग", "व्यक्ति हट", "पर्सन हट", "इंसान हट",
+    "चेहरा बदल", "बाल बदल", "आसमान बदल", "ऑब्जेक्ट हट", "चीज हट",
+    "हटा दो", "निकाल दो", "background change", "change background",
+    "remove background", "replace background", "edit this", "edit the photo",
+    "edit image", "change color", "change colour", "change clothes",
+    "change clothing", "change shirt", "change dress", "change outfit",
+    "remove person", "remove people", "remove a person", "remove object",
+    "remove someone", "erase person", "erase object", "replace sky",
+    "change hair", "change face", "add person", "add object",
+    "replace the background", "remove the background"
   ];
 
 
@@ -4108,11 +4080,21 @@ function looksLikePreviousImageEdit(
     s.length <= 50 &&
     (
       s.includes("बैकग्राउंड") ||
-      s.includes("background") ||
-      s.includes("बदल दो") ||
-      s.includes("हटा दो") ||
-      s.includes("replace") ||
-      s.includes("remove")
+       s.includes("पृष्ठभूमि") ||
+       s.includes("background") ||
+       s.includes("बदल दो") ||
+       s.includes("रंग बदल") ||
+       s.includes("कलर बदल") ||
+       s.includes("कपड़े बदल") ||
+       s.includes("व्यक्ति हट") ||
+       s.includes("पर्सन हट") ||
+       s.includes("हटा दो") ||
+       s.includes("निकाल दो") ||
+       s.includes("replace") ||
+       s.includes("remove") ||
+       s.includes("erase") ||
+       s.includes("change color") ||
+       s.includes("change clothes")
     )
   ){
 
@@ -4367,6 +4349,21 @@ async function sendChatRequest(){
         MAX_MODEL_IMAGE_SIZE,
         .76
       );
+  }else{
+    /* Automatically use the latest generated image for edit commands. */
+    const latestEditReference =
+      await getLatestCreationReference(
+        lastUserMessage?.content || ""
+      );
+
+    if(latestEditReference){
+      payload.image_b64 =
+        await resizeImageDataURL(
+          latestEditReference,
+          MAX_MODEL_IMAGE_SIZE,
+          .76
+        );
+    }
   }
 
   // Keep PDF support unchanged.
