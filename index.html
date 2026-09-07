@@ -887,8 +887,10 @@ const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 30;
 const MAX_MESSAGE_CHARS = 4000;
 const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
+const MEMORY_V3_KEY = "aaru_smart_memory_v3";
 const MAX_MEMORY_SUMMARY_CHARS = 3200;
 const MAX_RELEVANT_MEMORY_CHARS = 2600;
+const MAX_SEMANTIC_MEMORIES = 80;
 
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
@@ -912,6 +914,7 @@ let chats = [];
 let currentChatId = null;
 let messages = [];
 let memorySummary = "";
+let semanticMemory = [];
 
 let selectedPhotoBase64 = null;
 let selectedPhotoUrl = null;
@@ -1556,6 +1559,9 @@ function normalizeChat(chat){
   const savedMemory =
     String(chat.memorySummary || "").trim();
 
+  const savedSemanticMemory =
+    Array.isArray(chat.semanticMemory) ? chat.semanticMemory : [];
+
 
   const normalized =
     raw
@@ -1631,6 +1637,9 @@ function normalizeChat(chat){
 
     messages:
       normalized,
+
+    semanticMemory:
+      normalizeSemanticMemory(savedSemanticMemory),
 
     createdAt:
       Number(
@@ -1894,6 +1903,9 @@ function createNewChat(
     messages:
       [],
 
+    semanticMemory:
+      [],
+
     createdAt:
       now,
 
@@ -1924,6 +1936,9 @@ function createNewChat(
     chat.id;
 
   messages = [];
+  semanticMemory = [];
+  memorySummary = "";
+  updateMemoryButton();
 
 
   if(persist){
@@ -1972,8 +1987,10 @@ function saveCurrentChat(){
     ensureCurrentChat();
 
 
+  semanticMemory = updateSemanticMemory(semanticMemory, messages);
+  chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
   chat.memorySummary = buildMemorySummary(messages);
-  memorySummary = chat.memorySummary;
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || chat.memorySummary;
 
   chat.messages =
     messages
@@ -4362,6 +4379,72 @@ function memoryImportance(item, index, total){
   return score;
 }
 
+
+function normalizeSemanticMemory(list){
+  if(!Array.isArray(list)) return [];
+  return list.filter(m => m && typeof m.key === "string" && typeof m.value === "string").map(m => ({
+    id: String(m.id || makeMemoryId()),
+    type: String(m.type || "fact").slice(0,30),
+    key: cleanAaruText(m.key).trim().slice(0,140),
+    value: cleanAaruText(m.value).trim().slice(0,500),
+    source: String(m.source || "user").slice(0,20),
+    importance: Math.max(1, Math.min(10, Number(m.importance) || 5)),
+    updatedAt: Number(m.updatedAt) || Date.now()
+  })).filter(m => m.key && m.value).sort((a,b) => b.importance - a.importance || b.updatedAt - a.updatedAt).slice(0,MAX_SEMANTIC_MEMORIES);
+}
+function makeMemoryId(){ return "mem_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8); }
+function semanticMemoryKey(text){ return memoryTokens(text).slice(0,12).join(" "); }
+function extractSemanticMemories(list){
+  const out=[];
+  for(const item of (Array.isArray(list)?list:[])){
+    if(item?.role!=="user") continue;
+    const text=cleanAaruText(String(item.content||"")).replace(/\s+/g," ").trim();
+    if(!text || text.length<4) continue;
+    const patterns=[
+      [/^(?:मेरा नाम|my name is)\s+(.{1,100})$/i,"नाम","identity",7],
+      [/^(?:मुझे|i)\s+(?:पसंद है|पसंद हैं|like|prefer)\s+(.{2,180})$/i,"पसंद","preference",7],
+      [/^(?:मुझे|i)\s+(?:नापसंद है|dislike)\s+(.{2,180})$/i,"नापसंद","preference",7],
+      [/^(?:याद रखना|याद रखो|remember)[:\s]+(.{2,220})$/i,"याद रखने का निर्देश","instruction",9],
+      [/^(?:हमेशा|always)\s+(.{2,220})$/i,"स्थायी निर्देश","instruction",9]
+    ];
+    let matched=false;
+    for(const [re,label,type,importance] of patterns){
+      const m=text.match(re); if(!m) continue;
+      const value=m[1].trim();
+      out.push({key:label+" "+semanticMemoryKey(value),value,type,source:"user",importance,updatedAt:Date.now()});
+      matched=true; break;
+    }
+    if(!matched && /aaru ai|प्रोजेक्ट|परियोजना|बना रहा|बनाना है|worker|index|कोड|code/i.test(text) && text.length<=500){
+      out.push({key:"project "+semanticMemoryKey(text),value:text,type:"project",source:"user",importance:8,updatedAt:Date.now()});
+    }
+  }
+  return out;
+}
+function updateSemanticMemory(existing,list){
+  let mem=normalizeSemanticMemory(existing);
+  for(const item of extractSemanticMemories(list)){
+    const same=mem.findIndex(m => m.type===item.type && semanticMemoryKey(m.key)===semanticMemoryKey(item.key));
+    if(same>=0) mem[same]={...mem[same],...item,id:mem[same].id}; else mem.unshift({...item,id:makeMemoryId()});
+  }
+  const seen=new Set();
+  mem=mem.filter(m=>{const k=semanticMemoryKey(m.type+" "+m.key+" "+m.value); if(!k||seen.has(k)) return false; seen.add(k); return true;});
+  return normalizeSemanticMemory(mem);
+}
+function buildMemorySummaryFromSemanticMemory(mem){ return normalizeSemanticMemory(mem).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_MEMORY_SUMMARY_CHARS); }
+function getSemanticRelevantMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size||!semanticMemory.length) return "";
+  return semanticMemory.map(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return {...m,score:overlap*2+m.importance*.35};}).filter(m=>m.score>=2.5).sort((a,b)=>b.score-a.score).slice(0,8).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_RELEVANT_MEMORY_CHARS);
+}
+function forgetSemanticMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size) return 0; const before=semanticMemory.length;
+  semanticMemory=semanticMemory.filter(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return overlap<Math.max(1,Math.min(3,q.size));});
+  return before-semanticMemory.length;
+}
+function isForgetMemoryCommand(text){ return /^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b/i.test(String(text||"").trim()); }
+function getForgetTarget(text){ return String(text||"").replace(/^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b[:\s-]*/i,"").trim(); }
+function updateMemoryButton(){ const el=document.getElementById("memoryBtnText"); if(el) el.textContent=`स्मार्ट मेमोरी (${semanticMemory.length})`; }
+function showMemoryStatus(){ if(!semanticMemory.length){showToast("स्मार्ट मेमोरी में अभी कोई स्थायी तथ्य नहीं है।");return;} alert("Aaru की स्मार्ट मेमोरी:\n\n"+semanticMemory.slice(0,10).map(m=>`• ${m.key}: ${m.value}`).join("\n")+(semanticMemory.length>10?`\n\nऔर ${semanticMemory.length-10} यादें...`:"")); }
+
 function buildMemorySummary(list){
   const all = Array.isArray(list) ? list : [];
   const older = all.slice(0, -12);
@@ -4395,8 +4478,9 @@ function buildMemorySummary(list){
 }
 
 function getRelevantMemory(query){
+  const semantic = getSemanticRelevantMemory(query);
   const qTokens = new Set(memoryTokens(query));
-  if(!qTokens.size || !messages.length) return "";
+  if(!qTokens.size || !messages.length) return semantic;
 
   const older = messages.slice(0, -12);
   const scored = older.map((item, index) => {
@@ -4445,17 +4529,18 @@ function getRelevantMemory(query){
   }
 
   selected.sort((a,b) => a.index - b.index);
-  return selected.map(x => {
+  const historical = selected.map(x => {
     const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
     return `${label}: ${x.text.slice(0, 480)}`;
   }).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+  return [semantic, historical].filter(Boolean).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
 }
 
 function restoreChatMemory(chat){
-  memorySummary = String(chat?.memorySummary || "").slice(0, MAX_MEMORY_SUMMARY_CHARS);
-  if(!memorySummary && messages.length > 12){
-    memorySummary = buildMemorySummary(messages);
-  }
+  semanticMemory = normalizeSemanticMemory(chat?.semanticMemory || []);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || String(chat?.memorySummary || "").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+  if(!memorySummary && messages.length > 12) memorySummary = buildMemorySummary(messages);
+  updateMemoryButton();
 }
 
 /* =========================================================
@@ -4487,8 +4572,9 @@ async function sendChatRequest(){
     message: currentQuery,
     prompt: currentQuery,
     messages: recentMessages,
-    memory_summary: memorySummary || buildMemorySummary(messages),
+    memory_summary: memorySummary || buildMemorySummaryFromSemanticMemory(semanticMemory) || buildMemorySummary(messages),
     relevant_memory: relevantMemory,
+    semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
     stream: true
   };
 
@@ -4799,9 +4885,22 @@ async function handleSend(){
 
   addUserMessage(
     displayPrompt,
-    true,
+    false,
     attachedPhoto
   );
+
+  if(isForgetMemoryCommand(displayPrompt)){
+    const target=getForgetTarget(displayPrompt);
+    const removed=target ? forgetSemanticMemory(target) : semanticMemory.length;
+    if(!target) semanticMemory=[];
+    saveCurrentChat();
+    addAssistantMessage(removed ? `ठीक है, ${removed} मेमोरी हटा दी गई।` : "ठीक है, मेमोरी हटा दी गई।", true);
+    promptEl.value=""; autoResize(); clearSelectedPhoto(); isBusy=false; sendBtn.disabled=false;
+    return;
+  }
+
+  semanticMemory=updateSemanticMemory(semanticMemory,[messages[messages.length-1]]);
+  saveCurrentChat();
 
   promptEl.value =
     "";
@@ -5629,6 +5728,7 @@ function safeInitialLoad(){
                   -MAX_MESSAGES_PER_CHAT
                 )
             : [];
+        restoreChatMemory(latest);
       }
     }
 
@@ -5704,6 +5804,9 @@ function safeInitialLoad(){
     true;
 }
 
+
+const memoryBtn = document.getElementById("memoryBtn");
+if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
 
 /* =========================================================
    START
