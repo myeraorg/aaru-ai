@@ -4323,33 +4323,74 @@ function normalizeChatResult(
 
 
 /* =========================================================
-   SMART MEMORY
+   SMART MEMORY 2.0
 ========================================================= */
+
+const MEMORY_STOPWORDS = new Set([
+  "और","या","लेकिन","यह","वह","एक","इस","उस","को","से","में","पर","के","की","का","कि","है","हैं","था","थे","थी","तो","भी","ही","अब","जब","तक","आप","तुम","मैं","हम","मुझे","मेरा","मेरी","करो","करना","करके","क्या","क्यों","कैसे","कौन","कब","कहाँ","लिए","साथ","बहुत","ज्यादा","कुछ","कोई",
+  "the","and","or","but","this","that","with","from","for","are","is","was","were","you","your","what","why","how","who","when","where","please","can","could","would","should","about"
+]);
 
 function memoryTokens(text){
   return cleanAaruText(String(text || "").toLowerCase())
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
-    .filter(w => w.length >= 3)
-    .slice(0, 80);
+    .map(w => w.trim())
+    .filter(w => w.length >= 3 && !MEMORY_STOPWORDS.has(w))
+    .slice(0, 120);
+}
+
+function memoryKey(text){
+  return memoryTokens(text).slice(0, 18).join(" ");
+}
+
+function memoryImportance(item, index, total){
+  const text = cleanAaruText(String(item?.content || "")).trim();
+  if(!text) return 0;
+
+  let score = 1;
+  const lower = text.toLowerCase();
+
+  // User-stated information/preferences should survive longer.
+  if(item?.role === "user") score += 2;
+  if(/\b(मेरा|मेरी|मेरे|मैं|मुझे|हमारा|हमारी|i am|i'm|my|me|we|our|i like|i prefer|i want|i need)\b/i.test(lower)) score += 3;
+  if(/याद|remember|भूलना|always|हमेशा|पसंद|preference|prefer|project|परियोजना|बनाना|develop|developer|code|कोड/i.test(lower)) score += 2;
+  if(text.length > 80) score += 1;
+
+  // Slight recency bonus among the older messages.
+  score += Math.min(2, index / Math.max(1, total) * 2);
+  return score;
 }
 
 function buildMemorySummary(list){
-  const older = Array.isArray(list) ? list.slice(0, -12) : [];
+  const all = Array.isArray(list) ? list : [];
+  const older = all.slice(0, -12);
   if(!older.length) return "";
+
+  const candidates = older.map((item, index) => ({
+    item,
+    index,
+    score: memoryImportance(item, index, older.length),
+    text: cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim()
+  })).filter(x => x.text);
+
+  // Keep important user facts/preferences first, while retaining useful recent context.
+  candidates.sort((a,b) => b.score - a.score || b.index - a.index);
 
   const seen = new Set();
   const parts = [];
-  for(const item of older){
-    const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
-    if(!text) continue;
-    const key = text.slice(0, 180).toLowerCase();
-    if(seen.has(key)) continue;
+  for(const x of candidates){
+    const key = memoryKey(x.text) || x.text.slice(0, 120).toLowerCase();
+    if(!key || seen.has(key)) continue;
     seen.add(key);
-    const label = item?.role === "user" ? "यूज़र" : "Aaru";
-    parts.push(`${label}: ${text.slice(0, 260)}`);
+
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    const compact = x.text.slice(0, 360);
+    parts.push(`${label}: ${compact}`);
+
     if(parts.join("\n").length >= MAX_MEMORY_SUMMARY_CHARS) break;
   }
+
   return parts.join("\n").slice(0, MAX_MEMORY_SUMMARY_CHARS);
 }
 
@@ -4361,16 +4402,52 @@ function getRelevantMemory(query){
   const scored = older.map((item, index) => {
     const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
     const tokens = memoryTokens(text);
-    let score = 0;
-    for(const token of tokens){ if(qTokens.has(token)) score++; }
-    return {item, index, score, text};
-  }).filter(x => x.text && x.score > 0)
-    .sort((a,b) => b.score - a.score || b.index - a.index)
-    .slice(0, 6);
+    if(!text || !tokens.length) return null;
 
-  return scored.map(x => {
+    let overlap = 0;
+    const unique = new Set(tokens);
+    for(const token of unique){
+      if(qTokens.has(token)) overlap++;
+    }
+
+    // Phrase-level match is stronger than individual word overlap.
+    const qClean = cleanAaruText(String(query || "")).toLowerCase().replace(/\s+/g, " ").trim();
+    const tClean = text.toLowerCase();
+    const phraseBonus = qClean.length >= 8 && tClean.includes(qClean.slice(0, Math.min(50, qClean.length))) ? 6 : 0;
+
+    const importance = memoryImportance(item, index, older.length);
+    const recency = index / Math.max(1, older.length);
+    const score = overlap * 2 + phraseBonus + importance + recency;
+
+    return { item, index, score, text };
+  }).filter(Boolean)
+    .filter(x => x.score >= 3)
+    .sort((a,b) => b.score - a.score || b.index - a.index)
+    .slice(0, 8);
+
+  // Include the neighboring message when it helps preserve a user/assistant pair.
+  const selected = [];
+  const used = new Set();
+  for(const x of scored){
+    if(used.has(x.index)) continue;
+    used.add(x.index);
+    selected.push(x);
+
+    const neighborIndex = x.item?.role === "user" ? x.index + 1 : x.index - 1;
+    if(neighborIndex >= 0 && neighborIndex < older.length && selected.length < 8 && !used.has(neighborIndex)){
+      const neighbor = older[neighborIndex];
+      const nt = cleanAaruText(String(neighbor?.content || "")).replace(/\s+/g, " ").trim();
+      if(nt){
+        used.add(neighborIndex);
+        selected.push({ item: neighbor, index: neighborIndex, score: x.score - 0.5, text: nt });
+      }
+    }
+  }
+
+  selected.sort((a,b) => a.index - b.index);
+  return selected.map(x => {
     const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
-    return `${label}: ${x.text.slice(0, 430)}`;
+    return `${label}: ${x.text.slice(0, 480)}`;
   }).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
 }
 
