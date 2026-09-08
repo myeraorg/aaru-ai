@@ -4,206 +4,673 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Aaru AI — GPT-6 Astra</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+*{
+ box-sizing:border-box;
+ -webkit-tap-highlight-color:transparent
+}
+
+html,body{
+ margin:0;
+ min-height:100%;
+ background:#000;
+ color:#fff;
+ font-family:Arial,Helvetica,sans-serif
+}
+
 body{overflow-x:hidden}
-button,input,textarea{font:inherit}
-button{cursor:pointer;color:#fff}
-.app{min-height:100dvh;display:flex;flex-direction:column}
-.header{height:58px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:0 12px;background:#000;border-bottom:1px solid #222}
-.brand{flex:1;min-width:0}
-.brand-name{font-size:18px;font-weight:800}
-.brand-sub{font-size:10px;opacity:.45}
-.icon,.action{border:1px solid #333;background:#111;border-radius:11px}
-.icon{width:40px;height:40px;font-size:18px}
-main{flex:1}
-.chat{max-width:900px;margin:auto;padding:18px 12px 150px}
-.messages{display:flex;flex-direction:column;gap:14px}
-.msg{display:flex}
-.msg.user{justify-content:flex-end}
-.msg.assistant{justify-content:flex-start}
-.bubble{max-width:min(86%,720px);padding:11px 14px;border-radius:17px;line-height:1.55;font-size:15px;word-break:break-word;user-select:text}
-.user .bubble{background:#fff;color:#000;border-bottom-right-radius:5px}
-.assistant .bubble{background:#111;color:#fff;border:1px solid #292929;border-bottom-left-radius:5px}
-.md p{margin:0 0 9px}.md p:last-child{margin:0}
-.md h1,.md h2,.md h3{margin:12px 0 7px}
-.md ul,.md ol{padding-left:22px}
-.md pre{background:#050505;border:1px solid #292929;padding:12px;border-radius:10px;overflow:auto}
-.md code{background:#080808;padding:2px 5px;border-radius:4px}
-.md a{color:#fff;text-decoration:underline}
-.msg img{max-width:100%;border-radius:12px;margin-top:7px;cursor:pointer}
-.typing{opacity:.6}
-.tool{display:inline-block;font-size:10px;padding:3px 7px;border:1px solid #333;border-radius:20px;margin-bottom:6px;opacity:.7}
-.composer-shell{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#000 35%)}
-.composer{max-width:900px;margin:auto;background:#0b0b0b;border:1px solid #333;border-radius:18px;padding:8px}
-.input-row{display:flex;align-items:flex-end;gap:6px}
-textarea{flex:1;min-width:0;min-height:42px;max-height:150px;resize:none;border:0;outline:0;background:transparent;color:#fff;padding:10px 7px}
-textarea::placeholder{color:#fff;opacity:.4}
-.send{background:#fff!important;color:#000!important}
-.preview{display:none;position:relative;margin:3px 3px 8px;width:75px}
-.preview.show{display:block}
-.preview img{width:75px;height:75px;object-fit:cover;border-radius:10px}
-.preview button{position:absolute;right:-7px;top:-7px;border:0;border-radius:50%;background:#fff;color:#000;width:23px;height:23px}
-.drawer,.modal{position:fixed;z-index:100;top:0;bottom:0;background:#080808;border-color:#292929}
-.drawer{left:0;width:min(88vw,350px);transform:translateX(-105%);transition:.2s;border-right:1px solid #292929}
-.drawer.open{transform:translateX(0)}
-.drawer-head{height:58px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #292929}
-.drawer-title{flex:1;font-weight:800}
-.drawer-body{padding:12px;overflow:auto;height:calc(100% - 58px)}
-.action{width:100%;padding:11px;margin-bottom:7px;text-align:left}
-.section{font-size:10px;opacity:.45;margin:18px 4px 8px;text-transform:uppercase}
-.search{width:100%;padding:10px;border:1px solid #333;background:#111;color:#fff;border-radius:10px;margin-bottom:8px}
-.chat-item{display:flex;align-items:center;gap:5px;padding:9px;border-radius:10px}
-.chat-item.active{background:#181818}
-.chat-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
-.small{width:30px;height:30px;border:0;background:transparent}
-.overlay{position:fixed;inset:0;z-index:90;background:#000b;display:none}
-.overlay.open{display:block}
-.modal{z-index:200;left:50%;top:50%;bottom:auto;width:min(92vw,430px);transform:translate(-50%,-50%);border:1px solid #333;border-radius:16px;padding:16px;display:none}
-.modal.open{display:block}
-.modal h3{margin:0 0 15px}
-.setting{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
-.setting select,.setting input{background:#111;color:#fff;border:1px solid #333;padding:7px;border-radius:8px}
-.controls{display:none;gap:6px;flex-wrap:wrap;padding:7px 0}
-.controls.open{display:flex}
-.controls select{background:#111;color:#fff;border:1px solid #333;border-radius:8px;padding:6px}
-.status{font-size:10px;opacity:.55;padding:3px 4px}
-.creation{margin-top:8px}
-.creation img{width:100%;border-radius:10px}
-.empty{font-size:12px;opacity:.4;padding:12px}
+
+button,
+input,
+select,
+textarea{
+ font:inherit
+}
+
+button{
+ color:#fff;
+ cursor:pointer
+}
+
+.app{
+ min-height:100dvh;
+ display:flex;
+ flex-direction:column
+}
+
+.header{
+ height:58px;
+ position:sticky;
+ top:0;
+ z-index:50;
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:0 12px;
+ background:#000;
+ border-bottom:1px solid #222
+}
+
+.brand{
+ flex:1;
+ min-width:0
+}
+
+.brand-name{
+ font-size:18px;
+ font-weight:800
+}
+
+.brand-sub{
+ font-size:10px;
+ opacity:.45
+}
+
+.icon,
+.action{
+ border:1px solid #333;
+ background:#111;
+ border-radius:11px
+}
+
+.icon{
+ width:40px;
+ height:40px;
+ font-size:18px
+}
+
+.icon:active,
+.action:active,
+.small:active{
+ transform:scale(.96)
+}
+
+main{
+ flex:1
+}
+
+.chat{
+ max-width:900px;
+ margin:auto;
+ padding:18px 12px 150px
+}
+
+.messages{
+ display:flex;
+ flex-direction:column;
+ gap:14px
+}
+
+.msg{
+ display:flex
+}
+
+.msg.user{
+ justify-content:flex-end
+}
+
+.msg.assistant{
+ justify-content:flex-start
+}
+
+.bubble{
+ max-width:min(86%,720px);
+ padding:11px 14px;
+ border-radius:17px;
+ line-height:1.55;
+ font-size:15px;
+ word-break:break-word;
+ user-select:text
+}
+
+.user .bubble{
+ background:#fff;
+ color:#000;
+ border-bottom-right-radius:5px
+}
+
+.assistant .bubble{
+ background:#111;
+ color:#fff;
+ border:1px solid #292929;
+ border-bottom-left-radius:5px
+}
+
+.md p{
+ margin:0 0 9px
+}
+
+.md p:last-child{
+ margin:0
+}
+
+.md h1,
+.md h2,
+.md h3{
+ margin:12px 0 7px
+}
+
+.md ul,
+.md ol{
+ padding-left:22px
+}
+
+.md pre{
+ background:#050505;
+ border:1px solid #292929;
+ padding:12px;
+ border-radius:10px;
+ overflow:auto;
+ white-space:pre-wrap
+}
+
+.md code{
+ background:#080808;
+ padding:2px 5px;
+ border-radius:4px
+}
+
+.md a{
+ color:#fff;
+ text-decoration:underline
+}
+
+.msg img{
+ max-width:100%;
+ border-radius:12px;
+ margin-top:7px;
+ cursor:pointer
+}
+
+.typing{
+ opacity:.6
+}
+
+.tool{
+ font-size:10px;
+ opacity:.55;
+ margin-bottom:5px
+}
+
+.composer-shell{
+ position:fixed;
+ left:0;
+ right:0;
+ bottom:0;
+ z-index:40;
+ padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+ background:linear-gradient(transparent,#000 35%)
+}
+
+.composer{
+ max-width:900px;
+ margin:auto;
+ background:#0b0b0b;
+ border:1px solid #333;
+ border-radius:18px;
+ padding:8px
+}
+
+.input-row{
+ display:flex;
+ align-items:flex-end;
+ gap:6px
+}
+
+textarea{
+ flex:1;
+ min-width:0;
+ min-height:42px;
+ max-height:150px;
+ resize:none;
+ border:0;
+ outline:0;
+ background:transparent;
+ color:#fff;
+ padding:10px 7px
+}
+
+textarea::placeholder{
+ color:#fff;
+ opacity:.4
+}
+
+.send{
+ background:#fff!important;
+ color:#000!important
+}
+
+.send:disabled{
+ opacity:.4
+}
+
+.preview{
+ display:none;
+ position:relative;
+ margin:3px 3px 8px;
+ width:75px
+}
+
+.preview.show{
+ display:block
+}
+
+.preview img{
+ width:75px;
+ height:75px;
+ object-fit:cover;
+ border-radius:10px
+}
+
+.preview button{
+ position:absolute;
+ right:-7px;
+ top:-7px;
+ border:0;
+ border-radius:50%;
+ background:#fff;
+ color:#000;
+ width:23px;
+ height:23px
+}
+
+.controls{
+ display:none;
+ gap:6px;
+ flex-wrap:wrap;
+ padding:7px 0
+}
+
+.controls.open{
+ display:flex
+}
+
+.controls select{
+ background:#111;
+ color:#fff;
+ border:1px solid #333;
+ border-radius:8px;
+ padding:6px
+}
+
+.status{
+ min-height:17px;
+ font-size:10px;
+ opacity:.55;
+ padding:3px 4px
+}
+
+.drawer{
+ position:fixed;
+ z-index:100;
+ top:0;
+ bottom:0;
+ left:0;
+ width:min(88vw,350px);
+ background:#080808;
+ transform:translateX(-105%);
+ transition:.2s;
+ border-right:1px solid #292929
+}
+
+.drawer.open{
+ transform:translateX(0)
+}
+
+.drawer-head{
+ height:58px;
+ display:flex;
+ align-items:center;
+ padding:0 12px;
+ border-bottom:1px solid #292929
+}
+
+.drawer-title{
+ flex:1;
+ font-weight:800
+}
+
+.drawer-body{
+ padding:12px;
+ overflow:auto;
+ height:calc(100% - 58px)
+}
+
+.action{
+ width:100%;
+ padding:11px;
+ margin-bottom:7px;
+ text-align:left
+}
+
+.section{
+ font-size:10px;
+ opacity:.45;
+ margin:18px 4px 8px;
+ text-transform:uppercase
+}
+
+.search{
+ width:100%;
+ padding:10px;
+ border:1px solid #333;
+ background:#111;
+ color:#fff;
+ border-radius:10px;
+ margin-bottom:8px;
+ outline:none
+}
+
+.search::placeholder{
+ color:#fff;
+ opacity:.4
+}
+
+.chat-item{
+ display:flex;
+ align-items:center;
+ gap:5px;
+ padding:9px;
+ border-radius:10px;
+ margin-bottom:2px
+}
+
+.chat-item.active{
+ background:#181818
+}
+
+.chat-name{
+ flex:1;
+ min-width:0;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ font-size:13px;
+ cursor:pointer
+}
+
+.small{
+ width:30px;
+ height:30px;
+ border:0;
+ background:transparent;
+ border-radius:8px;
+ padding:0
+}
+
+.empty{
+ font-size:12px;
+ opacity:.4;
+ padding:12px
+}
+
+.creation{
+ margin-top:8px
+}
+
+.creation img{
+ width:100%;
+ border-radius:10px;
+ cursor:pointer
+}
+
+.overlay{
+ position:fixed;
+ inset:0;
+ z-index:90;
+ background:#000b;
+ display:none
+}
+
+.overlay.open{
+ display:block
+}
+
+.modal{
+ position:fixed;
+ z-index:200;
+ left:50%;
+ top:50%;
+ width:min(92vw,430px);
+ transform:translate(-50%,-50%);
+ background:#080808;
+ border:1px solid #333;
+ border-radius:16px;
+ padding:16px;
+ display:none
+}
+
+.modal.open{
+ display:block
+}
+
+.modal h3{
+ margin:0 0 15px
+}
+
+.setting{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:12px 0;
+ border-bottom:1px solid #222
+}
+
+.setting select,
+.setting input{
+ background:#111;
+ color:#fff;
+ border:1px solid #333;
+ padding:7px;
+ border-radius:8px
+}
+
+.hint{
+ font-size:9px;
+ opacity:.4;
+ padding:4px
+}
+
 @media(max-width:600px){
- .chat{padding:14px 9px 155px}.bubble{max-width:91%;font-size:15px}
- .brand-sub{display:none}
+ .chat{
+  padding:14px 9px 155px
+ }
+
+ .bubble{
+  max-width:91%;
+  font-size:15px
+ }
+
+ .brand-sub{
+  display:none
+ }
+
+ .icon{
+  width:38px;
+  height:38px
+ }
 }
 </style>
 </head>
 
 <body>
+
 <div class="app">
 
 <header class="header">
-<button class="icon" id="menu">☰</button>
-<div class="brand">
-<div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
-</div>
-<button class="icon" id="newTop">＋</button>
+ <button class="icon" id="menu">☰</button>
+
+ <div class="brand">
+  <div class="brand-name">Aaru AI</div>
+  <div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
+ </div>
+
+ <button class="icon" id="newTop">＋</button>
 </header>
 
 <div class="overlay" id="overlay"></div>
 
 <aside class="drawer" id="drawer">
-<div class="drawer-head">
-<div class="drawer-title">Aaru AI</div>
-<button class="icon" id="closeDrawer">×</button>
-</div>
 
-<div class="drawer-body">
-<button class="action" id="newChat">＋ नई चैट</button>
-<input class="search" id="chatSearch" placeholder="🔎 चैट खोजें...">
+ <div class="drawer-head">
+  <div class="drawer-title">Aaru AI</div>
+  <button class="icon" id="closeDrawer">×</button>
+ </div>
 
-<button class="action" id="settingsBtn">⚙️ Settings</button>
-<button class="action" id="exportAll">⬇️ सभी चैट Export</button>
+ <div class="drawer-body">
 
-<div class="section">Chats</div>
-<div id="chatList"></div>
+  <button class="action" id="newChat">＋ नई चैट</button>
 
-<div class="section">Recent Images</div>
-<div id="creations"></div>
-</div>
+  <input
+   class="search"
+   id="chatSearch"
+   placeholder="🔎 चैट खोजें..."
+   autocomplete="off"
+  >
+
+  <button class="action" id="settingsBtn">⚙️ Settings</button>
+
+  <button class="action" id="exportCurrent">
+   ⬇️ Current Chat Export
+  </button>
+
+  <button class="action" id="exportAll">
+   ⬇️ सभी चैट Export
+  </button>
+
+  <div class="section">Chats</div>
+  <div id="chatList"></div>
+
+  <div class="section">Recent Images</div>
+  <div id="creations"></div>
+
+ </div>
 </aside>
 
 <main>
-<div class="chat">
-<div class="messages" id="messages"></div>
-</div>
+ <div class="chat">
+  <div class="messages" id="messages"></div>
+ </div>
 </main>
 
 <div class="composer-shell">
-<div class="composer">
 
-<div class="preview" id="preview">
-<img id="previewImg">
-<button id="removeFile">×</button>
+ <div class="composer">
+
+  <div class="preview" id="preview">
+   <img id="previewImg" alt="preview">
+   <button id="removeFile">×</button>
+  </div>
+
+  <div class="controls" id="imageControls">
+
+   <select id="ratio" aria-label="Image ratio">
+    <option value="1:1">1:1</option>
+    <option value="16:9">16:9</option>
+    <option value="9:16">9:16</option>
+    <option value="4:3">4:3</option>
+    <option value="3:4">3:4</option>
+   </select>
+
+   <select id="size" aria-label="Image size">
+    <option value="1024x1024">1024×1024</option>
+    <option value="1536x1024">1536×1024</option>
+    <option value="1024x1536">1024×1536</option>
+   </select>
+
+   <select id="quality" aria-label="Image quality">
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+    <option value="low">Low</option>
+   </select>
+
+  </div>
+
+  <div class="status" id="toolStatus"></div>
+
+  <div class="input-row">
+
+   <button class="icon" id="fileBtn">📎</button>
+
+   <button class="icon" id="imageBtn">🖼️</button>
+
+   <button class="icon" id="micBtn">🎙️</button>
+
+   <textarea
+    id="prompt"
+    rows="1"
+    placeholder="Aaru से कुछ भी पूछें..."
+   ></textarea>
+
+   <button class="icon" id="speakBtn">🔊</button>
+
+   <button class="icon send" id="sendBtn">➤</button>
+
+  </div>
+
+  <div class="hint">
+   📎 PDF/Photo • 🖼️ Image Controls • 🎙️ Voice • Enter = Send
+  </div>
+
+ </div>
 </div>
 
-<div class="controls" id="imageControls">
-<select id="ratio">
-<option value="1:1">1:1</option>
-<option value="16:9">16:9</option>
-<option value="9:16">9:16</option>
-<option value="4:3">4:3</option>
-<option value="3:4">3:4</option>
-</select>
+<input
+ type="file"
+ id="fileInput"
+ accept="image/*,.pdf,application/pdf"
+ hidden
+>
 
-<select id="size">
-<option value="1024x1024">1024×1024</option>
-<option value="1536x1024">1536×1024</option>
-<option value="1024x1536">1024×1536</option>
-</select>
+<div class="modal" id="settingsModal">
 
-<select id="quality">
-<option value="medium">Medium</option>
-<option value="high">High</option>
-<option value="low">Low</option>
-</select>
-</div>
+ <h3>Aaru AI Settings</h3>
 
-<div class="status" id="toolStatus"></div>
+ <div class="setting">
+  <span>Voice Output</span>
+  <input type="checkbox" id="voiceOutput">
+ </div>
 
-<div class="input-row">
-<button class="icon" id="fileBtn">📎</button>
-<button class="icon" id="imageBtn">🖼️</button>
-<button class="icon" id="micBtn">🎙️</button>
-<textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..."></textarea>
-<button class="icon" id="speakBtn">🔊</button>
-<button class="icon send" id="sendBtn">➤</button>
-</div>
+ <div class="setting">
+  <span>Voice Mode</span>
+  <input type="checkbox" id="voiceMode">
+ </div>
 
-</div>
-</div>
+ <div class="setting">
+  <span>High Reasoning</span>
+  <input type="checkbox" id="highReasoning">
+ </div>
 
-<input type="file" id="fileInput" accept="image/*,.pdf,application/pdf">
+ <div class="setting">
+  <span>Voice Speed</span>
 
-<div class="modal" id="settings">
-<h3>Aaru AI Settings</h3>
+  <select id="voiceRate">
+   <option value=".85">Slow</option>
+   <option value="1">Normal</option>
+   <option value="1.15">Fast</option>
+  </select>
+ </div>
 
-<div class="setting">
-<span>Voice Output</span>
-<input type="checkbox" id="voiceOutput">
-</div>
+ <br>
 
-<div class="setting">
-<span>Voice Mode</span>
-<input type="checkbox" id="voiceMode">
-</div>
+ <button class="action" id="resetSettings">
+  Reset Settings
+ </button>
 
-<div class="setting">
-<span>High Reasoning</span>
-<input type="checkbox" id="highReasoning">
-</div>
+ <button class="action" id="closeSettings">
+  Close
+ </button>
 
-<div class="setting">
-<span>Voice Speed</span>
-<select id="voiceRate">
-<option value=".85">Slow</option>
-<option value="1">Normal</option>
-<option value="1.15">Fast</option>
-</select>
-</div>
-
-<button class="action" id="resetSettings">Reset Settings</button>
-<button class="action" id="closeSettings">Close</button>
 </div>
 
 <script>
 "use strict";
 
 /* =========================
-   AARU CORE CONFIG
+   AARU CONFIG
 ========================= */
 
 const API="https://aaru-ai-api.myera-org.workers.dev/";
@@ -226,6 +693,7 @@ const LIMIT={
  messageChars:5000,
  pdfChars:60000
 };
+
 
 /* =========================
    STATE
@@ -251,6 +719,7 @@ let settings={
  voiceRate:1
 };
 
+
 /* =========================
    DOM
 ========================= */
@@ -270,8 +739,9 @@ const UI={
  creations:$("creations"),
  toolStatus:$("toolStatus"),
  imageControls:$("imageControls"),
- settings:$("settings")
+ settings:$("settingsModal")
 };
+
 
 /* =========================
    STORAGE
@@ -281,57 +751,32 @@ function read(key,fallback){
  try{
   const v=JSON.parse(localStorage.getItem(key));
   return v??fallback;
- }catch{return fallback}
+ }catch{
+  return fallback;
+ }
 }
 
 function write(key,value){
- try{localStorage.setItem(key,JSON.stringify(value))}
- catch(e){console.warn("Storage:",e)}
-}
-
-function loadState(){
- chats=read(KEYS.chats,[]);
- if(!Array.isArray(chats))chats=[];
-
- settings={...settings,...read(KEYS.settings,{})};
-
- const old=read(KEYS.old,[]);
- if(!chats.length&&Array.isArray(old)&&old.length){
-  chats=[makeChat("पुरानी चैट",old)];
+ try{
+  localStorage.setItem(key,JSON.stringify(value));
+ }catch(e){
+  console.warn("Aaru Storage:",e);
  }
-
- if(!chats.length)newChat(false);
- else openChat(chats[0].id);
-
- $("voiceOutput").checked=settings.voiceOutput;
- $("voiceMode").checked=settings.voiceMode;
- $("highReasoning").checked=settings.highReasoning;
- $("voiceRate").value=settings.voiceRate;
-
- renderChats();
- renderCreations();
 }
 
-function saveChats(){
- chats=chats.slice(0,LIMIT.chats);
- write(KEYS.chats,chats);
-}
-
-function saveSettings(){
- write(KEYS.settings,settings);
-}
 
 /* =========================
-   CHAT MANAGEMENT
+   CHAT MODEL
 ========================= */
-
-function id(){
- return "chat_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);
-}
 
 function makeChat(title="नई चैट",list=[]){
  return {
-  id:id(),
+  id:
+   "chat_"+
+   Date.now().toString(36)+
+   "_"+
+   Math.random().toString(36).slice(2,7),
+
   title,
   customTitle:"",
   pinned:false,
@@ -344,29 +789,18 @@ function makeChat(title="नई चैट",list=[]){
  };
 }
 
-function newChat(close=true){
- if(messages.length)saveCurrent();
-
- const c=makeChat();
- chats.unshift(c);
+function saveChats(){
  chats=chats.slice(0,LIMIT.chats);
- currentId=c.id;
- messages=[];
- memory=[];
- memorySummary="";
- responseId=null;
-
- render();
- renderChats();
- if(close)drawer(false);
+ write(KEYS.chats,chats);
 }
 
 function saveCurrent(){
  const c=chats.find(x=>x.id===currentId);
+
  if(!c)return;
 
  c.messages=messages.slice(-LIMIT.messages);
- c.memory=memory.slice(0,LIMIT.memories);
+ c.memory=memory.slice(-LIMIT.memories);
  c.memorySummary=memorySummary;
  c.responseId=responseId;
  c.updatedAt=Date.now();
@@ -374,32 +808,129 @@ function saveCurrent(){
  saveChats();
 }
 
-function openChat(chatId){
- saveCurrent();
 
- const c=chats.find(x=>x.id===chatId);
- if(!c)return;
+/* =========================
+   INITIAL LOAD
+========================= */
+
+function loadState(){
+
+ chats=read(KEYS.chats,[]);
+
+ if(!Array.isArray(chats))
+  chats=[];
+
+ settings={
+  ...settings,
+  ...read(KEYS.settings,{})
+ };
+
+ const old=read(KEYS.old,[]);
+
+ if(!chats.length&&Array.isArray(old)&&old.length){
+  chats=[makeChat("पुरानी चैट",old)];
+ }
+
+ if(!chats.length){
+  createNewChat(false);
+ }else{
+  openChat(chats[0].id,false);
+ }
+
+ loadSettingsUI();
+ render();
+ renderChats();
+ renderCreations();
+}
+
+
+/* =========================
+   CHAT MANAGEMENT
+========================= */
+
+function createNewChat(closeDrawer=true){
+
+ if(messages.length)
+  saveCurrent();
+
+ const c=makeChat();
+
+ chats.unshift(c);
+ chats=chats.slice(0,LIMIT.chats);
 
  currentId=c.id;
- messages=Array.isArray(c.messages)?c.messages.slice(-LIMIT.messages):[];
- memory=Array.isArray(c.memory)?c.memory:[];
- memorySummary=c.memorySummary||"";
- responseId=c.responseId||null;
+
+ messages=[];
+ memory=[];
+ memorySummary="";
+ responseId=null;
+ selectedImage=null;
+ selectedDocument=null;
+
+ UI.preview.classList.remove("show");
 
  render();
  renderChats();
- drawer(false);
+
+ if(closeDrawer)
+  toggleDrawer(false);
+}
+
+function openChat(chatId,closeDrawer=true){
+
+ if(currentId)
+  saveCurrent();
+
+ const c=chats.find(x=>x.id===chatId);
+
+ if(!c)return;
+
+ currentId=c.id;
+
+ messages=Array.isArray(c.messages)
+  ?c.messages.slice(-LIMIT.messages)
+  :[];
+
+ memory=Array.isArray(c.memory)
+  ?c.memory
+  :[];
+
+ memorySummary=String(c.memorySummary||"");
+
+ responseId=String(c.responseId||"").trim()||null;
+
+ selectedImage=null;
+ selectedDocument="";
+
+ UI.preview.classList.remove("show");
+
+ render();
+ renderChats();
+
+ if(closeDrawer)
+  toggleDrawer(false);
 }
 
 function renameChat(chatId){
+
  const c=chats.find(x=>x.id===chatId);
+
  if(!c)return;
 
- const name=prompt("चैट का नाम:",c.customTitle||c.title||"नई चैट");
+ const name=window.prompt(
+  "चैट का नाम:",
+  c.customTitle||c.title||"नई चैट"
+ );
+
  if(name===null)return;
 
- c.customTitle=name.trim().slice(0,80);
- c.title=c.customTitle||c.title||"नई चैट";
+ const clean=name.trim().slice(0,80);
+
+ if(clean){
+  c.customTitle=clean;
+  c.title=clean;
+ }
+
  c.updatedAt=Date.now();
 
  saveChats();
@@ -407,110 +938,117 @@ function renameChat(chatId){
 }
 
 function pinChat(chatId){
+
  const c=chats.find(x=>x.id===chatId);
+
  if(!c)return;
 
  c.pinned=!c.pinned;
  c.updatedAt=Date.now();
+
  saveChats();
  renderChats();
 }
 
 function deleteChat(chatId){
- if(!confirm("यह चैट डिलीट करें?"))return;
+
+ if(!window.confirm("यह चैट डिलीट करें?"))
+  return;
 
  chats=chats.filter(x=>x.id!==chatId);
 
- if(!chats.length){
-  const c=makeChat();
-  chats=[c];
- }
+ if(!chats.length)
+  chats=[makeChat()];
 
  const active=chats.find(x=>x.id===currentId);
 
  if(!active){
+
   currentId=null;
   messages=[];
   memory=[];
+  memorySummary="";
   responseId=null;
-  openChat(chats[0].id);
- }else renderChats();
+
+  openChat(chats[0].id,false);
+
+ }else{
+
+  saveChats();
+  renderChats();
+ }
 
  saveChats();
 }
-
-function deleteAll(){
- if(!confirm("सभी चैट डिलीट करें?"))return;
-
- const c=makeChat();
- chats=[c];
- currentId=c.id;
- messages=[];
- memory=[];
- memorySummary="";
- responseId=null;
-
- saveChats();
- render();
- renderChats();
-}
-
-/* =========================
-   CHAT SEARCH / UI
-========================= */
 
 function chatText(c){
+
  return [
   c.title,
   c.customTitle,
   ...(c.messages||[]).map(x=>x.content||"")
- ].join(" ").toLowerCase();
+ ]
+ .join(" ")
+ .toLowerCase();
 }
 
 function renderChats(){
+
  const q=searchQuery.trim().toLowerCase();
 
  const list=chats
   .filter(c=>!q||chatText(c).includes(q))
-  .sort((a,b)=>
-   Number(b.pinned)-Number(a.pinned)||
-   b.updatedAt-a.updatedAt
+  .sort(
+   (a,b)=>
+    Number(b.pinned)-Number(a.pinned)||
+    b.updatedAt-a.updatedAt
   );
 
- UI.chatList.innerHTML=list.length?list.map(c=>`
-  <div class="chat-item ${c.id===currentId?"active":""}">
-   <button class="small" data-pin="${c.id}">${c.pinned?"📌":"○"}</button>
-   <div class="chat-name" data-open="${c.id}">
-    ${escape(c.customTitle||c.title||"नई चैट")}
+ UI.chatList.innerHTML=list.length
+ ?list.map(c=>`
+   <div class="chat-item ${c.id===currentId?"active":""}">
+
+    <button
+     class="small"
+     data-pin="${escapeAttr(c.id)}"
+     title="${c.pinned?"Unpin":"Pin"}"
+    >${c.pinned?"📌":"○"}</button>
+
+    <div
+     class="chat-name"
+     data-open="${escapeAttr(c.id)}"
+    >${escape(c.customTitle||c.title||"नई चैट")}</div>
+
+    <button
+     class="small"
+     data-rename="${escapeAttr(c.id)}"
+     title="Rename"
+    >✏️</button>
+
+    <button
+     class="small"
+     data-export="${escapeAttr(c.id)}"
+     title="Export"
+    >⬇️</button>
+
+    <button
+     class="small"
+     data-delete="${escapeAttr(c.id)}"
+     title="Delete"
+    >🗑️</button>
+
    </div>
-   <button class="small" data-rename="${c.id}">✏️</button>
-   <button class="small" data-delete="${c.id}">🗑️</button>
-  </div>
- `).join(""):`<div class="empty">कोई चैट नहीं</div>`;
+  `).join("")
+ :`<div class="empty">कोई चैट नहीं</div>`;
 }
+
 
 /* =========================
-   MESSAGE RENDER
+   MESSAGE UI
 ========================= */
 
-function render(){
- UI.messages.innerHTML=messages.map((m,i)=>`
-  <div class="msg ${m.role}">
-   <div class="bubble">
-    ${m.image?`<img src="${m.image}" data-image="${m.image}">`:""}
-    ${m.tool?`<div class="tool">${escape(m.tool)}</div>`:""}
-    <div class="md">${m.role==="assistant"?markdown(m.content):escape(m.content)}</div>
-   </div>
-  </div>
- `).join("");
-
- window.scrollTo({
-  top:document.documentElement.scrollHeight,
-  behavior:"smooth"
- });
-}
-
 function addMessage(role,content,extra={}){
+
  messages.push({
   role,
   content:String(content||""),
@@ -523,28 +1061,100 @@ function addMessage(role,content,extra={}){
  render();
 }
 
+function render(){
+
+ UI.messages.innerHTML=messages.map(m=>`
+
+  <div class="msg ${m.role}">
+
+   <div class="bubble">
+
+    ${
+     m.image
+      ?`<img
+          src="${escapeAttr(m.image)}"
+          data-image="${escapeAttr(m.image)}"
+          alt="Aaru image"
+        >`
+      :""
+    }
+
+    ${
+     m.tool
+      ?`<div class="tool">${escape(m.tool)}</div>`
+      :""
+    }
+
+    <div class="md">
+     ${
+      m.role==="assistant"
+       ?markdown(m.content)
+       :escape(m.content)
+     }
+    </div>
+
+   </div>
+
+  </div>
+ `).join("");
+
+ window.scrollTo({
+  top:document.documentElement.scrollHeight,
+  behavior:"smooth"
+ });
+}
+
 function addTyping(){
- const old=document.getElementById("typing");
- if(old)old.remove();
+
+ if(document.getElementById("typing"))
+  return;
 
  const d=document.createElement("div");
+
  d.id="typing";
  d.className="msg assistant";
- d.innerHTML='<div class="bubble"><div class="typing">Aaru सोच रहा है…</div></div>';
+
+ d.innerHTML=
+  '<div class="bubble"><div class="typing">Aaru सोच रहा है…</div></div>';
+
  UI.messages.appendChild(d);
 }
 
 function removeTyping(){
+
  const d=document.getElementById("typing");
- if(d)d.remove();
+
+ if(d)
+  d.remove();
 }
+
+function updateStreaming(text){
+
+ removeTyping();
+
+ const last=messages[messages.length-1];
+
+ if(last&&last.role==="assistant"){
+  last.content=text;
+ }else{
+  messages.push({
+   role:"assistant",
+   content:text
+  });
+ }
+
+ render();
+}
+
 
 /* =========================
    MEMORY
 ========================= */
 
 function remember(text){
+
  const s=String(text||"").trim();
+
  if(!s)return;
 
  const words=s
@@ -573,12 +1183,15 @@ function remember(text){
 }
 
 function relevantMemory(query){
- const q=String(query).toLowerCase();
+
+ const q=String(query||"").toLowerCase();
 
  return memory
   .map(x=>{
    const score=(x.words||[])
-    .filter(w=>q.includes(w.toLowerCase())).length;
+    .filter(w=>q.includes(w.toLowerCase()))
+    .length;
+
    return {x,score};
   })
   .filter(x=>x.score>0)
@@ -589,36 +1202,89 @@ function relevantMemory(query){
   .slice(0,2500);
 }
 
+function applyMemoryUpdates(updates){
+
+ if(!Array.isArray(updates))
+  return;
+
+ for(const u of updates.slice(0,30)){
+
+  const action=u.action||"add";
+
+  const text=String(
+   u.text||
+   u.value||
+   ""
+  ).trim();
+
+  if(!text)continue;
+
+  if(action==="delete"){
+
+   memory=memory.filter(
+    x=>x.text!==text
+   );
+
+  }else{
+
+   remember(text);
+  }
+ }
+
+ saveCurrent();
+}
+
+
 /* =========================
-   API
+   WORKER REQUEST
 ========================= */
 
 async function requestChat(query){
+
  const recent=messages
   .slice(-LIMIT.context)
   .map(m=>({
    role:m.role==="user"?"user":"assistant",
-   content:String(m.content||"").slice(0,LIMIT.messageChars)
+   content:String(m.content||"")
+    .slice(0,LIMIT.messageChars)
   }));
 
  const payload={
+
   message:query,
+
   messages:recent,
+
   model:MODEL,
+
   api:"responses",
 
   memory_summary:memorySummary,
-  relevant_memory:relevantMemory(query),
-  semantic_memory:memory.slice(0,LIMIT.memories),
 
-  previous_response_id:responseId||undefined,
+  relevant_memory:relevantMemory(query),
+
+  semantic_memory:memory.slice(
+   0,
+   LIMIT.memories
+  ),
+
+  previous_response_id:
+   responseId||undefined,
 
   reasoning:{
-   effort:settings.highReasoning?"high":"medium"
+   effort:
+    settings.highReasoning
+     ?"high"
+     :"medium"
   },
 
-  reasoning_effort:settings.highReasoning?"high":"medium",
+  reasoning_effort:
+   settings.highReasoning
+    ?"high"
+    :"medium",
+
   tool_choice:"auto",
+
   stream:true,
 
   image_options:{
@@ -628,24 +1294,29 @@ async function requestChat(query){
   },
 
   composer:"native-unified-composer",
+
   orchestration:"astra-native",
+
   intent_routing:"model-selected",
+
   frontend_routing:false,
 
   client_capabilities:{
    vision:!!selectedImage,
    document_text:!!selectedDocument,
    responses_api:true,
+
    native_tools:[
     "web_search",
     "image_generation",
     "code_interpreter",
     "file_search"
    ],
+
    web_search:true,
    image_generation:true,
    image_editing:true,
-   voice_input:!!recognition,
+   voice_input:true,
    browser_tts:true
   }
  };
@@ -654,42 +1325,63 @@ async function requestChat(query){
   payload.image_b64=selectedImage;
 
  if(selectedDocument)
-  payload.document_text=selectedDocument.slice(0,LIMIT.pdfChars);
+  payload.document_text=
+   selectedDocument.slice(
+    0,
+    LIMIT.pdfChars
+   );
 
- const res=await fetch(API+"chat",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify(payload)
- });
+ const res=await fetch(
+  API+"chat",
+  {
+   method:"POST",
+   headers:{
+    "Content-Type":"application/json"
+   },
+   body:JSON.stringify(payload)
+  }
+ );
 
  if(!res.ok){
-  const text=await res.text();
-  throw new Error(text||"Worker request failed");
+
+  const err=await res.text();
+
+  throw new Error(
+   err||"Worker request failed"
+  );
  }
 
- const type=res.headers.get("content-type")||"";
+ const type=
+  res.headers.get("content-type")||"";
 
  if(!type.includes("text/event-stream")){
+
   const data=await res.json();
 
   if(data.response_id)
    responseId=data.response_id;
 
-  if(Array.isArray(data.tools_used))
+  if(Array.isArray(data.tools_used)){
+
    tools=data.tools_used;
 
+   updateToolStatus();
+  }
+
   if(data.memory_updates)
-   applyMemoryUpdates(data.memory_updates);
+   applyMemoryUpdates(
+    data.memory_updates
+   );
 
-  if(data.image)
-   return {
-    text:data.text||"",
-    image:data.image,
-    responseId:data.response_id
-   };
+  return{
+   text:
+    data.text||
+    data.output||
+    data.message||
+    "",
 
-  return {
-   text:data.text||data.output||data.message||"",
+   image:data.image||null,
+
    responseId:data.response_id
   };
  }
@@ -697,85 +1389,112 @@ async function requestChat(query){
  return readStream(res);
 }
 
+
 /* =========================
    STREAM
 ========================= */
 
 async function readStream(res){
+
  const reader=res.body.getReader();
+
  const decoder=new TextDecoder();
+
  let buffer="";
  let text="";
  let image=null;
 
  while(true){
-  const {value,done}=await reader.read();
+
+  const {value,done}=
+   await reader.read();
+
   if(done)break;
 
-  buffer+=decoder.decode(value,{stream:true});
+  buffer+=decoder.decode(
+   value,
+   {stream:true}
+  );
 
   const lines=buffer.split("\n");
+
   buffer=lines.pop()||"";
 
   for(const raw of lines){
-   const line=raw.trim();
-   if(!line.startsWith("data:"))continue;
 
-   const rawData=line.slice(5).trim();
-   if(!rawData||rawData==="[DONE]")continue;
+   const line=raw.trim();
+
+   if(!line.startsWith("data:"))
+    continue;
+
+   const data=line.slice(5).trim();
+
+   if(!data||data==="[DONE]")
+    continue;
 
    try{
-    const d=JSON.parse(rawData);
 
-    if(d.response_id)responseId=d.response_id;
+    const d=JSON.parse(data);
+
+    if(d.response_id)
+     responseId=d.response_id;
+
     if(d.tools_used){
+
      tools=d.tools_used;
+
      updateToolStatus();
     }
 
     if(d.memory_updates)
-     applyMemoryUpdates(d.memory_updates);
+     applyMemoryUpdates(
+      d.memory_updates
+     );
 
     if(d.image)
      image=d.image;
+
+    if(d.type)
+     updateToolFromType(d.type);
 
     const chunk=
      d.delta||
      d.text_delta||
      d.output_text||
-     d.text||
      "";
 
     if(chunk){
+
      text+=chunk;
+
      updateStreaming(text);
     }
 
-    if(d.type)
-     updateToolFromType(d.type);
+   }catch(e){
 
-   }catch(e){}
+    console.warn(
+     "Aaru stream event:",
+     e
+    );
+   }
   }
  }
 
- return {text,image,responseId};
+ return{
+  text,
+  image,
+  responseId
+ };
 }
 
-function updateStreaming(text){
- removeTyping();
 
- const last=messages[messages.length-1];
-
- if(last?.role==="assistant")
-  last.content=text;
- else
-  messages.push({role:"assistant",content:text});
-
- render();
-}
+/* =========================
+   TOOL STATUS
+========================= */
 
 function updateToolFromType(type){
- const t=String(type);
+
+ const t=String(type||"");
 
  if(t.includes("web_search"))
   setTool("🌐 Web Search");
@@ -791,536 +1510,1234 @@ function updateToolFromType(type){
 }
 
 function updateToolStatus(){
- if(!tools.length)return;
 
- const labels=tools.map(x=>{
-  const s=typeof x==="string"?x:x.type||x.name||"";
-  if(s.includes("web"))return"🌐 Web Search";
-  if(s.includes("image"))return"🖼️ Image";
-  if(s.includes("code"))return"💻 Code/Data";
-  if(s.includes("file"))return"📄 File Search";
-  return s;
- }).filter(Boolean);
+ UI.toolStatus.textContent=
+  tools
+   .map(x=>{
+    const s=
+     typeof x==="string"
+      ?x
+      :x.type||
+       x.name||
+       "";
 
- UI.toolStatus.textContent=[...new Set(labels)].join(" • ");
+    if(s.includes("web"))
+     return"🌐 Web Search";
+
+    if(s.includes("image"))
+     return"🖼️ Image";
+
+    if(s.includes("code"))
+     return"💻 Code/Data";
+
+    if(s.includes("file"))
+     return"📄 File Search";
+
+    return s;
+   })
+   .filter(Boolean)
+   .join(" • ");
 }
 
 function setTool(text){
- UI.toolStatus.textContent=text;
+
+ UI.toolStatus.textContent=
+  String(text||"");
 }
+
 
 /* =========================
    SEND
 ========================= */
 
 async function send(){
- if(busy)return;
 
- let query=UI.prompt.value.trim();
+ if(busy)
+  return;
 
- if(!query&&selectedImage)query="इस फोटो को समझकर बताओ।";
- if(!query&&selectedDocument)query="इस PDF/document को पढ़कर मुख्य जानकारी बताओ।";
- if(!query)return;
+ let query=
+  UI.prompt.value.trim();
+
+ if(!query&&selectedImage)
+  query="इस फोटो को समझकर बताओ।";
+
+ if(!query&&selectedDocument)
+  query=
+   "इस PDF/document को पढ़कर मुख्य जानकारी बताओ।";
+
+ if(!query)
+  return;
 
  busy=true;
+
  UI.send.disabled=true;
+
  UI.prompt.value="";
+
  autoResize();
 
- addMessage("user",query,{
-  image:selectedImage||undefined
- });
+ addMessage(
+  "user",
+  query,
+  {
+   image:
+    selectedImage||
+    undefined
+  }
+ );
 
  remember(query);
+
  saveCurrent();
 
  selectedImage=null;
  selectedDocument="";
 
- UI.preview.classList.remove("show");
- setTool("Aaru सोच रहा है…");
+ UI.preview.classList.remove(
+  "show"
+ );
+
+ setTool(
+  "Aaru सोच रहा है…"
+ );
+
  addTyping();
 
  try{
-  const result=await requestChat(query);
+
+  const result=
+   await requestChat(query);
 
   removeTyping();
 
-  const last=messages[messages.length-1];
+  const last=
+   messages[messages.length-1];
 
-  if(last?.role==="assistant"){
-   last.content=result.text||"";
-   if(result.image)last.image=result.image;
+  if(last&&last.role==="assistant"){
+
+   last.content=
+    result.text||"";
+
+   if(result.image)
+    last.image=result.image;
+
   }else{
-   addMessage("assistant",result.text||"",{
-    image:result.image
-   });
+
+   addMessage(
+    "assistant",
+    result.text||"",
+    {
+     image:result.image
+    }
+   );
   }
 
   if(result.responseId)
-   responseId=result.responseId;
+   responseId=
+    result.responseId;
+
+  if(result.image)
+   saveCreation(
+    result.image,
+    query
+   );
 
   saveCurrent();
+
   render();
-  speak(result.text||"");
+
+  speak(
+   result.text||""
+  );
 
  }catch(error){
+
   removeTyping();
+
+  console.error(
+   "Aaru Worker:",
+   error
+  );
 
   addMessage(
    "assistant",
    "❌ अभी जवाब प्राप्त नहीं हो पाया। कृपया फिर से कोशिश करें।"
   );
 
-  console.error(error);
-
  }finally{
+
   busy=false;
+
   UI.send.disabled=false;
-  UI.toolStatus.textContent="";
-  selectedImage=null;
-  selectedDocument="";
+
+  setTool("");
  }
 }
 
+
 /* =========================
-   IMAGE / PDF
+   FILE / PDF / PHOTO
 ========================= */
 
 async function readFile(file){
- if(!file)return;
 
- if(file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf")){
-  setTool("📄 PDF पढ़ा जा रहा है…");
+ if(!file)
+  return;
+
+ if(
+  file.type==="application/pdf"||
+  file.name.toLowerCase().endsWith(".pdf")
+ ){
+
+  setTool(
+   "📄 PDF पढ़ा जा रहा है…"
+  );
 
   try{
-   const buf=await file.arrayBuffer();
-   const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+
+   const buf=
+    await file.arrayBuffer();
+
+   const pdf=
+    await pdfjsLib
+     .getDocument({
+      data:buf
+     })
+     .promise;
+
    let text="";
 
-   for(let p=1;p<=pdf.numPages;p++){
-    const page=await pdf.getPage(p);
-    const content=await page.getTextContent();
+   for(
+    let p=1;
+    p<=pdf.numPages;
+    p++
+   ){
 
-    text+=content.items
-     .map(x=>x.str)
-     .join(" ")+"\n";
+    const page=
+     await pdf.getPage(p);
 
-    if(text.length>=LIMIT.pdfChars)break;
+    const content=
+     await page.getTextContent();
+
+    text+=
+     content.items
+      .map(x=>x.str)
+      .join(" ")
+     +"\n";
+
+    if(
+     text.length>=
+     LIMIT.pdfChars
+    )
+     break;
    }
 
-   selectedDocument=text.slice(0,LIMIT.pdfChars);
-   setTool("📄 PDF तैयार है");
-   return;
+   selectedDocument=
+    text.slice(
+     0,
+     LIMIT.pdfChars
+    );
+
+   setTool(
+    "📄 PDF तैयार है"
+   );
 
   }catch(e){
-   setTool("❌ PDF पढ़ने में समस्या");
-   return;
+
+   console.error(e);
+
+   setTool(
+    "❌ PDF पढ़ने में समस्या"
+   );
   }
+
+  return;
  }
 
  if(file.type.startsWith("image/")){
-  selectedImage=await fileToDataURL(file);
-  UI.previewImg.src=selectedImage;
-  UI.preview.classList.add("show");
-  setTool("🖼️ Photo तैयार है");
+
+  try{
+
+   selectedImage=
+    await fileToDataURL(file);
+
+   UI.previewImg.src=
+    selectedImage;
+
+   UI.preview.classList.add(
+    "show"
+   );
+
+   setTool(
+    "🖼️ Photo तैयार है"
+   );
+
+  }catch(e){
+
+   console.error(e);
+
+   setTool(
+    "❌ Photo पढ़ने में समस्या"
+   );
+  }
  }
 }
 
 function fileToDataURL(file){
- return new Promise((resolve,reject)=>{
-  const r=new FileReader();
-  r.onload=()=>resolve(r.result);
-  r.onerror=reject;
-  r.readAsDataURL(file);
- });
-}
+
+ return new Promise(
+  (resolve,reject)=>{
+
+   const r=
+    new FileReader();
+
+   r.onload=
+    ()=>resolve(r.result);
+
+   r.onerror=
+    reject;
+
+   r.readAsDataURL(file);
+  }
+);
+
 
 /* =========================
-   VOICE
+   VOICE INPUT
 ========================= */
 
 function startVoice(){
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+ const SR=
+  window.SpeechRecognition||
+  window.webkitSpeechRecognition;
 
  if(!SR){
-  alert("इस browser में Voice Input उपलब्ध नहीं है।");
+
+  alert(
+   "इस browser में Voice Input उपलब्ध नहीं है।"
+  );
+
   return;
  }
 
  if(recognition){
+
   recognition.stop();
+
   recognition=null;
+
   $("micBtn").textContent="🎙️";
+
   return;
  }
 
- recognition=new SR();
- recognition.lang="hi-IN";
- recognition.interimResults=false;
- recognition.continuous=settings.voiceMode;
+ recognition=
+  new SR();
 
- recognition.onstart=()=>{
-  $("micBtn").textContent="🔴";
- };
+ recognition.lang="hi-IN";
+
+ recognition.interimResults=false;
+
+ recognition.continuous=
+  !!settings.voiceMode;
+
+ recognition.onstart=
+  ()=>{
+   $("micBtn").textContent="🔴";
+   setTool("🎙️ सुन रहा हूँ…");
+  };
 
  recognition.onresult=e=>{
-  const text=[...e.results]
-   .map(x=>x[0].transcript)
-   .join(" ");
 
-  UI.prompt.value+=(UI.prompt.value?" ":"")+text;
+  const text=
+   [...e.results]
+    .map(x=>x[0].transcript)
+    .join(" ");
+
+  UI.prompt.value+=
+   (UI.prompt.value?" ":"")+
+   text;
+
   autoResize();
 
-  if(settings.voiceMode&&!busy)
+  if(
+   settings.voiceMode&&
+   !busy
+  ){
    send();
- };
-
- recognition.onerror=e=>{
-  console.warn("Voice:",e.error);
+  }
  };
 
  recognition.onend=()=>{
+
   recognition=null;
+
+  $("micBtn").textContent="🎙️";
+
+  if(!busy)
+   setTool("");
+ };
+
+ recognition.onerror=e=>{
+
+  console.warn(
+   "Voice:",
+   e.error
+  );
+
+  recognition=null;
+
   $("micBtn").textContent="🎙️";
  };
+
  recognition.start();
 }
 
+
+/* =========================
+   VOICE OUTPUT
+========================= */
+
 function speak(text){
- if(!settings.voiceOutput||!text||!("speechSynthesis" in window))return;
+
+ if(
+  !settings.voiceOutput||
+  !text||
+  !("speechSynthesis" in window)
+ )
+  return;
 
  speechSynthesis.cancel();
 
- const u=new SpeechSynthesisUtterance(
-  text.replace(/[#*`]/g," ").slice(0,5000)
- );
+ const clean=
+  String(text)
+   .replace(/[#*`]/g," ")
+   .slice(0,5000);
 
- u.rate=Number(settings.voiceRate)||1;
- u.lang=/[\u0900-\u097F]/.test(text)?"hi-IN":"en-US";
+ const u=
+  new SpeechSynthesisUtterance(
+   clean
+  );
+
+ u.rate=
+  Number(settings.voiceRate)||1;
+
+ u.lang=
+  /[\u0900-\u097F]/.test(text)
+   ?"hi-IN"
+   :"en-US";
 
  speechSynthesis.speak(u);
 }
 
-/* =========================
-   EXPORT
-========================= */
-
-function exportChat(c){
- const data=(c.messages||[])
-  .map(m=>
-   `${m.role.toUpperCase()}:\n${m.content||""}\n`
-  )
-  .join("\n");
-
- download(
-  data,
-  `${safeName(c.customTitle||c.title||"Aaru Chat")}.txt`,
-  "text/plain"
- );
-}
-
-function exportAll(){
- const data=chats.map(c=>{
-  return `===== ${c.customTitle||c.title||"Chat"} =====\n`+
-   (c.messages||[]).map(m=>
-    `${m.role}: ${m.content||""}`
-   ).join("\n");
- }).join("\n\n");
-
- download(data,"aaru-all-chats.txt","text/plain");
-}
-
-function download(data,name,type){
- const blob=new Blob([data],{type});
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download=name;
- a.click();
- setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-
-/* =========================
-   MEMORY UPDATES
-========================= */
-
-function applyMemoryUpdates(updates){
- if(!Array.isArray(updates))return;
-
- for(const u of updates.slice(0,30)){
-  const action=u.action||"add";
-  const text=String(u.text||u.value||"").trim();
-  if(!text)continue;
-
-  if(action==="delete"){
-   memory=memory.filter(x=>x.text!==text);
-  }else{
-   remember(text);
-  }
- }
-
- saveCurrent();
-}
-
-/* =========================
-   IMAGE HISTORY
-========================= */
-
-function renderCreations(){
- const list=read(KEYS.images,[]);
- if(!Array.isArray(list)||!list.length){
-  UI.creations.innerHTML='<div class="empty">अभी कोई image नहीं</div>';
-  return;
- }
-
- UI.creations.innerHTML=list.slice(0,4).map(x=>`
-  <div class="creation">
-   <img src="${x.image||x.url}" data-image="${x.image||x.url}">
-  </div>
- `).join("");
-}
-
-function saveCreation(image,prompt){
- if(!image)return;
-
- const list=read(KEYS.images,[]);
- list.unshift({
-  image,
-  prompt:String(prompt||"").slice(0,300),
-  time:Date.now()
- });
-
- write(KEYS.images,list.slice(0,LIMIT.imageHistory));
- renderCreations();
-}
 
 /* =========================
    SETTINGS
 ========================= */
 
-function loadSettingsUI(){
- $("voiceOutput").checked=settings.voiceOutput;
- $("voiceMode").checked=settings.voiceMode;
- $("highReasoning").checked=settings.highReasoning;
- $("voiceRate").value=settings.voiceRate;
+function saveSettings(){
+
+ write(
+  KEYS.settings,
+  settings
+ );
 }
 
 function saveSetting(name,value){
+
  settings[name]=value;
+
  saveSettings();
 }
 
+function loadSettingsUI(){
+
+ $("voiceOutput").checked=
+  !!settings.voiceOutput;
+
+ $("voiceMode").checked=
+  !!settings.voiceMode;
+
+ $("highReasoning").checked=
+  !!settings.highReasoning;
+
+ $("voiceRate").value=
+  settings.voiceRate;
+}
+
 function resetSettings(){
+
  settings={
   voiceOutput:true,
   voiceMode:false,
   highReasoning:true,
   voiceRate:1
  };
+
  saveSettings();
  loadSettingsUI();
 }
 
+
 /* =========================
-   DRAWER / MODALS
+   DRAWER / MODAL
 ========================= */
 
-function drawer(open){
- UI.drawer.classList.toggle("open",open);
- UI.overlay.classList.toggle("open",open);
+function toggleDrawer(open){
+
+ UI.drawer.classList.toggle(
+  "open",
+  !!open
+ );
+
+ UI.overlay.classList.toggle(
+  "open",
+  !!open
+ );
 }
 
-function settings(open){
- UI.settings.classList.toggle("open",open);
+
+/*
+ IMPORTANT:
+ settings STATE ऊपर है।
+ इसलिए modal function का नाम
+ settings() नहीं रखा गया।
+*/
+function toggleSettings(open){
+
+ UI.settings.classList.toggle(
+  "open",
+  !!open
+ );
 }
+
+
+/* =========================
+   IMAGE HISTORY
+========================= */
+
+function saveCreation(
+ image,
+ promptText
+){
+
+ if(!image)
+  return;
+
+ const list=
+  read(KEYS.images,[]);
+
+ list.unshift({
+
+  image,
+
+  prompt:
+   String(promptText||"")
+    .slice(0,300),
+
+  time:Date.now()
+ });
+
+ write(
+  KEYS.images,
+  list.slice(
+   0,
+   LIMIT.imageHistory
+  )
+ );
+
+ renderCreations();
+}
+
+function renderCreations(){
+
+ const list=
+  read(KEYS.images,[]);
+
+ if(
+  !Array.isArray(list)||
+  !list.length
+ ){
+
+  UI.creations.innerHTML=
+   '<div class="empty">अभी कोई image नहीं</div>';
+
+  return;
+ }
+
+ UI.creations.innerHTML=
+  list
+   .slice(
+    0,
+    LIMIT.imageHistory
+   )
+   .map(x=>`
+
+    <div class="creation">
+
+     <img
+      src="${escapeAttr(x.image||x.url)}"
+      data-image="${escapeAttr(x.image||x.url)}"
+      alt="Recent image"
+     >
+
+    </div>
+
+   `)
+   .join("");
+}
+
+
+/* =========================
+   EXPORT
+========================= */
+
+function exportChat(c){
+
+ if(!c)
+  return;
+
+ const data=
+  (c.messages||[])
+   .map(
+    m=>
+     `${String(m.role||"").toUpperCase()}:\n`+
+     `${m.content||""}\n`
+   )
+   .join("\n");
+
+ download(
+  data,
+  safeName(
+   c.customTitle||
+   c.title||
+   "Aaru Chat"
+  )+".txt",
+  "text/plain"
+ );
+}
+
+function exportCurrent(){
+
+ const c=
+  chats.find(
+   x=>x.id===currentId
+  );
+
+ if(c)
+  exportChat(c);
+}
+
+function exportAll(){
+
+ const data=
+  chats
+   .map(c=>
+    `===== ${
+     c.customTitle||
+     c.title||
+     "Chat"
+    } =====\n`+
+
+    (c.messages||[])
+     .map(
+      m=>
+       `${m.role}: ${m.content||""}`
+     )
+     .join("\n")
+   )
+   .join("\n\n");
+
+ download(
+  data,
+  "aaru-all-chats.txt",
+  "text/plain"
+ );
+}
+
+function download(
+ data,
+ name,
+ type
+){
+
+ const blob=
+  new Blob(
+   [data],
+   {type}
+  );
+
+ const url=
+  URL.createObjectURL(blob);
+
+ const a=
+  document.createElement("a");
+
+ a.href=url;
+ a.download=name;
+
+ document.body.appendChild(a);
+
+ a.click();
+
+ a.remove();
+
+ setTimeout(
+  ()=>URL.revokeObjectURL(url),
+  1000
+ );
+}
+
 
 /* =========================
    HELPERS
 ========================= */
 
 function escape(v){
- return String(v||"").replace(/[&<>"']/g,m=>({
-  "&":"&amp;",
-  "<":"&lt;",
-  ">":"&gt;",
-  '"':"&quot;",
-  "'":"&#039;"
- }[m]));
+
+ return String(v||"")
+  .replace(
+   /[&<>"']/g,
+   m=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+   }[m])
+  );
 }
 
-function markdown(v){
- let s=escape(v);
-
- s=s.replace(/```([\s\S]*?)```/g,
-  "<pre><code>$1</code></pre>"
- );
-
- s=s.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");
- s=s.replace(/\*(.*?)\*/g,"<em>$1</em>");
- s=s.replace(/`([^`]+)`/g,"<code>$1</code>");
-
- s=s.split(/\n\n+/)
-  .map(p=>{
-   if(p.startsWith("<pre>"))return p;
-   return "<p>"+p.replace(/\n/g,"<br>")+"</p>";
-  }).join("");
-
- return s;
+function escapeAttr(v){
+ return escape(v);
 }
 
 function safeName(v){
- return String(v).replace(/[\\/:*?"<>|]/g,"_").slice(0,60);
+
+ return String(v||"")
+  .replace(
+   /[\\/:*?"<>|]/g,
+   "_"
+  )
+  .slice(0,60);
+}
+
+function markdown(v){
+
+ let s=escape(v);
+
+ s=s.replace(
+  /```([\s\S]*?)```/g,
+  "<pre><code>$1</code></pre>"
+ );
+
+ s=s.replace(
+  /\*\*(.*?)\*\*/g,
+  "<strong>$1</strong>"
+ );
+
+ s=s.replace(
+  /\*(.*?)\*/g,
+  "<em>$1</em>"
+ );
+
+ s=s.replace(
+  /`([^`]+)`/g,
+  "<code>$1</code>"
+ );
+
+ return s
+  .split(/\n\n+/)
+  .map(
+   p=>
+    p.startsWith("<pre>")
+     ?p
+     :"<p>"+
+      p.replace(
+       /\n/g,
+       "<br>"
+      )+
+      "</p>"
+  )
+  .join("");
 }
 
 function autoResize(){
+
  UI.prompt.style.height="auto";
- UI.prompt.style.height=Math.min(UI.prompt.scrollHeight,150)+"px";
+
+ UI.prompt.style.height=
+  Math.min(
+   UI.prompt.scrollHeight,
+   150
+  )+"px";
 }
+
 
 /* =========================
    EVENTS
 ========================= */
 
-$("menu").onclick=()=>drawer(true);
-$("closeDrawer").onclick=()=>drawer(false);
-UI.overlay.onclick=()=>drawer(false);
+$("menu").onclick=
+ ()=>toggleDrawer(true);
 
-$("newTop").onclick=()=>newChat(false);
-$("newChat").onclick=()=>newChat();
+$("closeDrawer").onclick=
+ ()=>toggleDrawer(false);
+
+UI.overlay.onclick=
+ ()=>toggleDrawer(false);
+
+$("newTop").onclick=
+ ()=>createNewChat(false);
+
+$("newChat").onclick=
+ ()=>createNewChat(true);
 
 $("chatSearch").oninput=e=>{
- searchQuery=e.target.value;
+
+ searchQuery=
+  e.target.value||"";
+
  renderChats();
 };
 
 $("settingsBtn").onclick=()=>{
- drawer(false);
- settings(true);
+
+ toggleDrawer(false);
+
+ toggleSettings(true);
 };
 
-$("closeSettings").onclick=()=>settings(false);
+$("closeSettings").onclick=
+ ()=>toggleSettings(false);
 
-$("exportAll").onclick=exportAll;
+$("exportCurrent").onclick=
+ exportCurrent;
 
-$("resetSettings").onclick=resetSettings;
+$("exportAll").onclick=
+ exportAll;
 
-$("voiceOutput").onchange=e=>{
- saveSetting("voiceOutput",e.target.checked);
-};
+$("resetSettings").onclick=
+ resetSettings;
 
-$("voiceMode").onchange=e=>{
- saveSetting("voiceMode",e.target.checked);
-};
+$("voiceOutput").onchange=e=>
+ saveSetting(
+  "voiceOutput",
+  e.target.checked
+ );
 
-$("highReasoning").onchange=e=>{
- saveSetting("highReasoning",e.target.checked);
-};
+$("voiceMode").onchange=e=>
+ saveSetting(
+  "voiceMode",
+  e.target.checked
+ );
 
-$("voiceRate").onchange=e=>{
- saveSetting("voiceRate",e.target.value);
-};
+$("highReasoning").onchange=e=>
+ saveSetting(
+  "highReasoning",
+  e.target.checked
+ );
 
-$("fileBtn").onclick=()=>UI.fileInput.click();
+$("voiceRate").onchange=e=>
+ saveSetting(
+  "voiceRate",
+  e.target.value
+ );
 
-UI.fileInput.onchange=async e=>{
- await readFile(e.target.files[0]);
- e.target.value="";
-};
+$("fileBtn").onclick=
+ ()=>UI.fileInput.click();
+
+UI.fileInput.onchange=
+ async e=>{
+
+  await readFile(
+   e.target.files[0]
+  );
+
+  e.target.value="";
+ };
 
 $("removeFile").onclick=()=>{
+
  selectedImage=null;
  selectedDocument="";
- UI.preview.classList.remove("show");
- UI.toolStatus.textContent="";
+
+ UI.preview.classList.remove(
+  "show"
+ );
+
+ setTool("");
 };
 
 $("imageBtn").onclick=()=>{
- UI.imageControls.classList.toggle("open");
+
+ UI.imageControls.classList.toggle(
+  "open"
+ );
 };
 
-$("micBtn").onclick=startVoice;
+$("ratio").onchange=
+ e=>{
+
+  write(
+   "aaru_image_options_v4",
+   {
+    ratio:e.target.value,
+    size:$("size").value,
+    quality:$("quality").value
+   }
+  );
+ };
+
+$("size").onchange=
+ e=>{
+
+  write(
+   "aaru_image_options_v4",
+   {
+    ratio:$("ratio").value,
+    size:e.target.value,
+    quality:$("quality").value
+   }
+  );
+ };
+
+$("quality").onchange=
+ e=>{
+
+  write(
+   "aaru_image_options_v4",
+   {
+    ratio:$("ratio").value,
+    size:$("size").value,
+    quality:e.target.value
+   }
+  );
+ };
+
+$("micBtn").onclick=
+ startVoice;
 
 $("speakBtn").onclick=()=>{
- const last=[...messages].reverse()
-  .find(x=>x.role==="assistant");
- if(last)speak(last.content);
+
+ const last=
+  [...messages]
+   .reverse()
+   .find(
+    x=>x.role==="assistant"
+   );
+
+ if(last)
+  speak(last.content);
 };
 
-UI.send.onclick=send;
+UI.send.onclick=
+ send;
 
-UI.prompt.addEventListener("input",autoResize);
+UI.prompt.addEventListener(
+ "input",
+ autoResize
+);
 
-UI.prompt.addEventListener("keydown",e=>{
- if(e.key==="Enter"&&!e.shiftKey){
-  e.preventDefault();
-  send();
+UI.prompt.addEventListener(
+ "keydown",
+ e=>{
+
+  if(
+   e.key==="Enter"&&
+   !e.shiftKey
+  ){
+
+   e.preventDefault();
+
+   send();
+  }
  }
-});
+);
 
-UI.chatList.addEventListener("click",e=>{
- const open=e.target.closest("[data-open]");
- const pin=e.target.closest("[data-pin]");
- const rename=e.target.closest("[data-rename]");
- const del=e.target.closest("[data-delete]");
 
- if(open)openChat(open.dataset.open);
- if(pin)pinChat(pin.dataset.pin);
- if(rename)renameChat(rename.dataset.rename);
- if(del)deleteChat(del.dataset.delete);
-});
+/* =========================
+   CHAT LIST EVENTS
+========================= */
 
-UI.messages.addEventListener("click",e=>{
- const img=e.target.closest("[data-image]");
- if(img){
-  const w=window.open();
-  if(w)w.document.write(
-   `<body style="margin:0;background:#000;display:grid;place-items:center">
-    <img src="${img.dataset.image}" style="max-width:100%;max-height:100vh">
-   </body>`
+UI.chatList.addEventListener(
+ "click",
+ e=>{
+
+  const open=
+   e.target.closest(
+    "[data-open]"
+   );
+
+  const pin=
+   e.target.closest(
+    "[data-pin]"
+   );
+
+  const rename=
+   e.target.closest(
+    "[data-rename]"
+   );
+
+  const exp=
+   e.target.closest(
+    "[data-export]"
+   );
+
+  const del=
+   e.target.closest(
+    "[data-delete]"
+   );
+
+  if(open){
+   openChat(
+    open.dataset.open
+   );
+   return;
+  }
+
+  if(pin){
+   pinChat(
+    pin.dataset.pin
+   );
+   return;
+  }
+
+  if(rename){
+   renameChat(
+    rename.dataset.rename
+   );
+   return;
+  }
+
+  if(exp){
+
+   const c=
+    chats.find(
+     x=>x.id===
+      exp.dataset.export
+    );
+
+   if(c)
+    exportChat(c);
+
+   return;
+  }
+
+  if(del){
+
+   deleteChat(
+    del.dataset.delete
+   );
+  }
+ }
+);
+
+
+/* =========================
+   IMAGE VIEWER
+========================= */
+
+function openImage(src){
+
+ if(!src)
+  return;
+
+ const w=
+  window.open();
+
+ if(!w){
+
+  alert(
+   "Image खोलने के लिए popup allow करें।"
+  );
+
+  return;
+ }
+
+ w.document.write(`
+  <html>
+  <head>
+   <title>Aaru AI Image</title>
+  </head>
+
+  <body
+   style="
+    margin:0;
+    background:#000;
+    display:grid;
+    place-items:center;
+    min-height:100vh;
+   "
+  >
+
+   <img
+    src="${escapeAttr(src)}"
+    style="
+     max-width:100%;
+     max-height:100vh;
+     object-fit:contain;
+    "
+   >
+
+  </body>
+  </html>
+ `);
+
+ w.document.close();
+}
+
+UI.messages.addEventListener(
+ "click",
+ e=>{
+
+  const img=
+   e.target.closest(
+    "[data-image]"
+   );
+
+  if(img)
+   openImage(
+    img.dataset.image
+   );
+ }
+);
+
+UI.creations.addEventListener(
+ "click",
+ e=>{
+
+  const img=
+   e.target.closest(
+    "[data-image]"
+   );
+
+  if(img)
+   openImage(
+    img.dataset.image
+   );
+ });
+
+
+/* =========================
+   IMAGE SETTINGS RESTORE
+========================= */
+
+function loadImageSettings(){
+
+ const x=
+  read(
+   "aaru_image_options_v4",
+   null
+  );
+
+ if(!x)
+  return;
+
+ if(x.ratio)
+  $("ratio").value=x.ratio;
+
+ if(x.size)
+  $("size").value=x.size;
+
+ if(x.quality)
+  $("quality").value=x.quality;
+}
+
+
+/* =========================
+   PAGE EVENTS
+========================= */
+
+window.addEventListener(
+ "beforeunload",
+ saveCurrent
+);
+
+window.addEventListener(
+ "error",
+ e=>{
+  console.error(
+   "Aaru Error:",
+   e.error||
+   e.message
   );
  }
-});
+);
 
-UI.creations.addEventListener("click",e=>{
- const img=e.target.closest("[data-image]");
- if(img){
-  const w=window.open();
-  if(w)w.document.write(
-   `<body style="margin:0;background:#000;display:grid;place-items:center">
-    <img src="${img.dataset.image}" style="max-width:100%;max-height:100vh">
-   </body>`
+window.addEventListener(
+ "unhandledrejection",
+ e=>{
+  console.error(
+   "Aaru Promise:",
+   e.reason
   );
  }
-});
+);
 
-window.addEventListener("beforeunload",saveCurrent);
-
-window.addEventListener("error",e=>{
- console.error("Aaru:",e.error||e.message);
-});
-
-window.addEventListener("unhandledrejection",e=>{
- console.error("Aaru Promise:",e.reason);
-});
 
 /* =========================
    START
 ========================= */
 
 loadState();
+
+loadImageSettings();
+
 loadSettingsUI();
+
 render();
+
 renderChats();
+
 renderCreations();
+
 autoResize();
 
-window.AARU_ASTRA_NATIVE=Object.freeze({
- model:MODEL,
- api:"responses",
- toolChoice:"auto",
- architecture:"astra-native",
- worker:API
-});
+
+/* =========================
+   ASTRA INFO
+========================= */
+
+window.AARU_ASTRA_NATIVE=
+ Object.freeze({
+
+  model:MODEL,
+
+  api:"responses",
+
+  toolChoice:"auto",
+
+  architecture:
+   "astra-native",
+
+  worker:API,
+
+  version:
+   "Compact 4 V4.1",
+
+  features:[
+   "memory",
+   "chat_search",
+   "chat_rename",
+   "chat_pin",
+   "chat_delete",
+   "chat_export",
+   "web_search_ui",
+   "image_controls",
+   "voice_input",
+   "voice_output",
+   "voice_mode",
+   "pdf_reader",
+   "vision",
+   "streaming",
+   "per_chat_response_id",
+   "tool_status"
+  ]
+
+ });
 </script>
+
 </body>
 </html>
