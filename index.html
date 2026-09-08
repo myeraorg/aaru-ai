@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+3<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -6579,5 +6579,447 @@ window.addEventListener(
 );
 
 
+window.addEventListener(
+  "unhandledrejection",
+  event => {
 
-Preview truncated for large file
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
+</script>
+
+<script>
+/* GPT-6 Astra Native Composer runtime marker.
+   The browser never contains the OpenAI API key; the Worker is the secure gateway.
+   The model, Responses API, reasoning and native tool selection are Worker-side.
+*/
+window.AARU_ASTRA_NATIVE = Object.freeze({
+  model: "gpt-6-astra",
+  api: "responses",
+  toolChoice: "auto",
+  intentRouting: "model-selected"
+});
+</script>
+<script>
+/* AARU v12 — Native Tool Intelligence & Orchestration Layer (Index-only, Worker unchanged) */
+(function(){
+  window.AARU_V12_TOOL_INTELLIGENCE=true;
+  window.AARU_V12_VERSION="NATIVE-TOOL-INTELLIGENCE-V12";
+  const norm=v=>String(v||"").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim();
+  function has(q,re){return re.test(q);}
+  window.aaruV12GetToolPlan=function(text,hasImage,hasPdf){
+    const q=norm(text), plan=[];
+    const current=/(latest|current|today|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर|चुनाव)/i;
+    const image=/(generate|create|draw|make|edit|modify|transform).*(image|picture|photo)|\b(image|picture|photo)\b|इमेज|तस्वीर|फोटो|चित्र|बनाओ|जनरेट|एडिट/i;
+    const code=/(calculate|calculation|math|compute|analy[sz]e data|csv|excel|python|code|debug|program|script|कैलकुलेट|गणना|हिसाब|कोड|डिबग|प्रोग्राम|स्क्रिप्ट)/i;
+    const file=hasPdf || /(pdf|document|file|फ़ाइल|फाइल|दस्तावेज|डॉक्यूमेंट)/i.test(q);
+    if(current.test(q))plan.push("web_search");
+    if(image.test(q)||hasImage)plan.push("image_generation");
+    if(code.test(q))plan.push("code_interpreter");
+    if(file)plan.push("file_search");
+    const unique=[...new Set(plan)];
+    let mode=unique.length>1?"multi_tool":unique.length===1?"single_tool":"no_tool";
+    if(unique.includes("image_generation") && hasImage) mode="multimodal_tool";
+    return {tools:unique,mode,allow_model_decision:true};
+  };
+  window.aaruV12ToolHint=function(plan){return Array.isArray(plan?.tools)?plan.tools.join(","):"";};
+  window.aaruV12ToolStatus=function(tool){
+    return ({web_search:"🔎 वेब पर देख रहा हूँ…",file_search:"📄 फ़ाइल देख रहा हूँ…",code_interpreter:"⚙️ विश्लेषण कर रहा हूँ…",image_generation:"🎨 इमेज तैयार कर रहा हूँ…",computer:"🖥️ काम कर रहा हूँ…"})[tool]||"";
+  };
+})();
+</script>
+
+<script>
+/* AARU v13 — Advanced Multimodal Understanding Engine */
+(function(){
+  window.AARU_V13_MULTIMODAL=true;
+  window.AARU_V13_VERSION="ADVANCED-MULTIMODAL-UNDERSTANDING-V13";
+  window.AARU_V13_MAX_ATTACHMENT_CONTEXT=12000;
+  function norm(v){return String(v||"").replace(/\s+/g," ").trim();}
+  function typeOfAttachment(v){
+    const s=String(v||"").toLowerCase();
+    if(/pdf|application\/pdf/.test(s))return "pdf";
+    if(/image|png|jpe?g|webp|gif/.test(s))return "image";
+    return "unknown";
+  }
+  window.aaruV13BuildMultimodalState=function(opts){
+    opts=opts||{};
+    const query=norm(opts.query);
+    const image=!!opts.hasImage;
+    const pdf=!!opts.hasPDF;
+    const selected=String(opts.selectedAttachmentType||"").toLowerCase();
+    const previous=String(opts.previousAttachmentType||"").toLowerCase();
+    const followup=!!opts.followup || /^(this|that|same|it|above|below|इसे|उसे|वही|इसको|उसको|ऊपर|नीचे|इसी|उसी)\b/i.test(query);
+    let attachment=selected||((image&&"image")||(pdf&&"pdf")||previous||"");
+    let mode="text";
+    if(attachment==="image" || image) mode="image";
+    if(attachment==="pdf" || pdf) mode="document";
+    if(followup && previous) mode=previous;
+    return {mode,attachment,followup,continuity:followup&&!!previous,query};
+  };
+  window.aaruV13CompactAttachmentContext=function(text,maxChars){
+    const limit=Math.max(500,Number(maxChars)||window.AARU_V13_MAX_ATTACHMENT_CONTEXT);
+    return norm(text).slice(0,limit);
+  };
+  window.aaruV13AttachmentType=typeOfAttachment;
+})();
+</script>
+<script>
+/* AARU v14 — Proactive Reasoning & Task Planning Engine (Index-only, Worker unchanged) */
+(function(){
+  window.AARU_V14_TASK_PLANNING=true;
+  window.AARU_V14_VERSION="PROACTIVE-REASONING-TASK-PLANNING-V14";
+  window.AARU_V14_MAX_STEPS=6;
+  window.AARU_V14_MAX_TASK_CONTEXT=9000;
+
+  const norm=v=>String(v||"").replace(/\s+/g," ").trim();
+  const has=(q,re)=>re.test(q);
+
+  window.aaruV14BuildTaskPlan=function(text,opts){
+    opts=opts||{};
+    const q=norm(text), lower=q.toLowerCase();
+    const steps=[];
+    const add=(id,label,why)=>{if(!steps.some(x=>x.id===id)&&steps.length<window.AARU_V14_MAX_STEPS)steps.push({id,label,why});};
+    if(!q)return {active:false,complexity:"simple",steps:[],strategy:"direct",modelMayReplan:true};
+
+    const current=/(latest|current|today|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर|चुनाव)/i;
+    const data=/(calculate|calculation|math|compute|analy[sz]e data|csv|excel|python|code|debug|गणना|कैलकुलेट|हिसाब|डेटा|कोड|डिबग|प्रोग्राम|स्क्रिप्ट)/i;
+    const compare=/(compare|comparison|versus|vs\.?|difference|तुलना|फर्क|अंतर|बनाम)/i;
+    const research=/(research|investigate|deep dive|रिसर्च|जांच|जाँच|विस्तार से|गहराई से)/i;
+    const image=/(generate|create|draw|make|edit|modify|transform).*(image|picture|photo)|\b(image|picture|photo)\b|इमेज|तस्वीर|फोटो|चित्र|बनाओ|जनरेट|एडिट/i;
+    const doc=!!opts.hasPDF || !!opts.hasImage || /(pdf|document|file|फ़ाइल|फाइल|दस्तावेज|डॉक्यूमेंट)/i.test(lower);
+    const multi=/(and then|then|after that|step by step|first.*then|पहले.*फिर|इसके बाद|फिर|उसके बाद|चरण|स्टेप)/i.test(lower) || q.length>180 || (compare.test(q)&&research.test(q));
+
+    if(current.test(q)) add("retrieve","ताज़ा जानकारी जुटाना","request appears time-sensitive or search-oriented");
+    if(doc) add("inspect","उपलब्ध image/PDF/document context देखना","attachment or document context is relevant");
+    if(data.test(q)) add("analyze","डेटा/गणना/कोड का विश्लेषण करना","request requires computation or technical analysis");
+    if(compare.test(q)) add("compare","विकल्पों की तुलना करना","request explicitly asks for comparison");
+    if(research.test(q)) add("research","स्रोतों और तथ्यों को व्यवस्थित करना","request asks for research or investigation");
+    if(image.test(q)) add("create","इमेज तैयार/संपादित करना","request is image-oriented");
+    if(multi || steps.length>1) add("synthesize","परिणामों को जोड़कर उत्तर तैयार करना","multiple reasoning/tool stages need one coherent answer");
+
+    let complexity="simple";
+    if(steps.length>=3 || multi) complexity="complex";
+    else if(steps.length>=1) complexity="moderate";
+    const strategy=complexity==="complex"?"planned":(steps.length?"guided":"direct");
+    return {active:steps.length>0,complexity,steps,strategy,modelMayReplan:true,attachmentAware:!!opts.hasImage||!!opts.hasPDF,query:q.slice(0,1200)};
+  };
+
+  window.aaruV14CompactTaskPlan=function(plan){
+    if(!plan?.active)return "";
+    return plan.steps.map((s,i)=>`${i+1}. ${s.id}: ${s.label}`).join(" | ").slice(0,window.AARU_V14_MAX_TASK_CONTEXT);
+  };
+
+  window.aaruV14ShouldPlan=function(text,profile){
+    const q=norm(text);
+    if(!q)return false;
+    if(profile?.mode==="fast" && q.length<80)return false;
+    return /(?:first|then|after|step|compare|research|analy[sz]e|calculate|debug|plan|strategy|how do I|पहले|फिर|इसके बाद|उसके बाद|चरण|तुलना|रिसर्च|विश्लेषण|गणना|कैलकुलेट|डिबग|योजना|रणनीति)/i.test(q) || q.length>180;
+  };
+})();
+</script>
+<script>
+/* AARU v15 — Autonomous Task Execution & Workflow Engine (Index-only, Worker unchanged) */
+(function(){
+  "use strict";
+  window.AARU_V15_AUTONOMOUS=true;
+  window.AARU_V15_VERSION="AUTONOMOUS-TASK-EXECUTION-V15";
+  window.AARU_V15_MAX_STEPS=6;
+  window.AARU_V15_MAX_HISTORY=24;
+  window.AARU_V15_STATE_PREFIX="aaru_v15_workflow_";
+
+  const clean=v=>String(v||"").replace(/\\s+/g," ").trim();
+  const stateKey=()=>window.AARU_V15_STATE_PREFIX+String(window.currentChatId||"default");
+  const safeLoad=()=>{try{return JSON.parse(localStorage.getItem(stateKey())||"null")}catch(_){return null}};
+  const safeSave=v=>{try{localStorage.setItem(stateKey(),JSON.stringify(v));return true}catch(_){return false}};
+
+  function buildSteps(query, plan){
+    const source=Array.isArray(plan?.steps)?plan.steps:[];
+    return source.slice(0,window.AARU_V15_MAX_STEPS).map((x,i)=>({
+      id:String(x.id||`step_${i+1}`),
+      label:clean(x.label||`कार्य चरण ${i+1}`),
+      status:i===0?"ready":"queued",
+      result:"",
+      attempts:0
+    }));
+  }
+
+  window.aaruV15CreateWorkflow=function(query,plan){
+    const q=clean(query);
+    const steps=buildSteps(q,plan);
+    const active=!!q && !!plan?.active && steps.length>0;
+    return {
+      version:window.AARU_V15_VERSION,
+      active,
+      status:active?"planned":"direct",
+      query:q.slice(0,1200),
+      currentStep:active?0:-1,
+      steps,
+      completed:[],
+      lastError:"",
+      createdAt:Date.now(),
+      updatedAt:Date.now()
+    };
+  };
+
+  window.aaruV15LoadWorkflow=function(){return safeLoad()};
+  window.aaruV15SaveWorkflow=function(state){
+    if(!state)return false;
+    state.updatedAt=Date.now();
+    return safeSave(state);
+  };
+  window.aaruV15ResetWorkflow=function(){try{localStorage.removeItem(stateKey())}catch(_){}
+    return window.aaruV15CreateWorkflow("",{active:false,steps:[]});
+  };
+
+  window.aaruV15PrepareExecution=function(query,plan){
+    const previous=safeLoad();
+    const normalized=clean(query);
+    let state=previous;
+    if(!state || state.query!==normalized || state.status==="completed" || state.status==="failed"){
+      state=window.aaruV15CreateWorkflow(normalized,plan);
+    }else{
+      state.updatedAt=Date.now();
+      if(state.status==="planned" && state.steps?.length)state.steps[0].status="ready";
+    }
+    window.aaruV15SaveWorkflow(state);
+    return state;
+  };
+
+  window.aaruV15MarkExecution=function(result){
+    const state=safeLoad();
+    if(!state?.active)return state||null;
+    const text=clean(result?.text||result?.message||"");
+    const failed=!!result?.error;
+    const i=Math.max(0,Math.min(Number(state.currentStep)||0,state.steps.length-1));
+    const step=state.steps[i];
+    if(step){
+      step.attempts=(step.attempts||0)+1;
+      if(failed){step.status="failed";state.lastError=text.slice(0,500);state.status="failed";}
+      else {step.status="completed";step.result=text.slice(0,1200);state.completed=Array.from(new Set([...(state.completed||[]),step.id]));
+        if(i+1<state.steps.length){state.currentStep=i+1;state.steps[i+1].status="ready";state.status="running";}
+        else {state.currentStep=i;state.status="completed";}
+      }
+    }
+    window.aaruV15SaveWorkflow(state);
+    return state;
+  };
+
+  window.aaruV15CompactState=function(state){
+    if(!state?.active)return "";
+    return state.steps.map((s,i)=>`${i+1}. ${s.id}:${s.status}`).join(" | ").slice(0,2400);
+  };
+
+  window.aaruV15GetExecutionHint=function(state){
+    if(!state?.active)return "";
+    const current=state.steps?.[state.currentStep];
+    return `workflow=${state.status}; current=${current?.id||"none"}; completed=${(state.completed||[]).join(",")}`.slice(0,1000);
+  };
+
+  /* Safely enrich the existing Worker request; no new endpoint and no second model. */
+  const originalFetch=window.fetchChatWithRecovery;
+  if(typeof originalFetch==="function" && !originalFetch.__AARU_V15_WRAPPED){
+    const wrapped=async function(payload){
+      try{
+        const p=payload||{};
+        if(window.AARU_V15_LAST_WORKFLOW){
+          p.client_workflow_version=window.AARU_V15_VERSION;
+          p.client_workflow_state=window.aaruV15CompactState(window.AARU_V15_LAST_WORKFLOW);
+          p.client_workflow_execution=window.aaruV15GetExecutionHint(window.AARU_V15_LAST_WORKFLOW);
+        }
+      }catch(_){ }
+      return originalFetch.call(this,payload);
+    };
+    wrapped.__AARU_V15_WRAPPED=true;
+    window.fetchChatWithRecovery=wrapped;
+  }
+
+  /* Observe the existing send pipeline without replacing handleSend or sendChatRequest. */
+  document.addEventListener("click",function(e){
+    try{
+      const el=e.target?.closest?.("button,[role='button']");
+      if(!el)return;
+      const label=clean(el.getAttribute("aria-label")||el.textContent||"").toLowerCase();
+      if(/send|भेज|submit/.test(label) && window.AARU_V15_LAST_WORKFLOW){
+        window.AARU_V15_LAST_WORKFLOW.updatedAt=Date.now();
+        window.aaruV15SaveWorkflow(window.AARU_V15_LAST_WORKFLOW);
+      }
+    }catch(_){ }
+  },true);
+
+  window.addEventListener("pagehide",function(){
+    try{if(window.AARU_V15_LAST_WORKFLOW)window.aaruV15SaveWorkflow(window.AARU_V15_LAST_WORKFLOW)}catch(_){ }
+  });
+})();
+</script>
+
+<script>
+/* AARU v18 — Self-Healing Runtime & Recovery Engine
+   Index-only additive layer. Worker/API architecture remains unchanged.
+*/
+(function(){
+  "use strict";
+  window.AARU_V18_SELF_HEALING=true;
+  window.AARU_V18_VERSION="SELF-HEALING-RUNTIME-RECOVERY-V18";
+  window.AARU_V18_MAX_RECOVERY_ATTEMPTS=2;
+  window.AARU_V18_STATE_KEY="aaru_v18_recovery_state_v1";
+
+  const clean=v=>String(v==null?"":v).replace(/\\s+/g," ").trim();
+  const now=()=>Date.now();
+  function load(){try{return JSON.parse(localStorage.getItem(window.AARU_V18_STATE_KEY)||"null")}catch(_){return null}}
+  function save(v){try{localStorage.setItem(window.AARU_V18_STATE_KEY,JSON.stringify(v));return true}catch(_){return false}}
+
+  window.aaruV18ClassifyError=function(error){
+    const status=Number(error?.status||0);
+    const code=clean(error?.code||"").toLowerCase();
+    const text=clean(error?.message||error||"").toLowerCase();
+    if(status===401||status===403||/unauthori[sz]ed|forbidden|invalid api key/.test(text))return "auth";
+    if(status===408||status===504||/timeout|timed out|deadline/.test(text))return "timeout";
+    if(status===429||/rate.?limit|quota|credit|billing|insufficient/.test(text))return "quota";
+    if(status>=500||/worker|gateway|bad gateway|service unavailable|upstream/.test(text))return "server";
+    if(/network|failed to fetch|offline|connection/.test(text))return "network";
+    if(code)return code;
+    return "unknown";
+  };
+
+  window.aaruV18BuildRecoveryPlan=function(error,attempt){
+    const type=window.aaruV18ClassifyError(error);
+    const n=Math.max(0,Number(attempt)||0);
+    const retryable=(type==="timeout"||type==="network"||type==="server") && n<window.AARU_V18_MAX_RECOVERY_ATTEMPTS;
+    return {
+      version:window.AARU_V18_VERSION,
+      error_type:type,
+      attempt:n,
+      retryable,
+      action:retryable?"retry":"surface_error",
+      preserve_context:true,
+      preserve_worker:true
+    };
+  };
+
+  window.aaruV18RecordRecovery=function(plan,error){
+    const state=load()||{version:window.AARU_V18_VERSION,total:0,retries:0,last:null};
+    state.version=window.AARU_V18_VERSION;
+    state.total=(state.total||0)+1;
+    if(plan?.retryable)state.retries=(state.retries||0)+1;
+    state.last={time:now(),type:plan?.error_type||"unknown",action:plan?.action||"surface_error",message:clean(error?.message||"").slice(0,300)};
+    save(state);
+    return state;
+  };
+
+  window.aaruV18GetRuntimeHealth=function(){
+    const state=load()||{};
+    return {
+      version:window.AARU_V18_VERSION,
+      online:navigator.onLine!==false,
+      fetchAvailable:typeof window.fetch==="function",
+      workerGateway:typeof window.fetchChatWithRecovery==="function",
+      chatPipeline:typeof window.sendChatRequest==="function" && typeof window.handleSend==="function",
+      lastRecovery:state.last||null
+    };
+  };
+
+  /* Non-invasive recovery wrapper: retries only transient failures and never retries quota/auth errors. */
+  const original=window.fetchChatWithRecovery;
+  if(typeof original==="function" && !original.__AARU_V18_WRAPPED){
+    const wrapped=async function(payload){
+      let attempt=0;
+      while(true){
+        try{return await original.call(this,payload)}
+        catch(error){
+          const plan=window.aaruV18BuildRecoveryPlan(error,attempt);
+          window.aaruV18RecordRecovery(plan,error);
+          if(!plan.retryable)throw error;
+          attempt++;
+          const delay=500*attempt;
+          await new Promise(resolve=>setTimeout(resolve,delay));
+        }
+      }
+    };
+    wrapped.__AARU_V18_WRAPPED=true;
+    wrapped.__AARU_V18_ORIGINAL=original;
+    window.fetchChatWithRecovery=wrapped;
+  }
+
+  window.addEventListener("online",function(){window.AARU_V18_LAST_ONLINE=now()});
+  window.addEventListener("offline",function(){window.AARU_V18_LAST_OFFLINE=now()});
+  window.addEventListener("pagehide",function(){try{save(load()||{version:window.AARU_V18_VERSION})}catch(_){} });
+})();
+</script>
+
+<script>
+/* AARU v19 — Adaptive Learning & Behavior Optimization Engine */
+(function(){
+  "use strict";
+  window.AARU_V19_ADAPTIVE=true;
+  window.AARU_V19_VERSION="ADAPTIVE-LEARNING-BEHAVIOR-V19";
+  const KEY="aaru_adaptive_behavior_v19";
+  const MAX_ITEMS=24;
+  const MAX_CHARS=2600;
+
+  function clean(v){return String(v||"").replace(/\s+/g," ").trim();}
+  function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"?x:{};}catch(_){return {};}}
+  function save(x){try{localStorage.setItem(KEY,JSON.stringify(x));}catch(_){} }
+  function words(v){
+    return new Set(clean(v).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(x=>x.length>2).slice(0,80));
+  }
+  function overlap(a,b){if(!a.size||!b.size)return 0;let n=0;a.forEach(x=>{if(b.has(x))n++;});return n/Math.max(1,Math.min(a.size,b.size));}
+
+  window.aaruV19GetAdaptiveProfile=function(text,messages){
+    const q=clean(text), all=Array.isArray(messages)?messages:[];
+    const lower=q.toLowerCase();
+    const profile={version:window.AARU_V19_VERSION,verbosity:"balanced",tone:"natural",reasoning:"auto",continuity:false,repeatRisk:false,confidence:0.72,sessionSignals:0};
+    if(!q)return profile;
+    const state=load();
+    const chatId=typeof currentChatId!=="undefined"?currentChatId:"global";
+    const prior=state[chatId]||{};
+    profile.sessionSignals=Number(prior.interactions||0);
+    const recentUsers=all.filter(m=>m&&m.role==="user").slice(-8).map(m=>clean(m.content));
+    const avg=recentUsers.length?recentUsers.reduce((n,x)=>n+x.length,0)/recentUsers.length:q.length;
+    if(q.length<55 && !/(explain|compare|research|analy[sz]e|code|calculate|समझ|तुलना|रिसर्च|विश्लेषण|कोड|गणना)/i.test(q)) profile.verbosity="concise";
+    else if(avg>900 || /(detail|detailed|deep|step by step|विस्तार|विस्तार से|डिटेल|स्टेप)/i.test(lower)) profile.verbosity="detailed";
+    if(/^(please|कृपया|बताइए|समझाइए|explain)/i.test(q)) profile.tone="helpful";
+    if(/^(yes|yeah|yep|ok|okay|sure|continue|next|same|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो)[!?.,\s]*$/i.test(q)) profile.continuity=true;
+    if(recentUsers.length>1){
+      const last=words(recentUsers[recentUsers.length-1]);
+      const prev=words(recentUsers[recentUsers.length-2]);
+      if(overlap(last,prev)>.65 && q.length<120) profile.repeatRisk=true;
+    }
+    if(/(latest|current|today|now|live|news|price|weather|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|कीमत|मौसम)/i.test(q)) profile.reasoning="deep";
+    else if(q.length<50 && !profile.continuity) profile.reasoning="fast";
+    profile.confidence=Math.max(.45,Math.min(.96,.72+(profile.sessionSignals>10?.06:0)+(profile.continuity?.08:0)-(profile.repeatRisk?.08:0)));
+    return profile;
+  };
+
+  window.aaruV19PersistAdaptiveState=function(chatId,messages,profile){
+    try{
+      const id=String(chatId||"global"); const state=load(); const old=state[id]||{};
+      const list=Array.isArray(messages)?messages:[];
+      const users=list.filter(m=>m&&m.role==="user").slice(-6).map(m=>clean(m.content));
+      state[id]={
+        interactions:Number(old.interactions||0)+1,
+        lastAt:Date.now(),
+        lastIntent:String(profile?.intent||old.lastIntent||"conversation").slice(0,80),
+        lastVerbosity:String(profile?.verbosity||old.lastVerbosity||"balanced").slice(0,40),
+        lastTone:String(profile?.tone||old.lastTone||"natural").slice(0,40),
+        recentQueries:users.slice(-MAX_ITEMS).map(x=>x.slice(0,240)),
+        confidence:Number(profile?.confidence||old.confidence||.72)
+      };
+      const keys=Object.keys(state).sort((a,b)=>(state[b]?.lastAt||0)-(state[a]?.lastAt||0)).slice(0,MAX_ITEMS);
+      const compact={}; keys.forEach(k=>compact[k]=state[k]); save(compact);
+    }catch(_){}
+  };
+
+  window.aaruV19GetBehaviorHint=function(profile){
+    const p=profile||{};
+    return JSON.stringify({version:window.AARU_V19_VERSION,verbosity:p.verbosity||"balanced",tone:p.tone||"natural",reasoning:p.reasoning||"auto",continuity:!!p.continuity,confidence:Number(p.confidence||.72)}).slice(0,MAX_CHARS);
+  };
+})();
+</script>
+
+</body>
+</html>
