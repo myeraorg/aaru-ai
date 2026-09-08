@@ -1,13 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
-
-<style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
+  <style>
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -829,164 +826,122 @@ body { color:#fff !important; }
 .welcome, .welcome * { color:#fff !important; }
 button, input, textarea, select { color-scheme:dark; }
 
+
+/* ============================================================
+   AARU AI v3 — UNIFIED BIG UPGRADE UI
+   ============================================================ */
+.drawer-tools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 4px}
+.drawer-mini{border:1px solid #333;background:#111;color:#fff;border-radius:10px;padding:9px 7px;font-size:11px;cursor:pointer}
+.drawer-mini:hover{background:#1d1d1d}
+.chat-search-box{display:none;margin:8px 0}.chat-search-box.show{display:block}
+.chat-search-box input{width:100%;background:#000;color:#fff;border:1px solid #444;border-radius:10px;padding:10px 11px;outline:none}
+.chat-search-box input::placeholder{color:#fff;opacity:.5}
+.chat-history-item{position:relative}
+.pin-chat{border:0;background:transparent;color:#fff;font-size:14px;padding:4px;cursor:pointer;opacity:.65}.pin-chat.active{opacity:1}
+.rename-chat{border:0;background:transparent;color:#fff;font-size:13px;padding:4px;cursor:pointer;opacity:.65}
+.chat-history-actions{display:flex;align-items:center;gap:2px}
+.tool-status{position:fixed;left:50%;bottom:138px;transform:translateX(-50%);z-index:121;display:none;max-width:92vw;background:#fff;color:#000;border:1px solid #fff;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700;box-shadow:0 5px 22px rgba(0,0,0,.55)}
+.tool-status.show{display:block}
+.composer-controls{display:flex;align-items:center;gap:6px;padding:2px 2px 7px;overflow-x:auto;scrollbar-width:none}.composer-controls::-webkit-scrollbar{display:none}
+.control-chip{flex:none;border:1px solid #333;background:#000;color:#fff;border-radius:999px;padding:6px 10px;font-size:11px;cursor:pointer}.control-chip.active{background:#fff;color:#000}
+.control-hint{font-size:10px;color:#fff;opacity:.5;white-space:nowrap;margin-left:auto}
+.image-controls{display:none;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px 2px 8px}.image-controls.show{display:grid}
+.image-controls label{font-size:9px;color:#fff;opacity:.85}.image-controls select{display:block;width:100%;margin-top:4px;background:#000;color:#fff;border:1px solid #333;border-radius:8px;padding:7px;font-size:10px}
+.settings-modal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:18px}.settings-modal.open{display:flex}
+.settings-card{width:min(92vw,430px);background:#111;color:#fff;border:1px solid #444;border-radius:18px;padding:14px;box-shadow:0 18px 70px rgba(0,0,0,.8)}
+.settings-head{display:flex;align-items:center;justify-content:space-between;font-size:17px;padding-bottom:12px;border-bottom:1px solid #333}.settings-head button{border:1px solid #444;background:#000;color:#fff;border-radius:9px;width:34px;height:34px;font-size:20px}
+.settings-section{padding:12px 0;border-bottom:1px solid #222}.settings-section:last-child{border-bottom:0}.settings-toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 2px;font-size:13px}.settings-toggle input{width:20px;height:20px;accent-color:#fff}
+.settings-action{width:100%;background:#000;color:#fff;border:1px solid #444;border-radius:10px;padding:10px}
+@media(max-width:600px){.drawer-tools{grid-template-columns:1fr 1fr}.image-controls{grid-template-columns:1fr 1fr 1fr}.control-hint{display:none}.tool-status{bottom:145px}}
+
 </style>
-</head>
-
-<body>
-
-<div class="app">
-
-<header class="header">
-
-<button class="menu-btn" id="menuBtn" aria-label="Menu">
-☰
-</button>
-
-<div class="brand">
-<div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer <span id="modePill" class="mode-pill">LIVE</span></div>
-</div>
-
-<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
-＋
-</button>
-
-</header>
-
-
-<div class="drawer-overlay" id="drawerOverlay"></div>
-
-
-<aside class="drawer" id="drawer">
-
-<div class="drawer-head">
-
-<div class="drawer-title">
-Aaru AI
-</div>
-
-<button class="close-drawer" id="closeDrawer">
-×
-</button>
-
-</div>
-
-
-<div class="drawer-body">
-
-<button class="drawer-action" id="newChatBtn">
-<span>＋</span>
-<span>नई चैट</span>
-</button>
-
-<button class="drawer-action" id="deleteAllBtn">
-<span>🗑️</span>
-<span>सभी चैट डिलीट करें</span>
-</button>
-
-
-<div class="section-title">
-Recent Chats
-</div>
-
-<div class="chat-history" id="chatHistory"></div>
-
-
-<div class="section-title">
-Recent Creations
-</div>
-
-<div class="creation-grid" id="creationGrid"></div>
-
-</div>
-
-</aside>
-
-
-<main>
-
-<div class="chat-wrap">
-
-<div class="messages" id="messages"></div>
-
-</div>
-
-</main>
-
-
-<div class="composer-shell">
-
-<div class="composer">
-
-<div class="photo-preview" id="photoPreview">
-
-<img id="photoPreviewImg" alt="Selected image">
-
-<button class="remove-photo" id="removePhoto">
-×
-</button>
-
-</div>
-
-
-<div class="input-row">
-
-<button class="icon-btn" id="photoBtn" title="Photo / PDF">
-📎
-</button>
-
-<button class="icon-btn" id="micBtn" title="Voice Input">
-🎙️
-</button>
-
-<textarea
-id="prompt"
-rows="1"
-placeholder="Aaru से कुछ भी पूछें..."
-autocomplete="off"
-spellcheck="true"></textarea>
-
-<button class="icon-btn" id="speakBtn" title="Voice Output">
-🔊
-</button>
-
-<button class="icon-btn send-btn" id="sendBtn" title="Send">
-➤
-</button>
-
-</div>
-
-
-
-
-</div>
-
-</div>
-
-</div>
-
-
-<input
-type="file"
-id="photoInput"
-accept="image/*,.pdf,application/pdf">
-
-
-<div class="image-viewer" id="imageViewer">
-
-<button class="close-viewer" id="closeViewer">
-×
-</button>
-
-<img id="viewerImg" alt="Image preview">
-
-</div>
-
-
-<div class="toast" id="toast"></div>
-
-
-<script>
+ </head>
+ <body>
+  <div class="app">
+   <header class="header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <div class="brand">
+     <div class="brand-name">Aaru AI</div>
+     <div class="brand-sub">
+      GPT-6 Astra • Native Unified Composer <span id="modePill" class="mode-pill">LIVE</span>
+     </div>
+    </div>
+    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">＋</button>
+   </header>
+   <div class="drawer-overlay" id="drawerOverlay"></div>
+   <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+     <div class="drawer-title">Aaru AI</div>
+     <button class="close-drawer" id="closeDrawer">×</button>
+    </div>
+    <div class="drawer-body">
+     <button class="drawer-action" id="newChatBtn"><span>＋</span> <span>नई चैट</span></button>
+     <button class="drawer-action" id="deleteAllBtn"><span>🗑️</span> <span>सभी चैट डिलीट करें</span></button>
+     <div class="drawer-tools">
+      <button class="drawer-mini" id="searchChatsBtn">🔎 चैट खोजें</button>
+      <button class="drawer-mini" id="settingsBtn">⚙️ Settings</button>
+      <button class="drawer-mini" id="exportAllBtn">📤 Export</button>
+     </div>
+     <div class="chat-search-box" id="chatSearchBox">
+      <input id="chatSearchInput" type="search" placeholder="पुरानी चैट खोजें…" autocomplete="off">
+     </div>
+     <div class="section-title">Recent Chats</div>
+     <div class="chat-history" id="chatHistory"></div>
+     <div class="section-title">Recent Creations</div>
+     <div class="creation-grid" id="creationGrid"></div>
+    </div>
+   </aside>
+   <main>
+    <div class="chat-wrap">
+     <div class="messages" id="messages"></div>
+    </div>
+   </main>
+   <div class="tool-status" id="toolStatus" aria-live="polite"></div>
+   <div class="composer-shell">
+    <div class="composer">
+     <div class="photo-preview" id="photoPreview">
+      <img id="photoPreviewImg" alt="Selected image">
+      <button class="remove-photo" id="removePhoto">×</button>
+     </div>
+     <div class="composer-controls" id="composerControls">
+      <button class="control-chip" id="imageControlsBtn" type="button">🖼️ Image</button>
+      <button class="control-chip" id="voiceModeBtn" type="button">🎙️ Voice</button>
+      <span class="control-hint" id="controlHint">Aaru AI • Ready</span>
+     </div>
+     <div class="image-controls" id="imageControls">
+      <label>Ratio<select id="imageRatio"><option>1:1</option><option>16:9</option><option>9:16</option><option>4:3</option><option>3:4</option></select></label> <label>Size<select id="imageSize"><option value="1024x1024">1024×1024</option><option value="1536x1024">1536×1024</option><option value="1024x1536">1024×1536</option></select></label> <label>Quality<select id="imageQuality"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label>
+     </div>
+     <div class="input-row">
+      <button class="icon-btn" id="photoBtn" title="Photo / PDF">📎</button>
+      <button class="icon-btn" id="micBtn" title="Voice Input">🎙️</button>
+      <textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..." autocomplete="off" spellcheck="true"></textarea>
+      <button class="icon-btn" id="speakBtn" title="Voice Output">🔊</button>
+      <button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <input type="file" id="photoInput" accept="image/*,.pdf,application/pdf">
+  <div class="settings-modal" id="settingsModal">
+   <div class="settings-card">
+    <div class="settings-head">
+     <strong>Aaru AI Settings</strong>
+     <button id="closeSettings" type="button">×</button>
+    </div>
+    <div class="settings-section">
+     <label class="settings-toggle"><span>🔊 Voice Output</span><input id="voiceOutputToggle" type="checkbox" checked></label> <label class="settings-toggle"><span>🎙️ Voice Mode</span><input id="voiceModeToggle" type="checkbox"></label> <label class="settings-toggle"><span>🧠 High Reasoning</span><input id="highReasoningToggle" type="checkbox"></label>
+    </div>
+    <div class="settings-section">
+     <button class="settings-action" id="clearLocalSettings" type="button">Reset local settings</button>
+    </div>
+   </div>
+  </div>
+  <div class="image-viewer" id="imageViewer">
+   <button class="close-viewer" id="closeViewer">×</button>
+   <img id="viewerImg" alt="Image preview">
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
 "use strict";
 
 
@@ -1058,6 +1013,9 @@ let previousResponseId = null;
 let lastToolsUsed = [];
 let streamAbortController = null;
 let voiceModeEnabled = false;
+let chatSearchQuery = "";
+let imageSettings = { ratio:"1:1", size:"1024x1024", quality:"medium" };
+let settingsLoaded = false;
 
 let volatileCreations = [];
 
@@ -2047,6 +2005,12 @@ function createNewChat(
     responseId:
       "",
 
+    pinned:
+      false,
+
+    customTitle:
+      "",
+
     createdAt:
       now,
 
@@ -2184,12 +2148,15 @@ function saveCurrentChat(){
     );
 
 
-  chat.title =
-    firstUser
-      ? firstUser.content
-          .replace(/\s+/g," ")
-          .slice(0,80)
-      : "नई चैट";
+  if(!chat.customTitle){
+    chat.title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
+  }
+  chat.title = String(chat.title || "नई चैट").slice(0,80);
 
 
   chat.updatedAt =
@@ -2198,7 +2165,7 @@ function saveCurrentChat(){
 
   saveChatHistory();
 
-  renderChatHistory();
+  renderChatHistoryV3();
 }
 
 
@@ -2610,171 +2577,48 @@ function formatTime(timestamp){
 }
 
 
-function renderChatHistory(){
-
-  chatHistoryEl.innerHTML = "";
-
-
-  const sorted =
-    chats
-      .slice()
-      .sort(
-        (a,b) =>
-          (b.updatedAt || 0) -
-          (a.updatedAt || 0)
-      );
-
-
+function renderChatHistoryV3(){
+  chatHistoryEl.innerHTML="";
+  const q=String(chatSearchQuery||"").trim().toLowerCase();
+  const sorted=chats.slice().sort((a,b)=>{
+    const pinA=a.pinned?1:0, pinB=b.pinned?1:0;
+    if(pinA!==pinB)return pinB-pinA;
+    return (b.updatedAt||0)-(a.updatedAt||0);
+  }).filter(item=>{
+    if(!q)return true;
+    const hay=[item.title,item.customTitle,...(Array.isArray(item.messages)?item.messages.map(m=>m.content):[])].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
   if(!sorted.length){
-
-    const empty =
-      document.createElement(
-        "div"
-      );
-
-    empty.className =
-      "empty-history";
-
-    empty.textContent =
-      "अभी कोई पुरानी चैट नहीं है।";
-
-    chatHistoryEl.appendChild(
-      empty
-    );
-
-    return;
+    const empty=document.createElement("div");empty.className="empty-history";empty.textContent=q?"कोई matching chat नहीं मिली।":"अभी कोई पुरानी चैट नहीं है।";chatHistoryEl.appendChild(empty);return;
   }
-
-
-  sorted.forEach(item => {
-
-    const row =
-      document.createElement(
-        "div"
-      );
-
-    row.className =
-      "chat-history-item" +
-      (
-        item.id === currentChatId
-          ? " active"
-          : ""
-      );
-
-
-    const info =
-      document.createElement(
-        "div"
-      );
-
-    info.className =
-      "chat-history-info";
-
-
-    const title =
-      document.createElement(
-        "div"
-      );
-
-    title.className =
-      "chat-history-title";
-
-    title.textContent =
-      item.title ||
-      "नई चैट";
-
-
-    const meta =
-      document.createElement(
-        "div"
-      );
-
-    meta.className =
-      "chat-history-meta";
-
-
-    meta.textContent =
-      (
-        Array.isArray(
-          item.messages
-        )
-          ? item.messages.length
-          : 0
-      ) +
-      " messages • " +
-      formatTime(
-        item.updatedAt
-      );
-
-
-    info.appendChild(
-      title
-    );
-
-    info.appendChild(
-      meta
-    );
-
-
-    const deleteBtn =
-      document.createElement(
-        "button"
-      );
-
-    deleteBtn.className =
-      "delete-chat";
-
-    deleteBtn.type =
-      "button";
-
-    deleteBtn.textContent =
-      "🗑️";
-
-    deleteBtn.title =
-      "इस चैट को डिलीट करें";
-
-
-    deleteBtn.addEventListener(
-      "click",
-      event => {
-
-        event.stopPropagation();
-
-        deleteChat(
-          item.id
-        );
-      }
-    );
-
-
-    row.appendChild(
-      info
-    );
-
-    row.appendChild(
-      deleteBtn
-    );
-
-
-    row.addEventListener(
-      "click",
-      () => {
-
-        openChat(
-          item.id
-        );
-
-        closeDrawer();
-      }
-    );
-
-
-    chatHistoryEl.appendChild(
-      row
-    );
+  sorted.forEach(item=>{
+    const row=document.createElement("div");
+    row.className="chat-history-item"+(item.id===currentChatId?" active":"");
+    const info=document.createElement("div");info.className="chat-history-info";
+    const title=document.createElement("div");title.className="chat-history-title";title.textContent=(item.title||"नई चैट");
+    const meta=document.createElement("div");meta.className="chat-history-meta";meta.textContent=((Array.isArray(item.messages)?item.messages.length:0)+" messages • "+formatTime(item.updatedAt));
+    info.append(title,meta);
+    const actions=document.createElement("div");actions.className="chat-history-actions";
+    const pin=document.createElement("button");pin.className="pin-chat"+(item.pinned?" active":"");pin.textContent=item.pinned?"★":"☆";pin.title=item.pinned?"Unpin":"Pin";
+    pin.onclick=e=>{e.stopPropagation();item.pinned=!item.pinned;saveChatHistory();renderChatHistoryV3();};
+    const rename=document.createElement("button");rename.className="rename-chat";rename.textContent="✎";rename.title="Rename";
+    rename.onclick=e=>{e.stopPropagation();renameChat(item.id);};
+    const del=document.createElement("button");del.className="delete-chat";del.textContent="🗑️";del.title="Delete";del.onclick=e=>{e.stopPropagation();deleteChat(item.id);};
+    actions.append(pin,rename,del);row.append(info,actions);
+    row.addEventListener("click",()=>{openChat(item.id);closeDrawer();});
+    chatHistoryEl.appendChild(row);
   });
 }
 
+function renameChat(id){
+  const chat=chats.find(c=>c.id===id);if(!chat)return;
+  const next=prompt("इस चैट का नया नाम लिखें:",chat.title||"नई चैट");
+  if(next===null)return;
+  const name=String(next).trim().slice(0,80);
+  if(!name)return;
+  chat.title=name;chat.customTitle=name;chat.updatedAt=Date.now();saveChatHistory();renderChatHistoryV3();
+}
 
 /* =========================================================
    OPEN CHAT
@@ -2818,9 +2662,13 @@ function openChat(id){
 
   hideTyping();
 
+  previousResponseId = String(chat.responseId || "").trim() || null;
+  semanticMemory = normalizeSemanticMemory(chat.semanticMemory || []);
+  memorySummary = String(chat.memorySummary || "");
+
   renderCurrentChat();
 
-  renderChatHistory();
+  renderChatHistoryV3();
 
   scrollBottom();
 }
@@ -2881,7 +2729,7 @@ function deleteChat(id){
   }
 
 
-  renderChatHistory();
+  renderChatHistoryV3();
 
   showToast(
     "चैट डिलीट कर दी गई।"
@@ -2940,7 +2788,7 @@ function deleteAllChats(){
 
   renderCurrentChat();
 
-  renderChatHistory();
+  renderChatHistoryV3();
 
   closeDrawer();
 
@@ -4747,6 +4595,19 @@ function applyWorkerMemoryResponse(data){
   updateMemoryButton();
 }
 
+function updateToolStatus(text,show=true){
+  const el=document.getElementById("toolStatus");if(!el)return;
+  el.textContent=String(text||"");el.classList.toggle("show",!!show&&!!text);
+}
+function updateToolStatusFromEvent(obj){
+  const t=String(obj?.type||"");
+  if(t.includes("web_search")){updateToolStatus("🌐 Web Search चल रहा है…");lastToolsUsed=[...new Set([...lastToolsUsed,"web_search"])];}
+  else if(t.includes("image_generation")){updateToolStatus("🖼️ Image तैयार हो रही है…");lastToolsUsed=[...new Set([...lastToolsUsed,"image_generation"])];}
+  else if(t.includes("code_interpreter")){updateToolStatus("💻 Code/Data analysis चल रहा है…");lastToolsUsed=[...new Set([...lastToolsUsed,"code_interpreter"])];}
+  else if(t.includes("file_search")){updateToolStatus("📄 File search चल रहा है…");lastToolsUsed=[...new Set([...lastToolsUsed,"file_search"])];}
+}
+function clearToolStatus(){updateToolStatus("",false);}
+
 /* =========================================================
    CHAT API
 ========================================================= */
@@ -4783,8 +4644,8 @@ async function sendChatRequest(){
     semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
     model: "gpt-6-astra",
     api: "responses",
-    reasoning: { effort: ASTRA_REASONING_EFFORT },
-    reasoning_effort: ASTRA_REASONING_EFFORT,
+    reasoning: { effort: window.AARU_HIGH_REASONING ? "high" : ASTRA_REASONING_EFFORT },
+    reasoning_effort: window.AARU_HIGH_REASONING ? "high" : ASTRA_REASONING_EFFORT,
     tool_choice: "auto",
     intelligence_layer: CLIENT_INTELLIGENCE_VERSION,
     orchestration: "astra-native",
@@ -4801,6 +4662,8 @@ async function sendChatRequest(){
     stream: true,
     previous_response_id: previousResponseId || undefined,
     conversation_state: previousResponseId ? "continuation" : "new-response",
+    image_options: imageSettings,
+    ui_features: { chat_search:true, rename:true, pin:true, export:true, voice_mode:voiceModeEnabled },
     composer: "native-unified-composer",
     intent_routing: "model-selected",
     frontend_routing: false,
@@ -5021,6 +4884,7 @@ async function sendChatRequest(){
 
       try{
         const parsed = JSON.parse(dataText);
+        updateToolStatusFromEvent(parsed);
         if(parsed?.response_id) previousResponseId = parsed.response_id;
         if(Array.isArray(parsed?.tools_used)) lastToolsUsed = parsed.tools_used;
         value = extractStreamText(parsed);
@@ -5180,6 +5044,7 @@ async function handleSend(){
     saveCurrentChat();
 
     hideTyping();
+    clearToolStatus();
 
     if(result && result.image){
 
@@ -5224,6 +5089,7 @@ async function handleSend(){
     );
 
     hideTyping();
+    clearToolStatus();
 
     addAssistantMessage(
       "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
@@ -5251,6 +5117,41 @@ async function handleSend(){
   }
 }
 
+
+function toggleImageControls(){
+  const box=document.getElementById("imageControls");const btn=document.getElementById("imageControlsBtn");
+  if(!box)return;box.classList.toggle("show");btn?.classList.toggle("active",box.classList.contains("show"));
+}
+function syncImageSettings(){
+  imageSettings={
+    ratio:document.getElementById("imageRatio")?.value||"1:1",
+    size:document.getElementById("imageSize")?.value||"1024x1024",
+    quality:document.getElementById("imageQuality")?.value||"medium"
+  };safeSet("aaru_image_settings_v3",JSON.stringify(imageSettings));
+}
+function loadV3Settings(){
+  try{ voiceOutputEnabled = safeGet("aaru_voice_output_v3") !== "0"; }catch{}
+  try{const saved=JSON.parse(safeGet("aaru_image_settings_v3")||"null");if(saved)imageSettings={...imageSettings,...saved};}catch{}
+  const r=document.getElementById("imageRatio"),z=document.getElementById("imageSize"),q=document.getElementById("imageQuality");
+  if(r)r.value=imageSettings.ratio;if(z)z.value=imageSettings.size;if(q)q.value=imageSettings.quality;
+  const vo=document.getElementById("voiceOutputToggle");if(vo)vo.checked=voiceOutputEnabled;
+  const vm=document.getElementById("voiceModeToggle");if(vm)vm.checked=voiceModeEnabled;
+  settingsLoaded=true;
+}
+function openSettings(){document.getElementById("settingsModal")?.classList.add("open");loadV3Settings();}
+function closeSettings(){document.getElementById("settingsModal")?.classList.remove("open");}
+function exportCurrentChat(){
+  const chat=ensureCurrentChat();
+  const lines=[`Aaru AI — ${chat.title||"नई चैट"}`,`Exported: ${new Date().toLocaleString("hi-IN")}`,"",...(messages||[]).map(m=>`${m.role==="user"?"You":"Aaru"}: ${m.content||""}`)];
+  downloadText(`${(chat.title||"aaru-chat").replace(/[^a-z0-9_-]+/gi,"_")}.txt`,lines.join("\n\n"));
+}
+function exportAllChats(){
+  const lines=[];for(const chat of chats){lines.push(`### ${chat.title||"नई चैट"}`);for(const m of (chat.messages||[]))lines.push(`${m.role}: ${m.content||""}`);lines.push("\n---\n");}
+  downloadText("aaru-all-chats.txt",lines.join("\n"));
+}
+function downloadText(name,text){
+  const blob=new Blob([text],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 
 /* =========================================================
    TEXTAREA
@@ -5687,7 +5588,7 @@ function startNewChat(){
 
   renderCurrentChat();
 
-  renderChatHistory();
+  renderChatHistoryV3();
 
 
 
@@ -5846,7 +5747,7 @@ function recoverPage(){
 
     renderCurrentChat();
 
-    renderChatHistory();
+    renderChatHistoryV3();
 
     updateModeButtons();
 
@@ -6031,7 +5932,7 @@ function safeInitialLoad(){
 
   renderCurrentChat();
 
-  renderChatHistory();
+  renderChatHistoryV3();
 
 
   /*
@@ -6134,8 +6035,7 @@ window.addEventListener(
 );
 
 </script>
-
-<script>
+  <script>
 /* GPT-6 Astra Native Composer runtime marker.
    The browser never contains the OpenAI API key; the Worker is the secure gateway.
    The model, Responses API, reasoning and native tool selection are Worker-side.
@@ -6146,6 +6046,29 @@ window.AARU_ASTRA_NATIVE = Object.freeze({
   toolChoice: "auto",
   intentRouting: "model-selected"
 });
+
+loadV3Settings();
+
+// ============================================================
+// AARU v3 — FEATURE BINDINGS
+// ============================================================
+document.getElementById("searchChatsBtn")?.addEventListener("click",()=>{
+  const box=document.getElementById("chatSearchBox");box?.classList.toggle("show");document.getElementById("chatSearchInput")?.focus();
+});
+document.getElementById("chatSearchInput")?.addEventListener("input",e=>{chatSearchQuery=e.target.value||"";renderChatHistoryV3();});
+document.getElementById("settingsBtn")?.addEventListener("click",()=>{closeDrawer();openSettings();});
+document.getElementById("exportAllBtn")?.addEventListener("click",exportAllChats);
+document.getElementById("imageControlsBtn")?.addEventListener("click",toggleImageControls);
+document.getElementById("imageRatio")?.addEventListener("change",syncImageSettings);
+document.getElementById("imageSize")?.addEventListener("change",syncImageSettings);
+document.getElementById("imageQuality")?.addEventListener("change",syncImageSettings);
+document.getElementById("voiceModeBtn")?.addEventListener("click",()=>{voiceModeEnabled=!voiceModeEnabled;document.getElementById("voiceModeBtn")?.classList.toggle("active",voiceModeEnabled);const x=document.getElementById("voiceModeToggle");if(x)x.checked=voiceModeEnabled;document.getElementById("modePill")?.classList.toggle("show",voiceModeEnabled);showToast(voiceModeEnabled?"Voice Mode ON":"Voice Mode OFF");});
+document.getElementById("closeSettings")?.addEventListener("click",closeSettings);
+document.getElementById("settingsModal")?.addEventListener("click",e=>{if(e.target.id==="settingsModal")closeSettings();});
+document.getElementById("voiceOutputToggle")?.addEventListener("change",e=>{voiceOutputEnabled=!!e.target.checked;safeSet("aaru_voice_output_v3",voiceOutputEnabled?"1":"0");});
+document.getElementById("voiceModeToggle")?.addEventListener("change",e=>{voiceModeEnabled=!!e.target.checked;document.getElementById("modePill")?.classList.toggle("show",voiceModeEnabled);document.getElementById("voiceModeBtn")?.classList.toggle("active",voiceModeEnabled);});
+document.getElementById("highReasoningToggle")?.addEventListener("change",e=>{window.AARU_HIGH_REASONING=!!e.target.checked;showToast(window.AARU_HIGH_REASONING?"High Reasoning ON":"Medium Reasoning ON");});
+document.getElementById("clearLocalSettings")?.addEventListener("click",()=>{try{localStorage.removeItem("aaru_image_settings_v3");localStorage.removeItem("aaru_voice_output_v3");}catch{};showToast("Local settings reset");loadV3Settings();});
 </script>
-</body>
+ </body>
 </html>
