@@ -5,7 +5,7 @@
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Stable</title>
+<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13 — v26 Multi-Step Agent Workflow</title>
 
 <style>
 *{
@@ -908,7 +908,7 @@ body,.app,main{
 
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer • Stable</div>
+<div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
 </div>
 
 <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
@@ -1051,7 +1051,399 @@ accept="image/*,.pdf,application/pdf">
 
 
 <script>
+/* =========================================================
+   AARU v10 — PERSISTENT CONVERSATION INTELLIGENCE
+   Additive Index layer. Worker/API architecture unchanged.
+   Keeps compact per-chat state outside the main chat payload.
+========================================================= */
+(function(){
+  window.AARU_V10_PERSISTENT = true;
+  window.AARU_V10_VERSION = "PERSISTENT-CONVERSATION-INTELLIGENCE-V10";
+  window.AARU_V10_STORAGE_KEY = "aaru_persistent_context_v10";
+  window.AARU_V10_MAX_CHARS = 5200;
+  window.AARU_V10_MAX_TOPICS = 12;
+  window.AARU_V10_MAX_TURNS = 18;
+  window.AARU_V10_MAX_CHATS = 12;
+
+  function clean(v){
+    return String(v||"").replace(/\s+/g," ").trim();
+  }
+  function norm(v){
+    return clean(v).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ");
+  }
+  function tokens(v){
+    const stop=new Set([
+      "the","and","for","with","that","this","you","are","was","has","have","from","what","how","why","can",
+      "में","और","का","की","के","को","से","है","हैं","था","थे","यह","वह","एक","क्या","कैसे","क्यों","करो","करें","मुझे","आप"
+    ]);
+    return [...new Set(norm(v).split(/\s+/).filter(x=>x.length>2&&!stop.has(x)))].slice(0,80);
+  }
+  function read(){
+    try{
+      const raw=localStorage.getItem(window.AARU_V10_STORAGE_KEY);
+      const data=raw?JSON.parse(raw):{};
+      return data&&typeof data==="object"?data:{};
+    }catch(_){ return {}; }
+  }
+  function write(data){
+    try{ localStorage.setItem(window.AARU_V10_STORAGE_KEY,JSON.stringify(data)); }catch(_){}
+  }
+  function compact(text,max){
+    const value=clean(text);
+    if(value.length<=max)return value;
+    return value.slice(0,Math.max(0,max-1)).replace(/\s+\S*$/,"")+"…";
+  }
+
+  function buildState(allMessages,currentQuery){
+    const list=Array.isArray(allMessages)?allMessages:[];
+    const users=list.filter(m=>m?.role==="user");
+    const freq=new Map();
+    users.slice(-30).forEach(m=>{
+      tokens(m.content).forEach(t=>freq.set(t,(freq.get(t)||0)+1));
+    });
+    const topics=[...freq.entries()]
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,window.AARU_V10_MAX_TOPICS)
+      .map(x=>x[0]);
+
+    const turns=list.slice(-window.AARU_V10_MAX_TURNS).map(m=>({
+      role:m?.role==="user"?"user":"assistant",
+      content:compact(m?.content,420)
+    })).filter(x=>x.content);
+
+    const older=list.slice(0,Math.max(0,list.length-window.AARU_V10_MAX_TURNS));
+    const summaryParts=[];
+    older.filter(m=>m?.role==="user").slice(-10).forEach(m=>{
+      const s=clean(m.content);
+      if(s)summaryParts.push("User: "+compact(s,360));
+    });
+    const summary=compact(summaryParts.join("\n"),window.AARU_V10_MAX_CHARS);
+
+    return {
+      version:window.AARU_V10_VERSION,
+      updatedAt:Date.now(),
+      messageCount:list.length,
+      topics,
+      summary,
+      recentTurns:turns,
+      lastQuery:compact(currentQuery,500)
+    };
+  }
+
+  window.aaruV10PersistState=function(chatId,allMessages,currentQuery){
+    if(!chatId)return null;
+    const state=buildState(allMessages,currentQuery);
+    const data=read();
+    data[String(chatId)]=state;
+    const entries=Object.entries(data)
+      .sort((a,b)=>(b[1]?.updatedAt||0)-(a[1]?.updatedAt||0))
+      .slice(0,window.AARU_V10_MAX_CHATS);
+    write(Object.fromEntries(entries));
+    return state;
+  };
+
+  window.aaruV10GetState=function(chatId){
+    if(!chatId)return null;
+    const data=read();
+    return data[String(chatId)]||null;
+  };
+
+  window.aaruV10BuildContextBridge=function(chatId,allMessages,currentQuery){
+    const state=window.aaruV10GetState(chatId) ||
+      window.aaruV10PersistState(chatId,allMessages,currentQuery);
+    if(!state)return {summary:"",topics:[],recentTurns:[],mode:"none"};
+
+    const q=norm(currentQuery);
+    const follow=/^(yes|yeah|yep|ok|okay|sure|do it|continue|next|same|that one|this one|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो|नेक्स्ट)[!?.,\s]*$/i.test(clean(q));
+    const topicHit=state.topics.some(t=>q.includes(t));
+    return {
+      summary:compact(state.summary,window.AARU_V10_MAX_CHARS),
+      topics:state.topics.join(" ").slice(0,500),
+      recentTurns:follow||topicHit ? state.recentTurns : state.recentTurns.slice(-8),
+      mode:follow ? "persistent-continuity" : (topicHit ? "persistent-topic" : "persistent"),
+      messageCount:state.messageCount
+    };
+  };
+
+  window.aaruV10ClearState=function(chatId){
+    try{
+      const data=read();
+      if(chatId)delete data[String(chatId)];
+      else Object.keys(data).forEach(k=>delete data[k]);
+      write(data);
+    }catch(_){}
+  };
+})();
+</script>
+<script>
+/* =========================================================
+   AARU v9 — LONG-CONTEXT & CONVERSATION CONTINUITY ENGINE
+   Safe additive layer. Worker/API architecture unchanged.
+========================================================= */
+(function(){
+  window.AARU_V9_LONG_CONTEXT = true;
+  window.AARU_V9_VERSION = "LONG-CONTEXT-CONTINUITY-V9";
+  window.AARU_V9_MAX_CONTEXT = 240;
+  window.AARU_V9_RECENT_ALWAYS = 10;
+  window.AARU_V9_MAX_SELECTED = 48;
+  window.AARU_V9_MAX_PAIR_CHARS = 900;
+
+  function norm(v){
+    return String(v||"").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim();
+  }
+  function tokens(v){
+    const stop=new Set(["the","and","for","with","that","this","you","are","was","has","have","from","what","how","why","can","में","और","का","की","के","को","से","है","हैं","था","थे","यह","वह","एक","क्या","कैसे","क्यों","करो","करें","मुझे","आप"]);
+    return new Set(norm(v).split(" ").filter(x=>x.length>2&&!stop.has(x)).slice(0,100));
+  }
+  function overlap(a,b){
+    if(!a.size||!b.size)return 0;
+    let n=0; a.forEach(x=>{if(b.has(x))n++;});
+    return n/Math.max(1,Math.min(a.size,b.size));
+  }
+  function followup(q){
+    return /^(yes|yeah|yep|ok|okay|sure|do it|continue|next|same|that one|this one|go ahead|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो|नेक्स्ट|हाँ करो|हां करो)[!?.,\s]*$/i.test(norm(q)) ||
+      /^(इसे|इसे ही|वही|वही वाला|उसी|उसको|इसको|उस पर|इस पर|पिछली|पिछला|ऊपर वाला|नीचे वाला)\b/i.test(norm(q));
+  }
+
+  window.aaruV9SelectLongContext=function(allMessages,currentQuery){
+    const list=Array.isArray(allMessages)?allMessages:[];
+    if(!list.length)return [];
+    const max=Math.min(window.AARU_V9_MAX_CONTEXT,list.length);
+    const source=list.slice(-max);
+    if(source.length<=window.AARU_V9_MAX_SELECTED)return source;
+    const q=norm(currentQuery), qt=tokens(q), isFollow=followup(q);
+    const recent=source.slice(-window.AARU_V9_RECENT_ALWAYS);
+    const recentSet=new Set(recent);
+    const scored=[];
+    source.forEach((m,i)=>{
+      if(recentSet.has(m))return;
+      const text=norm(m?.content||"");
+      if(!text)return;
+      let score=overlap(qt,tokens(text))*100;
+      score += m?.role==="user" ? 5 : 2;
+      score += Math.min(18,i/source.length*18);
+      if(isFollow)score+=10;
+      scored.push({m,i,score});
+    });
+    scored.sort((a,b)=>b.score-a.score || b.i-a.i);
+    const keep=Math.max(0,window.AARU_V9_MAX_SELECTED-recent.length);
+    const chosen=scored.slice(0,keep);
+    const selected=new Map();
+    chosen.forEach(x=>selected.set(x.i,x));
+    /* Preserve the immediate reply/user pair around highly relevant turns. */
+    chosen.slice(0,12).forEach(x=>{
+      const ni=x.m?.role==="user"?x.i+1:x.i-1;
+      if(ni>=0&&ni<source.length&&!selected.has(ni)&&selected.size<window.AARU_V9_MAX_SELECTED){
+        const n=source[ni];
+        if(n&&String(n.content||"").trim())selected.set(ni,{m:n,i:ni,score:x.score-1});
+      }
+    });
+    return [...selected.values()].sort((a,b)=>a.i-b.i).map(x=>x.m).slice(-window.AARU_V9_MAX_SELECTED);
+  };
+
+  window.aaruV9BuildConversationState=function(allMessages,currentQuery){
+    const list=Array.isArray(allMessages)?allMessages:[];
+    const users=list.filter(m=>m?.role==="user").slice(-12).map(m=>String(m.content||""));
+    const current=norm(currentQuery), qt=tokens(current);
+    const topicFreq=new Map();
+    users.forEach(t=>tokens(t).forEach(x=>topicFreq.set(x,(topicFreq.get(x)||0)+1)));
+    const topics=[...topicFreq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12).map(x=>x[0]);
+    const topicOverlap=overlap(qt,new Set(topics));
+    const continuity=followup(current)||topicOverlap>=0.18;
+    const freshTopic=!continuity && current.length>20 && topicOverlap<0.08;
+    return {topics,continuity,freshTopic,followup:followup(current)};
+  };
+
+  window.aaruV9CompactText=function(text,maxChars){
+    const value=String(text||"").trim();
+    if(!value||value.length<=maxChars)return value;
+    const parts=value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    let out="";
+    for(const part of parts){
+      if((out+"\n"+part).trim().length>maxChars)break;
+      out=out?out+"\n"+part:part;
+    }
+    return out.slice(0,maxChars);
+  };
+
+  window.aaruV9ResetContinuity=function(){
+    try{window.__AARU_V9_STATE__=null;}catch(_){ }
+  };
+})();
+</script>
+<script>
+/* =========================================================
+   AARU v8 — ADAPTIVE CONVERSATION ENGINE
+   Index-only additive layer. Worker/API architecture unchanged.
+   Purpose: select context adaptively without deleting existing state.
+========================================================= */
+(function(){
+  window.AARU_V8_ADAPTIVE = true;
+  window.AARU_V8_VERSION = "ADAPTIVE-CONVERSATION-V8";
+  window.AARU_V9_COMPATIBLE = true;
+  window.AARU_V10_COMPATIBLE = true;
+  window.AARU_V8_MAX_CONTEXT = 240;
+  window.AARU_V8_RECENT_ALWAYS = 8;
+  window.AARU_V8_MAX_SELECTED = 36;
+
+  function norm(v){
+    return String(v || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim();
+  }
+  function tokens(v){
+    const stop=new Set(["the","and","for","with","that","this","you","are","was","has","have","from","what","how","why","can","में","और","का","की","के","को","से","है","हैं","था","थे","यह","वह","एक","क्या","कैसे","क्यों","करो","करें","मुझे","आप"]);
+    return new Set(norm(v).split(" ").filter(x=>x.length>2&&!stop.has(x)).slice(0,80));
+  }
+  function overlap(a,b){
+    if(!a.size||!b.size)return 0;
+    let n=0; a.forEach(x=>{if(b.has(x))n++;});
+    return n/Math.max(1,Math.min(a.size,b.size));
+  }
+
+  window.aaruV8BuildAdaptiveContext=function(allMessages,currentQuery){
+    const list=Array.isArray(allMessages)?allMessages:[];
+    const current=norm(currentQuery);
+    const qTokens=tokens(current);
+    const start=Math.max(0,list.length-window.AARU_V8_MAX_CONTEXT);
+    const windowed=list.slice(start);
+    if(windowed.length<=window.AARU_V8_MAX_SELECTED)return windowed;
+
+    const recent=windowed.slice(-window.AARU_V8_RECENT_ALWAYS);
+    const recentSet=new Set(recent);
+    const scored=[];
+    windowed.forEach((m,i)=>{
+      if(recentSet.has(m))return;
+      const text=norm(m?.content||"");
+      if(!text)return;
+      let score=overlap(qTokens,tokens(text))*100;
+      if(m?.role==="user")score+=4;
+      score+=Math.max(0,10-(windowed.length-i)/12);
+      if(/(this|that|it|same|वही|इसे|उसे|इसको|उसको|इस पर|उस पर)/i.test(current))score+=8;
+      scored.push({m,i,score});
+    });
+    scored.sort((a,b)=>b.score-a.score || b.i-a.i);
+    const selected=scored.slice(0,Math.max(0,window.AARU_V8_MAX_SELECTED-recent.length)).sort((a,b)=>a.i-b.i).map(x=>x.m);
+    return [...selected,...recent];
+  };
+
+  window.aaruV8GetTopicState=function(allMessages,currentQuery){
+    const list=Array.isArray(allMessages)?allMessages:[];
+    const users=list.filter(m=>m?.role==="user").slice(-6).map(m=>String(m.content||""));
+    const current=norm(currentQuery);
+    const q=tokens(current);
+    const freq=new Map();
+    users.forEach(text=>tokens(text).forEach(t=>freq.set(t,(freq.get(t)||0)+1)));
+    const topic=[...freq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
+    const followup=/^(yes|yeah|yep|ok|okay|sure|do it|continue|next|same|that one|this one|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो)[!?.,\s]*$/i.test(current)
+      || /^(इसे|इसे ही|वही|वही वाला|उसी|उसको|इसको|उस पर|इस पर)\b/i.test(current);
+    const continuity=followup || overlap(q,new Set(topic))>0.18;
+    return {topic,followup,continuity};
+  };
+
+  window.aaruV8CompactMemory=function(text,maxChars){
+    const value=String(text||"").trim();
+    if(!value)return "";
+    if(value.length<=maxChars)return value;
+    const parts=value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    let out="";
+    for(const part of parts){
+      if((out+"\n"+part).trim().length>maxChars)break;
+      out=(out?out+"\n":"")+part;
+    }
+    return (out||value.slice(0,maxChars)).slice(0,maxChars);
+  };
+})();
+</script>
+<script>
+/* AARU v7 — Multimodal Intelligence Layer (Index-only, Worker unchanged) */
+(function(){
+  window.AARU_V7_MULTIMODAL = true;
+  window.AARU_V7_MAX_IMAGE_BYTES = 12000000;
+  window.AARU_V7_MAX_PDF_TEXT = 120000;
+  function aaruV7NormalizeMime(type){ return String(type||'').toLowerCase().split(';')[0].trim(); }
+  function aaruV7IsImageFile(file){ return !!file && /^image\//i.test(aaruV7NormalizeMime(file.type)); }
+  function aaruV7IsPdfFile(file){ return !!file && aaruV7NormalizeMime(file.type)==='application/pdf'; }
+  window.aaruV7ValidateAttachment=function(file){
+    if(!file) return {ok:false,reason:'no-file'};
+    if(aaruV7IsImageFile(file) && file.size>window.AARU_V7_MAX_IMAGE_BYTES) return {ok:false,reason:'image-too-large'};
+    if(aaruV7IsPdfFile(file) && file.size>window.AARU_V7_MAX_IMAGE_BYTES) return {ok:false,reason:'pdf-too-large'};
+    if(!aaruV7IsImageFile(file) && !aaruV7IsPdfFile(file)) return {ok:false,reason:'unsupported'};
+    return {ok:true,type:aaruV7IsPdfFile(file)?'pdf':'image'};
+  };
+  window.aaruV7TrimDocumentContext=function(text){ return String(text||'').slice(0,window.AARU_V7_MAX_PDF_TEXT); };
+})();
+</script>
+<script>
+/* =========================================================
+   AARU PERFORMANCE & MOBILE OPTIMIZATION v3
+   Safe additive layer: preserves existing app logic.
+========================================================= */
+(function(){
+  try{
+    document.documentElement.style.setProperty('content-visibility','auto');
+  }catch(_){}
+  try{
+    if('requestIdleCallback' in window){
+      window.__AARU_IDLE__=function(fn){ return requestIdleCallback(fn,{timeout:1200}); };
+    }else{
+      window.__AARU_IDLE__=function(fn){ return setTimeout(fn,50); };
+    }
+  }catch(_){ window.__AARU_IDLE__=function(fn){ return setTimeout(fn,50); }; }
+  window.__AARU_V3_VERSION__='PERFORMANCE-MOBILE-V3';
+  document.addEventListener('visibilitychange',function(){
+    try{ if(document.visibilityState==='hidden' && typeof window.saveCurrentChat==='function') window.saveCurrentChat(); }catch(_){}
+  },{passive:true});
+  window.addEventListener('pagehide',function(){
+    try{ if(typeof window.saveCurrentChat==='function') window.saveCurrentChat(); }catch(_){}
+  },{passive:true});
+})();
 "use strict";
+
+/* =========================================================
+   AARU STABILITY v1 — SAFE RUNTIME GUARDS
+   These guards do not replace existing app logic.
+   They prevent one runtime error from leaving the UI unusable.
+========================================================= */
+window.__AARU_RUNTIME_ERROR__ = null;
+window.addEventListener("error", function(event){
+  window.__AARU_RUNTIME_ERROR__ = event.error || new Error(event.message || "Runtime error");
+  try {
+    const el = document.getElementById("toast");
+    if (el && !document.body?.dataset?.aaruBooting) {
+      el.textContent = "⚠️ Aaru में एक अस्थायी UI समस्या आई है।";
+      el.classList.add("show");
+      clearTimeout(window.__AARU_RUNTIME_TOAST_TIMER__);
+      window.__AARU_RUNTIME_TOAST_TIMER__ = setTimeout(() => el.classList.remove("show"), 4200);
+    }
+  } catch (_) {}
+});
+window.addEventListener("unhandledrejection", function(event){
+  window.__AARU_RUNTIME_ERROR__ = event.reason || new Error("Unhandled promise rejection");
+  try { event.preventDefault(); } catch (_) {}
+});
+
+/* =========================================================
+   AARU SMART UX v2 — SESSION & LIFECYCLE PROTECTION
+========================================================= */
+window.__AARU_PAGE_HIDDEN__ = false;
+window.__AARU_LAST_SAVE__ = 0;
+
+function aaruLifecycleSave(){
+  try{
+    if(typeof saveCurrentChat === "function" && typeof ensureCurrentChat === "function" && messages?.length){
+      saveCurrentChat();
+      window.__AARU_LAST_SAVE__ = Date.now();
+    }
+  }catch(error){
+    console.warn("Aaru lifecycle save failed:", error);
+  }
+}
+
+document.addEventListener("visibilitychange",function(){
+  window.__AARU_PAGE_HIDDEN__ = document.visibilityState === "hidden";
+  if(window.__AARU_PAGE_HIDDEN__) aaruLifecycleSave();
+});
+window.addEventListener("pagehide",aaruLifecycleSave);
+
 
 
 /* =========================================================
@@ -2263,6 +2655,10 @@ function saveCurrentChat(){
   chat.updatedAt =
     Date.now();
 
+  try{
+    if(typeof window.aaruV19PersistAdaptiveState === "function" && typeof window.AARU_V19_LAST_PROFILE === "object")
+      window.aaruV19PersistAdaptiveState(currentChatId,messages,window.AARU_V19_LAST_PROFILE);
+  }catch(_){}
 
   saveChatHistory();
 
@@ -4181,6 +4577,355 @@ function normalizeImageResult(
 
 
 /* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+  selectedDocumentText = "";
+
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  photoPreviewImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+    "बैकग्राउंड बदल", "बैकग्राउंड हटा", "पृष्ठभूमि बदल", "पृष्ठभूमि हटा",
+    "इस फोटो", "इस तस्वीर", "इस इमेज", "इस चित्र", "इसमें बदलाव",
+    "इसमें बदल", "इसको एडिट", "इसे एडिट", "एडिट करो", "बदल दो",
+    "बैकग्राउंड", "पृष्ठभूमि", "रंग बदल", "कलर बदल", "कपड़े बदल",
+    "कपड़ा बदल", "कपड़े का रंग", "व्यक्ति हट", "पर्सन हट", "इंसान हट",
+    "चेहरा बदल", "बाल बदल", "आसमान बदल", "ऑब्जेक्ट हट", "चीज हट",
+    "हटा दो", "निकाल दो", "background change", "change background",
+    "remove background", "replace background", "edit this", "edit the photo",
+    "edit image", "change color", "change colour", "change clothes",
+    "change clothing", "change shirt", "change dress", "change outfit",
+    "remove person", "remove people", "remove a person", "remove object",
+    "remove someone", "erase person", "erase object", "replace sky",
+    "change hair", "change face", "add person", "add object",
+    "replace the background", "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+       s.includes("पृष्ठभूमि") ||
+       s.includes("background") ||
+       s.includes("बदल दो") ||
+       s.includes("रंग बदल") ||
+       s.includes("कलर बदल") ||
+       s.includes("कपड़े बदल") ||
+       s.includes("व्यक्ति हट") ||
+       s.includes("पर्सन हट") ||
+       s.includes("हटा दो") ||
+       s.includes("निकाल दो") ||
+       s.includes("replace") ||
+       s.includes("remove") ||
+       s.includes("erase") ||
+       s.includes("change color") ||
+       s.includes("change clothes")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
+}
+
+
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
+
+async function generateImage(
+  prompt
+){
+
+  const payload = {
+
+    prompt:
+      String(
+        prompt || ""
+      ).trim(),
+
+    ratio:
+      "1:1",
+
+    quality:
+      "standard"
+  };
+
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
+
+  return responseToImage(
+    response
+  );
+}
+
+
+/* =========================================================
    CHAT IMAGE NORMALIZATION
 ========================================================= */
 
@@ -4501,6 +5246,45 @@ function applyWorkerMemoryResponse(data){
    CHAT API
 ========================================================= */
 
+
+function getAaruInteractionProfile(text){
+  const q=cleanAaruText(text).trim().toLowerCase();
+  const profile={
+    intent:"conversation",
+    mode:"normal",
+    followup:false,
+    tool_hint:null
+  };
+  if(!q)return profile;
+
+  if(/^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|कैसे हो|क्या हाल है|धन्यवाद|thanks|thank you|ok|okay|ठीक है|ओके|bye|बाय)[!?.,\s]*$/i.test(q)){
+    profile.intent="casual";
+    profile.mode="fast";
+    return profile;
+  }
+
+  if(/(latest|current|today|tonight|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर|चुनाव)/i.test(q)){
+    profile.intent="current_information";
+    profile.mode="deep";
+    profile.tool_hint="web_search";
+  }else if(/(image|picture|photo|draw|generate.*image|इमेज|तस्वीर|फोटो|चित्र|बनाओ|बनाइए|जनरेट)/i.test(q)){
+    profile.intent="image";
+    profile.tool_hint="image_generation";
+  }else if(/(calculate|calculation|math|code|debug|program|script|कैलकुलेट|गणना|कोड|डिबग|प्रोग्राम)/i.test(q)){
+    profile.intent="analysis_or_code";
+    profile.mode="deep";
+    profile.tool_hint="code_interpreter";
+  }else if(/(explain|compare|research|analy[sz]e|विश्लेषण|तुलना|रिसर्च|समझाओ|समझाइए)/i.test(q)){
+    profile.intent="deep_reasoning";
+    profile.mode="deep";
+  }
+
+  profile.followup=/^(yes|yeah|yep|ok|okay|sure|do it|continue|next|same|that one|this one|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|नेक्स्ट|जारी रखो|हाँ करो|हां करो)[!?.,\s]*$/i.test(q)
+    || /^(इसे|इसे ही|वही|उसी|उसको|इसको|उस पर|इस पर)\b/i.test(q);
+
+  return profile;
+}
+
 function getConversationReasoningEffort(text){
   const q=cleanAaruText(text).toLowerCase(); if(!q)return ASTRA_FAST_REASONING_EFFORT;
   if(/(latest|current|today|tonight|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|खोज|सर्च|कीमत|मौसम|स्कोर|चुनाव)/i.test(q))return ASTRA_REASONING_EFFORT;
@@ -4587,14 +5371,96 @@ async function sendChatRequest(){
   const currentQuery =
     cleanAaruText(lastUserMessage?.content || "");
 
+  const proactivePlan=(typeof window.aaruV21BuildPlan === "function" ? window.aaruV21BuildPlan(currentQuery,messages) : null);
+window.AARU_V21_LAST_PLAN=proactivePlan;
+const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
+    ? window.aaruV19GetAdaptiveProfile(currentQuery,messages)
+    : {verbosity:"balanced",tone:"natural",reasoning:"auto",continuity:false,confidence:.72});
+  window.AARU_V19_LAST_PROFILE=adaptiveBehavior;
+
   const relevantMemory=getRelevantMemory(currentQuery);
-  const fastConversation=!shouldUseDeepContext(currentQuery);
+  const interaction=getAaruInteractionProfile(currentQuery);
+const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
+  const multimodalState=(typeof window.aaruV13BuildMultimodalState === "function"
+    ? window.aaruV13BuildMultimodalState({
+        query:currentQuery,
+        hasImage:!!selectedPhotoDataURL,
+        hasPDF:!!selectedDocumentText,
+        followup:interaction.followup || adaptiveTopic.followup
+      })
+    : {mode:"text",attachment:"",followup:false,continuity:false});
+  const taskPlan=(typeof window.aaruV14BuildTaskPlan === "function"
+    ? window.aaruV14BuildTaskPlan(currentQuery,{
+        hasImage:!!selectedPhotoDataURL,
+        hasPDF:!!selectedDocumentText,
+        multimodalMode:multimodalState.mode
+      })
+    : {active:false,complexity:"simple",steps:[],strategy:"direct",modelMayReplan:true});
+  const workflowState=(typeof window.aaruV15PrepareExecution === "function"
+    ? window.aaruV15PrepareExecution(currentQuery,taskPlan)
+    : null);
+  window.AARU_V15_LAST_WORKFLOW=workflowState;
+  const persistentBridge=(typeof window.aaruV10BuildContextBridge === "function"
+    ? window.aaruV10BuildContextBridge(currentChatId,messages,currentQuery)
+    : {summary:"",topics:"",recentTurns:[],mode:"none"});
+  const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function" ? window.aaruV9BuildConversationState(messages,currentQuery) : window.aaruV8GetTopicState(messages,currentQuery));
+  const fastConversation=interaction.mode==="fast" && !shouldUseDeepContext(currentQuery) && !adaptiveTopic.continuity;
+  const adaptiveMessages=(typeof window.aaruV9SelectLongContext === "function" ? window.aaruV9SelectLongContext(messages,currentQuery) : window.aaruV8BuildAdaptiveContext(messages,currentQuery));
+  const contextMessages=fastConversation
+    ? recentMessages.slice(-12)
+    : adaptiveMessages.map(item => ({
+        role:item.role === "user" ? "user" : "assistant",
+        content:cleanAaruText(String(item.content||"")).slice(0,MAX_MESSAGE_CHARS)
+      }));
+  const adaptiveMemory=fastConversation
+    ? ""
+    : (typeof window.aaruV9CompactText === "function"
+      ? window.aaruV9CompactText(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS)
+      : window.aaruV8CompactMemory(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS));
+  const goalState=(typeof window.aaruV23GetGoalState === "function" ? window.aaruV23GetGoalState(currentChatId) : null);
+  const multiStepWorkflow=(typeof window.aaruV26BuildWorkflow === "function" ? window.aaruV26BuildWorkflow(currentQuery,messages,taskPlan,goalState) : null);
+  window.AARU_V26_LAST_WORKFLOW=multiStepWorkflow;
+  if(typeof window.aaruV26SaveWorkflow === "function" && multiStepWorkflow) window.aaruV26SaveWorkflow(multiStepWorkflow);
+
   const payload={
     message:currentQuery,
-    messages:fastConversation?recentMessages.slice(-12):recentMessages,
-    memory_summary:fastConversation?"":(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages)),
+    messages:contextMessages,
+    memory_summary:adaptiveMemory,
     relevant_memory:fastConversation?"":relevantMemory,
-    reasoning_effort:getConversationReasoningEffort(currentQuery),
+    reasoning_effort:interaction.mode==="deep" || adaptiveTopic.continuity ? ASTRA_REASONING_EFFORT : getConversationReasoningEffort(currentQuery),
+    client_intent:interaction.intent,
+    client_followup:interaction.followup || adaptiveTopic.followup,
+    client_tool_hint:interaction.tool_hint,
+    client_tool_plan:window.aaruV12ToolHint(toolPlan),
+    client_task_plan:typeof window.aaruV14CompactTaskPlan === "function" ? window.aaruV14CompactTaskPlan(taskPlan) : "",
+    client_task_complexity:taskPlan.complexity,
+    client_task_strategy:taskPlan.strategy,
+    client_task_active:!!taskPlan.active,
+    client_task_model_replan:taskPlan.modelMayReplan!==false,
+    client_workflow_v26_version:window.AARU_V26_VERSION||"",
+    client_workflow_v26_state:typeof window.aaruV26CompactWorkflow === "function" ? window.aaruV26CompactWorkflow(multiStepWorkflow) : "",
+    client_workflow_v26_hint:typeof window.aaruV26GetWorkflowHint === "function" ? window.aaruV26GetWorkflowHint(multiStepWorkflow) : "",
+    client_workflow_v26_active:!!multiStepWorkflow?.active,
+    client_workflow_v26_remaining:Number(multiStepWorkflow?.remaining||0),
+    client_workflow_version:window.AARU_V15_VERSION||"",
+    client_workflow_state:typeof window.aaruV15CompactState === "function" ? window.aaruV15CompactState(workflowState) : "",
+    client_workflow_execution:typeof window.aaruV15GetExecutionHint === "function" ? window.aaruV15GetExecutionHint(workflowState) : "",
+    client_multimodal_mode:multimodalState.mode,
+    client_attachment_type:multimodalState.attachment||"",
+    client_topic:adaptiveTopic.topic.join(" ").slice(0,500),
+    client_context_mode:fastConversation ? "fast" : (adaptiveTopic.continuity ? "continuity" : "adaptive"),
+    client_context_count:contextMessages.length,
+    client_persistent_state: persistentBridge.mode,
+    client_persistent_topics: persistentBridge.topics,
+    client_persistent_summary: fastConversation ? "" : persistentBridge.summary,
+    client_persistent_message_count: persistentBridge.messageCount || messages.length,
+    client_adaptive_version: window.AARU_V19_VERSION || "",
+    client_adaptive_verbosity: adaptiveBehavior.verbosity,
+    client_adaptive_tone: adaptiveBehavior.tone,
+    client_adaptive_reasoning: adaptiveBehavior.reasoning,
+    client_adaptive_continuity: !!adaptiveBehavior.continuity,
+    client_adaptive_confidence: Number(adaptiveBehavior.confidence || .72),
+    client_behavior_hint: typeof window.aaruV19GetBehaviorHint === "function" ? window.aaruV19GetBehaviorHint(adaptiveBehavior) : "",
     stream:true,
     previous_response_id:previousResponseId||undefined
   };
@@ -4653,11 +5519,6 @@ async function sendChatRequest(){
 
 async function handleSend(){
 
-  if(!navigator.onLine){
-    showToast("इंटरनेट कनेक्शन उपलब्ध नहीं है।");
-    return;
-  }
-
   if(isBusy){
     return;
   }
@@ -4714,6 +5575,12 @@ async function handleSend(){
 
   semanticMemory=updateSemanticMemory(semanticMemory,[messages[messages.length-1]]);
   saveCurrentChat();
+  try{ if(typeof window.aaruV19PersistAdaptiveState === "function") window.aaruV19PersistAdaptiveState(currentChatId,messages,window.AARU_V19_LAST_PROFILE||{}); }catch(_){}
+  try{
+    if(typeof window.aaruV10PersistState === "function"){
+      window.aaruV10PersistState(currentChatId,messages,displayPrompt);
+    }
+  }catch(_){}
 
   promptEl.value =
     "";
@@ -4783,19 +5650,18 @@ async function handleSend(){
     hideTyping();
 
     const rawError=String(error?.message||"");
-    const quotaError=/(quota|credit|billing|insufficient|exceeded.*(quota|limit)|rate.?limit)/i.test(rawError);
+    const quotaError=Number(error?.status||0)===429 || /(quota|credit|billing|insufficient|exceeded.*(quota|limit)|rate.?limit)/i.test(rawError);
     const networkError=error?.name === "TypeError" || /network|failed to fetch|load failed|offline/i.test(rawError);
     const timeoutError=error?.name === "AbortError";
-    const status=Number(error?.status||0);
 
-    let userError=
+    const userError=
       quotaError
         ? "⚠️ API credit/quota उपलब्ध नहीं है। कृपया OpenAI API billing/credits जाँचें।"
         : timeoutError
           ? "⚠️ Request में बहुत समय लग गया। कृपया फिर कोशिश करें।"
           : networkError
             ? "⚠️ इंटरनेट या Worker connection में समस्या है। नेटवर्क जाँचकर फिर कोशिश करें।"
-            : (status>=500 || /worker|astra|openai api/i.test(rawError))
+            : (Number(error?.status||0)>=500 || /worker|astra|openai api/i.test(rawError))
               ? "⚠️ Aaru Worker/API इस समय जवाब नहीं दे रहा है। थोड़ी देर बाद फिर कोशिश करें।"
               : "⚠️ Request पूरी नहीं हो सकी। कृपया फिर कोशिश करें।";
 
@@ -4897,46 +5763,77 @@ function speakAaru(text){
 
 function startAaruVoice(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById("micBtn");
+
   if(!SR){
-    showToast("इस browser में Voice Input उपलब्ध नहीं है।");
+    showToast("इस browser में Voice Input उपलब्ध नहीं है। Chrome में microphone permission जाँचें।");
     return;
   }
+
   if(recognition){
-    try{ recognition.stop(); }catch(error){}
+    try{ recognition.abort ? recognition.abort() : recognition.stop(); }catch(error){}
     recognition = null;
-    document.getElementById("micBtn")?.classList.remove("voice-active");
+    micBtn?.classList.remove("voice-active");
+    showToast("Voice Input बंद कर दिया गया।");
     return;
   }
-  recognition = new SR();
-  recognition.lang = "hi-IN";
-  recognition.interimResults = false;
-  recognition.continuous = false;
-  recognition.onstart = () => {
-    document.getElementById("micBtn")?.classList.add("voice-active");
-    showToast("सुन रहा हूँ…");
+
+  let started = false;
+  const rec = new SR();
+  recognition = rec;
+  rec.lang = "hi-IN";
+  rec.interimResults = false;
+  rec.continuous = false;
+  rec.maxAlternatives = 1;
+
+  rec.onstart = () => {
+    started = true;
+    if(recognition !== rec) return;
+    micBtn?.classList.add("voice-active");
+    showToast("🎙️ सुन रहा हूँ… बोलिए।");
   };
-  recognition.onresult = event => {
-    const text = event.results?.[0]?.[0]?.transcript || "";
+
+  rec.onresult = event => {
+    if(recognition !== rec) return;
+    const text = event.results?.[0]?.[0]?.transcript?.trim() || "";
     if(text){
       promptEl.value = text;
       autoResize();
       promptEl.focus();
+      showToast("आवाज़ को टेक्स्ट में बदल दिया गया।");
     }
   };
-  recognition.onerror = event => {
-    showToast("Voice error: " + (event.error || "unknown"));
+
+  rec.onerror = event => {
+    if(recognition !== rec) return;
+    const code = String(event?.error || "unknown").toLowerCase();
+    const message =
+      code === "not-allowed" || code === "service-not-allowed"
+        ? "⚠️ Microphone permission की अनुमति दें।"
+        : code === "no-speech"
+          ? "⚠️ कोई आवाज़ नहीं मिली। फिर से बोलें।"
+          : code === "audio-capture"
+            ? "⚠️ Microphone उपलब्ध नहीं है।"
+            : code === "network"
+              ? "⚠️ Voice service/network में समस्या है।"
+              : "⚠️ Voice Input में समस्या हुई। फिर कोशिश करें।";
+    showToast(message.replace(/^⚠️\s*/,""));
   };
-  recognition.onend = () => {
-    recognition = null;
-    document.getElementById("micBtn")?.classList.remove("voice-active");
+
+  rec.onend = () => {
+    if(recognition === rec) recognition = null;
+    micBtn?.classList.remove("voice-active");
+    if(started) setTimeout(() => { try{ promptEl.focus(); }catch(error){} }, 0);
   };
-  try{ recognition.start(); }
-  catch(error){
-    recognition = null;
-    document.getElementById("micBtn")?.classList.remove("voice-active");
+
+  try{
+    rec.start();
+  }catch(error){
+    if(recognition === rec) recognition = null;
+    micBtn?.classList.remove("voice-active");
+    showToast("Voice Input शुरू नहीं हो सका। फिर कोशिश करें।");
   }
 }
-
 /* =========================================================
    PDF READER
 ========================================================= */
@@ -4965,6 +5862,9 @@ function setToastProgress(text){
 async function handlePDFFile(file){
   try{
     selectedDocumentText = await extractPDFText(file);
+    if(window.aaruV7TrimDocumentContext){
+      selectedDocumentText = window.aaruV7TrimDocumentContext(selectedDocumentText);
+    }
     if(!selectedDocumentText){
       showToast("PDF में पढ़ने योग्य text नहीं मिला।");
       return;
@@ -5020,6 +5920,20 @@ photoInput.addEventListener(
       await handlePDFFile(file);
       photoInput.value = "";
       return;
+    }
+
+    if(window.aaruV7ValidateAttachment){
+      const validation=window.aaruV7ValidateAttachment(file);
+      if(!validation.ok){
+        const messages={
+          "image-too-large":"Image बहुत बड़ी है। कृपया 12 MB से छोटी image चुनें।",
+          "pdf-too-large":"PDF बहुत बड़ी है। कृपया 12 MB से छोटी PDF चुनें।",
+          "unsupported":"यह file type supported नहीं है।"
+        };
+        showToast(messages[validation.reason] || "यह attachment supported नहीं है।");
+        photoInput.value="";
+        return;
+      }
     }
 
     if(
@@ -5608,93 +6522,5 @@ function safeInitialLoad(){
         window.scrollTo({
           top:
             document.documentElement
-              .scrollHeight,
-
-          behavior:"auto"
-        });
-
-      }catch(error){}
-
-    },
-    80
-  );
-
-
-  appReady =
-    true;
-}
-
-
-const memoryBtn = document.getElementById("memoryBtn");
-if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
-
-/* =========================================================
-   START
-========================================================= */
-
-if(
-  document.readyState ===
-  "loading"
-){
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    safeInitialLoad,
-    {
-      once:true
-    }
-  );
-
-}else{
-
-  setTimeout(
-    safeInitialLoad,
-    0
-  );
-}
-
-
-/* =========================================================
-   GLOBAL ERROR LOG
-========================================================= */
-
-window.addEventListener(
-  "error",
-  event => {
-
-    console.error(
-      "Aaru AI error:",
-      event.error ||
-      event.message
-    );
-  }
-);
-
-
-window.addEventListener(
-  "unhandledrejection",
-  event => {
-
-    console.error(
-      "Aaru AI promise error:",
-      event.reason
-    );
-  }
-);
-
-</script>
-
-<script>
-/* GPT-6 Astra Native Composer runtime marker.
-   The browser never contains the OpenAI API key; the Worker is the secure gateway.
-   The model, Responses API, reasoning and native tool selection are Worker-side.
-*/
-window.AARU_ASTRA_NATIVE = Object.freeze({
-  model: "gpt-6-astra",
-  api: "responses",
-  toolChoice: "auto",
-  intentRouting: "model-selected"
-});
-</script>
-</body>
-</html>
+              .scrol
+Preview truncated for large file
