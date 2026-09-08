@@ -663,7 +663,6 @@ main{
   transform:translate(-50%,0);
 }
 
-
 .voice-active{
   background:#ef4444 !important;
   color:#fff !important;
@@ -917,9 +916,7 @@ body,.app,main{
 
 </header>
 
-
 <div class="drawer-overlay" id="drawerOverlay"></div>
-
 
 <aside class="drawer" id="drawer">
 
@@ -935,7 +932,6 @@ Aaru AI
 
 </div>
 
-
 <div class="drawer-body">
 
 <button class="drawer-action" id="newChatBtn">
@@ -948,13 +944,11 @@ Aaru AI
 <span>सभी चैट डिलीट करें</span>
 </button>
 
-
 <div class="section-title">
 Recent Chats
 </div>
 
 <div class="chat-history" id="chatHistory"></div>
-
 
 <div class="section-title">
 Recent Creations
@@ -966,7 +960,6 @@ Recent Creations
 
 </aside>
 
-
 <main>
 
 <div class="chat-wrap">
@@ -976,7 +969,6 @@ Recent Creations
 </div>
 
 </main>
-
 
 <div class="composer-shell">
 
@@ -991,7 +983,6 @@ Recent Creations
 </button>
 
 </div>
-
 
 <div class="input-row">
 
@@ -1020,21 +1011,16 @@ spellcheck="true"></textarea>
 
 </div>
 
-
-
-
 </div>
 
 </div>
 
 </div>
-
 
 <input
 type="file"
 id="photoInput"
 accept="image/*,.pdf,application/pdf">
-
 
 <div class="image-viewer" id="imageViewer">
 
@@ -1046,13 +1032,10 @@ accept="image/*,.pdf,application/pdf">
 
 </div>
 
-
 <div class="toast" id="toast"></div>
-
 
 <script>
 "use strict";
-
 
 /* =========================================================
    CONFIG
@@ -1061,18 +1044,14 @@ accept="image/*,.pdf,application/pdf">
 const API =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
-
 const CHAT_LIST_KEY =
   "aaru_chat_history_v2";
-
 
 const OLD_CHAT_KEY =
   "aaru_chat_messages";
 
-
 const IMAGE_KEY =
   "aaru_history";
-
 
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 1000;
@@ -1097,13 +1076,11 @@ const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
 const MAX_HISTORY_IMAGE_CHARS = 420000;
 
-
 /*
   Image reference preprocessing is kept client-side only to reduce payload size.
   Actual image generation/editing is selected and executed by the Worker.
 */
 const MAX_MODEL_IMAGE_SIZE = 511;
-
 
 /* =========================================================
    STATE
@@ -1133,7 +1110,6 @@ let creationsLoaded = false;
 let appReady = false;
 
 let lastPageShowRecovery = 0;
-
 
 /* =========================================================
    DOM
@@ -1192,7 +1168,6 @@ function makeChatId(){
       .slice(2,9);
 }
 
-
 function makeImageId(){
 
   return "img_" +
@@ -1202,7 +1177,6 @@ function makeImageId(){
       .toString(36)
       .slice(2,10);
 }
-
 
 function showToast(text){
 
@@ -1223,7 +1197,6 @@ function showToast(text){
     },2200);
 }
 
-
 function escapeHTML(value){
 
   return String(value ?? "")
@@ -1233,7 +1206,6 @@ function escapeHTML(value){
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
 }
-
 
 /* =========================================================
    MARKDOWN RENDERER
@@ -1304,7 +1276,6 @@ function inlineMarkdown(text){
   return s;
 }
 
-
 function renderMarkdown(text){
 
   const source = cleanAaruText(text);
@@ -1324,7 +1295,6 @@ function renderMarkdown(text){
 
   let paragraph = [];
 
-
   function closeLists(){
 
     if(inUl){
@@ -1341,7 +1311,6 @@ function renderMarkdown(text){
       inOl = false;
     }
   }
-
 
   function flushParagraph(buffer){
 
@@ -1368,12 +1337,10 @@ function renderMarkdown(text){
       "</p>";
   }
 
-
   for(let i=0;i<lines.length;i++){
 
     const line =
       lines[i];
-
 
     if(
       line.trim()
@@ -1409,7 +1376,6 @@ function renderMarkdown(text){
       continue;
     }
 
-
     if(inCode){
 
       codeBuffer.push(
@@ -1418,7 +1384,6 @@ function renderMarkdown(text){
 
       continue;
     }
-
 
     if(!line.trim()){
 
@@ -1432,7 +1397,6 @@ function renderMarkdown(text){
 
       continue;
     }
-
 
     const h3 =
       line.match(
@@ -1448,7 +1412,6 @@ function renderMarkdown(text){
       line.match(
         /^#\s+(.+)$/
       );
-
 
     if(h1){
 
@@ -1468,7 +1431,6 @@ function renderMarkdown(text){
       continue;
     }
 
-
     if(h2){
 
       flushParagraph(
@@ -1486,7 +1448,6 @@ function renderMarkdown(text){
 
       continue;
     }
-
 
     if(h3){
 
@@ -1506,7 +1467,6 @@ function renderMarkdown(text){
       continue;
     }
 
-
     const ul =
       line.match(
         /^\s*[-*+]\s+(.+)$/
@@ -1516,7 +1476,6 @@ function renderMarkdown(text){
       line.match(
         /^\s*\d+[.)]\s+(.+)$/
       );
-
 
     if(ul){
 
@@ -1548,7 +1507,6 @@ function renderMarkdown(text){
       continue;
     }
 
-
     if(ol){
 
       flushParagraph(
@@ -1579,12 +1537,10 @@ function renderMarkdown(text){
       continue;
     }
 
-
     const quote =
       line.match(
         /^\s*>\s?(.*)$/
       );
-
 
     if(quote){
 
@@ -1604,12 +1560,10 @@ function renderMarkdown(text){
       continue;
     }
 
-
     paragraph.push(
       line
     );
   }
-
 
   if(inCode){
 
@@ -1621,7 +1575,6 @@ function renderMarkdown(text){
       "</code></pre>";
   }
 
-
   flushParagraph(
     paragraph
   );
@@ -1630,7 +1583,6 @@ function renderMarkdown(text){
 
   return html;
 }
-
 
 /* =========================================================
    STORAGE
@@ -1667,10 +1619,8 @@ function storageAvailable(){
   }
 }
 
-
 const HAS_STORAGE =
   storageAvailable();
-
 
 function safeGet(key){
 
@@ -1689,7 +1639,6 @@ function safeGet(key){
     return null;
   }
 }
-
 
 function safeSet(key,value){
 
@@ -1718,7 +1667,6 @@ function safeSet(key,value){
   }
 }
 
-
 function safeRemove(key){
 
   if(!HAS_STORAGE){
@@ -1733,7 +1681,6 @@ function safeRemove(key){
 
   }catch(error){}
 }
-
 
 /* =========================================================
    CHAT NORMALIZE
@@ -1752,7 +1699,6 @@ function normalizeChat(chat){
     return null;
   }
 
-
   const raw =
     Array.isArray(chat.messages)
       ? chat.messages
@@ -1763,7 +1709,6 @@ function normalizeChat(chat){
 
   const savedSemanticMemory =
     Array.isArray(chat.semanticMemory) ? chat.semanticMemory : [];
-
 
   const normalized =
     raw
@@ -1788,7 +1733,6 @@ function normalizeChat(chat){
             )
         };
 
-
         if(item.imageId){
 
           result.imageId =
@@ -1800,10 +1744,8 @@ function normalizeChat(chat){
             );
         }
 
-
         return result;
       });
-
 
   let title =
     String(
@@ -1811,7 +1753,6 @@ function normalizeChat(chat){
     )
     .trim()
     .slice(0,80);
-
 
   if(!title){
 
@@ -1828,7 +1769,6 @@ function normalizeChat(chat){
             .slice(0,80)
         : "नई चैट";
   }
-
 
   return {
 
@@ -1858,7 +1798,6 @@ function normalizeChat(chat){
   };
 }
 
-
 /* =========================================================
    LOAD CHAT HISTORY
 ========================================================= */
@@ -1871,7 +1810,6 @@ function loadChatHistory(){
     safeGet(
       CHAT_LIST_KEY
     );
-
 
   if(raw){
 
@@ -1925,7 +1863,6 @@ function loadChatHistory(){
     return;
   }
 
-
   /*
     पुराने storage की migration।
   */
@@ -1934,7 +1871,6 @@ function loadChatHistory(){
     safeGet(
       OLD_CHAT_KEY
     );
-
 
   if(oldRaw){
 
@@ -1972,7 +1908,6 @@ function loadChatHistory(){
               now
           });
 
-
         if(migrated){
           chats = [migrated];
         }
@@ -1986,7 +1921,6 @@ function loadChatHistory(){
   }
 }
 
-
 /* =========================================================
    SAVE CHAT HISTORY
 ========================================================= */
@@ -1996,7 +1930,6 @@ function saveChatHistory(){
   if(!HAS_STORAGE){
     return;
   }
-
 
   const sorted =
     chats
@@ -2010,7 +1943,6 @@ function saveChatHistory(){
         0,
         MAX_SAVED_CHATS
       );
-
 
   /*
     पहले सामान्य save।
@@ -2027,7 +1959,6 @@ function saveChatHistory(){
 
     return;
   }
-
 
   /*
     Storage quota भरने पर कम chats।
@@ -2056,7 +1987,6 @@ function saveChatHistory(){
     }
   }
 
-
   /*
     Last resort:
     image history हटाकर chat बचाएँ।
@@ -2066,13 +1996,11 @@ function saveChatHistory(){
     IMAGE_KEY
   );
 
-
   const emergency =
     sorted.slice(
       0,
       3
     );
-
 
   safeSet(
     CHAT_LIST_KEY,
@@ -2084,7 +2012,6 @@ function saveChatHistory(){
   chats = sorted;
 }
 
-
 /* =========================================================
    NEW CHAT
 ========================================================= */
@@ -2095,7 +2022,6 @@ function createNewChat(
 
   const now =
     Date.now();
-
 
   const chat = {
 
@@ -2121,11 +2047,9 @@ function createNewChat(
       now
   };
 
-
   chats.unshift(
     chat
   );
-
 
   chats =
     chats
@@ -2139,7 +2063,6 @@ function createNewChat(
         MAX_SAVED_CHATS
       );
 
-
   currentChatId =
     chat.id;
 
@@ -2150,16 +2073,13 @@ function createNewChat(
   lastToolsUsed = [];
   updateMemoryButton();
 
-
   if(persist){
 
     saveChatHistory();
   }
 
-
   return chat;
 }
-
 
 /* =========================================================
    ENSURE CURRENT CHAT
@@ -2180,12 +2100,10 @@ function ensureCurrentChat(){
     }
   }
 
-
   return createNewChat(
     true
   );
 }
-
 
 /* =========================================================
    SAVE CURRENT CHAT
@@ -2195,7 +2113,6 @@ function saveCurrentChat(){
 
   const chat =
     ensureCurrentChat();
-
 
   semanticMemory = updateSemanticMemory(semanticMemory, messages);
   chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
@@ -2228,7 +2145,6 @@ function saveCurrentChat(){
             )
         };
 
-
         if(item.imageId){
 
           result.imageId =
@@ -2240,17 +2156,14 @@ function saveCurrentChat(){
             );
         }
 
-
         return result;
       });
-
 
   const firstUser =
     chat.messages.find(
       item =>
         item.role === "user"
     );
-
 
   chat.title =
     firstUser
@@ -2259,16 +2172,13 @@ function saveCurrentChat(){
           .slice(0,80)
       : "नई चैट";
 
-
   chat.updatedAt =
     Date.now();
-
 
   saveChatHistory();
 
   renderChatHistory();
 }
-
 
 /* =========================================================
    RENDER CURRENT CHAT
@@ -2278,7 +2188,6 @@ function renderCurrentChat(){
 
   messagesEl.innerHTML = "";
 
-
   const list =
     Array.isArray(messages)
       ? messages.slice(
@@ -2286,12 +2195,10 @@ function renderCurrentChat(){
         )
       : [];
 
-
   if(!list.length){
 
     return;
   }
-
 
   list.forEach(item => {
 
@@ -2312,7 +2219,6 @@ function renderCurrentChat(){
     }
   });
 }
-
 
 /* =========================================================
    USER MESSAGE
@@ -2407,7 +2313,6 @@ function addUserMessage(
   }
 }
 
-
 /* =========================================================
    ASSISTANT MESSAGE
 ========================================================= */
@@ -2421,7 +2326,6 @@ function addAssistantMessage(
   const value =
     String(text || "");
 
-
   const record = {
 
     role:
@@ -2431,18 +2335,15 @@ function addAssistantMessage(
       value
   };
 
-
   if(imageId){
 
     record.imageId =
       imageId;
   }
 
-
   messages.push(
     record
   );
-
 
   const row =
     document.createElement(
@@ -2452,7 +2353,6 @@ function addAssistantMessage(
   row.className =
     "message assistant";
 
-
   const bubble =
     document.createElement(
       "div"
@@ -2461,12 +2361,10 @@ function addAssistantMessage(
   bubble.className =
     "bubble md";
 
-
   bubble.innerHTML =
     renderMarkdown(
       value
     );
-
 
   if(imageId){
 
@@ -2474,7 +2372,6 @@ function addAssistantMessage(
       findCreationById(
         imageId
       );
-
 
     if(creation?.image){
 
@@ -2493,7 +2390,6 @@ function addAssistantMessage(
         creation.prompt ||
         "Generated image";
 
-
       img.addEventListener(
         "click",
         () =>
@@ -2502,11 +2398,9 @@ function addAssistantMessage(
           )
       );
 
-
       bubble.appendChild(
         img
       );
-
 
       const note =
         document.createElement(
@@ -2525,7 +2419,6 @@ function addAssistantMessage(
     }
   }
 
-
   row.appendChild(
     bubble
   );
@@ -2534,13 +2427,11 @@ function addAssistantMessage(
     row
   );
 
-
   if(persist){
 
     saveCurrentChat();
   }
 }
-
 
 /* =========================================================
    TYPING
@@ -2549,7 +2440,6 @@ function addAssistantMessage(
 function showTyping(){
 
   hideTyping();
-
 
   const row =
     document.createElement(
@@ -2562,7 +2452,6 @@ function showTyping(){
   row.id =
     "typingMessage";
 
-
   const bubble =
     document.createElement(
       "div"
@@ -2570,7 +2459,6 @@ function showTyping(){
 
   bubble.className =
     "bubble";
-
 
   bubble.innerHTML = `
     <div class="typing">
@@ -2580,7 +2468,6 @@ function showTyping(){
     </div>
   `;
 
-
   row.appendChild(
     bubble
   );
@@ -2589,10 +2476,8 @@ function showTyping(){
     row
   );
 
-
   scrollBottom();
 }
-
 
 function hideTyping(){
 
@@ -2644,8 +2529,6 @@ function extractResponseTextClient(data){if(typeof data?.output_text==="string")
 function extractImageFromResponseClient(data){for(const item of data?.output||[]){if(item?.type==="image_generation_call"&&item?.result){const result=String(item.result);return result.startsWith("data:image/")?result:`data:image/png;base64,${result}`;}}return null;}
 function removeStreamingMessage(){const item=document.getElementById("streamingMessage");if(item)item.remove();activeStream=null;}
 
-
-
 /* =========================================================
    SCROLL
 ========================================================= */
@@ -2671,7 +2554,6 @@ function scrollBottom(){
   );
 }
 
-
 /* =========================================================
    CHAT HISTORY UI
 ========================================================= */
@@ -2681,7 +2563,6 @@ function formatTime(timestamp){
   if(!timestamp){
     return "";
   }
-
 
   try{
 
@@ -2703,11 +2584,9 @@ function formatTime(timestamp){
   }
 }
 
-
 function renderChatHistory(){
 
   chatHistoryEl.innerHTML = "";
-
 
   const sorted =
     chats
@@ -2717,7 +2596,6 @@ function renderChatHistory(){
           (b.updatedAt || 0) -
           (a.updatedAt || 0)
       );
-
 
   if(!sorted.length){
 
@@ -2739,7 +2617,6 @@ function renderChatHistory(){
     return;
   }
 
-
   sorted.forEach(item => {
 
     const row =
@@ -2755,7 +2632,6 @@ function renderChatHistory(){
           : ""
       );
 
-
     const info =
       document.createElement(
         "div"
@@ -2763,7 +2639,6 @@ function renderChatHistory(){
 
     info.className =
       "chat-history-info";
-
 
     const title =
       document.createElement(
@@ -2777,7 +2652,6 @@ function renderChatHistory(){
       item.title ||
       "नई चैट";
 
-
     const meta =
       document.createElement(
         "div"
@@ -2785,7 +2659,6 @@ function renderChatHistory(){
 
     meta.className =
       "chat-history-meta";
-
 
     meta.textContent =
       (
@@ -2800,7 +2673,6 @@ function renderChatHistory(){
         item.updatedAt
       );
 
-
     info.appendChild(
       title
     );
@@ -2808,7 +2680,6 @@ function renderChatHistory(){
     info.appendChild(
       meta
     );
-
 
     const deleteBtn =
       document.createElement(
@@ -2827,7 +2698,6 @@ function renderChatHistory(){
     deleteBtn.title =
       "इस चैट को डिलीट करें";
 
-
     deleteBtn.addEventListener(
       "click",
       event => {
@@ -2840,7 +2710,6 @@ function renderChatHistory(){
       }
     );
 
-
     row.appendChild(
       info
     );
@@ -2848,7 +2717,6 @@ function renderChatHistory(){
     row.appendChild(
       deleteBtn
     );
-
 
     row.addEventListener(
       "click",
@@ -2862,13 +2730,11 @@ function renderChatHistory(){
       }
     );
 
-
     chatHistoryEl.appendChild(
       row
     );
   });
 }
-
 
 /* =========================================================
    OPEN CHAT
@@ -2882,15 +2748,12 @@ function openChat(id){
         item.id === id
     );
 
-
   if(!chat){
     return;
   }
 
-
   currentChatId =
     chat.id;
-
 
   messages =
     Array.isArray(
@@ -2907,13 +2770,11 @@ function openChat(id){
 
   lastToolsUsed = [];
 
-
   isBusy =
     false;
 
   sendBtn.disabled =
     false;
-
 
   hideTyping();
 
@@ -2923,7 +2784,6 @@ function openChat(id){
 
   scrollBottom();
 }
-
 
 /* =========================================================
    DELETE CHAT
@@ -2937,29 +2797,24 @@ function deleteChat(id){
         item.id === id
     );
 
-
   if(!chat){
     return;
   }
-
 
   const ok =
     confirm(
       `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
     );
 
-
   if(!ok){
     return;
   }
-
 
   chats =
     chats.filter(
       item =>
         item.id !== id
     );
-
 
   if(currentChatId === id){
 
@@ -2979,14 +2834,12 @@ function deleteChat(id){
     saveChatHistory();
   }
 
-
   renderChatHistory();
 
   showToast(
     "चैट डिलीट कर दी गई।"
   );
 }
-
 
 /* =========================================================
    DELETE ALL
@@ -3003,17 +2856,14 @@ function deleteAllChats(){
     return;
   }
 
-
   const ok =
     confirm(
       "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
     );
 
-
   if(!ok){
     return;
   }
-
 
   chats = [];
 
@@ -3021,7 +2871,6 @@ function deleteAllChats(){
     null;
 
   messages = [];
-
 
   safeRemove(
     CHAT_LIST_KEY
@@ -3031,11 +2880,9 @@ function deleteAllChats(){
     OLD_CHAT_KEY
   );
 
-
   createNewChat(
     false
   );
-
 
   renderCurrentChat();
 
@@ -3043,18 +2890,15 @@ function deleteAllChats(){
 
   closeDrawer();
 
-
   window.scrollTo({
     top:0,
     behavior:"auto"
   });
 
-
   showToast(
     "सभी चैट डिलीट कर दी गईं।"
   );
 }
-
 
 /* =========================================================
    IMAGE HISTORY
@@ -3066,17 +2910,14 @@ function getStoredCreations(){
     return [];
   }
 
-
   const raw =
     safeGet(
       IMAGE_KEY
     );
 
-
   if(!raw){
     return [];
   }
-
 
   try{
 
@@ -3085,11 +2926,9 @@ function getStoredCreations(){
         raw
       );
 
-
     if(!Array.isArray(parsed)){
       return [];
     }
-
 
     return parsed
       .filter(
@@ -3117,7 +2956,6 @@ function getStoredCreations(){
   }
 }
 
-
 /* =========================================================
    CREATIONS
 ========================================================= */
@@ -3127,16 +2965,13 @@ function getCreations(){
   const stored =
     getStoredCreations();
 
-
   const all = [
     ...volatileCreations,
     ...stored
   ];
 
-
   const seen =
     new Set();
-
 
   return all
     .filter(item => {
@@ -3149,7 +2984,6 @@ function getCreations(){
         return false;
       }
 
-
       if(
         seen.has(
           item.id
@@ -3157,7 +2991,6 @@ function getCreations(){
       ){
         return false;
       }
-
 
       seen.add(
         item.id
@@ -3176,13 +3009,11 @@ function getCreations(){
     );
 }
 
-
 function findCreationById(id){
 
   if(!id){
     return null;
   }
-
 
   const volatile =
     volatileCreations.find(
@@ -3190,11 +3021,9 @@ function findCreationById(id){
         item.id === id
     );
 
-
   if(volatile){
     return volatile;
   }
-
 
   return getStoredCreations()
     .find(
@@ -3202,7 +3031,6 @@ function findCreationById(id){
         item.id === id
     ) || null;
 }
-
 
 /* =========================================================
    SAVE CREATIONS
@@ -3213,7 +3041,6 @@ function saveCreations(list){
   if(!HAS_STORAGE){
     return false;
   }
-
 
   try{
 
@@ -3230,7 +3057,6 @@ function saveCreations(list){
           0,
           MAX_SAVED_CREATIONS
         );
-
 
     return safeSet(
       IMAGE_KEY,
@@ -3250,7 +3076,6 @@ function saveCreations(list){
   }
 }
 
-
 /* =========================================================
    IMAGE BLOB HELPERS
 ========================================================= */
@@ -3264,7 +3089,6 @@ async function dataURLToBlob(
       "Image data missing"
     );
   }
-
 
   /*
     data:image/...;base64,...
@@ -3285,7 +3109,6 @@ async function dataURLToBlob(
     const body =
       parts.slice(1).join(",");
 
-
     const mime =
       (
         header.match(
@@ -3294,16 +3117,13 @@ async function dataURLToBlob(
       )[1] ||
       "image/png";
 
-
     const binary =
       atob(body);
-
 
     const bytes =
       new Uint8Array(
         binary.length
       );
-
 
     for(
       let i=0;
@@ -3315,7 +3135,6 @@ async function dataURLToBlob(
         binary.charCodeAt(i);
     }
 
-
     return new Blob(
       [bytes],
       {
@@ -3324,12 +3143,10 @@ async function dataURLToBlob(
     );
   }
 
-
   const response =
     await fetch(
       dataURL
     );
-
 
   if(!response.ok){
 
@@ -3338,10 +3155,8 @@ async function dataURLToBlob(
     );
   }
 
-
   return response.blob();
 }
-
 
 async function blobToDataURL(
   blob
@@ -3353,17 +3168,14 @@ async function blobToDataURL(
       const reader =
         new FileReader();
 
-
       reader.onload =
         () =>
           resolve(
             reader.result
           );
 
-
       reader.onerror =
         reject;
-
 
       reader.readAsDataURL(
         blob
@@ -3371,7 +3183,6 @@ async function blobToDataURL(
     }
   );
 }
-
 
 /* =========================================================
    IMAGE RESIZE
@@ -3388,10 +3199,8 @@ async function resizeImageDataURL(
     return null;
   }
 
-
   const img =
     new Image();
-
 
   await new Promise(
     (resolve,reject) => {
@@ -3407,16 +3216,13 @@ async function resizeImageDataURL(
     }
   );
 
-
   const sourceWidth =
     img.naturalWidth ||
     img.width;
 
-
   const sourceHeight =
     img.naturalHeight ||
     img.height;
-
 
   if(
     !sourceWidth ||
@@ -3425,7 +3231,6 @@ async function resizeImageDataURL(
 
     return dataURL;
   }
-
 
   const scale =
     Math.min(
@@ -3437,7 +3242,6 @@ async function resizeImageDataURL(
       )
     );
 
-
   const width =
     Math.max(
       1,
@@ -3445,7 +3249,6 @@ async function resizeImageDataURL(
         sourceWidth * scale
       )
     );
-
 
   const height =
     Math.max(
@@ -3455,12 +3258,10 @@ async function resizeImageDataURL(
       )
     );
 
-
   const canvas =
     document.createElement(
       "canvas"
     );
-
 
   canvas.width =
     width;
@@ -3468,17 +3269,14 @@ async function resizeImageDataURL(
   canvas.height =
     height;
 
-
   const ctx =
     canvas.getContext(
       "2d"
     );
 
-
   if(!ctx){
     return dataURL;
   }
-
 
   ctx.drawImage(
     img,
@@ -3487,7 +3285,6 @@ async function resizeImageDataURL(
     width,
     height
   );
-
 
   /*
     JPEG reference image काफी छोटा रहेगा।
@@ -3498,7 +3295,6 @@ async function resizeImageDataURL(
     quality
   );
 }
-
 
 /* =========================================================
    HISTORY IMAGE
@@ -3516,7 +3312,6 @@ async function blobToHistoryDataURL(
         blob
       );
 
-
     /*
       IMPORTANT:
       dimensions close() से पहले save करें।
@@ -3528,7 +3323,6 @@ async function blobToHistoryDataURL(
     const originalHeight =
       bitmap.height;
 
-
     const scale =
       Math.min(
         1,
@@ -3539,7 +3333,6 @@ async function blobToHistoryDataURL(
         )
       );
 
-
     const width =
       Math.max(
         1,
@@ -3547,7 +3340,6 @@ async function blobToHistoryDataURL(
           originalWidth * scale
         )
       );
-
 
     const height =
       Math.max(
@@ -3557,12 +3349,10 @@ async function blobToHistoryDataURL(
         )
       );
 
-
     const canvas =
       document.createElement(
         "canvas"
       );
-
 
     canvas.width =
       width;
@@ -3570,12 +3360,10 @@ async function blobToHistoryDataURL(
     canvas.height =
       height;
 
-
     const ctx =
       canvas.getContext(
         "2d"
       );
-
 
     if(!ctx){
 
@@ -3583,7 +3371,6 @@ async function blobToHistoryDataURL(
 
       return null;
     }
-
 
     ctx.drawImage(
       bitmap,
@@ -3593,9 +3380,7 @@ async function blobToHistoryDataURL(
       height
     );
 
-
     bitmap.close();
-
 
     /*
       WebP preferred.
@@ -3606,7 +3391,6 @@ async function blobToHistoryDataURL(
         "image/webp",
         .70
       );
-
 
     /*
       Browser WebP support न करे तो JPEG।
@@ -3625,7 +3409,6 @@ async function blobToHistoryDataURL(
         );
     }
 
-
     /*
       History के लिए hard limit।
     */
@@ -3640,10 +3423,8 @@ async function blobToHistoryDataURL(
           "canvas"
         );
 
-
       const smallerMax =
         420;
-
 
       const smallerScale =
         Math.min(
@@ -3655,7 +3436,6 @@ async function blobToHistoryDataURL(
           )
         );
 
-
       const smallWidth =
         Math.max(
           1,
@@ -3664,7 +3444,6 @@ async function blobToHistoryDataURL(
             smallerScale
           )
         );
-
 
       const smallHeight =
         Math.max(
@@ -3675,24 +3454,20 @@ async function blobToHistoryDataURL(
           )
         );
 
-
       smallerCanvas.width =
         smallWidth;
 
       smallerCanvas.height =
         smallHeight;
 
-
       const smallerCtx =
         smallerCanvas.getContext(
           "2d"
         );
 
-
       if(!smallerCtx){
         return null;
       }
-
 
       /*
         Original bitmap बंद हो चुका है,
@@ -3707,13 +3482,11 @@ async function blobToHistoryDataURL(
         smallHeight
       );
 
-
       dataURL =
         smallerCanvas.toDataURL(
           "image/jpeg",
           .62
         );
-
 
       if(
         dataURL.length >
@@ -3723,7 +3496,6 @@ async function blobToHistoryDataURL(
         return null;
       }
     }
-
 
     return dataURL;
 
@@ -3738,7 +3510,6 @@ async function blobToHistoryDataURL(
   }
 }
 
-
 /* =========================================================
    SAVE CREATION
 ========================================================= */
@@ -3752,10 +3523,8 @@ async function saveCreation(
     return null;
   }
 
-
   const imageId =
     makeImageId();
-
 
   /*
     Original image को localStorage में नहीं डालेंगे।
@@ -3765,14 +3534,12 @@ async function saveCreation(
   let historyImage =
     null;
 
-
   try{
 
     const blob =
       await dataURLToBlob(
         imageData
       );
-
 
     historyImage =
       await blobToHistoryDataURL(
@@ -3787,7 +3554,6 @@ async function saveCreation(
       error
     );
   }
-
 
   /*
     अगर compressed history नहीं बनी,
@@ -3816,18 +3582,15 @@ async function saveCreation(
       Date.now()
   };
 
-
   volatileCreations.unshift(
     record
   );
-
 
   volatileCreations =
     volatileCreations.slice(
       0,
       MAX_SAVED_CREATIONS
     );
-
 
   /*
     केवल compressed image storage में save करें।
@@ -3837,7 +3600,6 @@ async function saveCreation(
 
     const existing =
       getStoredCreations();
-
 
     const list =
       [
@@ -3852,7 +3614,6 @@ async function saveCreation(
         0,
         MAX_SAVED_CREATIONS
       );
-
 
     if(
       saveCreations(
@@ -3873,17 +3634,13 @@ async function saveCreation(
     }
   }
 
-
   creationsLoaded =
     true;
 
-
   renderCreations();
-
 
   return imageId;
 }
-
 
 /* =========================================================
    RENDER CREATIONS
@@ -3893,14 +3650,12 @@ function renderCreations(){
 
   creationGrid.innerHTML = "";
 
-
   const list =
     getCreations()
       .slice(
         0,
         MAX_SAVED_CREATIONS
       );
-
 
   if(!list.length){
 
@@ -3922,7 +3677,6 @@ function renderCreations(){
     return;
   }
 
-
   list.forEach(item => {
 
     const card =
@@ -3932,7 +3686,6 @@ function renderCreations(){
 
     card.className =
       "creation-card";
-
 
     const img =
       document.createElement(
@@ -3946,7 +3699,6 @@ function renderCreations(){
       item.prompt ||
       "Creation";
 
-
     img.addEventListener(
       "click",
       () =>
@@ -3954,7 +3706,6 @@ function renderCreations(){
           item.image
         )
     );
-
 
     const caption =
       document.createElement(
@@ -3968,7 +3719,6 @@ function renderCreations(){
       item.prompt ||
       "Image";
 
-
     card.appendChild(
       img
     );
@@ -3977,13 +3727,11 @@ function renderCreations(){
       caption
     );
 
-
     creationGrid.appendChild(
       card
     );
   });
 }
-
 
 /* =========================================================
    LAZY CREATION LOAD
@@ -3996,14 +3744,11 @@ function loadCreationsLazy(){
     return;
   }
 
-
   creationsLoaded =
     true;
 
-
   renderCreations();
 }
-
 
 /* =========================================================
    IMAGE VIEWER
@@ -4015,16 +3760,13 @@ function openImageViewer(src){
     return;
   }
 
-
   viewerImg.src =
     src;
-
 
   imageViewer.classList.add(
     "open"
   );
 }
-
 
 function closeImageViewer(){
 
@@ -4036,7 +3778,6 @@ function closeImageViewer(){
     "src"
   );
 }
-
 
 /* =========================================================
    IMAGE RESPONSE NORMALIZATION
@@ -4050,7 +3791,6 @@ function normalizeImageResult(
     return null;
   }
 
-
   /*
     Direct data URL.
   */
@@ -4062,11 +3802,9 @@ function normalizeImageResult(
     const s =
       value.trim();
 
-
     if(!s){
       return null;
     }
-
 
     if(
       s.startsWith(
@@ -4076,7 +3814,6 @@ function normalizeImageResult(
 
       return s;
     }
-
 
     /*
       URL भी स्वीकार करें।
@@ -4088,7 +3825,6 @@ function normalizeImageResult(
 
       return s;
     }
-
 
     /*
       Raw Base64।
@@ -4109,10 +3845,8 @@ function normalizeImageResult(
       );
     }
 
-
     return null;
   }
-
 
   /*
     Array response।
@@ -4139,7 +3873,6 @@ function normalizeImageResult(
     return null;
   }
 
-
   if(
     typeof value === "object"
   ){
@@ -4159,7 +3892,6 @@ function normalizeImageResult(
       value.data
     ];
 
-
     for(
       const item of candidates
     ){
@@ -4175,10 +3907,8 @@ function normalizeImageResult(
     }
   }
 
-
   return null;
 }
-
 
 /* =========================================================
    RAW IMAGE RESPONSE -> DATA URL
@@ -4195,7 +3925,6 @@ async function responseToImage(
       ) || ""
     ).toLowerCase();
 
-
   /*
     Worker अगर सीधे image/png,
     image/jpeg या image/webp लौटाता है।
@@ -4210,12 +3939,10 @@ async function responseToImage(
     const blob =
       await response.blob();
 
-
     return blobToDataURL(
       blob
     );
   }
-
 
   /*
     JSON response।
@@ -4224,9 +3951,7 @@ async function responseToImage(
   const text =
     await response.text();
 
-
   let data = null;
-
 
   try{
 
@@ -4243,7 +3968,6 @@ async function responseToImage(
     );
   }
 
-
   if(!response.ok){
 
     throw new Error(
@@ -4254,12 +3978,10 @@ async function responseToImage(
     );
   }
 
-
   const image =
     normalizeImageResult(
       data
     );
-
 
   if(!image){
 
@@ -4268,10 +3990,8 @@ async function responseToImage(
     );
   }
 
-
   return image;
 }
-
 
 /* =========================================================
    CLEAR PHOTO
@@ -4279,7 +3999,6 @@ async function responseToImage(
 
 function clearSelectedPhoto(){
   selectedDocumentText = "";
-
 
   selectedPhotoBase64 =
     null;
@@ -4299,7 +4018,6 @@ function clearSelectedPhoto(){
   );
 }
 
-
 /* =========================================================
    GET LATEST CREATION AS EDIT REFERENCE
 ========================================================= */
@@ -4315,11 +4033,9 @@ function looksLikePreviousImageEdit(
     .trim()
     .toLowerCase();
 
-
   if(!s){
     return false;
   }
-
 
   /*
     Strong edit phrases।
@@ -4342,7 +4058,6 @@ function looksLikePreviousImageEdit(
     "replace the background", "remove the background"
   ];
 
-
   if(
     strongPhrases.some(
       phrase =>
@@ -4354,7 +4069,6 @@ function looksLikePreviousImageEdit(
 
     return true;
   }
-
 
   /*
     छोटे natural edit commands।
@@ -4385,10 +4099,8 @@ function looksLikePreviousImageEdit(
     return true;
   }
 
-
   return false;
 }
-
 
 async function getLatestCreationReference(
   prompt
@@ -4403,10 +4115,8 @@ async function getLatestCreationReference(
     return null;
   }
 
-
   const latest =
     getCreations()[0];
-
 
   if(
     !latest ||
@@ -4415,7 +4125,6 @@ async function getLatestCreationReference(
 
     return null;
   }
-
 
   try{
 
@@ -4435,7 +4144,6 @@ async function getLatestCreationReference(
     return null;
   }
 }
-
 
 /* =========================================================
    GENERATE IMAGE
@@ -4459,14 +4167,12 @@ async function generateImage(
       "standard"
   };
 
-
   /*
     सबसे पहले manually selected photo।
   */
 
   let reference =
     selectedPhotoBase64;
-
 
   /*
     अगर photo selected नहीं है,
@@ -4481,7 +4187,6 @@ async function generateImage(
         prompt
       );
   }
-
 
   /*
     IMPORTANT:
@@ -4498,7 +4203,6 @@ async function generateImage(
         .76
       );
   }
-
 
   const response =
     await fetch(
@@ -4518,7 +4222,6 @@ async function generateImage(
       }
     );
 
-
   /*
     यह raw PNG और JSON दोनों संभालेगा।
   */
@@ -4527,7 +4230,6 @@ async function generateImage(
     response
   );
 }
-
 
 /* =========================================================
    CHAT IMAGE NORMALIZATION
@@ -4555,7 +4257,6 @@ function normalizeChatResult(
       data.content ??
       "";
 
-
     const image =
       normalizeImageResult(
         data.image ??
@@ -4564,7 +4265,6 @@ function normalizeChatResult(
         data.result?.image ??
         null
       );
-
 
     applyWorkerMemoryResponse(data);
 
@@ -4586,7 +4286,6 @@ function normalizeChatResult(
     };
   }
 
-
   /*
     Plain string response।
   */
@@ -4602,7 +4301,6 @@ function normalizeChatResult(
       null
   };
 }
-
 
 /* =========================================================
    SMART MEMORY 3.0
@@ -4643,7 +4341,6 @@ function memoryImportance(item, index, total){
   score += Math.min(2, index / Math.max(1, total) * 2);
   return score;
 }
-
 
 function normalizeSemanticMemory(list){
   if(!Array.isArray(list)) return [];
@@ -4919,7 +4616,6 @@ async function fetchChatWithRecovery(payload){
   throw lastError || new Error("Chat request failed.");
 }
 
-
 async function sendChatRequest(){
 
   const recentMessages =
@@ -5147,7 +4843,6 @@ async function handleSend(){
   }
 }
 
-
 /* =========================================================
    TEXTAREA
 ========================================================= */
@@ -5157,7 +4852,6 @@ function autoResize(){
   promptEl.style.height =
     "auto";
 
-
   promptEl.style.height =
     Math.min(
       promptEl.scrollHeight,
@@ -5165,12 +4859,10 @@ function autoResize(){
     ) + "px";
 }
 
-
 promptEl.addEventListener(
   "input",
   autoResize
 );
-
 
 /* =========================================================
    ENTER
@@ -5192,7 +4884,6 @@ promptEl.addEventListener(
   }
 );
 
-
 /* =========================================================
    SEND BUTTON
 ========================================================= */
@@ -5201,7 +4892,6 @@ sendBtn.addEventListener(
   "click",
   handleSend
 );
-
 
 /* =========================================================
    VOICE OUTPUT
@@ -5324,7 +5014,6 @@ document
     }
   );
 
-
 /* =========================================================
    PHOTO UPLOAD
 ========================================================= */
@@ -5336,11 +5025,9 @@ photoInput.addEventListener(
     const file =
       event.target.files?.[0];
 
-
     if(!file){
       return;
     }
-
 
     if(
       file.type === "application/pdf" ||
@@ -5364,14 +5051,12 @@ photoInput.addEventListener(
       return;
     }
 
-
     try{
 
       const original =
         await fileToDataURL(
           file
         );
-
 
       /*
         IMPORTANT:
@@ -5386,28 +5071,22 @@ photoInput.addEventListener(
           .80
         );
 
-
       selectedPhotoBase64 =
         resized;
-
 
       selectedPhotoUrl =
         resized;
 
-
       photoPreviewImg.src =
         selectedPhotoUrl;
-
 
       photoPreview.classList.add(
         "show"
       );
 
-
       showToast(
         "Photo तैयार है। अब सीधे Send दबाएँ या सवाल लिखें।"
       );
-
 
     }catch(error){
 
@@ -5415,7 +5094,6 @@ photoInput.addEventListener(
         "Photo processing failed:",
         error
       );
-
 
       showToast(
         "Photo पढ़ने में समस्या हुई।"
@@ -5432,7 +5110,6 @@ photoInput.addEventListener(
     }
   });
 
-
 function fileToDataURL(file){
 
   return new Promise(
@@ -5441,17 +5118,14 @@ function fileToDataURL(file){
       const reader =
         new FileReader();
 
-
       reader.onload =
         () =>
           resolve(
             reader.result
           );
 
-
       reader.onerror =
         reject;
-
 
       reader.readAsDataURL(
         file
@@ -5459,7 +5133,6 @@ function fileToDataURL(file){
     }
   );
 }
-
 
 /* =========================================================
    REMOVE PHOTO
@@ -5471,7 +5144,6 @@ document
     "click",
     clearSelectedPhoto
   );
-
 
 /* =========================================================
    VOICE BUTTONS
@@ -5502,7 +5174,6 @@ function openDrawer(){
     "open"
   );
 
-
   /*
     Image history केवल drawer खोलने पर।
   */
@@ -5512,7 +5183,6 @@ function openDrawer(){
     0
   );
 }
-
 
 function closeDrawer(){
 
@@ -5525,14 +5195,12 @@ function closeDrawer(){
   );
 }
 
-
 document
   .getElementById("menuBtn")
   .addEventListener(
     "click",
     openDrawer
   );
-
 
 document
   .getElementById("closeDrawer")
@@ -5541,12 +5209,10 @@ document
     closeDrawer
   );
 
-
 drawerOverlay.addEventListener(
   "click",
   closeDrawer
 );
-
 
 /* =========================================================
    NEW CHAT
@@ -5558,35 +5224,27 @@ function startNewChat(){
     return;
   }
 
-
   if(currentChatId){
 
     saveCurrentChat();
   }
 
-
   createNewChat(
     true
   );
-
 
   renderCurrentChat();
 
   renderChatHistory();
 
-
-
   clearSelectedPhoto();
 
-
   closeDrawer();
-
 
   window.scrollTo({
     top:0,
     behavior:"auto"
   });
-
 
   setTimeout(
     () =>
@@ -5595,7 +5253,6 @@ function startNewChat(){
   );
 }
 
-
 document
   .getElementById("newChatBtn")
   .addEventListener(
@@ -5603,14 +5260,12 @@ document
     startNewChat
   );
 
-
 document
   .getElementById("newChatTop")
   .addEventListener(
     "click",
     startNewChat
   );
-
 
 /* =========================================================
    VIEWER
@@ -5622,7 +5277,6 @@ document
     "click",
     closeImageViewer
   );
-
 
 imageViewer.addEventListener(
   "click",
@@ -5636,7 +5290,6 @@ imageViewer.addEventListener(
     }
   }
 );
-
 
 /* =========================================================
    ESC
@@ -5657,7 +5310,6 @@ document.addEventListener(
   }
 );
 
-
 /* =========================================================
    PAGE RECOVERY
 ========================================================= */
@@ -5666,7 +5318,6 @@ function recoverPage(){
 
   const now =
     Date.now();
-
 
   if(
     now -
@@ -5677,10 +5328,8 @@ function recoverPage(){
     return;
   }
 
-
   lastPageShowRecovery =
     now;
-
 
   if(!isBusy){
     try{
@@ -5691,7 +5340,6 @@ function recoverPage(){
       false;
   }
 
-
   try{
 
     closeDrawer();
@@ -5699,7 +5347,6 @@ function recoverPage(){
     closeImageViewer();
 
   }catch(error){}
-
 
   try{
 
@@ -5709,7 +5356,6 @@ function recoverPage(){
           item.id ===
           currentChatId
       );
-
 
     if(current){
 
@@ -5723,7 +5369,6 @@ function recoverPage(){
               )
           : [];
     }
-
 
     renderCurrentChat();
 
@@ -5742,7 +5387,6 @@ function recoverPage(){
   }
 }
 
-
 /* =========================================================
    PAGESHOW
 ========================================================= */
@@ -5755,14 +5399,12 @@ window.addEventListener(
       return;
     }
 
-
     if(event.persisted){
 
       recoverPage();
 
       return;
     }
-
 
     if(
       document.visibilityState ===
@@ -5776,7 +5418,6 @@ window.addEventListener(
     }
   }
 );
-
 
 /* =========================================================
    VISIBILITY
@@ -5811,7 +5452,6 @@ document.addEventListener(
   }
 );
 
-
 /* =========================================================
    INITIAL LOAD
 ========================================================= */
@@ -5837,7 +5477,6 @@ function safeInitialLoad(){
     messages = [];
   }
 
-
   try{
 
     if(!chats.length){
@@ -5861,12 +5500,10 @@ function safeInitialLoad(){
               (a.updatedAt || 0)
           )[0];
 
-
       if(latest){
 
         currentChatId =
           latest.id;
-
 
         messages =
           Array.isArray(
@@ -5880,7 +5517,6 @@ function safeInitialLoad(){
         restoreChatMemory(latest);
       }
     }
-
 
   }catch(error){
 
@@ -5896,12 +5532,10 @@ function safeInitialLoad(){
     currentChatId =
       null;
 
-
     createNewChat(
       false
     );
   }
-
 
   /*
     Chat पहले render।
@@ -5910,7 +5544,6 @@ function safeInitialLoad(){
   renderCurrentChat();
 
   renderChatHistory();
-
 
   /*
     Image history startup पर parse नहीं।
@@ -5923,11 +5556,9 @@ function safeInitialLoad(){
       </div>
     `;
 
-
   updateModeButtons();
 
   autoResize();
-
 
   setTimeout(
     () => {
@@ -5948,11 +5579,9 @@ function safeInitialLoad(){
     80
   );
 
-
   appReady =
     true;
 }
-
 
 const memoryBtn = document.getElementById("memoryBtn");
 if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
@@ -5982,7 +5611,6 @@ if(
   );
 }
 
-
 /* =========================================================
    GLOBAL ERROR LOG
 ========================================================= */
@@ -5998,7 +5626,6 @@ window.addEventListener(
     );
   }
 );
-
 
 window.addEventListener(
   "unhandledrejection",
