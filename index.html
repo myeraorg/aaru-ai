@@ -5,7 +5,7 @@
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
+<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Stable</title>
 
 <style>
 *{
@@ -908,7 +908,7 @@ body,.app,main{
 
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
+<div class="brand-sub">GPT-6 Astra • Native Unified Composer • Stable</div>
 </div>
 
 <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
@@ -4181,355 +4181,6 @@ function normalizeImageResult(
 
 
 /* =========================================================
-   RAW IMAGE RESPONSE -> DATA URL
-========================================================= */
-
-async function responseToImage(
-  response
-){
-
-  const contentType =
-    (
-      response.headers.get(
-        "content-type"
-      ) || ""
-    ).toLowerCase();
-
-
-  /*
-    Worker अगर सीधे image/png,
-    image/jpeg या image/webp लौटाता है।
-  */
-
-  if(
-    contentType.startsWith(
-      "image/"
-    )
-  ){
-
-    const blob =
-      await response.blob();
-
-
-    return blobToDataURL(
-      blob
-    );
-  }
-
-
-  /*
-    JSON response।
-  */
-
-  const text =
-    await response.text();
-
-
-  let data = null;
-
-
-  try{
-
-    data =
-      text
-        ? JSON.parse(text)
-        : null;
-
-  }catch(error){
-
-    throw new Error(
-      text ||
-      "Image response पढ़ा नहीं जा सका।"
-    );
-  }
-
-
-  if(!response.ok){
-
-    throw new Error(
-      data?.error ||
-      data?.message ||
-      data?.response ||
-      "Image request failed."
-    );
-  }
-
-
-  const image =
-    normalizeImageResult(
-      data
-    );
-
-
-  if(!image){
-
-    throw new Error(
-      "Image response में image नहीं मिली।"
-    );
-  }
-
-
-  return image;
-}
-
-
-/* =========================================================
-   CLEAR PHOTO
-========================================================= */
-
-function clearSelectedPhoto(){
-  selectedDocumentText = "";
-
-
-  selectedPhotoBase64 =
-    null;
-
-  selectedPhotoUrl =
-    null;
-
-  photoInput.value =
-    "";
-
-  photoPreview.classList.remove(
-    "show"
-  );
-
-  photoPreviewImg.removeAttribute(
-    "src"
-  );
-}
-
-
-/* =========================================================
-   GET LATEST CREATION AS EDIT REFERENCE
-========================================================= */
-
-function looksLikePreviousImageEdit(
-  prompt
-){
-
-  const s =
-    String(
-      prompt || ""
-    )
-    .trim()
-    .toLowerCase();
-
-
-  if(!s){
-    return false;
-  }
-
-
-  /*
-    Strong edit phrases।
-  */
-
-  const strongPhrases = [
-    "बैकग्राउंड बदल", "बैकग्राउंड हटा", "पृष्ठभूमि बदल", "पृष्ठभूमि हटा",
-    "इस फोटो", "इस तस्वीर", "इस इमेज", "इस चित्र", "इसमें बदलाव",
-    "इसमें बदल", "इसको एडिट", "इसे एडिट", "एडिट करो", "बदल दो",
-    "बैकग्राउंड", "पृष्ठभूमि", "रंग बदल", "कलर बदल", "कपड़े बदल",
-    "कपड़ा बदल", "कपड़े का रंग", "व्यक्ति हट", "पर्सन हट", "इंसान हट",
-    "चेहरा बदल", "बाल बदल", "आसमान बदल", "ऑब्जेक्ट हट", "चीज हट",
-    "हटा दो", "निकाल दो", "background change", "change background",
-    "remove background", "replace background", "edit this", "edit the photo",
-    "edit image", "change color", "change colour", "change clothes",
-    "change clothing", "change shirt", "change dress", "change outfit",
-    "remove person", "remove people", "remove a person", "remove object",
-    "remove someone", "erase person", "erase object", "replace sky",
-    "change hair", "change face", "add person", "add object",
-    "replace the background", "remove the background"
-  ];
-
-
-  if(
-    strongPhrases.some(
-      phrase =>
-        s.includes(
-          phrase
-        )
-    )
-  ){
-
-    return true;
-  }
-
-
-  /*
-    छोटे natural edit commands।
-  */
-
-  if(
-    s.length <= 50 &&
-    (
-      s.includes("बैकग्राउंड") ||
-       s.includes("पृष्ठभूमि") ||
-       s.includes("background") ||
-       s.includes("बदल दो") ||
-       s.includes("रंग बदल") ||
-       s.includes("कलर बदल") ||
-       s.includes("कपड़े बदल") ||
-       s.includes("व्यक्ति हट") ||
-       s.includes("पर्सन हट") ||
-       s.includes("हटा दो") ||
-       s.includes("निकाल दो") ||
-       s.includes("replace") ||
-       s.includes("remove") ||
-       s.includes("erase") ||
-       s.includes("change color") ||
-       s.includes("change clothes")
-    )
-  ){
-
-    return true;
-  }
-
-
-  return false;
-}
-
-
-async function getLatestCreationReference(
-  prompt
-){
-
-  if(
-    !looksLikePreviousImageEdit(
-      prompt
-    )
-  ){
-
-    return null;
-  }
-
-
-  const latest =
-    getCreations()[0];
-
-
-  if(
-    !latest ||
-    !latest.image
-  ){
-
-    return null;
-  }
-
-
-  try{
-
-    return await resizeImageDataURL(
-      latest.image,
-      MAX_MODEL_IMAGE_SIZE,
-      .76
-    );
-
-  }catch(error){
-
-    console.warn(
-      "Latest creation reference failed:",
-      error
-    );
-
-    return null;
-  }
-}
-
-
-/* =========================================================
-   GENERATE IMAGE
-========================================================= */
-
-async function generateImage(
-  prompt
-){
-
-  const payload = {
-
-    prompt:
-      String(
-        prompt || ""
-      ).trim(),
-
-    ratio:
-      "1:1",
-
-    quality:
-      "standard"
-  };
-
-
-  /*
-    सबसे पहले manually selected photo।
-  */
-
-  let reference =
-    selectedPhotoBase64;
-
-
-  /*
-    अगर photo selected नहीं है,
-    और command previous image edit जैसी है,
-    तो latest creation reference लें।
-  */
-
-  if(!reference){
-
-    reference =
-      await getLatestCreationReference(
-        prompt
-      );
-  }
-
-
-  /*
-    IMPORTANT:
-    FLUX.2 Klein को भेजने से ठीक पहले
-    image को <512x512 रखें।
-  */
-
-  if(reference){
-
-    payload.image_b64 =
-      await resizeImageDataURL(
-        reference,
-        MAX_MODEL_IMAGE_SIZE,
-        .76
-      );
-  }
-
-
-  const response =
-    await fetch(
-      API + "image",
-      {
-        method:"POST",
-
-        headers:{
-          "Content-Type":
-            "application/json"
-        },
-
-        body:
-          JSON.stringify(
-            payload
-          )
-      }
-    );
-
-
-  /*
-    यह raw PNG और JSON दोनों संभालेगा।
-  */
-
-  return responseToImage(
-    response
-  );
-}
-
-
-/* =========================================================
    CHAT IMAGE NORMALIZATION
 ========================================================= */
 
@@ -4982,7 +4633,13 @@ async function sendChatRequest(){
   if(contentType.startsWith("image/"))return {text:"इमेज तैयार है।",image:await blobToDataURL(await response.blob())};
   const raw=await response.text(); let data=null;
   try{data=raw?JSON.parse(raw):null;}catch{if(!response.ok)throw new Error(raw||"Chat request failed.");if(raw.trim())return {text:cleanAaruText(raw),image:null};throw new Error("Worker ने खाली response दिया।");}
-  if(!response.ok)throw new Error(data?.error||data?.message||data?.detail||"Chat request failed.");
+  if(!response.ok){
+    const message=data?.error||data?.message||data?.detail||`Chat request failed (${response.status})`;
+    const error=new Error(String(message));
+    error.status=response.status;
+    error.code=data?.code||data?.error?.code||null;
+    throw error;
+  }
   const normalized=normalizeChatResult(data); const nextResponseId=data?.response_id||data?.id||null;
   if(nextResponseId){previousResponseId=String(nextResponseId).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;}
   lastToolsUsed=Array.isArray(data?.tools_used)?data.tools_used:[];
@@ -4995,6 +4652,11 @@ async function sendChatRequest(){
 ========================================================= */
 
 async function handleSend(){
+
+  if(!navigator.onLine){
+    showToast("इंटरनेट कनेक्शन उपलब्ध नहीं है।");
+    return;
+  }
 
   if(isBusy){
     return;
@@ -5120,16 +4782,25 @@ async function handleSend(){
     removeStreamingMessage();
     hideTyping();
 
-    addAssistantMessage(
-      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
-      true
-    );
+    const rawError=String(error?.message||"");
+    const quotaError=/(quota|credit|billing|insufficient|exceeded.*(quota|limit)|rate.?limit)/i.test(rawError);
+    const networkError=error?.name === "TypeError" || /network|failed to fetch|load failed|offline/i.test(rawError);
+    const timeoutError=error?.name === "AbortError";
+    const status=Number(error?.status||0);
 
-    showToast(
-      error?.name === "AbortError"
-        ? "Request में समय लग रहा है। फिर कोशिश करें।"
-        : (error?.message || "Request failed")
-    );
+    let userError=
+      quotaError
+        ? "⚠️ API credit/quota उपलब्ध नहीं है। कृपया OpenAI API billing/credits जाँचें।"
+        : timeoutError
+          ? "⚠️ Request में बहुत समय लग गया। कृपया फिर कोशिश करें।"
+          : networkError
+            ? "⚠️ इंटरनेट या Worker connection में समस्या है। नेटवर्क जाँचकर फिर कोशिश करें।"
+            : (status>=500 || /worker|astra|openai api/i.test(rawError))
+              ? "⚠️ Aaru Worker/API इस समय जवाब नहीं दे रहा है। थोड़ी देर बाद फिर कोशिश करें।"
+              : "⚠️ Request पूरी नहीं हो सकी। कृपया फिर कोशिश करें।";
+
+    addAssistantMessage(userError,true);
+    showToast(userError.replace(/^⚠️\s*/,""));
 
   }finally{
 
