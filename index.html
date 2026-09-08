@@ -710,6 +710,125 @@ main{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+/* ============================================================
+   AARU AI — BLACK & WHITE UI OVERRIDE
+   High-contrast monochrome chat surface
+   ============================================================ */
+html, body, .app {
+  background:#000 !important;
+  color:#fff !important;
+}
+body { color:#fff !important; }
+.header {
+  background:#000 !important;
+  border-bottom:1px solid #2a2a2a !important;
+  color:#fff !important;
+}
+.menu-btn, .new-chat-top {
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.brand-name, .brand-sub { color:#fff !important; }
+.drawer {
+  background:#000 !important;
+  border-right:1px solid #2a2a2a !important;
+  color:#fff !important;
+}
+.drawer-action {
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid #222 !important;
+}
+.drawer-action:hover { background:#1b1b1b !important; }
+.delete-chat { color:#fff !important; }
+.chat-history-title, .chat-history-meta, .section-title { color:#fff !important; }
+.chat-wrap { background:#000 !important; }
+.message.assistant .bubble {
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.message.user .bubble {
+  background:#fff !important;
+  color:#000 !important;
+  border:1px solid #fff !important;
+}
+.message.system .bubble {
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.bubble, .md, .md p, .md li, .md strong, .md em, .md blockquote {
+  color:inherit !important;
+}
+.md a { color:#fff !important; text-decoration:underline; }
+.md code {
+  background:#000 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.md pre {
+  background:#000 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.message-tools .message-tool {
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.typing span {
+  background:#fff !important;
+  opacity:1 !important;
+}
+.composer-shell {
+  background:linear-gradient(to bottom, rgba(0,0,0,0), #000 32%, #000 100%) !important;
+}
+.composer {
+  background:#111 !important;
+  border:1px solid #333 !important;
+  box-shadow:0 8px 35px rgba(0,0,0,.7) !important;
+}
+#prompt {
+  color:#fff !important;
+  background:#111 !important;
+  caret-color:#fff !important;
+}
+#prompt::placeholder {
+  color:#fff !important;
+  opacity:.55 !important;
+}
+.icon-btn {
+  background:#000 !important;
+  color:#fff !important;
+  border:1px solid #333 !important;
+}
+.icon-btn:hover { background:#1c1c1c !important; }
+.send-btn {
+  background:#fff !important;
+  color:#000 !important;
+  border:1px solid #fff !important;
+}
+.send-btn:hover { background:#ddd !important; }
+.send-btn:disabled { background:#555 !important; color:#aaa !important; }
+.remove-photo { color:#fff !important; }
+.stream-status, .pdf-status { color:#fff !important; }
+.mode-pill {
+  background:#fff !important;
+  color:#000 !important;
+  border:1px solid #fff !important;
+}
+.toast {
+  background:#fff !important;
+  color:#000 !important;
+  border:1px solid #fff !important;
+}
+.close-viewer { color:#fff !important; }
+.welcome, .welcome * { color:#fff !important; }
+button, input, textarea, select { color-scheme:dark; }
+
 </style>
 </head>
 
