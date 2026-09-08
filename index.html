@@ -1,13 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
-
-<style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
+  <style>
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -683,6 +680,9 @@ main{
   min-height:20px;
 }
 
+.stream-text{white-space:pre-wrap;overflow-wrap:anywhere;}
+.stream-status{font-size:11px;opacity:.58;margin-top:7px;}
+
 @media(max-width:600px){
 
   .header{
@@ -891,163 +891,60 @@ body,.app,main{
 }
 
 </style>
-</head>
-
-<body>
-
-<div class="app">
-
-<header class="header">
-
-<button class="menu-btn" id="menuBtn" aria-label="Menu">
-☰
-</button>
-
-<div class="brand">
-<div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
-</div>
-
-<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
-＋
-</button>
-
-</header>
-
-
-<div class="drawer-overlay" id="drawerOverlay"></div>
-
-
-<aside class="drawer" id="drawer">
-
-<div class="drawer-head">
-
-<div class="drawer-title">
-Aaru AI
-</div>
-
-<button class="close-drawer" id="closeDrawer">
-×
-</button>
-
-</div>
-
-
-<div class="drawer-body">
-
-<button class="drawer-action" id="newChatBtn">
-<span>＋</span>
-<span>नई चैट</span>
-</button>
-
-<button class="drawer-action" id="deleteAllBtn">
-<span>🗑️</span>
-<span>सभी चैट डिलीट करें</span>
-</button>
-
-
-<div class="section-title">
-Recent Chats
-</div>
-
-<div class="chat-history" id="chatHistory"></div>
-
-
-<div class="section-title">
-Recent Creations
-</div>
-
-<div class="creation-grid" id="creationGrid"></div>
-
-</div>
-
-</aside>
-
-
-<main>
-
-<div class="chat-wrap">
-
-<div class="messages" id="messages"></div>
-
-</div>
-
-</main>
-
-
-<div class="composer-shell">
-
-<div class="composer">
-
-<div class="photo-preview" id="photoPreview">
-
-<img id="photoPreviewImg" alt="Selected image">
-
-<button class="remove-photo" id="removePhoto">
-×
-</button>
-
-</div>
-
-
-<div class="input-row">
-
-<button class="icon-btn" id="photoBtn" title="Photo / PDF">
-📎
-</button>
-
-<button class="icon-btn" id="micBtn" title="Voice Input">
-🎙️
-</button>
-
-<textarea
-id="prompt"
-rows="1"
-placeholder="Aaru से कुछ भी पूछें..."
-autocomplete="off"
-spellcheck="true"></textarea>
-
-<button class="icon-btn" id="speakBtn" title="Voice Output">
-🔊
-</button>
-
-<button class="icon-btn send-btn" id="sendBtn" title="Send">
-➤
-</button>
-
-</div>
-
-
-
-
-</div>
-
-</div>
-
-</div>
-
-
-<input
-type="file"
-id="photoInput"
-accept="image/*,.pdf,application/pdf">
-
-
-<div class="image-viewer" id="imageViewer">
-
-<button class="close-viewer" id="closeViewer">
-×
-</button>
-
-<img id="viewerImg" alt="Image preview">
-
-</div>
-
-
-<div class="toast" id="toast"></div>
-
-
-<script>
+ </head>
+ <body>
+  <div class="app">
+   <header class="header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <div class="brand">
+     <div class="brand-name">Aaru AI</div>
+     <div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
+    </div>
+    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">＋</button>
+   </header>
+   <div class="drawer-overlay" id="drawerOverlay"></div>
+   <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+     <div class="drawer-title">Aaru AI</div>
+     <button class="close-drawer" id="closeDrawer">×</button>
+    </div>
+    <div class="drawer-body">
+     <button class="drawer-action" id="newChatBtn"><span>＋</span> <span>नई चैट</span></button>
+     <button class="drawer-action" id="deleteAllBtn"><span>🗑️</span> <span>सभी चैट डिलीट करें</span></button>
+     <div class="section-title">Recent Chats</div>
+     <div class="chat-history" id="chatHistory"></div>
+     <div class="section-title">Recent Creations</div>
+     <div class="creation-grid" id="creationGrid"></div>
+    </div>
+   </aside>
+   <main>
+    <div class="chat-wrap">
+     <div class="messages" id="messages"></div>
+    </div>
+   </main>
+   <div class="composer-shell">
+    <div class="composer">
+     <div class="photo-preview" id="photoPreview">
+      <img id="photoPreviewImg" alt="Selected image">
+      <button class="remove-photo" id="removePhoto">×</button>
+     </div>
+     <div class="input-row">
+      <button class="icon-btn" id="photoBtn" title="Photo / PDF">📎</button>
+      <button class="icon-btn" id="micBtn" title="Voice Input">🎙️</button>
+      <textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..." autocomplete="off" spellcheck="true"></textarea>
+      <button class="icon-btn" id="speakBtn" title="Voice Output">🔊</button>
+      <button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <input type="file" id="photoInput" accept="image/*,.pdf,application/pdf">
+  <div class="image-viewer" id="imageViewer">
+   <button class="close-viewer" id="closeViewer">×</button>
+   <img id="viewerImg" alt="Image preview">
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
 "use strict";
 
 
@@ -1121,6 +1018,7 @@ let recognition = null;
 let isBusy = false;
 let previousResponseId = null;
 let lastToolsUsed = [];
+let activeStream = null;
 
 let volatileCreations = [];
 
@@ -2569,7 +2467,7 @@ function showTyping(){
 
 
   bubble.innerHTML = `
-    <div class="typing" aria-label="Aaru is typing">
+    <div class="typing">
       <span></span>
       <span></span>
       <span></span>
@@ -2601,6 +2499,45 @@ function hideTyping(){
     item.remove();
   }
 }
+
+function startStreamingMessage(){
+  hideTyping();
+  const row=document.createElement("div"); row.className="message assistant"; row.id="streamingMessage";
+  const bubble=document.createElement("div"); bubble.className="bubble md";
+  const text=document.createElement("div"); text.className="stream-text";
+  const status=document.createElement("div"); status.className="stream-status";
+  bubble.append(text,status); row.appendChild(bubble); messagesEl.appendChild(row);
+  activeStream={row,bubble,text,status,buffer:"",tools:new Set(),response:null}; scrollBottom(); return activeStream;
+}
+function setStreamStatus(value){ if(activeStream?.status) activeStream.status.textContent=String(value||""); }
+function handleStreamEvent(type,data){
+  if(!activeStream) startStreamingMessage();
+  const t=String(type||""); const it=String(data?.type||""); const combined=(t+" "+it).toLowerCase();
+  const map=[["web_search","🔎 वेब पर देख रहा हूँ…"],["file_search","📄 फ़ाइल देख रहा हूँ…"],["code_interpreter","⚙️ विश्लेषण कर रहा हूँ…"],["image_generation","🎨 इमेज तैयार कर रहा हूँ…"],["computer","🖥️ काम कर रहा हूँ…"]];
+  for(const [key,label] of map) if(combined.includes(key)){activeStream.tools.add(key);setStreamStatus(label);break;}
+  if(t.includes("output_text.delta")){ const delta=typeof data?.delta==="string"?data.delta:""; if(delta){activeStream.buffer+=delta;activeStream.text.textContent=activeStream.buffer;setStreamStatus("");scrollBottom();} }
+  if(t.includes("output_text.done") && !activeStream.buffer && typeof data?.text==="string"){activeStream.buffer=data.text;activeStream.text.textContent=activeStream.buffer;}
+  if(t==="response.completed" || it==="response.completed"){activeStream.response=data?.response||data;setStreamStatus("");}
+  if(t==="response.failed" || t==="response.incomplete") setStreamStatus("");
+}
+function parseSSEEventBlock(block){
+  const lines=String(block||"").split(/\r?\n/); let event=""; const dataLines=[];
+  for(const line of lines){if(line.startsWith("event:")) event=line.slice(6).trim();else if(line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());}
+  const raw=dataLines.join("\n"); if(!raw||raw==="[DONE]") return {event,data:null};
+  try{return {event,data:JSON.parse(raw)};}catch{return {event,data:null};}
+}
+async function consumeAstraStream(response){
+  const stream=startStreamingMessage(); if(!response.body) throw new Error("Streaming response body unavailable.");
+  const reader=response.body.getReader(); const decoder=new TextDecoder(); let pending="";
+  try{while(true){const {value,done}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const blocks=pending.split(/\r?\n\r?\n/);pending=blocks.pop()||"";for(const block of blocks){const p=parseSSEEventBlock(block);if(p.data)handleStreamEvent(p.event,p.data);}}pending+=decoder.decode();if(pending.trim()){const p=parseSSEEventBlock(pending);if(p.data)handleStreamEvent(p.event,p.data);}}finally{try{reader.releaseLock();}catch(error){}}
+  const d=stream.response; const text=cleanAaruText(stream.buffer||extractResponseTextClient(d)); const image=extractImageFromResponseClient(d); const tools=[...stream.tools];
+  for(const item of d?.output||[]){const type=String(item?.type||"").toLowerCase();if(type.includes("web_search"))tools.push("web_search");if(type.includes("file_search"))tools.push("file_search");if(type.includes("code_interpreter"))tools.push("code_interpreter");if(type.includes("image_generation"))tools.push("image_generation");}
+  lastToolsUsed=[...new Set(tools)]; if(d?.id){previousResponseId=String(d.id).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;} if(!text&&!image)throw new Error("Aaru ने खाली streaming response दिया।"); return {text,image,tools_used:lastToolsUsed,response_id:d?.id||null};
+}
+function extractResponseTextClient(data){if(typeof data?.output_text==="string")return data.output_text;const chunks=[];for(const item of data?.output||[]){if(item?.type!=="message")continue;for(const c of item?.content||[])if(c?.type==="output_text"&&typeof c.text==="string")chunks.push(c.text);}return chunks.join("\n");}
+function extractImageFromResponseClient(data){for(const item of data?.output||[]){if(item?.type==="image_generation_call"&&item?.result){const result=String(item.result);return result.startsWith("data:image/")?result:`data:image/png;base64,${result}`;}}return null;}
+function removeStreamingMessage(){const item=document.getElementById("streamingMessage");if(item)item.remove();activeStream=null;}
+
 
 
 /* =========================================================
@@ -4808,21 +4745,13 @@ function applyWorkerMemoryResponse(data){
 ========================================================= */
 
 function getConversationReasoningEffort(text){
-  const q = cleanAaruText(text).toLowerCase();
-  if(!q) return ASTRA_FAST_REASONING_EFFORT;
-
-  const fast = /^(hi|hello|hey|hola|namaste|नमस्ते|हाय|हेलो|कैसे हो|कैसी हो|क्या हाल है|धन्यवाद|thanks|thank you|ok|okay|ठीक है|ओके|bye|बाय|good morning|good night|शुभ प्रभात|शुभ रात्रि)[!?.,\s]*$/i;
-  if(fast.test(q) || q.length <= 45) return ASTRA_FAST_REASONING_EFFORT;
-
-  const complex = /(calculate|calculation|analy[sz]e|compare|research|latest|current|today|news|search|explain in detail|code|debug|कैलकुलेट|गणना|विश्लेषण|तुलना|रिसर्च|ताज़ा|ताजा|अभी|आज|समाचार|खोज|विस्तार से|कोड|डिबग)/i;
-  return complex.test(q) ? ASTRA_REASONING_EFFORT : ASTRA_NORMAL_REASONING_EFFORT;
+  const q=cleanAaruText(text).toLowerCase(); if(!q)return ASTRA_FAST_REASONING_EFFORT;
+  if(/(latest|current|today|tonight|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|खोज|सर्च|कीमत|मौसम|स्कोर|चुनाव)/i.test(q))return ASTRA_REASONING_EFFORT;
+  const fast=/^(hi|hello|hey|hola|namaste|नमस्ते|हाय|हेलो|कैसे हो|कैसी हो|क्या हाल है|धन्यवाद|thanks|thank you|ok|okay|ठीक है|ओके|bye|बाय|good morning|good night|शुभ प्रभात|शुभ रात्रि)[!?.,\s]*$/i;
+  if(fast.test(q))return ASTRA_FAST_REASONING_EFFORT; const complex=/(calculate|calculation|analy[sz]e|compare|research|explain|code|debug|कैलकुलेट|गणना|विश्लेषण|तुलना|रिसर्च|समझाओ|समझाइए|कोड|डिबग)/i;
+  if(q.length<=45&&!complex.test(q))return ASTRA_FAST_REASONING_EFFORT; return complex.test(q)?ASTRA_REASONING_EFFORT:ASTRA_NORMAL_REASONING_EFFORT;
 }
-
-function shouldUseDeepContext(text){
-  const q = cleanAaruText(text).toLowerCase();
-  if(q.length <= 80 && /^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|कैसे हो|क्या हाल है|thanks|thank you|धन्यवाद|ok|okay|ठीक है|ओके|bye|बाय)/i.test(q)) return false;
-  return true;
-}
+function shouldUseDeepContext(text){const q=cleanAaruText(text).toLowerCase();if(/(latest|current|today|now|live|recent|news|search|web|price|weather|score|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर)/i.test(q))return true;if(q.length<=80&&/^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|कैसे हो|क्या हाल है|thanks|thank you|धन्यवाद|ok|okay|ठीक है|ओके|bye|बाय)/i.test(q))return false;return true;}
 
 async function fetchChatWithRecovery(payload){
 
@@ -4901,21 +4830,16 @@ async function sendChatRequest(){
   const currentQuery =
     cleanAaruText(lastUserMessage?.content || "");
 
-  const relevantMemory =
-    getRelevantMemory(currentQuery);
-
-  const fastConversation = !shouldUseDeepContext(currentQuery);
-  const payload = {
+  const relevantMemory=getRelevantMemory(currentQuery);
+  const fastConversation=!shouldUseDeepContext(currentQuery);
+  const payload={
     message:currentQuery,
-    messages:fastConversation ? recentMessages.slice(-12) : recentMessages,
-    memory_summary:fastConversation ? "" : (
-      memorySummary ||
-      buildMemorySummaryFromSemanticMemory(semanticMemory) ||
-      buildMemorySummary(messages)
-    ),
-    relevant_memory:fastConversation ? "" : relevantMemory,
+    messages:fastConversation?recentMessages.slice(-12):recentMessages,
+    memory_summary:fastConversation?"":(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages)),
+    relevant_memory:fastConversation?"":relevantMemory,
     reasoning_effort:getConversationReasoningEffort(currentQuery),
-    previous_response_id:previousResponseId || undefined
+    stream:true,
+    previous_response_id:previousResponseId||undefined
   };
 
   if(selectedPhotoBase64){
@@ -4947,81 +4871,16 @@ async function sendChatRequest(){
   const response =
     await fetchChatWithRecovery(payload);
 
-  const contentType =
-    (response.headers.get("content-type") || "").toLowerCase();
-
-  if(contentType.startsWith("image/")){
-    return {
-      text:"इमेज तैयार है।",
-      image:await blobToDataURL(await response.blob())
-    };
-  }
-
-  const raw =
-    await response.text();
-
-  let data = null;
-
-  try{
-    data = raw ? JSON.parse(raw) : null;
-  }catch{
-    if(!response.ok){
-      throw new Error(raw || "Chat request failed.");
-    }
-
-    if(raw.trim()){
-      return {
-        text:cleanAaruText(raw),
-        image:null
-      };
-    }
-
-    throw new Error("Worker ने खाली response दिया।");
-  }
-
-  if(!response.ok){
-    throw new Error(
-      data?.error ||
-      data?.message ||
-      data?.detail ||
-      "Chat request failed."
-    );
-  }
-
-  const normalized =
-    normalizeChatResult(data);
-
-  const nextResponseId =
-    data?.response_id ||
-    data?.id ||
-    null;
-
-  if(nextResponseId){
-    previousResponseId =
-      String(nextResponseId).slice(0,200);
-
-    const chat =
-      chats.find(item => item.id === currentChatId);
-
-    if(chat){
-      chat.responseId =
-        previousResponseId;
-    }
-  }
-
-  lastToolsUsed =
-    Array.isArray(data?.tools_used)
-      ? data.tools_used
-      : [];
-
-  if(
-    !normalized?.text &&
-    !normalized?.image
-  ){
-    throw new Error("Aaru ने खाली response दिया।");
-  }
-
-  return normalized;
+  const contentType=(response.headers.get("content-type")||"").toLowerCase();
+  if(contentType.includes("text/event-stream"))return await consumeAstraStream(response);
+  if(contentType.startsWith("image/"))return {text:"इमेज तैयार है।",image:await blobToDataURL(await response.blob())};
+  const raw=await response.text(); let data=null;
+  try{data=raw?JSON.parse(raw):null;}catch{if(!response.ok)throw new Error(raw||"Chat request failed.");if(raw.trim())return {text:cleanAaruText(raw),image:null};throw new Error("Worker ने खाली response दिया।");}
+  if(!response.ok)throw new Error(data?.error||data?.message||data?.detail||"Chat request failed.");
+  const normalized=normalizeChatResult(data); const nextResponseId=data?.response_id||data?.id||null;
+  if(nextResponseId){previousResponseId=String(nextResponseId).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;}
+  lastToolsUsed=Array.isArray(data?.tools_used)?data.tools_used:[];
+  if(!normalized?.text&&!normalized?.image)throw new Error("Aaru ने खाली response दिया।"); return normalized;
 }
 
 /* =========================================================
@@ -5107,6 +4966,7 @@ async function handleSend(){
 
     saveCurrentChat();
 
+    removeStreamingMessage();
     hideTyping();
 
     if(result && result.image){
@@ -5151,6 +5011,7 @@ async function handleSend(){
       error
     );
 
+    removeStreamingMessage();
     hideTyping();
 
     addAssistantMessage(
@@ -6045,8 +5906,7 @@ window.addEventListener(
 );
 
 </script>
-
-<script>
+  <script>
 /* GPT-6 Astra Native Composer runtime marker.
    The browser never contains the OpenAI API key; the Worker is the secure gateway.
    The model, Responses API, reasoning and native tool selection are Worker-side.
@@ -6058,5 +5918,5 @@ window.AARU_ASTRA_NATIVE = Object.freeze({
   intentRouting: "model-selected"
 });
 </script>
-</body>
+ </body>
 </html>
