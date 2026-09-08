@@ -675,6 +675,14 @@ main{
   padding:4px 8px;
 }
 
+.response-error{
+  white-space:pre-wrap;
+}
+
+.typing{
+  min-height:20px;
+}
+
 @media(max-width:600px){
 
   .header{
@@ -1067,6 +1075,8 @@ const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 1000;
 const MAX_CONTEXT_MESSAGES = 240;
 const ASTRA_REASONING_EFFORT = "high";
+const ASTRA_FAST_REASONING_EFFORT = "low";
+const ASTRA_NORMAL_REASONING_EFFORT = "medium";
 const MAX_MESSAGE_CHARS = 4000;
 const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
 const MEMORY_V3_KEY = "aaru_smart_memory_v3";
@@ -1077,6 +1087,8 @@ const CLIENT_INTELLIGENCE_VERSION = "GPT-6-ASTRA-NATIVE";
 const CLIENT_REASONING_ENGINE_VERSION = "GPT-6-ASTRA";
 const CLIENT_MEMORY_ENGINE_VERSION = "6.0";
 const MAX_WORKER_MEMORY_UPDATES = 40;
+const CHAT_REQUEST_TIMEOUT_MS = 60000;
+const CHAT_RETRY_DELAY_MS = 700;
 
 const MAX_SAVED_CREATIONS = 4;
 const MAX_CREATION_PROMPT_CHARS = 300;
@@ -1827,6 +1839,9 @@ function normalizeChat(chat){
     semanticMemory:
       normalizeSemanticMemory(savedSemanticMemory),
 
+    responseId:
+      String(chat.responseId || chat.previousResponseId || "").slice(0,200) || null,
+
     createdAt:
       Number(
         chat.createdAt
@@ -2092,6 +2107,9 @@ function createNewChat(
     semanticMemory:
       [],
 
+    responseId:
+      null,
+
     createdAt:
       now,
 
@@ -2124,6 +2142,8 @@ function createNewChat(
   messages = [];
   semanticMemory = [];
   memorySummary = "";
+  previousResponseId = null;
+  lastToolsUsed = [];
   updateMemoryButton();
 
 
@@ -2177,6 +2197,9 @@ function saveCurrentChat(){
   chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
   chat.memorySummary = buildMemorySummary(messages);
   memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || chat.memorySummary;
+
+  chat.responseId =
+    previousResponseId || null;
 
   chat.messages =
     messages
@@ -2546,7 +2569,7 @@ function showTyping(){
 
 
   bubble.innerHTML = `
-    <div class="typing">
+    <div class="typing" aria-label="Aaru is typing">
       <span></span>
       <span></span>
       <span></span>
@@ -2835,6 +2858,11 @@ function openChat(id){
             -MAX_MESSAGES_PER_CHAT
           )
       : [];
+
+  previousResponseId =
+    chat.responseId || null;
+
+  lastToolsUsed = [];
 
 
   isBusy =
@@ -4779,6 +4807,84 @@ function applyWorkerMemoryResponse(data){
    CHAT API
 ========================================================= */
 
+function getConversationReasoningEffort(text){
+  const q = cleanAaruText(text).toLowerCase();
+  if(!q) return ASTRA_FAST_REASONING_EFFORT;
+
+  const fast = /^(hi|hello|hey|hola|namaste|नमस्ते|हाय|हेलो|कैसे हो|कैसी हो|क्या हाल है|धन्यवाद|thanks|thank you|ok|okay|ठीक है|ओके|bye|बाय|good morning|good night|शुभ प्रभात|शुभ रात्रि)[!?.,\s]*$/i;
+  if(fast.test(q) || q.length <= 45) return ASTRA_FAST_REASONING_EFFORT;
+
+  const complex = /(calculate|calculation|analy[sz]e|compare|research|latest|current|today|news|search|explain in detail|code|debug|कैलकुलेट|गणना|विश्लेषण|तुलना|रिसर्च|ताज़ा|ताजा|अभी|आज|समाचार|खोज|विस्तार से|कोड|डिबग)/i;
+  return complex.test(q) ? ASTRA_REASONING_EFFORT : ASTRA_NORMAL_REASONING_EFFORT;
+}
+
+function shouldUseDeepContext(text){
+  const q = cleanAaruText(text).toLowerCase();
+  if(q.length <= 80 && /^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|कैसे हो|क्या हाल है|thanks|thank you|धन्यवाद|ok|okay|ठीक है|ओके|bye|बाय)/i.test(q)) return false;
+  return true;
+}
+
+async function fetchChatWithRecovery(payload){
+
+  let lastError = null;
+
+  for(let attempt = 0; attempt < 2; attempt++){
+
+    const controller =
+      new AbortController();
+
+    const timer =
+      setTimeout(
+        () => controller.abort(),
+        CHAT_REQUEST_TIMEOUT_MS
+      );
+
+    try{
+
+      const response =
+        await fetch(API + "chat",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(payload),
+          signal:controller.signal
+        });
+
+      clearTimeout(timer);
+
+      if(
+        response.ok ||
+        attempt === 1 ||
+        ![502,503,504].includes(response.status)
+      ){
+        return response;
+      }
+
+      lastError =
+        new Error("Worker temporarily unavailable.");
+
+    }catch(error){
+
+      clearTimeout(timer);
+      lastError = error;
+
+      const retryable =
+        error?.name === "AbortError" ||
+        error instanceof TypeError;
+
+      if(!retryable || attempt === 1){
+        throw error;
+      }
+    }
+
+    await new Promise(resolve =>
+      setTimeout(resolve, CHAT_RETRY_DELAY_MS)
+    );
+  }
+
+  throw lastError || new Error("Chat request failed.");
+}
+
+
 async function sendChatRequest(){
 
   const recentMessages =
@@ -4798,15 +4904,17 @@ async function sendChatRequest(){
   const relevantMemory =
     getRelevantMemory(currentQuery);
 
+  const fastConversation = !shouldUseDeepContext(currentQuery);
   const payload = {
     message:currentQuery,
-    messages:recentMessages,
-    memory_summary:
+    messages:fastConversation ? recentMessages.slice(-12) : recentMessages,
+    memory_summary:fastConversation ? "" : (
       memorySummary ||
       buildMemorySummaryFromSemanticMemory(semanticMemory) ||
-      buildMemorySummary(messages),
-    relevant_memory:relevantMemory,
-    reasoning_effort:ASTRA_REASONING_EFFORT,
+      buildMemorySummary(messages)
+    ),
+    relevant_memory:fastConversation ? "" : relevantMemory,
+    reasoning_effort:getConversationReasoningEffort(currentQuery),
     previous_response_id:previousResponseId || undefined
   };
 
@@ -4837,27 +4945,21 @@ async function sendChatRequest(){
   }
 
   const response =
-    await fetch(API + "chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(payload)
-    });
+    await fetchChatWithRecovery(payload);
 
   const contentType =
     (response.headers.get("content-type") || "").toLowerCase();
 
   if(contentType.startsWith("image/")){
-    if(!response.ok){
-      throw new Error("Chat image request failed.");
-    }
-
     return {
       text:"इमेज तैयार है।",
       image:await blobToDataURL(await response.blob())
     };
   }
 
-  const raw = await response.text();
+  const raw =
+    await response.text();
+
   let data = null;
 
   try{
@@ -4867,10 +4969,14 @@ async function sendChatRequest(){
       throw new Error(raw || "Chat request failed.");
     }
 
-    return {
-      text:cleanAaruText(raw),
-      image:null
-    };
+    if(raw.trim()){
+      return {
+        text:cleanAaruText(raw),
+        image:null
+      };
+    }
+
+    throw new Error("Worker ने खाली response दिया।");
   }
 
   if(!response.ok){
@@ -4885,15 +4991,35 @@ async function sendChatRequest(){
   const normalized =
     normalizeChatResult(data);
 
-  previousResponseId =
+  const nextResponseId =
     data?.response_id ||
     data?.id ||
-    previousResponseId;
+    null;
+
+  if(nextResponseId){
+    previousResponseId =
+      String(nextResponseId).slice(0,200);
+
+    const chat =
+      chats.find(item => item.id === currentChatId);
+
+    if(chat){
+      chat.responseId =
+        previousResponseId;
+    }
+  }
 
   lastToolsUsed =
     Array.isArray(data?.tools_used)
       ? data.tools_used
       : [];
+
+  if(
+    !normalized?.text &&
+    !normalized?.image
+  ){
+    throw new Error("Aaru ने खाली response दिया।");
+  }
 
   return normalized;
 }
@@ -5033,8 +5159,9 @@ async function handleSend(){
     );
 
     showToast(
-      error?.message ||
-      "Request failed"
+      error?.name === "AbortError"
+        ? "Request में समय लग रहा है। फिर कोशिश करें।"
+        : (error?.message || "Request failed")
     );
 
   }finally{
@@ -5588,18 +5715,14 @@ function recoverPage(){
     now;
 
 
-  try{
+  if(!isBusy){
+    try{
+      hideTyping();
+    }catch(error){}
 
-    hideTyping();
-
-  }catch(error){}
-
-
-  isBusy =
-    false;
-
-  sendBtn.disabled =
-    false;
+    sendBtn.disabled =
+      false;
+  }
 
 
   try{
@@ -5707,13 +5830,10 @@ document.addEventListener(
 
           try{
 
-            hideTyping();
-
-            isBusy =
-              false;
-
-            sendBtn.disabled =
-              false;
+            if(!isBusy){
+              hideTyping();
+              sendBtn.disabled = false;
+            }
 
           }catch(error){}
 
