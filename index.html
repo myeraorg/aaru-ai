@@ -675,6 +675,14 @@ main{
   padding:4px 8px;
 }
 
+
+.message-tools{display:flex;gap:5px;margin-top:6px;opacity:.0;transition:.18s}
+.message:hover .message-tools,.message:focus-within .message-tools{opacity:.75}
+.message-tool{border:0;background:rgba(255,255,255,.06);color:inherit;border-radius:8px;padding:4px 7px;font-size:11px;cursor:pointer}
+.stream-status{font-size:11px;opacity:.55;margin:3px 2px 7px}
+.mode-pill{font-size:10px;padding:4px 8px;border-radius:999px;background:rgba(40,100,232,.12);color:#71a7ff;display:none}
+.mode-pill.show{display:inline-flex}
+
 @media(max-width:600px){
 
   .header{
@@ -702,133 +710,6 @@ main{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
-
-
-/* =========================================================
-   AARU MOBILE CONTRAST + VISIBILITY FIX
-   Keep the existing Native Unified Composer architecture.
-   These overrides only repair readability on dark surfaces.
-========================================================= */
-
-/* Dark assistant/error bubbles must use light text. */
-.message.assistant .bubble{
-  color:#f7f9fc;
-}
-
-.message.user .bubble{
-  color:#ffffff;
-}
-
-.message.system .bubble{
-  color:#f7f9fc;
-}
-
-/* Markdown inside assistant messages inherits the readable color. */
-.message.assistant .md,
-.message.assistant .md p,
-.message.assistant .md li,
-.message.assistant .md h1,
-.message.assistant .md h2,
-.message.assistant .md h3,
-.message.assistant .md blockquote{
-  color:#f7f9fc;
-}
-
-/* Drawer is dark, so all drawer controls/text must be light. */
-.drawer{
-  color:#f7f9fc;
-}
-
-.drawer-title,
-.drawer-action,
-.chat-history-title,
-.chat-history-meta,
-.section-title,
-.empty-history,
-.creation-prompt{
-  color:#f7f9fc;
-}
-
-.drawer-action{
-  color:#f7f9fc;
-}
-
-.delete-chat,
-.close-drawer{
-  color:#f7f9fc;
-}
-
-/* Dark composer: input and icons must be visible. */
-.composer{
-  color:#f7f9fc;
-}
-
-#prompt{
-  color:#f7f9fc;
-  -webkit-text-fill-color:#f7f9fc;
-  caret-color:#f7f9fc;
-}
-
-#prompt::placeholder{
-  color:#d7dce7;
-  opacity:.78;
-}
-
-.icon-btn{
-  color:#f7f9fc;
-  -webkit-text-fill-color:#f7f9fc;
-}
-
-.remove-photo{
-  color:#ffffff;
-}
-
-.close-viewer{
-  color:#ffffff;
-}
-
-.toast{
-  color:#ffffff;
-}
-
-/* Keep links readable on dark assistant bubbles. */
-.message.assistant .md a{
-  color:#8db8ff;
-}
-
-/* Compact mobile composer so it does not cover the conversation. */
-@media(max-width:600px){
-  .composer-shell{
-    padding:6px 8px calc(6px + env(safe-area-inset-bottom));
-  }
-
-  .composer{
-    padding:6px;
-    border-radius:16px;
-  }
-
-  .input-row{
-    gap:6px;
-  }
-
-  .icon-btn{
-    width:38px;
-    height:38px;
-    border-radius:11px;
-  }
-
-  #prompt{
-    min-height:38px;
-    max-height:96px;
-    padding:8px 6px;
-    font-size:15px;
-  }
-
-  .chat-wrap{
-    padding-bottom:112px;
-  }
-}
-
 </style>
 </head>
 
@@ -844,7 +725,7 @@ main{
 
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
-<div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
+<div class="brand-sub">GPT-6 Astra • Native Unified Composer <span id="modePill" class="mode-pill">LIVE</span></div>
 </div>
 
 <button class="new-chat-top" id="newChatTop" aria-label="New Chat">
@@ -1012,17 +893,17 @@ const IMAGE_KEY =
 
 const MAX_SAVED_CHATS = 8;
 const MAX_MESSAGES_PER_CHAT = 1000;
-const MAX_CONTEXT_MESSAGES = 240;
-const ASTRA_REASONING_EFFORT = "high";
-const MAX_MESSAGE_CHARS = 4000;
+const MAX_CONTEXT_MESSAGES = 48;
+const ASTRA_REASONING_EFFORT = "medium";
+const MAX_MESSAGE_CHARS = 3000;
 const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
 const MEMORY_V3_KEY = "aaru_smart_memory_v3";
-const MAX_MEMORY_SUMMARY_CHARS = 3200;
-const MAX_RELEVANT_MEMORY_CHARS = 2600;
-const MAX_SEMANTIC_MEMORIES = 80;
+const MAX_MEMORY_SUMMARY_CHARS = 2200;
+const MAX_RELEVANT_MEMORY_CHARS = 1800;
+const MAX_SEMANTIC_MEMORIES = 40;
 const CLIENT_INTELLIGENCE_VERSION = "GPT-6-ASTRA-NATIVE";
 const CLIENT_REASONING_ENGINE_VERSION = "GPT-6-ASTRA";
-const CLIENT_MEMORY_ENGINE_VERSION = "6.0";
+const CLIENT_MEMORY_ENGINE_VERSION = "7.0";
 const MAX_WORKER_MEMORY_UPDATES = 40;
 
 const MAX_SAVED_CREATIONS = 4;
@@ -1056,6 +937,8 @@ let recognition = null;
 let isBusy = false;
 let previousResponseId = null;
 let lastToolsUsed = [];
+let streamAbortController = null;
+let voiceModeEnabled = false;
 
 let volatileCreations = [];
 
@@ -1774,6 +1657,9 @@ function normalizeChat(chat){
     semanticMemory:
       normalizeSemanticMemory(savedSemanticMemory),
 
+    responseId:
+      String(chat.responseId || chat.previousResponseId || "").slice(0,200),
+
     createdAt:
       Number(
         chat.createdAt
@@ -2039,6 +1925,9 @@ function createNewChat(
     semanticMemory:
       [],
 
+    responseId:
+      "",
+
     createdAt:
       now,
 
@@ -2068,9 +1957,12 @@ function createNewChat(
   currentChatId =
     chat.id;
 
+  previousResponseId = String(chat.responseId || "").trim() || null;
+
   messages = [];
   semanticMemory = [];
   memorySummary = "";
+  previousResponseId = null;
   updateMemoryButton();
 
 
@@ -2123,6 +2015,7 @@ function saveCurrentChat(){
   semanticMemory = updateSemanticMemory(semanticMemory, messages);
   chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
   chat.memorySummary = buildMemorySummary(messages);
+  chat.responseId = String(previousResponseId || chat.responseId || "").slice(0,200);
   memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || chat.memorySummary;
 
   chat.messages =
@@ -2449,6 +2342,19 @@ function addAssistantMessage(
   row.appendChild(
     bubble
   );
+
+  const tools = document.createElement("div");
+  tools.className = "message-tools";
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "message-tool";
+  copyBtn.type = "button";
+  copyBtn.textContent = "कॉपी";
+  copyBtn.onclick = async () => {
+    try { await navigator.clipboard.writeText(value); showToast("कॉपी हो गया।"); }
+    catch { showToast("कॉपी नहीं हो पाया।"); }
+  };
+  tools.appendChild(copyBtn);
+  row.appendChild(tools);
 
   messagesEl.appendChild(
     row
@@ -4748,10 +4654,11 @@ async function sendChatRequest(){
   const currentQuery = lastUserMessage?.content || "";
   const relevantMemory = getRelevantMemory(currentQuery);
 
+  const continuation = Boolean(previousResponseId);
+
   const payload = {
     message: currentQuery,
-    prompt: currentQuery,
-    messages: recentMessages,
+    messages: continuation ? [] : recentMessages,
     memory_summary: memorySummary || buildMemorySummaryFromSemanticMemory(semanticMemory) || buildMemorySummary(messages),
     relevant_memory: relevantMemory,
     semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
@@ -4830,13 +4737,16 @@ async function sendChatRequest(){
       selectedDocumentText.slice(0, 90000);
   }
 
+  streamAbortController = new AbortController();
+
   const response =
     await fetch(API + "chat", {
       method:"POST",
       headers:{
         "Content-Type":"application/json"
       },
-      body:JSON.stringify(payload)
+      body:JSON.stringify(payload),
+      signal:streamAbortController.signal
     });
 
   const contentType =
@@ -4932,7 +4842,10 @@ async function sendChatRequest(){
     if(obj == null) return "";
     if(typeof obj === "string") return obj;
 
+    if(obj.type === "response.output_text.delta" && typeof obj.delta === "string") return obj.delta;
+    if(obj.type === "response.completed" && obj.response?.id) previousResponseId = obj.response.id;
     return (
+      obj.response?.output_text ??
       obj.response ??
       obj.text ??
       obj.content ??
@@ -5055,6 +4968,7 @@ async function sendChatRequest(){
 
   row.remove();
 
+  streamAbortController = null;
   return {
     text:cleanAaruText(fullText),
     image:null
@@ -5095,8 +5009,9 @@ async function handleSend(){
   isBusy =
     true;
 
-  sendBtn.disabled =
-    true;
+  sendBtn.disabled = false;
+  sendBtn.textContent = "■";
+  sendBtn.title = "उत्तर रोकें";
 
   const attachedPhoto =
     selectedPhotoUrl;
@@ -5267,10 +5182,13 @@ promptEl.addEventListener(
    SEND BUTTON
 ========================================================= */
 
-sendBtn.addEventListener(
-  "click",
-  handleSend
-);
+sendBtn.addEventListener("click", () => {
+  if(isBusy && streamAbortController){
+    try{ streamAbortController.abort(); }catch(error){}
+    return;
+  }
+  handleSend();
+});
 
 
 /* =========================================================
@@ -5309,7 +5227,7 @@ function startAaruVoice(){
   recognition = new SR();
   recognition.lang = "hi-IN";
   recognition.interimResults = false;
-  recognition.continuous = false;
+  recognition.continuous = voiceModeEnabled;
   recognition.onstart = () => {
     document.getElementById("micBtn")?.classList.add("voice-active");
     showToast("सुन रहा हूँ…");
@@ -5320,6 +5238,7 @@ function startAaruVoice(){
       promptEl.value = text;
       autoResize();
       promptEl.focus();
+      if(voiceModeEnabled && text.trim() && !isBusy){ handleSend(); }
     }
   };
   recognition.onerror = event => {
@@ -5548,6 +5467,13 @@ document
 ========================================================= */
 
 document.getElementById("micBtn")?.addEventListener("click",startAaruVoice);
+
+document.getElementById("speakBtn")?.addEventListener("dblclick",()=>{
+  voiceModeEnabled = !voiceModeEnabled;
+  const pill = document.getElementById("modePill");
+  if(pill) pill.classList.toggle("show", voiceModeEnabled);
+  showToast(voiceModeEnabled ? "Voice Mode ON" : "Voice Mode OFF");
+});
 
 document.getElementById("speakBtn")?.addEventListener("click",()=>{
   voiceOutputEnabled = !voiceOutputEnabled;
