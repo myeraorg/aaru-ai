@@ -5,7 +5,7 @@
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13 — v26 Multi-Step Agent Workflow</title>
+<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13</title>
 
 <style>
 *{
@@ -894,6 +894,7 @@ body,.app,main{
 }
 
 </style>
+<!-- AARU v31 CLEAN REBUILD: v19 known-working runtime baseline; no new runtime wrappers. -->
 </head>
 
 <body>
@@ -5371,9 +5372,7 @@ async function sendChatRequest(){
   const currentQuery =
     cleanAaruText(lastUserMessage?.content || "");
 
-  const proactivePlan=(typeof window.aaruV21BuildPlan === "function" ? window.aaruV21BuildPlan(currentQuery,messages) : null);
-window.AARU_V21_LAST_PLAN=proactivePlan;
-const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
+  const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
     ? window.aaruV19GetAdaptiveProfile(currentQuery,messages)
     : {verbosity:"balanced",tone:"natural",reasoning:"auto",continuity:false,confidence:.72});
   window.AARU_V19_LAST_PROFILE=adaptiveBehavior;
@@ -5417,11 +5416,6 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
     : (typeof window.aaruV9CompactText === "function"
       ? window.aaruV9CompactText(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS)
       : window.aaruV8CompactMemory(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS));
-  const goalState=(typeof window.aaruV23GetGoalState === "function" ? window.aaruV23GetGoalState(currentChatId) : null);
-  const multiStepWorkflow=(typeof window.aaruV26BuildWorkflow === "function" ? window.aaruV26BuildWorkflow(currentQuery,messages,taskPlan,goalState) : null);
-  window.AARU_V26_LAST_WORKFLOW=multiStepWorkflow;
-  if(typeof window.aaruV26SaveWorkflow === "function" && multiStepWorkflow) window.aaruV26SaveWorkflow(multiStepWorkflow);
-
   const payload={
     message:currentQuery,
     messages:contextMessages,
@@ -5437,11 +5431,6 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
     client_task_strategy:taskPlan.strategy,
     client_task_active:!!taskPlan.active,
     client_task_model_replan:taskPlan.modelMayReplan!==false,
-    client_workflow_v26_version:window.AARU_V26_VERSION||"",
-    client_workflow_v26_state:typeof window.aaruV26CompactWorkflow === "function" ? window.aaruV26CompactWorkflow(multiStepWorkflow) : "",
-    client_workflow_v26_hint:typeof window.aaruV26GetWorkflowHint === "function" ? window.aaruV26GetWorkflowHint(multiStepWorkflow) : "",
-    client_workflow_v26_active:!!multiStepWorkflow?.active,
-    client_workflow_v26_remaining:Number(multiStepWorkflow?.remaining||0),
     client_workflow_version:window.AARU_V15_VERSION||"",
     client_workflow_state:typeof window.aaruV15CompactState === "function" ? window.aaruV15CompactState(workflowState) : "",
     client_workflow_execution:typeof window.aaruV15GetExecutionHint === "function" ? window.aaruV15GetExecutionHint(workflowState) : "",
@@ -6522,5 +6511,73 @@ function safeInitialLoad(){
         window.scrollTo({
           top:
             document.documentElement
-              .scrol
+              .scrollHeight,
+
+          behavior:"auto"
+        });
+
+      }catch(error){}
+
+    },
+    80
+  );
+
+
+  appReady =
+    true;
+}
+
+
+const memoryBtn = document.getElementById("memoryBtn");
+if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
+
+/* v2: save the active conversation after the app is initialized. */
+window.addEventListener("beforeunload",function(){
+  aaruLifecycleSave();
+});
+
+/* =========================================================
+   START
+========================================================= */
+
+if(
+  document.readyState ===
+  "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
+    }
+  );
+
+}else{
+
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
+
+
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
+
+
+
 Preview truncated for large file
