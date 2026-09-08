@@ -884,8 +884,8 @@ const IMAGE_KEY =
 
 
 const MAX_SAVED_CHATS = 8;
-const MAX_MESSAGES_PER_CHAT = 200;
-const MAX_CONTEXT_MESSAGES = 80;
+const MAX_MESSAGES_PER_CHAT = 1000;
+const MAX_CONTEXT_MESSAGES = 240;
 const ASTRA_REASONING_EFFORT = "high";
 const MAX_MESSAGE_CHARS = 4000;
 const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
@@ -904,10 +904,8 @@ const MAX_HISTORY_IMAGE_CHARS = 420000;
 
 
 /*
-  Cloudflare FLUX.2 Klein 4B के लिए
-  reference image 512x512 से छोटी होनी चाहिए।
-
-  इसलिए 511 रखा गया है।
+  Image reference preprocessing is kept client-side only to reduce payload size.
+  Actual image generation/editing is selected and executed by the Worker.
 */
 const MAX_MODEL_IMAGE_SIZE = 511;
 
@@ -4631,8 +4629,12 @@ async function sendChatRequest(){
     relevant_memory: relevantMemory,
     semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
     model: "gpt-6-astra",
+    api: "responses",
+    reasoning: { effort: ASTRA_REASONING_EFFORT },
     reasoning_effort: ASTRA_REASONING_EFFORT,
+    tool_choice: "auto",
     intelligence_layer: CLIENT_INTELLIGENCE_VERSION,
+    orchestration: "astra-native",
     client_version: CLIENT_INTELLIGENCE_VERSION,
     memory_engine: CLIENT_MEMORY_ENGINE_VERSION,
     reasoning_engine: CLIENT_REASONING_ENGINE_VERSION,
@@ -4645,10 +4647,23 @@ async function sendChatRequest(){
     },
     stream: true,
     previous_response_id: previousResponseId || undefined,
+    conversation_state: previousResponseId ? "continuation" : "new-response",
     composer: "native-unified-composer",
+    intent_routing: "model-selected",
+    frontend_routing: false,
     client_capabilities: {
       vision: !!selectedPhotoBase64,
       document_text: !!selectedDocumentText,
+      responses_api: true,
+      native_tools: [
+        "web_search",
+        "file_search",
+        "image_generation",
+        "code_interpreter",
+        "computer_use",
+        "functions",
+        "mcp"
+      ],
       web_search: true,
       image_generation: true,
       image_editing: true,
@@ -5948,5 +5963,17 @@ window.addEventListener(
 
 </script>
 
+<script>
+/* GPT-6 Astra Native Composer runtime marker.
+   The browser never contains the OpenAI API key; the Worker is the secure gateway.
+   The model, Responses API, reasoning and native tool selection are Worker-side.
+*/
+window.AARU_ASTRA_NATIVE = Object.freeze({
+  model: "gpt-6-astra",
+  api: "responses",
+  toolChoice: "auto",
+  intentRouting: "model-selected"
+});
+</script>
 </body>
 </html>
