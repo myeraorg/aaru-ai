@@ -1,11 +1,11 @@
-3<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13</title>
+<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13 — v26 Multi-Step Agent Workflow</title>
 
 <style>
 *{
@@ -894,7 +894,6 @@ body,.app,main{
 }
 
 </style>
-<!-- AARU v31 CLEAN REBUILD: v19 known-working runtime baseline; no new runtime wrappers. -->
 </head>
 
 <body>
@@ -5372,7 +5371,9 @@ async function sendChatRequest(){
   const currentQuery =
     cleanAaruText(lastUserMessage?.content || "");
 
-  const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
+  const proactivePlan=(typeof window.aaruV21BuildPlan === "function" ? window.aaruV21BuildPlan(currentQuery,messages) : null);
+window.AARU_V21_LAST_PLAN=proactivePlan;
+const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
     ? window.aaruV19GetAdaptiveProfile(currentQuery,messages)
     : {verbosity:"balanced",tone:"natural",reasoning:"auto",continuity:false,confidence:.72});
   window.AARU_V19_LAST_PROFILE=adaptiveBehavior;
@@ -5416,6 +5417,11 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
     : (typeof window.aaruV9CompactText === "function"
       ? window.aaruV9CompactText(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS)
       : window.aaruV8CompactMemory(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS));
+  const goalState=(typeof window.aaruV23GetGoalState === "function" ? window.aaruV23GetGoalState(currentChatId) : null);
+  const multiStepWorkflow=(typeof window.aaruV26BuildWorkflow === "function" ? window.aaruV26BuildWorkflow(currentQuery,messages,taskPlan,goalState) : null);
+  window.AARU_V26_LAST_WORKFLOW=multiStepWorkflow;
+  if(typeof window.aaruV26SaveWorkflow === "function" && multiStepWorkflow) window.aaruV26SaveWorkflow(multiStepWorkflow);
+
   const payload={
     message:currentQuery,
     messages:contextMessages,
@@ -5431,6 +5437,11 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
     client_task_strategy:taskPlan.strategy,
     client_task_active:!!taskPlan.active,
     client_task_model_replan:taskPlan.modelMayReplan!==false,
+    client_workflow_v26_version:window.AARU_V26_VERSION||"",
+    client_workflow_v26_state:typeof window.aaruV26CompactWorkflow === "function" ? window.aaruV26CompactWorkflow(multiStepWorkflow) : "",
+    client_workflow_v26_hint:typeof window.aaruV26GetWorkflowHint === "function" ? window.aaruV26GetWorkflowHint(multiStepWorkflow) : "",
+    client_workflow_v26_active:!!multiStepWorkflow?.active,
+    client_workflow_v26_remaining:Number(multiStepWorkflow?.remaining||0),
     client_workflow_version:window.AARU_V15_VERSION||"",
     client_workflow_state:typeof window.aaruV15CompactState === "function" ? window.aaruV15CompactState(workflowState) : "",
     client_workflow_execution:typeof window.aaruV15GetExecutionHint === "function" ? window.aaruV15GetExecutionHint(workflowState) : "",
@@ -7021,5 +7032,757 @@ window.AARU_ASTRA_NATIVE = Object.freeze({
 })();
 </script>
 
+<script>
+/* AARU v20 — Predictive Context & Intent Engine */
+(function(){
+  "use strict";
+  window.AARU_V20_PREDICTIVE=true;
+  window.AARU_V20_VERSION="PREDICTIVE-CONTEXT-INTENT-V20";
+  const KEY="aaru_predictive_context_v20";
+  const MAX_ITEMS=32, MAX_CHARS=3600;
+  const clean=v=>String(v||"").replace(/\s+/g," ").trim();
+  const load=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"?x:{};}catch(_){return {};}};
+  const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x));}catch(_){} };
+  const tokens=v=>new Set(clean(v).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(x=>x.length>2).slice(0,100));
+  const overlap=(a,b)=>{if(!a.size||!b.size)return 0;let n=0;a.forEach(x=>{if(b.has(x))n++;});return n/Math.max(1,Math.min(a.size,b.size));};
+  function intent(q){
+    if(/^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|ok|okay|ठीक है|ओके|thanks|धन्यवाद|bye|बाय)[!?.,\s]*$/i.test(q))return "casual";
+    if(/(latest|current|today|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर|चुनाव)/i.test(q))return "current_information";
+    if(/(image|picture|photo|draw|generate.*image|इमेज|तस्वीर|फोटो|चित्र|बनाओ|बनाइए|जनरेट)/i.test(q))return "image";
+    if(/(code|debug|program|script|calculate|calculation|कैलकुलेट|गणना|कोड|डिबग|प्रोग्राम)/i.test(q))return "analysis_or_code";
+    if(/(explain|compare|research|analy[sz]e|समझाओ|समझाइए|तुलना|रिसर्च|विश्लेषण)/i.test(q))return "deep_reasoning";
+    if(/(how|why|what|when|where|क्यों|कैसे|क्या|कब|कहाँ)/i.test(q))return "question";
+    return "conversation";
+  }
+  window.aaruV20Predict=function(text,messages){
+    const q=clean(text), all=Array.isArray(messages)?messages:[], state=load();
+    const users=all.filter(m=>m&&m.role==="user").slice(-10).map(m=>clean(m.content)).filter(Boolean);
+    const current=intent(q), previous=users.length>1?intent(users[users.length-2]):"";
+    let continuity=!!(previous&&current!=="casual"&&(overlap(tokens(q),tokens(users[users.length-1]))>.18 || /^(yes|yeah|yep|ok|okay|sure|continue|next|same|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो)[!?.,\s]*$/i.test(q)));
+    let topic=users.slice(-4).map(x=>x.slice(0,180)).join(" | ");
+    const chatId=typeof currentChatId!=="undefined"?String(currentChatId):"global";
+    const prior=state[chatId]||{};
+    const prediction={version:window.AARU_V20_VERSION,intent:current,previousIntent:previous,continuity,topic:topic.slice(0,900),confidence:Math.max(.42,Math.min(.97,.68+(users.length>=4?.08:0)+(continuity?.1:0)+(prior.interactions>8?.05:0))),recommendedContext:current==="casual"?"minimal":(continuity?"focused_continuity":"adaptive"),nextAction:current==="current_information"?"native_web_search":current==="image"?"native_image_generation":current==="analysis_or_code"?"native_code_interpreter":continuity?"continue_previous_goal":"answer_directly"};
+    window.AARU_V20_LAST_PREDICTION=prediction;
+    return prediction;
+  };
+  window.aaruV20Persist=function(chatId,p){
+    try{const state=load(),id=String(chatId||"global"),old=state[id]||{};state[id]={interactions:Number(old.interactions||0)+1,lastAt:Date.now(),intent:p?.intent||old.intent||"conversation",topic:String(p?.topic||old.topic||"").slice(0,900),confidence:Number(p?.confidence||old.confidence||.68)};const keys=Object.keys(state).sort((a,b)=>(state[b]?.lastAt||0)-(state[a]?.lastAt||0)).slice(0,MAX_ITEMS),compact={};keys.forEach(k=>compact[k]=state[k]);save(compact);}catch(_){}
+  };
+  const original=window.fetchChatWithRecovery;
+  if(typeof original==="function"&&!original.__AARU_V20_WRAPPED){
+    const wrapped=async function(payload){
+      try{
+        const p=payload&&typeof payload==="object"?payload:{};
+        const query=String(p.message||p.text||p.user_message||"");
+        const messages=Array.isArray(p.messages)?p.messages:[];
+        const prediction=window.aaruV20Predict(query,messages);
+        p.client_predictive_version=window.AARU_V20_VERSION;
+        p.client_predictive_intent=prediction.intent;
+        p.client_predictive_previous_intent=prediction.previousIntent;
+        p.client_predictive_continuity=prediction.continuity;
+        p.client_predictive_confidence=prediction.confidence;
+        p.client_predictive_context=JSON.stringify({topic:prediction.topic,recommendedContext:prediction.recommendedContext,nextAction:prediction.nextAction}).slice(0,MAX_CHARS);
+        p.client_predictive_allow_model_decision=true;
+        window.aaruV20Persist(typeof currentChatId!=="undefined"?currentChatId:"global",prediction);
+        return await original.call(this,p);
+      }catch(error){throw error;}
+    };
+    wrapped.__AARU_V20_WRAPPED=true;wrapped.__AARU_V20_ORIGINAL=original;window.fetchChatWithRecovery=wrapped;
+  }
+})();
+</script>
+
+
+<!-- AARU V21 PROACTIVE AGENTIC CONTEXT ENGINE -->
+<script>
+window.AARU_V21_PROACTIVE=true;
+window.AARU_V21_VERSION="PROACTIVE-AGENTIC-CONTEXT-V21";
+const AARU_V21_KEY="aaru_proactive_agentic_v21";
+function aaruV21Load(){try{return JSON.parse(localStorage.getItem(AARU_V21_KEY)||'{}')}catch(e){return {}}}
+function aaruV21Save(state){try{localStorage.setItem(AARU_V21_KEY,JSON.stringify(state))}catch(e){}}
+function aaruV21Signals(text,messages){
+ const q=cleanAaruText(text||'').trim().toLowerCase();
+ const history=Array.isArray(messages)?messages.slice(-8):[];
+ const follow=/^(yes|yeah|yep|ok|okay|sure|do it|continue|next|same|go ahead|वही|इसे|उसे|हाँ|हां|ठीक है|करो|आगे|जारी रखो|नेक्स्ट)[!?.,\s]*$/i.test(q);
+ const action=/(make|create|build|write|generate|fix|check|find|search|compare|calculate|send|open|बनाओ|बनाइए|लिखो|जनरेट|ठीक करो|जाँच|खोजो|सर्च|तुलना|गणना|भेजो|खोलो)/i.test(q);
+ const question=/\?|^(what|why|how|when|where|who|क्या|क्यों|कैसे|कब|कहाँ|कौन)/i.test(q);
+ const recent=history.map(m=>cleanAaruText(m?.content||'')).filter(Boolean).slice(-3).join(' ');
+ return {follow,action,question,recent:recent.slice(-1800),hasHistory:history.length>0};
+}
+function aaruV21BuildPlan(text,messages){
+ const s=aaruV21Signals(text,messages), q=cleanAaruText(text||'');
+ let mode='respond';
+ if(s.follow&&s.hasHistory)mode='continue';
+ else if(s.action)mode='execute_or_assist';
+ else if(s.question)mode='answer';
+ const plan={version:AARU_V21_VERSION,mode,anticipate:s.follow||s.action,clarifyRisk:q.length<12&&!s.follow,steps:mode==='continue'?['use_recent_context','continue_previous_intent','respond']:mode==='execute_or_assist'?['infer_goal','choose_native_capability','execute_or_explain']:['understand_request','respond'],confidence:q.length>20?.86:.68};
+ const st=aaruV21Load(); st.lastPlan=plan; st.count=(st.count||0)+1; st.lastQuery=q.slice(0,500); aaruV21Save(st); return plan;
+}
+function aaruV21CompactPlan(plan){try{return JSON.stringify(plan).slice(0,1800)}catch(e){return ''}}
+function aaruV21Hint(plan){if(!plan)return '';if(plan.mode==='continue')return 'Continue the most recent relevant user intent when the request is clearly a follow-up; do not invent missing details.';if(plan.mode==='execute_or_assist')return 'Infer the requested outcome and use available native capabilities when appropriate; avoid unnecessary clarification.';return 'Answer directly and preserve relevant conversation context.'}
+</script>
+
+
+<script>
+/* =========================================================
+   AARU AI v22 — AUTONOMOUS DECISION & EXECUTION ENGINE
+   Preserves v1–v21. Client-side decision orchestration only.
+   Worker/backend remains unchanged.
+   ========================================================= */
+(function(){
+  "use strict";
+  window.AARU_V22_AUTONOMOUS_DECISION=true;
+  window.AARU_V22_VERSION="AUTONOMOUS-DECISION-EXECUTION-V22";
+  const KEY="aaru_autonomous_decision_v22";
+
+  function v22Load(){
+    try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){return {};}
+  }
+  function v22Save(state){
+    try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+  }
+  function v22Classify(text){
+    const q=String(text||"").trim().toLowerCase();
+    if(!q)return "idle";
+    if(/^(yes|yeah|yep|ok|okay|sure|do it|continue|next|go ahead|हाँ|हां|ठीक है|करो|आगे|जारी रखो|नेक्स्ट)[!?.,\s]*$/i.test(q))return "continue";
+    if(/(create|make|build|generate|write|send|open|show|find|search|calculate|code|fix|बनाओ|बनाइए|जनरेट|लिखो|भेजो|खोलो|दिखाओ|खोजो|सर्च|गणना|कोड|ठीक करो)/i.test(q))return "execute";
+    if(/(plan|steps|roadmap|workflow|योजना|स्टेप|कदम|वर्कफ्लो)/i.test(q))return "plan";
+    if(/(compare|choose|which|best|decide|तुलना|चुनो|कौन|बेहतर|फैसला)/i.test(q))return "decide";
+    return "answer";
+  }
+  function v22Build(text,context){
+    const intent=v22Classify(text);
+    const c=context||{};
+    const state=v22Load();
+    const plan={intent,action:intent==="execute"?"act":intent==="plan"?"decompose":intent==="decide"?"evaluate":"respond",autonomy:intent==="execute"||intent==="continue",confidence:intent==="idle"?.99:.78,contextSignals:[],timestamp:Date.now()};
+    if(c.adaptive)plan.contextSignals.push("adaptive");
+    if(c.predictive)plan.contextSignals.push("predictive");
+    if(c.proactive)plan.contextSignals.push("proactive");
+    state.last=plan;
+    state.count=(state.count||0)+1;
+    state.lastIntent=intent;
+    v22Save(state);
+    return plan;
+  }
+  window.aaruV22GetDecisionPlan=v22Build;
+  window.aaruV22GetExecutionHint=function(plan){
+    const p=plan||{};
+    if(p.intent==="execute"||p.intent==="continue")return "autonomous_execution";
+    if(p.intent==="plan")return "structured_planning";
+    if(p.intent==="decide")return "decision_support";
+    return "direct_response";
+  };
+  window.aaruV22GetState=function(){return v22Load();};
+})();
+</script>
+<script>
+/* AARU AI v23 — GOAL MEMORY & LONG-TERM AGENT STATE */
+(function(){
+  "use strict";
+  const KEY="aaru_goal_state_v23";
+  const MAX_GOALS=24;
+  const MAX_TASKS=80;
+  const VERSION="GOAL-MEMORY-LONG-TERM-AGENT-STATE-V23";
+  window.AARU_V23_GOAL_MEMORY=true;
+  window.AARU_V23_VERSION=VERSION;
+
+  function clean(v){return String(v??"").replace(/\\s+/g," ").trim();}
+  function load(){
+    try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){return {};}
+  }
+  function save(s){
+    try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
+  }
+  function words(t){return clean(t).toLowerCase().split(/\\s+/).filter(Boolean);}
+  function goalIntent(text){
+    const q=clean(text).toLowerCase();
+    if(!q)return "conversation";
+    if(/\\b(i want|i need|i am trying|help me|let's|lets|plan|build|create|make|develop|finish|complete|learn|prepare|organize|fix|solve)\\b|मैं.*(चाहता|चाहती|करना है|बनाना है|पूरा करना है|सीखना है|तैयार करना है|ठीक करना है)/i.test(q))return "goal";
+    if(/\\b(next|continue|resume|again|remaining|pending|where were we|carry on)\\b|\\b(आगे|जारी|फिर से|बाकी|अधूरा|कहाँ थे|वहीं से)\\b/i.test(q))return "resume";
+    return "conversation";
+  }
+  function extractGoal(text){
+    const q=clean(text); if(!q)return "";
+    return q.replace(/^(please|pls|help me|can you|could you|let's|lets|मुझे|कृपया|क्या तुम|क्या आप)[: ,]*/i,"").slice(0,500);
+  }
+  function similarity(a,b){
+    const A=new Set(words(a)),B=new Set(words(b));
+    if(!A.size||!B.size)return 0;
+    let hit=0; A.forEach(x=>{if(B.has(x))hit++;});
+    return hit/Math.max(1,Math.min(A.size,B.size));
+  }
+  function upsertGoal(text,chatId){
+    const s=load(); s.goals=Array.isArray(s.goals)?s.goals:[];
+    const gtext=extractGoal(text); if(!gtext)return null;
+    let g=s.goals.find(g=>similarity(g.title,gtext)>=0.62 && g.status!=="completed");
+    const now=Date.now();
+    if(!g){g={id:"g23_"+now.toString(36)+Math.random().toString(36).slice(2,7),title:gtext,status:"active",progress:0,tasks:[],createdAt:now,updatedAt:now,chatId:chatId||""};s.goals.unshift(g);}
+    else {g.updatedAt=now; if(chatId)g.chatId=chatId;}
+    s.goals=s.goals.slice(0,MAX_GOALS); save(s); return g;
+  }
+  function getActive(){return load().goals?.filter(g=>g.status==="active").sort((a,b)=>b.updatedAt-a.updatedAt)||[];}
+  function getPending(){
+    const out=[];(load().goals||[]).forEach(g=>(g.tasks||[]).forEach(t=>{if(t.status!=="done")out.push({...t,goalId:g.id,goalTitle:g.title});}));
+    return out.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).slice(0,MAX_TASKS);
+  }
+  function buildState(query,chatId){
+    const s=load(), active=getActive(), pending=getPending(), q=clean(query);
+    const related=active.map(g=>({g,score:similarity(g.title,q)})).filter(x=>x.score>=0.35).sort((a,b)=>b.score-a.score).slice(0,3).map(x=>x.g);
+    return {version:VERSION,chatId:chatId||"",intent:goalIntent(q),active:active.slice(0,5).map(g=>({id:g.id,title:g.title,status:g.status,progress:g.progress})),related:related.map(g=>({id:g.id,title:g.title,status:g.status,progress:g.progress})),pending:pending.slice(0,8).map(t=>({title:t.title,status:t.status,goal:t.goalTitle})),goalCount:(s.goals||[]).length};
+  }
+  function hint(state){
+    if(!state)return "";
+    if(state.intent==="resume" && state.pending.length)return "Resume the most relevant pending task before starting a new goal.";
+    if(state.related.length)return "Prefer continuity with the related active goal when the user's request is ambiguous.";
+    if(state.active.length)return "Preserve active-goal continuity unless the user clearly starts a different goal.";
+    return "No strong long-term goal context detected.";
+  }
+  function recordInteraction(query,chatId){
+    const type=goalIntent(query); if(type!=="goal")return null;
+    const g=upsertGoal(query,chatId); return g?g.id:null;
+  }
+  window.aaruV23GoalIntent=goalIntent;
+  window.aaruV23UpsertGoal=upsertGoal;
+  window.aaruV23GetActiveGoals=getActive;
+  window.aaruV23GetPendingTasks=getPending;
+  window.aaruV23BuildGoalState=buildState;
+  window.aaruV23GetGoalHint=hint;
+  window.aaruV23RecordInteraction=recordInteraction;
+
+  /* Wrap the existing request pipeline without replacing earlier layers. */
+  if(typeof window.fetchChatWithRecovery==="function" && !window.AARU_V23_WRAPPED){
+    const prev=window.fetchChatWithRecovery;
+    window.fetchChatWithRecovery=async function(messages,opts){
+      try{
+        const query=(messages||[]).filter(m=>m&&m.role==="user").slice(-1)[0]?.content||"";
+        const chatId=window.currentChatId||window.activeChatId||"";
+        const state=buildState(typeof query==="string"?query:JSON.stringify(query),chatId);
+        const nextOpts=Object.assign({},opts||{}, {client_goal_memory:state,client_goal_hint:hint(state),client_goal_version:VERSION});
+        return await prev(messages,nextOpts);
+      }catch(e){return prev(messages,opts);}
+    };
+    window.AARU_V23_WRAPPED=true;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    try{
+      if(typeof window.handleSend==="function" && !window.AARU_V23_SEND_WRAPPED){
+        const prev=window.handleSend;
+        window.handleSend=async function(){
+          try{
+            const input=document.querySelector("#messageInput,textarea,input[type='text']");
+            const q=input?.value||""; const chatId=window.currentChatId||window.activeChatId||"";
+            if(q)recordInteraction(q,chatId);
+          }catch(e){}
+          return prev.apply(this,arguments);
+        };
+        window.AARU_V23_SEND_WRAPPED=true;
+      }
+    }catch(e){}
+  });
+})();
+</script>
+<script>
+/* AARU AI v25 — GOAL EXECUTION & PROGRESS ENGINE */
+(function(){
+  "use strict";
+  const KEY="aaru_goal_execution_v25";
+  const VERSION="GOAL-EXECUTION-PROGRESS-ENGINE-V24";
+  const MAX_ACTIVE=24, MAX_STEPS=120;
+  window.AARU_V24_GOAL_EXECUTION=true;
+  window.AARU_V24_VERSION=VERSION;
+
+  function clean(v){return String(v??"").replace(/\s+/g," ").trim();}
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){return {};}}
+  function save(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  function now(){return Date.now();}
+  function extractSteps(text){
+    const q=clean(text); if(!q)return [];
+    const parts=q.split(/(?:\.|;|\n|,\s+(?=(?:then|next|and then|फिर|इसके बाद|अगला|और)\b))/i).map(clean).filter(Boolean);
+    return parts.slice(0,8).map((title,i)=>({id:"s24_"+now().toString(36)+"_"+i,title,status:"pending",createdAt:now(),updatedAt:now()}));
+  }
+  function findGoal(state,goalId){return (state.goals||[]).find(g=>g.id===goalId)||null;}
+  function scoreGoal(title,q){
+    const A=new Set(clean(title).toLowerCase().split(/\s+/).filter(Boolean));
+    const B=new Set(clean(q).toLowerCase().split(/\s+/).filter(Boolean));
+    if(!A.size||!B.size)return 0; let n=0; A.forEach(x=>{if(B.has(x))n++;}); return n/Math.max(1,Math.min(A.size,B.size));
+  }
+  function getState(query,chatId){
+    const s=load(), q=clean(query);
+    let goals=Array.isArray(s.goals)?s.goals:[];
+    let active=goals.filter(g=>g.status!=="completed").sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+    let related=active.map(g=>({g,score:scoreGoal(g.title,q)})).sort((a,b)=>b.score-a.score).slice(0,5);
+    return {version:VERSION,chatId:chatId||"",active:active.slice(0,8).map(g=>({id:g.id,title:g.title,status:g.status,progress:g.progress||0,currentStep:g.currentStep||0,totalSteps:(g.steps||[]).length})),related:related.slice(0,3).map(x=>({id:x.g.id,title:x.g.title,score:+x.score.toFixed(2),progress:x.g.progress||0})),pending:active.reduce((n,g)=>n+(g.steps||[]).filter(x=>x.status!=="done").length,0)};
+  }
+  function ensureGoal(title,chatId){
+    const s=load(); s.goals=Array.isArray(s.goals)?s.goals:[]; const q=clean(title); if(!q)return null;
+    let g=s.goals.find(x=>x.title===q && x.status!=="completed");
+    if(!g){g={id:"g24_"+now().toString(36)+Math.random().toString(36).slice(2,6),title:q,status:"active",progress:0,currentStep:0,steps:extractSteps(q),createdAt:now(),updatedAt:now(),chatId:chatId||""};s.goals.unshift(g);}
+    else {g.updatedAt=now(); if(chatId)g.chatId=chatId;}
+    g.steps=(g.steps||[]).slice(0,MAX_STEPS); s.goals=s.goals.slice(0,MAX_ACTIVE); save(s); return g;
+  }
+  function update(goalId,stepIndex,status){
+    const s=load(); const g=findGoal(s,goalId); if(!g)return null;
+    const i=Math.max(0,Math.min((g.steps||[]).length-1,Number(stepIndex)||0)); const step=g.steps?.[i];
+    if(step){step.status=status||"done";step.updatedAt=now();}
+    const total=(g.steps||[]).length, done=(g.steps||[]).filter(x=>x.status==="done").length;
+    g.progress=total?Math.round(done/total*100):Math.min(99,(g.progress||0)+10); g.currentStep=Math.min(total,done); g.updatedAt=now();
+    if(total&&done>=total)g.status="completed";
+    save(s); return g;
+  }
+  function buildExecutionPlan(query,chatId){
+    const state=getState(query,chatId); const target=state.related[0]||state.active[0]||null;
+    return {version:VERSION,goal:target,action:target?(target.currentStep<target.totalSteps?"continue":"review"):"create",nextStep:target?target.currentStep+1:1,shouldExecute:!!target,progress:target?.progress||0};
+  }
+  function hint(plan){
+    if(!plan)return "";
+    if(plan.action==="continue")return "Continue the active goal from its next pending step; avoid repeating completed work.";
+    if(plan.action==="review")return "Review the completed goal and confirm whether a follow-up is needed.";
+    return "If the user expresses a new goal, establish a concise execution path before acting.";
+  }
+  window.aaruV24GetGoalExecutionState=getState;
+  window.aaruV24EnsureGoal=ensureGoal;
+  window.aaruV24UpdateGoalProgress=update;
+  window.aaruV24BuildExecutionPlan=buildExecutionPlan;
+  window.aaruV24GetExecutionHint=hint;
+
+  if(typeof window.fetchChatWithRecovery==="function" && !window.AARU_V24_WRAPPED){
+    const prev=window.fetchChatWithRecovery;
+    window.fetchChatWithRecovery=async function(messages,opts){
+      try{
+        const query=(messages||[]).filter(m=>m&&m.role==="user").slice(-1)[0]?.content||"";
+        const chatId=window.currentChatId||window.activeChatId||"";
+        const plan=buildExecutionPlan(typeof query==="string"?query:JSON.stringify(query),chatId);
+        window.AARU_V24_LAST_PLAN=plan;
+        const nextOpts=Object.assign({},opts||{}, {client_goal_execution_version:VERSION,client_goal_execution_state:getState(query,chatId),client_goal_execution_plan:plan,client_goal_execution_hint:hint(plan)});
+        return await prev(messages,nextOpts);
+      }catch(e){return prev(messages,opts);}
+    };
+    window.AARU_V24_WRAPPED=true;
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    try{
+      if(typeof window.handleSend==="function" && !window.AARU_V24_SEND_WRAPPED){
+        const prev=window.handleSend;
+        window.handleSend=async function(){
+          try{
+            const input=document.querySelector("#messageInput,textarea,input[type='text']");
+            const q=input?.value||""; const chatId=window.currentChatId||window.activeChatId||"";
+            if(q && typeof window.aaruV24EnsureGoal==="function" && /\b(build|create|develop|finish|complete|plan|fix|solve|learn|prepare|make)\b|\b(बनाना|पूरा|प्लान|ठीक|सीखना|तैयार|करना है)\b/i.test(q)) window.aaruV24EnsureGoal(q,chatId);
+          }catch(e){}
+          return prev.apply(this,arguments);
+        };
+        window.AARU_V24_SEND_WRAPPED=true;
+      }
+    }catch(e){}
+  });
+})();
+</script>
+
+<script>
+/* AARU AI v25 — Advanced Memory & Knowledge Graph */
+window.AARU_V25_KNOWLEDGE_GRAPH=true;
+window.AARU_V25_VERSION="ADVANCED-MEMORY-KNOWLEDGE-GRAPH-V25";
+window.aaruV25BuildKnowledgeGraph=function(messages){
+  const list=Array.isArray(messages)?messages:[]; const nodes=[];
+  list.slice(-120).forEach((m,i)=>{const t=String(m?.content||m?.text||'').trim(); if(t) nodes.push({id:'m'+i,type:'message',text:t.slice(0,500)});});
+  return {version:window.AARU_V25_VERSION,nodes:nodes.slice(-60),edges:[],count:nodes.length};
+};
+window.aaruV25MemoryHint=function(graph){return graph&&graph.count?`knowledge_graph_nodes:${graph.count}`:'knowledge_graph_empty';};
+</script>
+<script>
+/* =========================================================
+   AARU AI v26 — MULTI-STEP AGENT WORKFLOW ENGINE
+   Preserves v1-v25. Worker remains unchanged.
+========================================================= */
+window.AARU_V26_MULTI_STEP_WORKFLOW=true;
+window.AARU_V26_VERSION="MULTI-STEP-AGENT-WORKFLOW-V26";
+window.AARU_V26_STATE_KEY="aaru_multi_step_workflow_v26";
+window.AARU_V26_MAX_STEPS=12;
+
+(function(){
+  function text(v){return cleanAaruText(String(v||"")).trim();}
+  function load(){try{return JSON.parse(localStorage.getItem(window.AARU_V26_STATE_KEY)||"null")}catch(_){return null}}
+  function save(v){try{localStorage.setItem(window.AARU_V26_STATE_KEY,JSON.stringify(v));return true}catch(_){return false}}
+  function keywords(q){
+    return text(q).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(x=>x.length>2).slice(0,24);
+  }
+  function build(query, messages, taskPlan, goalState){
+    const q=text(query), lower=q.toLowerCase(), steps=[];
+    const complex=/(and then|then|after that|first|next|finally|step|steps|plan|workflow|research|compare|analyze|analyse|implement|build|develop|तब|फिर|उसके बाद|पहले|अगला|अंत में|स्टेप|कदम|योजना|रिसर्च|तुलना|विश्लेषण|बनाओ|बनाइए|डेवलप|तैयार)/i.test(lower);
+    const parts=q.split(/\s*(?:=>|->|→|;|\n)\s*/).map(text).filter(Boolean).slice(0,window.AARU_V26_MAX_STEPS);
+    if(parts.length>1) parts.forEach((p,i)=>steps.push({id:i+1,title:p.slice(0,180),status:i===0?"active":"pending"}));
+    else if(complex && taskPlan && Array.isArray(taskPlan.steps) && taskPlan.steps.length){
+      taskPlan.steps.slice(0,window.AARU_V26_MAX_STEPS).forEach((p,i)=>steps.push({id:i+1,title:text(p?.title||p?.description||p).slice(0,180),status:i===0?"active":"pending"}));
+    } else if(complex){
+      ["Understand the request","Plan the required work","Execute the necessary steps","Verify the result"].forEach((p,i)=>steps.push({id:i+1,title:p,status:i===0?"active":"pending"}));
+    }
+    const state=load()||{version:window.AARU_V26_VERSION,goalId:null,query:"",steps:[],completed:0,updatedAt:0};
+    const activeGoal=goalState?.activeGoal||goalState?.goal||null;
+    const goalId=activeGoal?.id||state.goalId||null;
+    return {version:window.AARU_V26_VERSION,active:steps.length>0||!!goalId,goalId,query:q.slice(0,500),keywords:keywords(q),steps,completed:steps.filter(x=>x.status==="done").length,remaining:steps.filter(x=>x.status!=="done").length,strategy:steps.length>1?"sequential":"direct",updatedAt:Date.now()};
+  }
+  function compact(w){
+    if(!w)return "";
+    return JSON.stringify({version:w.version,active:!!w.active,goalId:w.goalId||null,strategy:w.strategy,completed:w.completed||0,remaining:w.remaining||0,steps:(w.steps||[]).slice(0,window.AARU_V26_MAX_STEPS).map(s=>({id:s.id,title:s.title,status:s.status}))}).slice(0,5000);
+  }
+  function saveWorkflow(w){if(!w)return false; return save(w)}
+  function mark(stepId,status){
+    const w=load(); if(!w)return null;
+    const n=Number(stepId); if(Number.isFinite(n)){const step=w.steps?.find(x=>x.id===n);if(step)step.status=status||"done";}
+    w.completed=(w.steps||[]).filter(x=>x.status==="done").length; w.remaining=(w.steps||[]).filter(x=>x.status!=="done").length; w.updatedAt=Date.now(); save(w); return w;
+  }
+  function hint(w){
+    if(!w?.active)return "workflow:direct";
+    const next=(w.steps||[]).find(x=>x.status!=="done");
+    return `workflow:${w.strategy||"sequential"};completed:${w.completed||0};remaining:${w.remaining||0};next:${text(next?.title||"").slice(0,180)}`;
+  }
+  window.aaruV26BuildWorkflow=build;
+  window.aaruV26CompactWorkflow=compact;
+  window.aaruV26SaveWorkflow=saveWorkflow;
+  window.aaruV26MarkWorkflowStep=mark;
+  window.aaruV26GetWorkflowHint=hint;
+  window.aaruV26GetWorkflowState=load;
+  window.aaruV26ResetWorkflow=function(){try{localStorage.removeItem(window.AARU_V26_STATE_KEY)}catch(_){} return true};
+})();
+</script>
+
+<script>
+/* AARU AI v27 — Self-Evaluation & Quality Control */
+window.AARU_V27_SELF_EVALUATION = true;
+window.AARU_V27_VERSION = "SELF-EVALUATION-QUALITY-CONTROL-V27";
+window.AARU_V27_QC_KEY = "aaru_self_evaluation_qc_v27";
+
+function aaruV27Normalize(text){
+  return typeof cleanAaruText === "function" ? cleanAaruText(text || "") : String(text || "").trim();
+}
+function aaruV27EvaluateResponse(query, answer){
+  const q=aaruV27Normalize(query), a=aaruV27Normalize(answer);
+  const checks={
+    hasAnswer:a.length>0,
+    notTruncated:!/[…]$/.test(a) && a.length>8,
+    addressesQuery:q.length===0 || a.length>0,
+    likelyError:/(failed|error|exception|something went wrong|couldn't|cannot process|quota|429|502|error al|fehler|erreur|त्रुटि|समस्या)/i.test(a),
+    tooShort:q.length>80 && a.length<25,
+    repetition:false
+  };
+  const words=a.toLowerCase().split(/\s+/).filter(Boolean);
+  if(words.length>=12){
+    const tail=words.slice(-Math.min(30,words.length));
+    const unique=new Set(tail).size;
+    checks.repetition=(tail.length-unique)/tail.length>.55;
+  }
+  let score=1;
+  if(!checks.hasAnswer)score-=.45;
+  if(!checks.notTruncated)score-=.08;
+  if(!checks.addressesQuery)score-=.12;
+  if(checks.likelyError)score-=.35;
+  if(checks.tooShort)score-=.12;
+  if(checks.repetition)score-=.18;
+  score=Math.max(0,Math.min(1,score));
+  return {score:Number(score.toFixed(2)),checks,needsReview:score<.62};
+}
+function aaruV27LoadQC(){
+  try{return JSON.parse(localStorage.getItem(window.AARU_V27_QC_KEY)||"{}")||{};}catch(e){return {};}
+}
+function aaruV27SaveQC(state){
+  try{localStorage.setItem(window.AARU_V27_QC_KEY,JSON.stringify(state));}catch(e){}
+}
+function aaruV27RecordEvaluation(query,answer,meta){
+  const state=aaruV27LoadQC();
+  state.version=window.AARU_V27_VERSION;
+  state.total=Number(state.total||0)+1;
+  if(meta && meta.needsReview)state.review=Number(state.review||0)+1;
+  state.last={at:Date.now(),score:meta?.score||0,needsReview:!!meta?.needsReview,query:aaruV27Normalize(query).slice(0,240)};
+  state.average=Number((((Number(state.average)||0)*(state.total-1)+(meta?.score||0))/state.total).toFixed(3));
+  aaruV27SaveQC(state);
+  window.AARU_V27_LAST_EVALUATION=meta;
+  return state;
+}
+function aaruV27BuildQualityHint(query,answer){
+  const result=aaruV27EvaluateResponse(query,answer);
+  return result.needsReview
+    ? "quality_review: verify answer completeness, relevance, and error signals before treating the response as final"
+    : "quality_pass: response appears complete and coherent";
+}
+function aaruV27GetQualityState(){
+  const s=aaruV27LoadQC();
+  return {version:window.AARU_V27_VERSION,total:Number(s.total||0),review:Number(s.review||0),average:Number(s.average||0),last:s.last||null};
+}
+</script>
+
+<script>
+(function(){
+  const original=window.normalizeChatResult;
+  if(typeof original!=="function" || original.__aaruV27Wrapped)return;
+  function wrapped(){
+    const result=original.apply(this,arguments);
+    try{
+      const query=window.AARU_V27_LAST_QUERY || window.AARU_V27_PENDING_QUERY || "";
+      const text=result && (result.text || result.content || result.message || "");
+      if(text){
+        const evaluation=aaruV27EvaluateResponse(query,text);
+        aaruV27RecordEvaluation(query,text,evaluation);
+      }
+    }catch(e){}
+    return result;
+  }
+  wrapped.__aaruV27Wrapped=true;
+  window.normalizeChatResult=wrapped;
+})();
+</script>
+
+<script>
+/* AARU_V27_SEND_WRAPPER */
+(function(){
+  const fn=window.sendChatRequest;
+  if(typeof fn!=="function" || fn.__aaruV27Wrapped)return;
+  async function wrappedSendChatRequest(){
+    const args=[...arguments];
+    try{
+      const q=typeof args[0]==="string"?args[0]:window.AARU_V27_LAST_QUERY||"";
+      window.AARU_V27_LAST_QUERY=q;
+    }catch(e){}
+    return fn.apply(this,args);
+  }
+  wrappedSendChatRequest.__aaruV27Wrapped=true;
+  window.sendChatRequest=wrappedSendChatRequest;
+})();
+</script>
+
+<!-- AARU_V28_ADVANCED_PERSONALIZATION -->
+<script>
+/* Aaru AI v28 — Advanced Personalization & Behavioral Intelligence */
+window.AARU_V28_PERSONALIZATION=true;
+window.AARU_V28_VERSION="ADVANCED-PERSONALIZATION-BEHAVIOR-V28";
+const AARU_V28_KEY="aaru_advanced_personalization_v28";
+function aaruV28GetProfile(){
+  try{const x=JSON.parse(localStorage.getItem(AARU_V28_KEY)||"{}");return {verbosity:x.verbosity||"balanced",tone:x.tone||"natural",format:x.format||"adaptive",detail:x.detail||"adaptive",corrections:x.corrections||0,signals:x.signals||{},confidence:Number(x.confidence)||.72};}catch(e){return {verbosity:"balanced",tone:"natural",format:"adaptive",detail:"adaptive",corrections:0,signals:{},confidence:.72};}
+}
+function aaruV28InferProfile(text){
+ const q=String(text||"").trim().toLowerCase(), p=aaruV28GetProfile();
+ if(q.length<35) p.verbosity="concise";
+ if(/(detail|detailed|deep|thorough|विस्तार|विस्तार से|डिटेल|गहराई)/i.test(q))p.detail="high";
+ if(/(short|brief|quick|संक्षेप|छोटा|कम)/i.test(q))p.verbosity="concise";
+ if(/(formal|professional|औपचारिक|प्रोफेशनल)/i.test(q))p.tone="professional";
+ if(/(casual|friendly|दोस्ताना|मजेदार)/i.test(q))p.tone="friendly";
+ if(/(list|steps|bullet|सूची|स्टेप)/i.test(q))p.format="structured";
+ return p;
+}
+function aaruV28PersistProfile(p){try{localStorage.setItem(AARU_V28_KEY,JSON.stringify({...p,updatedAt:Date.now()}));}catch(e){}}
+function aaruV28BuildHint(text){
+ const p=aaruV28InferProfile(text); aaruV28PersistProfile(p);
+ return `Personalization: verbosity=${p.verbosity}; tone=${p.tone}; format=${p.format}; detail=${p.detail}; adapt naturally without mentioning these settings.`;
+}
+window.aaruV28GetProfile=aaruV28GetProfile; window.aaruV28InferProfile=aaruV28InferProfile; window.aaruV28BuildHint=aaruV28BuildHint;
+</script>
+
+
+<script>
+/* AARU AI v29 — FULL NATIVE TOOL ORCHESTRATION */
+(function(){
+  "use strict";
+  const KEY="aaru_native_tool_orchestration_v29";
+  const VERSION="FULL-NATIVE-TOOL-ORCHESTRATION-V29";
+  const MAX_EVENTS=80;
+  const TOOLS=["web_search","image_generation","code_interpreter","file_search","computer"];
+  window.AARU_V29_NATIVE_ORCHESTRATION=true;
+  window.AARU_V29_VERSION=VERSION;
+
+  function clean(v){return String(v??"").replace(/\s+/g," ").trim();}
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){return {};}}
+  function save(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  function now(){return Date.now();}
+
+  function detectTools(text,hasImage,hasPdf){
+    const q=clean(text).toLowerCase();
+    const selected=[];
+    if(hasImage || /(image|picture|photo|draw|generate.*image|इमेज|तस्वीर|फोटो|चित्र|बनाओ|जनरेट)/i.test(q)) selected.push("image_generation");
+    if(hasPdf || /(pdf|document|file|फ़ाइल|फाइल|दस्तावेज)/i.test(q)) selected.push("file_search");
+    if(/(calculate|calculation|math|code|debug|program|script|data|csv|कैलकुलेट|गणना|कोड|डिबग|प्रोग्राम|डेटा)/i.test(q)) selected.push("code_interpreter");
+    if(/(latest|current|today|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर|चुनाव)/i.test(q)) selected.push("web_search");
+    if(/(click|open|navigate|browser|website|page|क्लिक|खोलो|वेबसाइट|पेज)/i.test(q)) selected.push("computer");
+    return [...new Set(selected)].filter(t=>TOOLS.includes(t));
+  }
+
+  function buildPlan(text,hasImage,hasPdf){
+    const q=clean(text), detected=detectTools(q,hasImage,hasPdf);
+    const primary=detected[0]||null;
+    const mode=detected.length>1?"multi-tool":primary?"single-tool":"model-only";
+    return {version:VERSION,mode,primary,tools:detected,allowModelDecision:true,parallelSafe:detected.filter(x=>x!=="computer").length>1,reason:q.length>400?"complex":"standard",confidence:detected.length?0.91:0.74};
+  }
+
+  function compact(plan){
+    if(!plan)return "";
+    return JSON.stringify({mode:plan.mode,primary:plan.primary,tools:plan.tools,parallelSafe:!!plan.parallelSafe,allowModelDecision:true,confidence:plan.confidence});
+  }
+  function hint(plan){
+    if(!plan||!plan.tools?.length)return "Let the model choose native tools when the request requires capabilities beyond text generation.";
+    return `Native tool orchestration candidate: ${plan.tools.join(", ")}. Prefer the minimum necessary tool set and let the model make the final tool decision.`;
+  }
+  function record(plan,ok){
+    const s=load(); s.events=Array.isArray(s.events)?s.events:[];
+    s.events.unshift({ts:now(),tools:plan?.tools||[],mode:plan?.mode||"model-only",ok:!!ok});
+    s.events=s.events.slice(0,MAX_EVENTS); s.count=(s.count||0)+1; save(s);
+  }
+  function state(){
+    const s=load();
+    return {version:VERSION,count:Number(s.count||0),recent:(s.events||[]).slice(0,8),availableTools:TOOLS};
+  }
+
+  window.aaruV29DetectTools=detectTools;
+  window.aaruV29BuildToolPlan=buildPlan;
+  window.aaruV29CompactToolPlan=compact;
+  window.aaruV29GetToolHint=hint;
+  window.aaruV29RecordToolEvent=record;
+  window.aaruV29GetToolState=state;
+
+  if(typeof window.fetchChatWithRecovery==="function" && !window.AARU_V29_WRAPPED){
+    const prev=window.fetchChatWithRecovery;
+    window.fetchChatWithRecovery=async function(messages,opts){
+      const query=(messages||[]).filter(m=>m&&m.role==="user").slice(-1)[0]?.content||"";
+      const hasImage=!!window.selectedPhotoBase64;
+      const hasPdf=!!window.selectedPdfText;
+      const plan=buildPlan(typeof query==="string"?query:JSON.stringify(query),hasImage,hasPdf);
+      window.AARU_V29_LAST_PLAN=plan;
+      const nextOpts=Object.assign({},opts||{},{
+        client_native_tool_orchestration_version:VERSION,
+        client_native_tool_orchestration_plan:compact(plan),
+        client_native_tool_orchestration_hint:hint(plan),
+        client_native_tool_orchestration_tools:plan.tools.join(","),
+        client_native_tool_orchestration_mode:plan.mode,
+        client_native_tool_orchestration_confidence:plan.confidence
+      });
+      try{
+        const response=await prev(messages,nextOpts);
+        record(plan,true);
+        return response;
+      }catch(e){record(plan,false);throw e;}
+    };
+    window.AARU_V29_WRAPPED=true;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    try{
+      const input=document.querySelector("#messageInput,textarea,input[type='text']");
+      if(input && !input.__aaruV29Bound){
+        input.addEventListener("input",function(){
+          try{window.AARU_V29_LIVE_PLAN=buildPlan(input.value,!!window.selectedPhotoBase64,!!window.selectedPdfText);}catch(e){}
+        });
+        input.__aaruV29Bound=true;
+      }
+    }catch(e){}
+  });
+})();
+</script>
+\n\n<script>
+/* AARU AI v30 — UNIFIED AGENT ARCHITECTURE */
+(function(){
+  "use strict";
+  const VERSION="UNIFIED-AGENT-ARCHITECTURE-V30";
+  const KEY="aaru_unified_agent_runtime_v30";
+  const MAX_EVENTS=100;
+  window.AARU_V30_UNIFIED_AGENT=true;
+  window.AARU_V30_VERSION=VERSION;
+
+  function clean(v){return String(v??"").replace(/\s+/g," ").trim();}
+  function now(){return Date.now();}
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){return {};}}
+  function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));}catch(e){}}
+
+  function getLayerState(){
+    return {
+      adaptive:!!window.AARU_V19_ADAPTIVE,
+      predictive:!!window.AARU_V20_PREDICTIVE,
+      proactive:!!window.AARU_V21_PROACTIVE,
+      autonomous:!!window.AARU_V22_AUTONOMOUS,
+      goals:!!window.AARU_V23_GOAL_MEMORY,
+      execution:!!window.AARU_V24_GOAL_EXECUTION,
+      knowledge:!!window.AARU_V25_ADVANCED_MEMORY,
+      workflow:!!window.AARU_V26_MULTI_STEP_WORKFLOW,
+      quality:!!window.AARU_V27_SELF_EVALUATION,
+      personalization:!!window.AARU_V28_PERSONALIZATION,
+      orchestration:!!window.AARU_V29_NATIVE_ORCHESTRATION
+    };
+  }
+
+  function detectIntent(text){
+    const q=clean(text).toLowerCase();
+    if(!q)return "empty";
+    if(/(latest|current|today|now|live|recent|news|search|web|price|weather|score|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर)/i.test(q))return "current_information";
+    if(/(image|picture|photo|draw|generate.*image|इमेज|तस्वीर|फोटो|चित्र|बनाओ|जनरेट)/i.test(q))return "image_generation";
+    if(/(calculate|calculation|math|code|debug|program|script|csv|data|कैलकुलेट|गणना|कोड|डिबग|प्रोग्राम|डेटा)/i.test(q))return "analysis_or_code";
+    if(/(plan|build|create|make|develop|implement|continue|finish|complete|योजना|बनाओ|बनाइए|तैयार|जारी|पूरा|विकसित)/i.test(q))return "task_execution";
+    if(/(explain|compare|research|analy[sz]e|विश्लेषण|तुलना|रिसर्च|समझाओ|समझाइए)/i.test(q))return "deep_reasoning";
+    return "conversation";
+  }
+
+  function buildRuntime(text,hasImage,hasPdf){
+    const intent=detectIntent(text);
+    let toolPlan=null;
+    try{
+      if(typeof window.aaruV29BuildToolPlan==="function") toolPlan=window.aaruV29BuildToolPlan(text,hasImage,hasPdf);
+    }catch(e){}
+    let goal=null, workflow=null, adaptive=null, proactive=null;
+    try{if(typeof window.aaruV23GetGoalState==="function")goal=window.aaruV23GetGoalState();}catch(e){}
+    try{if(typeof window.aaruV26GetWorkflowState==="function")workflow=window.aaruV26GetWorkflowState();}catch(e){}
+    try{if(typeof window.aaruV19GetAdaptiveProfile==="function")adaptive=window.aaruV19GetAdaptiveProfile(text,[]);}catch(e){}
+    try{if(typeof window.aaruV21BuildProactivePlan==="function")proactive=window.aaruV21BuildProactivePlan(text);}catch(e){}
+    return {version:VERSION,intent,toolPlan,goal,workflow,adaptive,proactive,attachments:{image:!!hasImage,pdf:!!hasPdf},timestamp:now()};
+  }
+
+  function compact(runtime){
+    if(!runtime)return "";
+    return JSON.stringify({version:VERSION,intent:runtime.intent,tools:runtime.toolPlan?.tools||[],mode:runtime.toolPlan?.mode||"model-only",goal:runtime.goal?.activeGoal||runtime.goal?.goal||null,workflow:runtime.workflow?.status||runtime.workflow?.active||null,adaptive:runtime.adaptive?{verbosity:runtime.adaptive.verbosity,tone:runtime.adaptive.tone,reasoning:runtime.adaptive.reasoning}:null,attachments:runtime.attachments});
+  }
+
+  function saveEvent(runtime,ok){
+    const s=load();
+    s.events=Array.isArray(s.events)?s.events:[];
+    s.events.unshift({ts:now(),intent:runtime?.intent||"empty",tools:runtime?.toolPlan?.tools||[],ok:!!ok});
+    s.events=s.events.slice(0,MAX_EVENTS);
+    s.count=Number(s.count||0)+1;
+    s.last=s.events[0]||null;
+    save(s);
+  }
+
+  function health(){
+    const layers=getLayerState(), values=Object.values(layers);
+    const active=values.filter(Boolean).length;
+    return {version:VERSION,activeLayers:active,totalLayers:values.length,coverage:values.length?Math.round(active/values.length*100):0,online:navigator.onLine!==false,lastEvent:load().last||null};
+  }
+
+  window.aaruV30GetLayerState=getLayerState;
+  window.aaruV30DetectIntent=detectIntent;
+  window.aaruV30BuildRuntime=buildRuntime;
+  window.aaruV30CompactRuntime=compact;
+  window.aaruV30GetHealth=health;
+
+  if(typeof window.fetchChatWithRecovery==="function" && !window.AARU_V30_WRAPPED){
+    const prev=window.fetchChatWithRecovery;
+    window.fetchChatWithRecovery=async function(messages,opts){
+      const last=(messages||[]).filter(m=>m&&m.role==="user").slice(-1)[0];
+      const raw=last?.content;
+      const text=typeof raw==="string"?raw:JSON.stringify(raw??"");
+      const runtime=buildRuntime(text,!!window.selectedPhotoBase64,!!window.selectedPdfText);
+      window.AARU_V30_LAST_RUNTIME=runtime;
+      const nextOpts=Object.assign({},opts||{}, {
+        client_unified_agent_version:VERSION,
+        client_unified_agent_intent:runtime.intent,
+        client_unified_agent_runtime:compact(runtime),
+        client_unified_agent_health:JSON.stringify(health()),
+        client_unified_agent_model_decision:true
+      });
+      try{const response=await prev(messages,nextOpts);saveEvent(runtime,true);return response;}
+      catch(e){saveEvent(runtime,false);throw e;}
+    };
+    window.AARU_V30_WRAPPED=true;
+  }
+
+  window.addEventListener("online",function(){window.AARU_V30_LAST_NETWORK="online";});
+  window.addEventListener("offline",function(){window.AARU_V30_LAST_NETWORK="offline";});
+})();
+</script>
 </body>
 </html>
