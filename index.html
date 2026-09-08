@@ -1,2743 +1,5989 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<title>Aaru AI — GPT-6 Astra</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-<style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
+  <style>
 *{
- box-sizing:border-box;
- -webkit-tap-highlight-color:transparent
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
- margin:0;
- min-height:100%;
- background:#000;
- color:#fff;
- font-family:Arial,Helvetica,sans-serif
+html{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  overflow-x:clip;
+  overflow-y:auto;
+  overscroll-behavior-y:auto;
 }
 
-body{overflow-x:hidden}
+body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100dvh;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f7f9fc;
+  color:#172033;
+  overflow-x:clip;
+  overflow-y:auto;
+  overscroll-behavior-y:auto;
+}
 
 button,
 input,
-select,
 textarea{
- font:inherit
+  font:inherit;
 }
 
 button{
- color:#fff;
- cursor:pointer
-}
-
-.app{
- min-height:100dvh;
- display:flex;
- flex-direction:column
-}
-
-.header{
- height:58px;
- position:sticky;
- top:0;
- z-index:50;
- display:flex;
- align-items:center;
- gap:10px;
- padding:0 12px;
- background:#000;
- border-bottom:1px solid #222
-}
-
-.brand{
- flex:1;
- min-width:0
-}
-
-.brand-name{
- font-size:18px;
- font-weight:800
-}
-
-.brand-sub{
- font-size:10px;
- opacity:.45
-}
-
-.icon,
-.action{
- border:1px solid #333;
- background:#111;
- border-radius:11px
-}
-
-.icon{
- width:40px;
- height:40px;
- font-size:18px
-}
-
-.icon:active,
-.action:active,
-.small:active{
- transform:scale(.96)
+  -webkit-user-select:none;
+  user-select:none;
 }
 
 main{
- flex:1
+  position:relative;
+  flex:1 0 auto;
+  min-height:calc(100dvh - 58px);
+  overflow:visible;
+  scroll-behavior:smooth;
 }
 
-.chat{
- max-width:900px;
- margin:auto;
- padding:18px 12px 150px
+.app{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:58px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  background:rgba(255,255,255,.96);
+  border-bottom:1px solid rgba(20,35,60,.10);
+  backdrop-filter:blur(14px);
+}
+
+.menu-btn{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:#eef2f7;
+  color:#172033;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.brand{
+  min-width:0;
+  flex:1;
+}
+
+.brand-name{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.brand-sub{
+  margin-top:1px;
+  font-size:10px;
+  opacity:.45;
+}
+
+.new-chat-top{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:#eef2f7;
+  color:#172033;
+  font-size:21px;
+  cursor:pointer;
+}
+
+.drawer-overlay{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(0,0,0,.58);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+}
+
+.drawer-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.drawer{
+  position:fixed;
+  z-index:210;
+  top:0;
+  left:0;
+  bottom:0;
+  width:min(88vw,340px);
+  background:#151821;
+  border-right:1px solid rgba(255,255,255,.07);
+  transform:translateX(-105%);
+  transition:.22s ease;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.drawer.open{
+  transform:translateX(0);
+}
+
+.drawer-head{
+  height:58px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  border-bottom:1px solid rgba(20,35,60,.10);
+}
+
+.drawer-title{
+  flex:1;
+  font-size:17px;
+  font-weight:800;
+}
+
+.close-drawer{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:11px;
+  background:#eef2f7;
+  color:#172033;
+  font-size:21px;
+}
+
+.drawer-body{
+  flex:1;
+  overflow-y:auto;
+  padding:12px;
+}
+
+.drawer-action{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:0;
+  color:#172033;
+  background:rgba(255,255,255,.055);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:8px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.drawer-action:hover{
+  background:rgba(255,255,255,.09);
+}
+
+.section-title{
+  margin:18px 4px 9px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  opacity:.4;
+}
+
+.chat-history{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.chat-history-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:10px;
+  border-radius:11px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.chat-history-item:hover{
+  background:rgba(255,255,255,.055);
+}
+
+.chat-history-item.active{
+  background:rgba(255,255,255,.085);
+}
+
+.chat-history-info{
+  min-width:0;
+  flex:1;
+}
+
+.chat-history-title{
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-history-meta{
+  margin-top:3px;
+  font-size:10px;
+  opacity:.4;
+}
+
+.delete-chat{
+  width:30px;
+  height:30px;
+  flex:none;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#172033;
+  opacity:.48;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.delete-chat:hover{
+  opacity:1;
+  background:rgba(255,70,70,.13);
+}
+
+.empty-history{
+  padding:15px 10px;
+  font-size:12px;
+  opacity:.4;
+  line-height:1.5;
+}
+
+.chat-wrap{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:18px 12px 155px;
 }
 
 .messages{
- display:flex;
- flex-direction:column;
- gap:14px
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
-.msg{
- display:flex
+.message{
+  width:100%;
+  display:flex;
 }
 
-.msg.user{
- justify-content:flex-end
+.message.user{
+  justify-content:flex-end;
 }
 
-.msg.assistant{
- justify-content:flex-start
+.message.assistant{
+  justify-content:flex-start;
 }
 
 .bubble{
- max-width:min(86%,720px);
- padding:11px 14px;
- border-radius:17px;
- line-height:1.55;
- font-size:15px;
- word-break:break-word;
- user-select:text
+  max-width:min(85%,720px);
+  padding:11px 14px;
+  border-radius:17px;
+  font-size:15px;
+  line-height:1.55;
+  word-break:break-word;
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
+  cursor:text;
 }
 
-.user .bubble{
- background:#fff;
- color:#000;
- border-bottom-right-radius:5px
+.message.user .bubble,
+.message.assistant .bubble{
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+  touch-action:auto;
 }
 
-.assistant .bubble{
- background:#111;
- color:#fff;
- border:1px solid #292929;
- border-bottom-left-radius:5px
+.message.user .bubble{
+  background:#245eea;
+  border-bottom-right-radius:5px;
 }
 
-.md p{
- margin:0 0 9px
+.message.assistant .bubble{
+  background:#191d27;
+  border:1px solid rgba(255,255,255,.055);
+  border-bottom-left-radius:5px;
 }
 
-.md p:last-child{
- margin:0
+.message.system .bubble{
+  background:rgba(255,255,255,.05);
 }
 
 .md h1,
 .md h2,
 .md h3{
- margin:12px 0 7px
+  margin:14px 0 8px;
+  line-height:1.25;
+}
+
+.md h1{font-size:22px}
+.md h2{font-size:19px}
+.md h3{font-size:17px}
+
+.md p{
+  margin:0 0 9px;
+}
+
+.md p:last-child{
+  margin-bottom:0;
 }
 
 .md ul,
 .md ol{
- padding-left:22px
+  margin:7px 0 10px;
+  padding-left:22px;
 }
 
-.md pre{
- background:#050505;
- border:1px solid #292929;
- padding:12px;
- border-radius:10px;
- overflow:auto;
- white-space:pre-wrap
+.md li{
+  margin:4px 0;
 }
 
-.md code{
- background:#080808;
- padding:2px 5px;
- border-radius:4px
+.md blockquote{
+  margin:10px 0;
+  padding:7px 12px;
+  border-left:3px solid #777;
+  background:rgba(255,255,255,.04);
+  opacity:.9;
 }
 
 .md a{
- color:#fff;
- text-decoration:underline
+  color:#71a7ff;
+  text-decoration:underline;
 }
 
-.msg img{
- max-width:100%;
- border-radius:12px;
- margin-top:7px;
- cursor:pointer
+.md code{
+  padding:2px 5px;
+  border-radius:5px;
+  background:#0d1016;
+  font-family:monospace;
+  font-size:.92em;
+}
+
+.md pre{
+  margin:10px 0;
+  padding:12px;
+  overflow:auto;
+  border-radius:10px;
+  background:#0b0e13;
+  border:1px solid rgba(255,255,255,.07);
+  white-space:pre;
+}
+
+.md pre code{
+  padding:0;
+  background:transparent;
+}
+
+.attached-user-image{
+  display:block;
+  width:min(100%,320px);
+  max-height:360px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:7px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.generated-image{
+  display:block;
+  width:100%;
+  max-width:720px;
+  border-radius:14px;
+  margin-top:8px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.image-note{
+  margin-top:7px;
+  font-size:11px;
+  opacity:.42;
 }
 
 .typing{
- opacity:.6
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 2px;
 }
 
-.tool{
- font-size:10px;
- opacity:.55;
- margin-bottom:5px
+.typing span{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#fff;
+  opacity:.35;
+  animation:typing 1s infinite;
+}
+
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+
+@keyframes typing{
+  0%,70%,100%{
+    transform:translateY(0);
+    opacity:.25;
+  }
+  35%{
+    transform:translateY(-4px);
+    opacity:.8;
+  }
 }
 
 .composer-shell{
- position:fixed;
- left:0;
- right:0;
- bottom:0;
- z-index:40;
- padding:8px 10px calc(8px + env(safe-area-inset-bottom));
- background:linear-gradient(transparent,#000 35%)
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:120;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:linear-gradient(
+    to bottom,
+    rgba(15,17,23,0),
+    rgba(15,17,23,.94) 22%,
+    #0f1117 48%
+  );
 }
 
 .composer{
- max-width:900px;
- margin:auto;
- background:#0b0b0b;
- border:1px solid #333;
- border-radius:18px;
- padding:8px
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  border:1px solid rgba(255,255,255,.1);
+  background:#171a23;
+  border-radius:18px;
+  padding:8px;
+  box-shadow:0 8px 35px rgba(0,0,0,.25);
+}
+
+.photo-preview{
+  display:none;
+  position:relative;
+  width:74px;
+  height:74px;
+  margin:3px 3px 8px;
+}
+
+.photo-preview.show{
+  display:block;
+}
+
+.photo-preview img{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.remove-photo{
+  position:absolute;
+  right:-6px;
+  top:-6px;
+  width:23px;
+  height:23px;
+  border:0;
+  border-radius:50%;
+  background:#ef4444;
+  color:#172033;
+  font-size:15px;
 }
 
 .input-row{
- display:flex;
- align-items:flex-end;
- gap:6px
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
 }
 
-textarea{
- flex:1;
- min-width:0;
- min-height:42px;
- max-height:150px;
- resize:none;
- border:0;
- outline:0;
- background:transparent;
- color:#fff;
- padding:10px 7px
+#prompt{
+  flex:1;
+  min-width:0;
+  min-height:42px;
+  max-height:150px;
+  resize:none;
+  border:0;
+  outline:0;
+  color:#172033;
+  background:transparent;
+  padding:10px 8px;
+  line-height:1.4;
 }
 
-textarea::placeholder{
- color:#fff;
- opacity:.4
+#prompt::placeholder{
+  color:#172033;
+  opacity:.38;
 }
 
-.send{
- background:#fff!important;
- color:#000!important
+.icon-btn{
+  width:40px;
+  height:40px;
+  flex:none;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.065);
+  color:#172033;
+  cursor:pointer;
 }
 
-.send:disabled{
- opacity:.4
+.icon-btn:hover{
+  background:rgba(255,255,255,.1);
 }
 
-.preview{
- display:none;
- position:relative;
- margin:3px 3px 8px;
- width:75px
+.send-btn{
+  background:#2864e8;
 }
 
-.preview.show{
- display:block
+.send-btn:hover{
+  background:#3570ed;
 }
 
-.preview img{
- width:75px;
- height:75px;
- object-fit:cover;
- border-radius:10px
+.send-btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
 }
 
-.preview button{
- position:absolute;
- right:-7px;
- top:-7px;
- border:0;
- border-radius:50%;
- background:#fff;
- color:#000;
- width:23px;
- height:23px
+#photoInput{
+  display:none;
 }
 
-.controls{
- display:none;
- gap:6px;
- flex-wrap:wrap;
- padding:7px 0
+.creation-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
 }
 
-.controls.open{
- display:flex
+.creation-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:11px;
+  background:#0e1117;
+  border:1px solid rgba(255,255,255,.06);
 }
 
-.controls select{
- background:#111;
- color:#fff;
- border:1px solid #333;
- border-radius:8px;
- padding:6px
+.creation-card img{
+  display:block;
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
 }
 
-.status{
- min-height:17px;
- font-size:10px;
- opacity:.55;
- padding:3px 4px
+.creation-prompt{
+  padding:7px;
+  font-size:10px;
+  opacity:.6;
+  line-height:1.35;
 }
 
-.drawer{
- position:fixed;
- z-index:100;
- top:0;
- bottom:0;
- left:0;
- width:min(88vw,350px);
- background:#080808;
- transform:translateX(-105%);
- transition:.2s;
- border-right:1px solid #292929
+.image-viewer{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.9);
 }
 
-.drawer.open{
- transform:translateX(0)
+.image-viewer.open{
+  display:flex;
 }
 
-.drawer-head{
- height:58px;
- display:flex;
- align-items:center;
- padding:0 12px;
- border-bottom:1px solid #292929
+.image-viewer img{
+  max-width:100%;
+  max-height:90dvh;
+  object-fit:contain;
+  border-radius:10px;
 }
 
-.drawer-title{
- flex:1;
- font-weight:800
+.close-viewer{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+  color:#172033;
+  font-size:23px;
 }
 
-.drawer-body{
- padding:12px;
- overflow:auto;
- height:calc(100% - 58px)
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:92px;
+  z-index:700;
+  transform:translate(-50%,20px);
+  max-width:90vw;
+  padding:10px 14px;
+  border-radius:11px;
+  background:#252a36;
+  color:#172033;
+  font-size:12px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  box-shadow:0 7px 25px rgba(0,0,0,.3);
 }
 
-.action{
- width:100%;
- padding:11px;
- margin-bottom:7px;
- text-align:left
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
 }
 
-.section{
- font-size:10px;
- opacity:.45;
- margin:18px 4px 8px;
- text-transform:uppercase
+
+.voice-active{
+  background:#ef4444 !important;
+  color:#fff !important;
 }
 
-.search{
- width:100%;
- padding:10px;
- border:1px solid #333;
- background:#111;
- color:#fff;
- border-radius:10px;
- margin-bottom:8px;
- outline:none
-}
-
-.search::placeholder{
- color:#fff;
- opacity:.4
-}
-
-.chat-item{
- display:flex;
- align-items:center;
- gap:5px;
- padding:9px;
- border-radius:10px;
- margin-bottom:2px
-}
-
-.chat-item.active{
- background:#181818
-}
-
-.chat-name{
- flex:1;
- min-width:0;
- white-space:nowrap;
- overflow:hidden;
- text-overflow:ellipsis;
- font-size:13px;
- cursor:pointer
-}
-
-.small{
- width:30px;
- height:30px;
- border:0;
- background:transparent;
- border-radius:8px;
- padding:0
-}
-
-.empty{
- font-size:12px;
- opacity:.4;
- padding:12px
-}
-
-.creation{
- margin-top:8px
-}
-
-.creation img{
- width:100%;
- border-radius:10px;
- cursor:pointer
-}
-
-.overlay{
- position:fixed;
- inset:0;
- z-index:90;
- background:#000b;
- display:none
-}
-
-.overlay.open{
- display:block
-}
-
-.modal{
- position:fixed;
- z-index:200;
- left:50%;
- top:50%;
- width:min(92vw,430px);
- transform:translate(-50%,-50%);
- background:#080808;
- border:1px solid #333;
- border-radius:16px;
- padding:16px;
- display:none
-}
-
-.modal.open{
- display:block
-}
-
-.modal h3{
- margin:0 0 15px
-}
-
-.setting{
- display:flex;
- align-items:center;
- justify-content:space-between;
- padding:12px 0;
- border-bottom:1px solid #222
-}
-
-.setting select,
-.setting input{
- background:#111;
- color:#fff;
- border:1px solid #333;
- padding:7px;
- border-radius:8px
-}
-
-.hint{
- font-size:9px;
- opacity:.4;
- padding:4px
+.pdf-status{
+  font-size:11px;
+  opacity:.65;
+  padding:4px 8px;
 }
 
 @media(max-width:600px){
- .chat{
-  padding:14px 9px 155px
- }
 
- .bubble{
-  max-width:91%;
-  font-size:15px
- }
+  .header{
+    height:55px;
+  }
 
- .brand-sub{
-  display:none
- }
+  .brand-name{
+    font-size:17px;
+  }
 
- .icon{
-  width:38px;
-  height:38px
- }
+  .chat-wrap{
+    padding:14px 9px 155px;
+  }
+
+  .bubble{
+    max-width:90%;
+    font-size:15px;
+  }
+
+  .composer{
+    border-radius:17px;
+  }
+
+  .creation-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
 }
+
+.v42-search{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#111;margin:0 0 8px}.v42-image-controls{display:none;gap:6px;flex-wrap:wrap;padding:6px 0}.v42-image-controls.open{display:flex}.v42-image-controls select{background:#fff;color:#111;border:1px solid #ccc;border-radius:8px;padding:6px}.v42-status{min-height:16px;font-size:10px;opacity:.6;padding:2px 4px}.v42-modal{position:fixed;inset:0;z-index:900;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);padding:16px}.v42-modal.open{display:flex}.v42-modal-card{width:min(92vw,430px);background:#fff;color:#111;border-radius:16px;padding:16px}.v42-modal-card label{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.v42-modal-card select{padding:7px;border:1px solid #ccc;border-radius:8px}
 </style>
-</head>
-
-<body>
-
-<div class="app">
-
-<header class="header">
- <button class="icon" id="menu">☰</button>
-
- <div class="brand">
-  <div class="brand-name">Aaru AI</div>
-  <div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
- </div>
-
- <button class="icon" id="newTop">＋</button>
-</header>
-
-<div class="overlay" id="overlay"></div>
-
-<aside class="drawer" id="drawer">
-
- <div class="drawer-head">
-  <div class="drawer-title">Aaru AI</div>
-  <button class="icon" id="closeDrawer">×</button>
- </div>
-
- <div class="drawer-body">
-
-  <button class="action" id="newChat">＋ नई चैट</button>
-
-  <input
-   class="search"
-   id="chatSearch"
-   placeholder="🔎 चैट खोजें..."
-   autocomplete="off"
-  >
-
-  <button class="action" id="settingsBtn">⚙️ Settings</button>
-
-  <button class="action" id="exportCurrent">
-   ⬇️ Current Chat Export
-  </button>
-
-  <button class="action" id="exportAll">
-   ⬇️ सभी चैट Export
-  </button>
-
-  <div class="section">Chats</div>
-  <div id="chatList"></div>
-
-  <div class="section">Recent Images</div>
-  <div id="creations"></div>
-
- </div>
-</aside>
-
-<main>
- <div class="chat">
-  <div class="messages" id="messages"></div>
- </div>
-</main>
-
-<div class="composer-shell">
-
- <div class="composer">
-
-  <div class="preview" id="preview">
-   <img id="previewImg" alt="preview">
-   <button id="removeFile">×</button>
+ </head>
+ <body>
+  <div class="app">
+   <header class="header">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <div class="brand">
+     <div class="brand-name">Aaru AI</div>
+     <div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
+    </div>
+    <button class="new-chat-top" id="newChatTop" aria-label="New Chat">＋</button>
+   </header>
+   <div class="drawer-overlay" id="drawerOverlay"></div>
+   <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+     <div class="drawer-title">Aaru AI</div>
+     <button class="close-drawer" id="closeDrawer">×</button>
+    </div>
+    <div class="drawer-body">
+     <button class="drawer-action" id="newChatBtn"><span>＋</span> <span>नई चैट</span></button>
+     <button class="drawer-action" id="deleteAllBtn"><span>🗑️</span> <span>सभी चैट डिलीट करें</span></button>
+     <input id="chatSearchV42" class="v42-search" placeholder="🔎 चैट खोजें..." autocomplete="off">
+     <button class="drawer-action" id="exportCurrentV42">⬇️ Current Chat Export</button>
+     <button class="drawer-action" id="exportAllV42">⬇️ सभी चैट Export</button>
+     <button class="drawer-action" id="settingsBtnV42">⚙️ Settings</button>
+     <div class="section-title">Recent Chats</div>
+     <div class="chat-history" id="chatHistory"></div>
+     <div class="section-title">Recent Creations</div>
+     <div class="creation-grid" id="creationGrid"></div>
+    </div>
+   </aside>
+   <main>
+    <div class="chat-wrap">
+     <div class="messages" id="messages"></div>
+    </div>
+   </main>
+   <div class="composer-shell">
+    <div class="composer">
+     <div class="photo-preview" id="photoPreview">
+      <img id="photoPreviewImg" alt="Selected image">
+      <button class="remove-photo" id="removePhoto">×</button>
+     </div>
+     <div class="v42-image-controls" id="imageControlsV42">
+      <select id="ratioV42"><option value="1:1">1:1</option><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="4:3">4:3</option><option value="3:4">3:4</option></select> <select id="sizeV42"><option value="1024x1024">1024×1024</option><option value="1536x1024">1536×1024</option><option value="1024x1536">1024×1536</option></select> <select id="qualityV42"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+     </div>
+     <div class="v42-status" id="toolStatusV42"></div>
+     <div class="input-row">
+      <button class="icon-btn" id="imageControlsBtnV42" title="Image Controls">🖼️</button>
+      <button class="icon-btn" id="photoBtn" title="Photo / PDF">📎</button>
+      <button class="icon-btn" id="micBtn" title="Voice Input">🎙️</button>
+      <textarea id="prompt" rows="1" placeholder="Aaru से कुछ भी पूछें..." autocomplete="off" spellcheck="true"></textarea>
+      <button class="icon-btn" id="speakBtn" title="Voice Output">🔊</button>
+      <button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
+     </div>
+    </div>
+   </div>
   </div>
-
-  <div class="controls" id="imageControls">
-
-   <select id="ratio" aria-label="Image ratio">
-    <option value="1:1">1:1</option>
-    <option value="16:9">16:9</option>
-    <option value="9:16">9:16</option>
-    <option value="4:3">4:3</option>
-    <option value="3:4">3:4</option>
-   </select>
-
-   <select id="size" aria-label="Image size">
-    <option value="1024x1024">1024×1024</option>
-    <option value="1536x1024">1536×1024</option>
-    <option value="1024x1536">1024×1536</option>
-   </select>
-
-   <select id="quality" aria-label="Image quality">
-    <option value="medium">Medium</option>
-    <option value="high">High</option>
-    <option value="low">Low</option>
-   </select>
-
+  <input type="file" id="photoInput" accept="image/*,.pdf,application/pdf">
+  <div class="image-viewer" id="imageViewer">
+   <button class="close-viewer" id="closeViewer">×</button>
+   <img id="viewerImg" alt="Image preview">
   </div>
-
-  <div class="status" id="toolStatus"></div>
-
-  <div class="input-row">
-
-   <button class="icon" id="fileBtn">📎</button>
-
-   <button class="icon" id="imageBtn">🖼️</button>
-
-   <button class="icon" id="micBtn">🎙️</button>
-
-   <textarea
-    id="prompt"
-    rows="1"
-    placeholder="Aaru से कुछ भी पूछें..."
-   ></textarea>
-
-   <button class="icon" id="speakBtn">🔊</button>
-
-   <button class="icon send" id="sendBtn">➤</button>
-
+  <div class="v42-modal" id="settingsModalV42">
+   <div class="v42-modal-card">
+    <h3>Aaru AI Settings</h3>
+    <label><span>Voice Output</span><input type="checkbox" id="voiceOutputV42"></label> <label><span>Voice Mode</span><input type="checkbox" id="voiceModeV42"></label> <label><span>High Reasoning</span><input type="checkbox" id="highReasoningV42"></label> <label><span>Voice Speed</span><select id="voiceRateV42"><option value=".85">Slow</option><option value="1">Normal</option><option value="1.15">Fast</option></select></label>
+    <button class="drawer-action" id="resetSettingsV42">Reset Settings</button>
+    <button class="drawer-action" id="closeSettingsV42">Close</button>
+   </div>
   </div>
-
-  <div class="hint">
-   📎 PDF/Photo • 🖼️ Image Controls • 🎙️ Voice • Enter = Send
-  </div>
-
- </div>
-</div>
-
-<input
- type="file"
- id="fileInput"
- accept="image/*,.pdf,application/pdf"
- hidden
->
-
-<div class="modal" id="settingsModal">
-
- <h3>Aaru AI Settings</h3>
-
- <div class="setting">
-  <span>Voice Output</span>
-  <input type="checkbox" id="voiceOutput">
- </div>
-
- <div class="setting">
-  <span>Voice Mode</span>
-  <input type="checkbox" id="voiceMode">
- </div>
-
- <div class="setting">
-  <span>High Reasoning</span>
-  <input type="checkbox" id="highReasoning">
- </div>
-
- <div class="setting">
-  <span>Voice Speed</span>
-
-  <select id="voiceRate">
-   <option value=".85">Slow</option>
-   <option value="1">Normal</option>
-   <option value="1.15">Fast</option>
-  </select>
- </div>
-
- <br>
-
- <button class="action" id="resetSettings">
-  Reset Settings
- </button>
-
- <button class="action" id="closeSettings">
-  Close
- </button>
-
-</div>
-
-<script>
+  <div class="toast" id="toast"></div>
+  <script>
 "use strict";
 
-/* =========================
-   AARU CONFIG
-========================= */
 
-const API="https://aaru-ai-api.myera-org.workers.dev/";
-const MODEL="gpt-6-astra";
+/* =========================================================
+   CONFIG
+========================================================= */
 
-const KEYS={
- chats:"aaru_chat_history_v2",
- old:"aaru_chat_messages",
- memory:"aaru_smart_memory_v3",
- images:"aaru_history",
- settings:"aaru_compact_v4_settings"
-};
+const API =
+  "https://aaru-ai-api.myera-org.workers.dev/";
 
-const LIMIT={
- chats:8,
- messages:1000,
- context:80,
- memories:40,
- imageHistory:4,
- messageChars:5000,
- pdfChars:60000
-};
 
+const CHAT_LIST_KEY =
+  "aaru_chat_history_v2";
 
-/* =========================
-   STATE
-========================= */
 
-let chats=[];
-let currentId=null;
-let messages=[];
-let memory=[];
-let memorySummary="";
-let selectedImage=null;
-let selectedDocument="";
-let busy=false;
-let responseId=null;
-let tools=[];
-let searchQuery="";
-let recognition=null;
+const OLD_CHAT_KEY =
+  "aaru_chat_messages";
 
-let settings={
- voiceOutput:true,
- voiceMode:false,
- highReasoning:true,
- voiceRate:1
-};
 
+const IMAGE_KEY =
+  "aaru_history";
 
-/* =========================
-   DOM
-========================= */
 
-const $=id=>document.getElementById(id);
+const MAX_SAVED_CHATS = 8;
+const MAX_MESSAGES_PER_CHAT = 1000;
+const MAX_CONTEXT_MESSAGES = 240;
+const ASTRA_REASONING_EFFORT = "high";
+const MAX_MESSAGE_CHARS = 4000;
+const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
+const MEMORY_V3_KEY = "aaru_smart_memory_v3";
+const MAX_MEMORY_SUMMARY_CHARS = 3200;
+const MAX_RELEVANT_MEMORY_CHARS = 2600;
+const MAX_SEMANTIC_MEMORIES = 80;
+const CLIENT_INTELLIGENCE_VERSION = "GPT-6-ASTRA-NATIVE";
+const CLIENT_REASONING_ENGINE_VERSION = "GPT-6-ASTRA";
+const CLIENT_MEMORY_ENGINE_VERSION = "6.0";
+const MAX_WORKER_MEMORY_UPDATES = 40;
 
-const UI={
- messages:$("messages"),
- prompt:$("prompt"),
- send:$("sendBtn"),
- drawer:$("drawer"),
- overlay:$("overlay"),
- preview:$("preview"),
- previewImg:$("previewImg"),
- fileInput:$("fileInput"),
- chatList:$("chatList"),
- creations:$("creations"),
- toolStatus:$("toolStatus"),
- imageControls:$("imageControls"),
- settings:$("settingsModal")
-};
-
-
-/* =========================
-   STORAGE
-========================= */
-
-function read(key,fallback){
- try{
-  const v=JSON.parse(localStorage.getItem(key));
-  return v??fallback;
- }catch{
-  return fallback;
- }
-}
-
-function write(key,value){
- try{
-  localStorage.setItem(key,JSON.stringify(value));
- }catch(e){
-  console.warn("Aaru Storage:",e);
- }
-}
-
-
-/* =========================
-   CHAT MODEL
-========================= */
-
-function makeChat(title="नई चैट",list=[]){
- return {
-  id:
-   "chat_"+
-   Date.now().toString(36)+
-   "_"+
-   Math.random().toString(36).slice(2,7),
-
-  title,
-  customTitle:"",
-  pinned:false,
-  createdAt:Date.now(),
-  updatedAt:Date.now(),
-  messages:list,
-  memory:[],
-  memorySummary:"",
-  responseId:null
- };
-}
-
-function saveChats(){
- chats=chats.slice(0,LIMIT.chats);
- write(KEYS.chats,chats);
-}
-
-function saveCurrent(){
- const c=chats.find(x=>x.id===currentId);
-
- if(!c)return;
-
- c.messages=messages.slice(-LIMIT.messages);
- c.memory=memory.slice(-LIMIT.memories);
- c.memorySummary=memorySummary;
- c.responseId=responseId;
- c.updatedAt=Date.now();
-
- saveChats();
-}
-
-
-/* =========================
-   INITIAL LOAD
-========================= */
-
-function loadState(){
-
- chats=read(KEYS.chats,[]);
-
- if(!Array.isArray(chats))
-  chats=[];
-
- settings={
-  ...settings,
-  ...read(KEYS.settings,{})
- };
-
- const old=read(KEYS.old,[]);
-
- if(!chats.length&&Array.isArray(old)&&old.length){
-  chats=[makeChat("पुरानी चैट",old)];
- }
-
- if(!chats.length){
-  createNewChat(false);
- }else{
-  openChat(chats[0].id,false);
- }
-
- loadSettingsUI();
- render();
- renderChats();
- renderCreations();
-}
-
-
-/* =========================
-   CHAT MANAGEMENT
-========================= */
-
-function createNewChat(closeDrawer=true){
-
- if(messages.length)
-  saveCurrent();
-
- const c=makeChat();
-
- chats.unshift(c);
- chats=chats.slice(0,LIMIT.chats);
-
- currentId=c.id;
-
- messages=[];
- memory=[];
- memorySummary="";
- responseId=null;
- selectedImage=null;
- selectedDocument=null;
-
- UI.preview.classList.remove("show");
-
- render();
- renderChats();
-
- if(closeDrawer)
-  toggleDrawer(false);
-}
-
-function openChat(chatId,closeDrawer=true){
-
- if(currentId)
-  saveCurrent();
-
- const c=chats.find(x=>x.id===chatId);
-
- if(!c)return;
-
- currentId=c.id;
-
- messages=Array.isArray(c.messages)
-  ?c.messages.slice(-LIMIT.messages)
-  :[];
-
- memory=Array.isArray(c.memory)
-  ?c.memory
-  :[];
-
- memorySummary=String(c.memorySummary||"");
-
- responseId=String(c.responseId||"").trim()||null;
-
- selectedImage=null;
- selectedDocument="";
-
- UI.preview.classList.remove("show");
-
- render();
- renderChats();
-
- if(closeDrawer)
-  toggleDrawer(false);
-}
-
-function renameChat(chatId){
-
- const c=chats.find(x=>x.id===chatId);
-
- if(!c)return;
-
- const name=window.prompt(
-  "चैट का नाम:",
-  c.customTitle||c.title||"नई चैट"
- );
-
- if(name===null)return;
-
- const clean=name.trim().slice(0,80);
-
- if(clean){
-  c.customTitle=clean;
-  c.title=clean;
- }
-
- c.updatedAt=Date.now();
-
- saveChats();
- renderChats();
-}
-
-function pinChat(chatId){
-
- const c=chats.find(x=>x.id===chatId);
-
- if(!c)return;
-
- c.pinned=!c.pinned;
- c.updatedAt=Date.now();
-
- saveChats();
- renderChats();
-}
-
-function deleteChat(chatId){
-
- if(!window.confirm("यह चैट डिलीट करें?"))
-  return;
-
- chats=chats.filter(x=>x.id!==chatId);
-
- if(!chats.length)
-  chats=[makeChat()];
-
- const active=chats.find(x=>x.id===currentId);
-
- if(!active){
-
-  currentId=null;
-  messages=[];
-  memory=[];
-  memorySummary="";
-  responseId=null;
-
-  openChat(chats[0].id,false);
-
- }else{
-
-  saveChats();
-  renderChats();
- }
-
- saveChats();
-}
-
-function chatText(c){
-
- return [
-  c.title,
-  c.customTitle,
-  ...(c.messages||[]).map(x=>x.content||"")
- ]
- .join(" ")
- .toLowerCase();
-}
-
-function renderChats(){
-
- const q=searchQuery.trim().toLowerCase();
-
- const list=chats
-  .filter(c=>!q||chatText(c).includes(q))
-  .sort(
-   (a,b)=>
-    Number(b.pinned)-Number(a.pinned)||
-    b.updatedAt-a.updatedAt
-  );
-
- UI.chatList.innerHTML=list.length
- ?list.map(c=>`
-   <div class="chat-item ${c.id===currentId?"active":""}">
-
-    <button
-     class="small"
-     data-pin="${escapeAttr(c.id)}"
-     title="${c.pinned?"Unpin":"Pin"}"
-    >${c.pinned?"📌":"○"}</button>
-
-    <div
-     class="chat-name"
-     data-open="${escapeAttr(c.id)}"
-    >${escape(c.customTitle||c.title||"नई चैट")}</div>
-
-    <button
-     class="small"
-     data-rename="${escapeAttr(c.id)}"
-     title="Rename"
-    >✏️</button>
-
-    <button
-     class="small"
-     data-export="${escapeAttr(c.id)}"
-     title="Export"
-    >⬇️</button>
-
-    <button
-     class="small"
-     data-delete="${escapeAttr(c.id)}"
-     title="Delete"
-    >🗑️</button>
-
-   </div>
-  `).join("")
- :`<div class="empty">कोई चैट नहीं</div>`;
-}
-
-
-/* =========================
-   MESSAGE UI
-========================= */
-
-function addMessage(role,content,extra={}){
-
- messages.push({
-  role,
-  content:String(content||""),
-  ...extra
- });
-
- if(messages.length>LIMIT.messages)
-  messages=messages.slice(-LIMIT.messages);
-
- render();
-}
-
-function render(){
-
- UI.messages.innerHTML=messages.map(m=>`
-
-  <div class="msg ${m.role}">
-
-   <div class="bubble">
-
-    ${
-     m.image
-      ?`<img
-          src="${escapeAttr(m.image)}"
-          data-image="${escapeAttr(m.image)}"
-          alt="Aaru image"
-        >`
-      :""
-    }
-
-    ${
-     m.tool
-      ?`<div class="tool">${escape(m.tool)}</div>`
-      :""
-    }
-
-    <div class="md">
-     ${
-      m.role==="assistant"
-       ?markdown(m.content)
-       :escape(m.content)
-     }
-    </div>
-
-   </div>
-
-  </div>
- `).join("");
-
- window.scrollTo({
-  top:document.documentElement.scrollHeight,
-  behavior:"smooth"
- });
-}
-
-function addTyping(){
-
- if(document.getElementById("typing"))
-  return;
-
- const d=document.createElement("div");
-
- d.id="typing";
- d.className="msg assistant";
-
- d.innerHTML=
-  '<div class="bubble"><div class="typing">Aaru सोच रहा है…</div></div>';
-
- UI.messages.appendChild(d);
-}
-
-function removeTyping(){
-
- const d=document.getElementById("typing");
-
- if(d)
-  d.remove();
-}
-
-function updateStreaming(text){
-
- removeTyping();
-
- const last=messages[messages.length-1];
-
- if(last&&last.role==="assistant"){
-  last.content=text;
- }else{
-  messages.push({
-   role:"assistant",
-   content:text
-  });
- }
-
- render();
-}
-
-
-/* =========================
-   MEMORY
-========================= */
-
-function remember(text){
-
- const s=String(text||"").trim();
-
- if(!s)return;
-
- const words=s
-  .replace(/[^\p{L}\p{N}\s]/gu," ")
-  .split(/\s+/)
-  .filter(x=>x.length>2);
-
- if(!words.length)return;
-
- const item={
-  text:s.slice(0,500),
-  words:[...new Set(words)].slice(0,30),
-  time:Date.now()
- };
-
- memory=[
-  item,
-  ...memory.filter(x=>x.text!==item.text)
- ].slice(0,LIMIT.memories);
-
- memorySummary=memory
-  .slice(0,12)
-  .map(x=>x.text)
-  .join("\n")
-  .slice(0,2500);
-}
-
-function relevantMemory(query){
-
- const q=String(query||"").toLowerCase();
-
- return memory
-  .map(x=>{
-   const score=(x.words||[])
-    .filter(w=>q.includes(w.toLowerCase()))
-    .length;
-
-   return {x,score};
-  })
-  .filter(x=>x.score>0)
-  .sort((a,b)=>b.score-a.score)
-  .slice(0,8)
-  .map(x=>x.x.text)
-  .join("\n")
-  .slice(0,2500);
-}
-
-function applyMemoryUpdates(updates){
-
- if(!Array.isArray(updates))
-  return;
-
- for(const u of updates.slice(0,30)){
-
-  const action=u.action||"add";
-
-  const text=String(
-   u.text||
-   u.value||
-   ""
-  ).trim();
-
-  if(!text)continue;
-
-  if(action==="delete"){
-
-   memory=memory.filter(
-    x=>x.text!==text
-   );
-
-  }else{
-
-   remember(text);
-  }
- }
-
- saveCurrent();
-}
-
-
-/* =========================
-   WORKER REQUEST
-========================= */
-
-async function requestChat(query){
-
- const recent=messages
-  .slice(-LIMIT.context)
-  .map(m=>({
-   role:m.role==="user"?"user":"assistant",
-   content:String(m.content||"")
-    .slice(0,LIMIT.messageChars)
-  }));
-
- const payload={
-
-  message:query,
-
-  messages:recent,
-
-  model:MODEL,
-
-  api:"responses",
-
-  memory_summary:memorySummary,
-
-  relevant_memory:relevantMemory(query),
-
-  semantic_memory:memory.slice(
-   0,
-   LIMIT.memories
-  ),
-
-  previous_response_id:
-   responseId||undefined,
-
-  reasoning:{
-   effort:
-    settings.highReasoning
-     ?"high"
-     :"medium"
-  },
-
-  reasoning_effort:
-   settings.highReasoning
-    ?"high"
-    :"medium",
-
-  tool_choice:"auto",
-
-  stream:true,
-
-  image_options:{
-   ratio:$("ratio").value,
-   size:$("size").value,
-   quality:$("quality").value
-  },
-
-  composer:"native-unified-composer",
-
-  orchestration:"astra-native",
-
-  intent_routing:"model-selected",
-
-  frontend_routing:false,
-
-  client_capabilities:{
-   vision:!!selectedImage,
-   document_text:!!selectedDocument,
-   responses_api:true,
-
-   native_tools:[
-    "web_search",
-    "image_generation",
-    "code_interpreter",
-    "file_search"
-   ],
-
-   web_search:true,
-   image_generation:true,
-   image_editing:true,
-   voice_input:true,
-   browser_tts:true
-  }
- };
-
- if(selectedImage)
-  payload.image_b64=selectedImage;
-
- if(selectedDocument)
-  payload.document_text=
-   selectedDocument.slice(
-    0,
-    LIMIT.pdfChars
-   );
-
- const res=await fetch(
-  API+"chat",
-  {
-   method:"POST",
-   headers:{
-    "Content-Type":"application/json"
-   },
-   body:JSON.stringify(payload)
-  }
- );
-
- if(!res.ok){
-
-  const err=await res.text();
-
-  throw new Error(
-   err||"Worker request failed"
-  );
- }
-
- const type=
-  res.headers.get("content-type")||"";
-
- if(!type.includes("text/event-stream")){
-
-  const data=await res.json();
-
-  if(data.response_id)
-   responseId=data.response_id;
-
-  if(Array.isArray(data.tools_used)){
-
-   tools=data.tools_used;
-
-   updateToolStatus();
-  }
-
-  if(data.memory_updates)
-   applyMemoryUpdates(
-    data.memory_updates
-   );
-
-  return{
-   text:
-    data.text||
-    data.output||
-    data.message||
-    "",
-
-   image:data.image||null,
-
-   responseId:data.response_id
-  };
- }
-
- return readStream(res);
-}
-
-
-/* =========================
-   STREAM
-========================= */
-
-async function readStream(res){
-
- const reader=res.body.getReader();
-
- const decoder=new TextDecoder();
-
- let buffer="";
- let text="";
- let image=null;
-
- while(true){
-
-  const {value,done}=
-   await reader.read();
-
-  if(done)break;
-
-  buffer+=decoder.decode(
-   value,
-   {stream:true}
-  );
-
-  const lines=buffer.split("\n");
-
-  buffer=lines.pop()||"";
-
-  for(const raw of lines){
-
-   const line=raw.trim();
-
-   if(!line.startsWith("data:"))
-    continue;
-
-   const data=line.slice(5).trim();
-
-   if(!data||data==="[DONE]")
-    continue;
-
-   try{
-
-    const d=JSON.parse(data);
-
-    if(d.response_id)
-     responseId=d.response_id;
-
-    if(d.tools_used){
-
-     tools=d.tools_used;
-
-     updateToolStatus();
-    }
-
-    if(d.memory_updates)
-     applyMemoryUpdates(
-      d.memory_updates
-     );
-
-    if(d.image)
-     image=d.image;
-
-    if(d.type)
-     updateToolFromType(d.type);
-
-    const chunk=
-     d.delta||
-     d.text_delta||
-     d.output_text||
-     "";
-
-    if(chunk){
-
-     text+=chunk;
-
-     updateStreaming(text);
-    }
-
-   }catch(e){
-
-    console.warn(
-     "Aaru stream event:",
-     e
-    );
-   }
-  }
- }
-
- return{
-  text,
-  image,
-  responseId
- };
-}
-
-
-/* =========================
-   TOOL STATUS
-========================= */
-
-function updateToolFromType(type){
-
- const t=String(type||"");
-
- if(t.includes("web_search"))
-  setTool("🌐 Web Search");
-
- else if(t.includes("image"))
-  setTool("🖼️ Image");
-
- else if(t.includes("code"))
-  setTool("💻 Code/Data");
-
- else if(t.includes("file"))
-  setTool("📄 File Search");
-}
-
-function updateToolStatus(){
-
- UI.toolStatus.textContent=
-  tools
-   .map(x=>{
-    const s=
-     typeof x==="string"
-      ?x
-      :x.type||
-       x.name||
-       "";
-
-    if(s.includes("web"))
-     return"🌐 Web Search";
-
-    if(s.includes("image"))
-     return"🖼️ Image";
-
-    if(s.includes("code"))
-     return"💻 Code/Data";
-
-    if(s.includes("file"))
-     return"📄 File Search";
-
-    return s;
-   })
-   .filter(Boolean)
-   .join(" • ");
-}
-
-function setTool(text){
-
- UI.toolStatus.textContent=
-  String(text||"");
-}
-
-
-/* =========================
-   SEND
-========================= */
-
-async function send(){
-
- if(busy)
-  return;
-
- let query=
-  UI.prompt.value.trim();
-
- if(!query&&selectedImage)
-  query="इस फोटो को समझकर बताओ।";
-
- if(!query&&selectedDocument)
-  query=
-   "इस PDF/document को पढ़कर मुख्य जानकारी बताओ।";
-
- if(!query)
-  return;
-
- busy=true;
-
- UI.send.disabled=true;
-
- UI.prompt.value="";
-
- autoResize();
-
- addMessage(
-  "user",
-  query,
-  {
-   image:
-    selectedImage||
-    undefined
-  }
- );
-
- remember(query);
-
- saveCurrent();
-
- selectedImage=null;
- selectedDocument="";
-
- UI.preview.classList.remove(
-  "show"
- );
-
- setTool(
-  "Aaru सोच रहा है…"
- );
-
- addTyping();
-
- try{
-
-  const result=
-   await requestChat(query);
-
-  removeTyping();
-
-  const last=
-   messages[messages.length-1];
-
-  if(last&&last.role==="assistant"){
-
-   last.content=
-    result.text||"";
-
-   if(result.image)
-    last.image=result.image;
-
-  }else{
-
-   addMessage(
-    "assistant",
-    result.text||"",
-    {
-     image:result.image
-    }
-   );
-  }
-
-  if(result.responseId)
-   responseId=
-    result.responseId;
-
-  if(result.image)
-   saveCreation(
-    result.image,
-    query
-   );
-
-  saveCurrent();
-
-  render();
-
-  speak(
-   result.text||""
-  );
-
- }catch(error){
-
-  removeTyping();
-
-  console.error(
-   "Aaru Worker:",
-   error
-  );
-
-  addMessage(
-   "assistant",
-   "❌ अभी जवाब प्राप्त नहीं हो पाया। कृपया फिर से कोशिश करें।"
-  );
-
- }finally{
-
-  busy=false;
-
-  UI.send.disabled=false;
-
-  setTool("");
- }
-}
-
-
-/* =========================
-   FILE / PDF / PHOTO
-========================= */
-
-async function readFile(file){
-
- if(!file)
-  return;
-
- if(
-  file.type==="application/pdf"||
-  file.name.toLowerCase().endsWith(".pdf")
- ){
-
-  setTool(
-   "📄 PDF पढ़ा जा रहा है…"
-  );
-
-  try{
-
-   const buf=
-    await file.arrayBuffer();
-
-   const pdf=
-    await pdfjsLib
-     .getDocument({
-      data:buf
-     })
-     .promise;
-
-   let text="";
-
-   for(
-    let p=1;
-    p<=pdf.numPages;
-    p++
-   ){
-
-    const page=
-     await pdf.getPage(p);
-
-    const content=
-     await page.getTextContent();
-
-    text+=
-     content.items
-      .map(x=>x.str)
-      .join(" ")
-     +"\n";
-
-    if(
-     text.length>=
-     LIMIT.pdfChars
-    )
-     break;
-   }
-
-   selectedDocument=
-    text.slice(
-     0,
-     LIMIT.pdfChars
-    );
-
-   setTool(
-    "📄 PDF तैयार है"
-   );
-
-  }catch(e){
-
-   console.error(e);
-
-   setTool(
-    "❌ PDF पढ़ने में समस्या"
-   );
-  }
-
-  return;
- }
-
- if(file.type.startsWith("image/")){
-
-  try{
-
-   selectedImage=
-    await fileToDataURL(file);
-
-   UI.previewImg.src=
-    selectedImage;
-
-   UI.preview.classList.add(
-    "show"
-   );
-
-   setTool(
-    "🖼️ Photo तैयार है"
-   );
-
-  }catch(e){
-
-   console.error(e);
-
-   setTool(
-    "❌ Photo पढ़ने में समस्या"
-   );
-  }
- }
-}
-
-function fileToDataURL(file){
-
- return new Promise(
-  (resolve,reject)=>{
-
-   const r=
-    new FileReader();
-
-   r.onload=
-    ()=>resolve(r.result);
-
-   r.onerror=
-    reject;
-
-   r.readAsDataURL(file);
-  }
-);
-
-
-/* =========================
-   VOICE INPUT
-========================= */
-
-function startVoice(){
-
- const SR=
-  window.SpeechRecognition||
-  window.webkitSpeechRecognition;
-
- if(!SR){
-
-  alert(
-   "इस browser में Voice Input उपलब्ध नहीं है।"
-  );
-
-  return;
- }
-
- if(recognition){
-
-  recognition.stop();
-
-  recognition=null;
-
-  $("micBtn").textContent="🎙️";
-
-  return;
- }
-
- recognition=
-  new SR();
-
- recognition.lang="hi-IN";
-
- recognition.interimResults=false;
-
- recognition.continuous=
-  !!settings.voiceMode;
-
- recognition.onstart=
-  ()=>{
-   $("micBtn").textContent="🔴";
-   setTool("🎙️ सुन रहा हूँ…");
-  };
-
- recognition.onresult=e=>{
-
-  const text=
-   [...e.results]
-    .map(x=>x[0].transcript)
-    .join(" ");
-
-  UI.prompt.value+=
-   (UI.prompt.value?" ":"")+
-   text;
-
-  autoResize();
-
-  if(
-   settings.voiceMode&&
-   !busy
-  ){
-   send();
-  }
- };
-
- recognition.onend=()=>{
-
-  recognition=null;
-
-  $("micBtn").textContent="🎙️";
-
-  if(!busy)
-   setTool("");
- };
-
- recognition.onerror=e=>{
-
-  console.warn(
-   "Voice:",
-   e.error
-  );
-
-  recognition=null;
-
-  $("micBtn").textContent="🎙️";
- };
-
- recognition.start();
-}
-
-
-/* =========================
-   VOICE OUTPUT
-========================= */
-
-function speak(text){
-
- if(
-  !settings.voiceOutput||
-  !text||
-  !("speechSynthesis" in window)
- )
-  return;
-
- speechSynthesis.cancel();
-
- const clean=
-  String(text)
-   .replace(/[#*`]/g," ")
-   .slice(0,5000);
-
- const u=
-  new SpeechSynthesisUtterance(
-   clean
-  );
-
- u.rate=
-  Number(settings.voiceRate)||1;
-
- u.lang=
-  /[\u0900-\u097F]/.test(text)
-   ?"hi-IN"
-   :"en-US";
-
- speechSynthesis.speak(u);
-}
-
-
-/* =========================
-   SETTINGS
-========================= */
-
-function saveSettings(){
-
- write(
-  KEYS.settings,
-  settings
- );
-}
-
-function saveSetting(name,value){
-
- settings[name]=value;
-
- saveSettings();
-}
-
-function loadSettingsUI(){
-
- $("voiceOutput").checked=
-  !!settings.voiceOutput;
-
- $("voiceMode").checked=
-  !!settings.voiceMode;
-
- $("highReasoning").checked=
-  !!settings.highReasoning;
-
- $("voiceRate").value=
-  settings.voiceRate;
-}
-
-function resetSettings(){
-
- settings={
-  voiceOutput:true,
-  voiceMode:false,
-  highReasoning:true,
-  voiceRate:1
- };
-
- saveSettings();
- loadSettingsUI();
-}
-
-
-/* =========================
-   DRAWER / MODAL
-========================= */
-
-function toggleDrawer(open){
-
- UI.drawer.classList.toggle(
-  "open",
-  !!open
- );
-
- UI.overlay.classList.toggle(
-  "open",
-  !!open
- );
-}
+const MAX_SAVED_CREATIONS = 4;
+const MAX_CREATION_PROMPT_CHARS = 300;
+const MAX_HISTORY_IMAGE_CHARS = 420000;
 
 
 /*
- IMPORTANT:
- settings STATE ऊपर है।
- इसलिए modal function का नाम
- settings() नहीं रखा गया।
+  Image reference preprocessing is kept client-side only to reduce payload size.
+  Actual image generation/editing is selected and executed by the Worker.
 */
-function toggleSettings(open){
+const MAX_MODEL_IMAGE_SIZE = 511;
 
- UI.settings.classList.toggle(
-  "open",
-  !!open
- );
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let chats = [];
+let currentChatId = null;
+let messages = [];
+let memorySummary = "";
+let semanticMemory = [];
+
+let selectedPhotoBase64 = null;
+let selectedPhotoUrl = null;
+let selectedDocumentText = "";
+let voiceOutputEnabled = true;
+let recognition = null;
+
+let isBusy = false;
+let previousResponseId = null;
+let lastToolsUsed = [];
+
+let volatileCreations = [];
+
+let creationsLoaded = false;
+
+let appReady = false;
+
+let lastPageShowRecovery = 0;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const messagesEl =
+  document.getElementById("messages");
+
+const promptEl =
+  document.getElementById("prompt");
+
+const sendBtn =
+  document.getElementById("sendBtn");
+
+const photoInput =
+  document.getElementById("photoInput");
+
+const photoPreview =
+  document.getElementById("photoPreview");
+
+const photoPreviewImg =
+  document.getElementById("photoPreviewImg");
+
+const chatHistoryEl =
+  document.getElementById("chatHistory");
+
+const creationGrid =
+  document.getElementById("creationGrid");
+
+const drawer =
+  document.getElementById("drawer");
+
+const drawerOverlay =
+  document.getElementById("drawerOverlay");
+
+const imageViewer =
+  document.getElementById("imageViewer");
+
+const viewerImg =
+  document.getElementById("viewerImg");
+
+const toastEl =
+  document.getElementById("toast");
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function makeChatId(){
+
+  return "chat_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,9);
 }
 
 
-/* =========================
-   IMAGE HISTORY
-========================= */
+function makeImageId(){
 
-function saveCreation(
- image,
- promptText
+  return "img_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,10);
+}
+
+
+function showToast(text){
+
+  toastEl.textContent =
+    String(text || "");
+
+  toastEl.classList.add("show");
+
+  clearTimeout(showToast.timer);
+
+  showToast.timer =
+    setTimeout(() => {
+
+      toastEl.classList.remove(
+        "show"
+      );
+
+    },2200);
+}
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+/* =========================================================
+   MARKDOWN RENDERER
+   IMPORTANT: UNCHANGED
+========================================================= */
+
+function cleanAaruText(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<div\s*>/gi,"\n")
+    .replace(/<\/div\s*>/gi,"\n")
+    .replace(/\r\n/g,"\n")
+    .replace(/\r/g,"\n")
+    .replace(/\*\*(.*?)\*\*/gs,"$1")
+    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,"$1")
+    .replace(/\n{3,}/g,"\n\n")
+    .trim();
+}
+
+function cleanAaruChunk(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/\*\*/g,"")
+    .replace(/(?<!\*)\*(?!\*)/g,"");
+}
+
+function inlineMarkdown(text){
+
+  let s =
+    escapeHTML(text);
+
+  s =
+    s.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
+
+  s =
+    s.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+  s =
+    s.replace(
+      /\*\*([^*]+)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /__([^_]+)__/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      "<em>$1</em>"
+    );
+
+  s =
+    s.replace(
+      /(?<!_)_([^_]+)_(?!_)/g,
+      "<em>$1</em>"
+    );
+
+  return s;
+}
+
+
+function renderMarkdown(text){
+
+  const source = cleanAaruText(text);
+
+  const lines =
+    source.split("\n");
+
+  let html = "";
+
+  let inCode = false;
+
+  let codeBuffer = [];
+
+  let inUl = false;
+
+  let inOl = false;
+
+  let paragraph = [];
+
+
+  function closeLists(){
+
+    if(inUl){
+
+      html += "</ul>";
+
+      inUl = false;
+    }
+
+    if(inOl){
+
+      html += "</ol>";
+
+      inOl = false;
+    }
+  }
+
+
+  function flushParagraph(buffer){
+
+    if(!buffer.length){
+      return;
+    }
+
+    const value =
+      buffer.join("\n")
+        .trim();
+
+    if(!value){
+      return;
+    }
+
+    html +=
+      "<p>" +
+      inlineMarkdown(
+        value.replace(
+          /\n/g,
+          "<br>"
+        )
+      ) +
+      "</p>";
+  }
+
+
+  for(let i=0;i<lines.length;i++){
+
+    const line =
+      lines[i];
+
+
+    if(
+      line.trim()
+        .startsWith("```")
+    ){
+
+      if(inCode){
+
+        html +=
+          "<pre><code>" +
+          escapeHTML(
+            codeBuffer.join("\n")
+          ) +
+          "</code></pre>";
+
+        codeBuffer = [];
+
+        inCode = false;
+
+      }else{
+
+        flushParagraph(
+          paragraph
+        );
+
+        paragraph = [];
+
+        closeLists();
+
+        inCode = true;
+      }
+
+      continue;
+    }
+
+
+    if(inCode){
+
+      codeBuffer.push(
+        line
+      );
+
+      continue;
+    }
+
+
+    if(!line.trim()){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      continue;
+    }
+
+
+    const h3 =
+      line.match(
+        /^###\s+(.+)$/
+      );
+
+    const h2 =
+      line.match(
+        /^##\s+(.+)$/
+      );
+
+    const h1 =
+      line.match(
+        /^#\s+(.+)$/
+      );
+
+
+    if(h1){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h1>" +
+        inlineMarkdown(h1[1]) +
+        "</h1>";
+
+      continue;
+    }
+
+
+    if(h2){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h2>" +
+        inlineMarkdown(h2[1]) +
+        "</h2>";
+
+      continue;
+    }
+
+
+    if(h3){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h3>" +
+        inlineMarkdown(h3[1]) +
+        "</h3>";
+
+      continue;
+    }
+
+
+    const ul =
+      line.match(
+        /^\s*[-*+]\s+(.+)$/
+      );
+
+    const ol =
+      line.match(
+        /^\s*\d+[.)]\s+(.+)$/
+      );
+
+
+    if(ul){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inOl){
+
+        html += "</ol>";
+
+        inOl = false;
+      }
+
+      if(!inUl){
+
+        html += "<ul>";
+
+        inUl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ul[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    if(ol){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inUl){
+
+        html += "</ul>";
+
+        inUl = false;
+      }
+
+      if(!inOl){
+
+        html += "<ol>";
+
+        inOl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ol[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    const quote =
+      line.match(
+        /^\s*>\s?(.*)$/
+      );
+
+
+    if(quote){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<blockquote>" +
+        inlineMarkdown(quote[1]) +
+        "</blockquote>";
+
+      continue;
+    }
+
+
+    paragraph.push(
+      line
+    );
+  }
+
+
+  if(inCode){
+
+    html +=
+      "<pre><code>" +
+      escapeHTML(
+        codeBuffer.join("\n")
+      ) +
+      "</code></pre>";
+  }
+
+
+  flushParagraph(
+    paragraph
+  );
+
+  closeLists();
+
+  return html;
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function storageAvailable(){
+
+  try{
+
+    const storage =
+      window.localStorage;
+
+    if(!storage){
+      return false;
+    }
+
+    const key =
+      "__aaru_test__";
+
+    storage.setItem(
+      key,
+      "1"
+    );
+
+    storage.removeItem(
+      key
+    );
+
+    return true;
+
+  }catch(error){
+
+    return false;
+  }
+}
+
+
+const HAS_STORAGE =
+  storageAvailable();
+
+
+function safeGet(key){
+
+  if(!HAS_STORAGE){
+    return null;
+  }
+
+  try{
+
+    return localStorage.getItem(
+      key
+    );
+
+  }catch(error){
+
+    return null;
+  }
+}
+
+
+function safeSet(key,value){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+  try{
+
+    localStorage.setItem(
+      key,
+      value
+    );
+
+    return true;
+
+  }catch(error){
+
+    console.warn(
+      "Storage write failed:",
+      key,
+      error
+    );
+
+    return false;
+  }
+}
+
+
+function safeRemove(key){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+  try{
+
+    localStorage.removeItem(
+      key
+    );
+
+  }catch(error){}
+}
+
+
+/* =========================================================
+   CHAT NORMALIZE
+========================================================= */
+
+function normalizeChat(chat){
+
+  if(!chat){
+    return null;
+  }
+
+  const id =
+    String(chat.id || "");
+
+  if(!id){
+    return null;
+  }
+
+
+  const raw =
+    Array.isArray(chat.messages)
+      ? chat.messages
+      : [];
+
+  const savedMemory =
+    String(chat.memorySummary || "").trim();
+
+  const savedSemanticMemory =
+    Array.isArray(chat.semanticMemory) ? chat.semanticMemory : [];
+
+
+  const normalized =
+    raw
+      .slice(-MAX_MESSAGES_PER_CHAT)
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content ??
+              item.text ??
+              ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  let title =
+    String(
+      chat.title || ""
+    )
+    .trim()
+    .slice(0,80);
+
+
+  if(!title){
+
+    const firstUser =
+      normalized.find(
+        item =>
+          item.role === "user"
+      );
+
+    title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
+  }
+
+
+  return {
+
+    id,
+
+    title:
+      title || "नई चैट",
+
+    customTitle:
+      String(chat.customTitle || "").trim().slice(0,80),
+
+    pinned:
+      !!chat.pinned,
+
+    responseId:
+      String(chat.responseId || "").trim() || null,
+
+    messages:
+      normalized,
+
+    semanticMemory:
+      normalizeSemanticMemory(savedSemanticMemory),
+
+    createdAt:
+      Number(
+        chat.createdAt
+      ) || Date.now(),
+
+    updatedAt:
+      Number(
+        chat.updatedAt
+      ) || Date.now()
+  };
+}
+
+
+/* =========================================================
+   LOAD CHAT HISTORY
+========================================================= */
+
+function loadChatHistory(){
+
+  chats = [];
+
+  const raw =
+    safeGet(
+      CHAT_LIST_KEY
+    );
+
+
+  if(raw){
+
+    try{
+
+      const parsed =
+        JSON.parse(raw);
+
+      if(Array.isArray(parsed)){
+
+        const seen =
+          new Set();
+
+        chats =
+          parsed
+            .map(normalizeChat)
+            .filter(Boolean)
+            .filter(chat => {
+
+              if(seen.has(chat.id)){
+                return false;
+              }
+
+              seen.add(chat.id);
+
+              return true;
+            })
+            .sort(
+              (a,b) =>
+                (b.updatedAt || 0) -
+                (a.updatedAt || 0)
+            )
+            .slice(
+              0,
+              MAX_SAVED_CHATS
+            );
+      }
+
+    }catch(error){
+
+      console.warn(
+        "Chat history corrupted:",
+        error
+      );
+
+      safeRemove(
+        CHAT_LIST_KEY
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+    पुराने storage की migration।
+  */
+
+  const oldRaw =
+    safeGet(
+      OLD_CHAT_KEY
+    );
+
+
+  if(oldRaw){
+
+    try{
+
+      const old =
+        JSON.parse(
+          oldRaw
+        );
+
+      if(
+        Array.isArray(old) &&
+        old.length
+      ){
+
+        const now =
+          Date.now();
+
+        const migrated =
+          normalizeChat({
+
+            id:
+              makeChatId(),
+
+            title:
+              "पुरानी चैट",
+
+            messages:
+              old,
+
+            createdAt:
+              now,
+
+            updatedAt:
+              now
+          });
+
+
+        if(migrated){
+          chats = [migrated];
+        }
+      }
+
+    }catch(error){}
+
+    safeRemove(
+      OLD_CHAT_KEY
+    );
+  }
+}
+
+
+/* =========================================================
+   SAVE CHAT HISTORY
+========================================================= */
+
+function saveChatHistory(){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  /*
+    पहले सामान्य save।
+  */
+
+  if(
+    safeSet(
+      CHAT_LIST_KEY,
+      JSON.stringify(sorted)
+    )
+  ){
+
+    chats = sorted;
+
+    return;
+  }
+
+
+  /*
+    Storage quota भरने पर कम chats।
+  */
+
+  for(
+    const count of [6,4,3,2,1]
+  ){
+
+    const smaller =
+      sorted.slice(
+        0,
+        count
+      );
+
+    if(
+      safeSet(
+        CHAT_LIST_KEY,
+        JSON.stringify(smaller)
+      )
+    ){
+
+      chats = sorted;
+
+      return;
+    }
+  }
+
+
+  /*
+    Last resort:
+    image history हटाकर chat बचाएँ।
+  */
+
+  safeRemove(
+    IMAGE_KEY
+  );
+
+
+  const emergency =
+    sorted.slice(
+      0,
+      3
+    );
+
+
+  safeSet(
+    CHAT_LIST_KEY,
+    JSON.stringify(
+      emergency
+    )
+  );
+
+  chats = sorted;
+}
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function createNewChat(
+  persist = true
 ){
 
- if(!image)
-  return;
+  const now =
+    Date.now();
 
- const list=
-  read(KEYS.images,[]);
 
- list.unshift({
+  const chat = {
 
-  image,
+    id:
+      makeChatId(),
 
-  prompt:
-   String(promptText||"")
-    .slice(0,300),
+    title:
+      "नई चैट",
 
-  time:Date.now()
- });
+    customTitle:
+      "",
 
- write(
-  KEYS.images,
-  list.slice(
-   0,
-   LIMIT.imageHistory
-  )
- );
+    pinned:
+      false,
 
- renderCreations();
+    responseId:
+      null,
+
+    messages:
+      [],
+
+    semanticMemory:
+      [],
+
+    createdAt:
+      now,
+
+    updatedAt:
+      now
+  };
+
+
+  chats.unshift(
+    chat
+  );
+
+
+  chats =
+    chats
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  currentChatId =
+    chat.id;
+
+  messages = [];
+  semanticMemory = [];
+  memorySummary = "";
+  updateMemoryButton();
+
+
+  if(persist){
+
+    saveChatHistory();
+  }
+
+
+  return chat;
 }
+
+
+/* =========================================================
+   ENSURE CURRENT CHAT
+========================================================= */
+
+function ensureCurrentChat(){
+
+  if(currentChatId){
+
+    const existing =
+      chats.find(
+        chat =>
+          chat.id === currentChatId
+      );
+
+    if(existing){
+      return existing;
+    }
+  }
+
+
+  return createNewChat(
+    true
+  );
+}
+
+
+/* =========================================================
+   SAVE CURRENT CHAT
+========================================================= */
+
+function saveCurrentChat(){
+
+  const chat =
+    ensureCurrentChat();
+
+
+  semanticMemory = updateSemanticMemory(semanticMemory, messages);
+  chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
+  chat.responseId = previousResponseId || null;
+  chat.memorySummary = buildMemorySummary(messages);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || chat.memorySummary;
+
+  chat.messages =
+    messages
+      .slice(
+        -MAX_MESSAGES_PER_CHAT
+      )
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content || ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  const firstUser =
+    chat.messages.find(
+      item =>
+        item.role === "user"
+    );
+
+
+  if(!chat.customTitle){
+    chat.title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
+  }else{
+    chat.title = chat.customTitle;
+  }
+
+
+  chat.updatedAt =
+    Date.now();
+
+
+  saveChatHistory();
+
+  renderChatHistory();
+}
+
+
+/* =========================================================
+   RENDER CURRENT CHAT
+========================================================= */
+
+function renderCurrentChat(){
+
+  messagesEl.innerHTML = "";
+
+
+  const list =
+    Array.isArray(messages)
+      ? messages.slice(
+          -MAX_MESSAGES_PER_CHAT
+        )
+      : [];
+
+
+  if(!list.length){
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    if(item.role === "user"){
+
+      addUserMessage(
+        item.content,
+        false
+      );
+
+    }else{
+
+      addAssistantMessage(
+        item.content,
+        false,
+        item.imageId || null
+      );
+    }
+  });
+}
+
+
+/* =========================================================
+   USER MESSAGE
+========================================================= */
+
+function addUserMessage(
+  text,
+  persist = true,
+  imageUrl = null
+){
+
+  const value =
+    String(text || "");
+
+  messages.push({
+    role:
+      "user",
+    content:
+      value
+  });
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message user";
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+  if(imageUrl){
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.className =
+      "attached-user-image";
+
+    img.src =
+      imageUrl;
+
+    img.alt =
+      "Attached image";
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          imageUrl
+        )
+    );
+
+    bubble.appendChild(
+      img
+    );
+  }
+
+  if(value){
+
+    const textNode =
+      document.createElement(
+        "div"
+      );
+
+    textNode.textContent =
+      value;
+
+    bubble.appendChild(
+      textNode
+    );
+  }
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+  if(persist){
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   ASSISTANT MESSAGE
+========================================================= */
+
+function addAssistantMessage(
+  text,
+  persist = true,
+  imageId = null
+){
+
+  const value =
+    String(text || "");
+
+
+  const record = {
+
+    role:
+      "assistant",
+
+    content:
+      value
+  };
+
+
+  if(imageId){
+
+    record.imageId =
+      imageId;
+  }
+
+
+  messages.push(
+    record
+  );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble md";
+
+
+  bubble.innerHTML =
+    renderMarkdown(
+      value
+    );
+
+
+  if(imageId){
+
+    const creation =
+      findCreationById(
+        imageId
+      );
+
+
+    if(creation?.image){
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.className =
+        "generated-image";
+
+      img.src =
+        creation.image;
+
+      img.alt =
+        creation.prompt ||
+        "Generated image";
+
+
+      img.addEventListener(
+        "click",
+        () =>
+          openImageViewer(
+            creation.image
+          )
+      );
+
+
+      bubble.appendChild(
+        img
+      );
+
+
+      const note =
+        document.createElement(
+          "div"
+        );
+
+      note.className =
+        "image-note";
+
+      note.textContent =
+        "Image generated successfully.";
+
+      bubble.appendChild(
+        note
+      );
+    }
+  }
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  if(persist){
+
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   TYPING
+========================================================= */
+
+function showTyping(){
+
+  hideTyping();
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+  row.id =
+    "typingMessage";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.innerHTML = `
+    <div class="typing">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  scrollBottom();
+}
+
+
+function hideTyping(){
+
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
+
+  if(item){
+    item.remove();
+  }
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollBottom(){
+
+  requestAnimationFrame(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:
+            "smooth"
+        });
+
+      }catch(error){}
+    }
+  );
+}
+
+
+/* =========================================================
+   CHAT HISTORY UI
+========================================================= */
+
+function formatTime(timestamp){
+
+  if(!timestamp){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      timestamp
+    ).toLocaleString(
+      "hi-IN",
+      {
+        day:"2-digit",
+        month:"short",
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  }catch(error){
+
+    return "";
+  }
+}
+
+
+function renderChatHistory(){
+
+  chatHistoryEl.innerHTML = "";
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      );
+
+
+  if(!sorted.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई पुरानी चैट नहीं है।";
+
+    chatHistoryEl.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  sorted.forEach(item => {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "chat-history-item" +
+      (
+        item.id === currentChatId
+          ? " active"
+          : ""
+      );
+
+
+    const info =
+      document.createElement(
+        "div"
+      );
+
+    info.className =
+      "chat-history-info";
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "chat-history-title";
+
+    title.textContent =
+      item.title ||
+      "नई चैट";
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "chat-history-meta";
+
+
+    meta.textContent =
+      (
+        Array.isArray(
+          item.messages
+        )
+          ? item.messages.length
+          : 0
+      ) +
+      " messages • " +
+      formatTime(
+        item.updatedAt
+      );
+
+
+    info.appendChild(
+      title
+    );
+
+    info.appendChild(
+      meta
+    );
+
+
+    const deleteBtn =
+      document.createElement(
+        "button"
+      );
+
+    deleteBtn.className =
+      "delete-chat";
+
+    deleteBtn.type =
+      "button";
+
+    deleteBtn.textContent =
+      "🗑️";
+
+    deleteBtn.title =
+      "इस चैट को डिलीट करें";
+
+
+    deleteBtn.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        deleteChat(
+          item.id
+        );
+      }
+    );
+
+
+    row.appendChild(
+      info
+    );
+
+    row.appendChild(
+      deleteBtn
+    );
+
+
+    row.addEventListener(
+      "click",
+      () => {
+
+        openChat(
+          item.id
+        );
+
+        closeDrawer();
+      }
+    );
+
+
+    chatHistoryEl.appendChild(
+      row
+    );
+  });
+}
+
+
+/* =========================================================
+   OPEN CHAT
+========================================================= */
+
+function openChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  currentChatId =
+    chat.id;
+
+  previousResponseId =
+    String(chat.responseId || "").trim() || null;
+
+  messages =
+    Array.isArray(
+      chat.messages
+    )
+      ? chat.messages
+          .slice(
+            -MAX_MESSAGES_PER_CHAT
+          )
+      : [];
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  hideTyping();
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  scrollBottom();
+}
+
+
+/* =========================================================
+   DELETE CHAT
+========================================================= */
+
+function deleteChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats =
+    chats.filter(
+      item =>
+        item.id !== id
+    );
+
+
+  if(currentChatId === id){
+
+    currentChatId =
+      null;
+
+    messages = [];
+
+    createNewChat(
+      true
+    );
+
+    renderCurrentChat();
+
+  }else{
+
+    saveChatHistory();
+  }
+
+
+  renderChatHistory();
+
+  showToast(
+    "चैट डिलीट कर दी गई।"
+  );
+}
+
+
+/* =========================================================
+   DELETE ALL
+========================================================= */
+
+function deleteAllChats(){
+
+  if(!chats.length){
+
+    showToast(
+      "डिलीट करने के लिए कोई चैट नहीं है।"
+    );
+
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats = [];
+
+  currentChatId =
+    null;
+
+  messages = [];
+
+
+  safeRemove(
+    CHAT_LIST_KEY
+  );
+
+  safeRemove(
+    OLD_CHAT_KEY
+  );
+
+
+  createNewChat(
+    false
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  showToast(
+    "सभी चैट डिलीट कर दी गईं।"
+  );
+}
+
+
+/* =========================================================
+   IMAGE HISTORY
+========================================================= */
+
+function getStoredCreations(){
+
+  if(!HAS_STORAGE){
+    return [];
+  }
+
+
+  const raw =
+    safeGet(
+      IMAGE_KEY
+    );
+
+
+  if(!raw){
+    return [];
+  }
+
+
+  try{
+
+    const parsed =
+      JSON.parse(
+        raw
+      );
+
+
+    if(!Array.isArray(parsed)){
+      return [];
+    }
+
+
+    return parsed
+      .filter(
+        item =>
+          item &&
+          typeof item.image === "string"
+      )
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Image history invalid:",
+      error
+    );
+
+    safeRemove(
+      IMAGE_KEY
+    );
+
+    return [];
+  }
+}
+
+
+/* =========================================================
+   CREATIONS
+========================================================= */
+
+function getCreations(){
+
+  const stored =
+    getStoredCreations();
+
+
+  const all = [
+    ...volatileCreations,
+    ...stored
+  ];
+
+
+  const seen =
+    new Set();
+
+
+  return all
+    .filter(item => {
+
+      if(
+        !item ||
+        !item.image ||
+        !item.id
+      ){
+        return false;
+      }
+
+
+      if(
+        seen.has(
+          item.id
+        )
+      ){
+        return false;
+      }
+
+
+      seen.add(
+        item.id
+      );
+
+      return true;
+    })
+    .sort(
+      (a,b) =>
+        (b.time || b.createdAt || 0) -
+        (a.time || a.createdAt || 0)
+    )
+    .slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+}
+
+
+function findCreationById(id){
+
+  if(!id){
+    return null;
+  }
+
+
+  const volatile =
+    volatileCreations.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(volatile){
+    return volatile;
+  }
+
+
+  return getStoredCreations()
+    .find(
+      item =>
+        item.id === id
+    ) || null;
+}
+
+
+/* =========================================================
+   SAVE CREATIONS
+========================================================= */
+
+function saveCreations(list){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+
+  try{
+
+    const clean =
+      list
+        .filter(
+          item =>
+            item &&
+            item.image &&
+            item.image.length <=
+              MAX_HISTORY_IMAGE_CHARS
+        )
+        .slice(
+          0,
+          MAX_SAVED_CREATIONS
+        );
+
+
+    return safeSet(
+      IMAGE_KEY,
+      JSON.stringify(
+        clean
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Creation save failed:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   IMAGE BLOB HELPERS
+========================================================= */
+
+async function dataURLToBlob(
+  dataURL
+){
+
+  if(!dataURL){
+    throw new Error(
+      "Image data missing"
+    );
+  }
+
+
+  /*
+    data:image/...;base64,...
+  */
+
+  if(
+    dataURL.startsWith(
+      "data:"
+    )
+  ){
+
+    const parts =
+      dataURL.split(",");
+
+    const header =
+      parts[0];
+
+    const body =
+      parts.slice(1).join(",");
+
+
+    const mime =
+      (
+        header.match(
+          /data:([^;]+)/
+        ) || []
+      )[1] ||
+      "image/png";
+
+
+    const binary =
+      atob(body);
+
+
+    const bytes =
+      new Uint8Array(
+        binary.length
+      );
+
+
+    for(
+      let i=0;
+      i<binary.length;
+      i++
+    ){
+
+      bytes[i] =
+        binary.charCodeAt(i);
+    }
+
+
+    return new Blob(
+      [bytes],
+      {
+        type:mime
+      }
+    );
+  }
+
+
+  const response =
+    await fetch(
+      dataURL
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Image fetch failed"
+    );
+  }
+
+
+  return response.blob();
+}
+
+
+async function blobToDataURL(
+  blob
+){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        blob
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESIZE
+   IMPORTANT FOR FLUX.2 KLEIN REFERENCE IMAGE
+========================================================= */
+
+async function resizeImageDataURL(
+  dataURL,
+  maxSize = MAX_MODEL_IMAGE_SIZE,
+  quality = .78
+){
+
+  if(!dataURL){
+    return null;
+  }
+
+
+  const img =
+    new Image();
+
+
+  await new Promise(
+    (resolve,reject) => {
+
+      img.onload =
+        resolve;
+
+      img.onerror =
+        reject;
+
+      img.src =
+        dataURL;
+    }
+  );
+
+
+  const sourceWidth =
+    img.naturalWidth ||
+    img.width;
+
+
+  const sourceHeight =
+    img.naturalHeight ||
+    img.height;
+
+
+  if(
+    !sourceWidth ||
+    !sourceHeight
+  ){
+
+    return dataURL;
+  }
+
+
+  const scale =
+    Math.min(
+      1,
+      maxSize /
+      Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+
+  const width =
+    Math.max(
+      1,
+      Math.round(
+        sourceWidth * scale
+      )
+    );
+
+
+  const height =
+    Math.max(
+      1,
+      Math.round(
+        sourceHeight * scale
+      )
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  if(!ctx){
+    return dataURL;
+  }
+
+
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    JPEG reference image काफी छोटा रहेगा।
+  */
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    quality
+  );
+}
+
+
+/* =========================================================
+   HISTORY IMAGE
+========================================================= */
+
+async function blobToHistoryDataURL(
+  blob,
+  maxSize = 560
+){
+
+  try{
+
+    const bitmap =
+      await createImageBitmap(
+        blob
+      );
+
+
+    /*
+      IMPORTANT:
+      dimensions close() से पहले save करें।
+    */
+
+    const originalWidth =
+      bitmap.width;
+
+    const originalHeight =
+      bitmap.height;
+
+
+    const scale =
+      Math.min(
+        1,
+        maxSize /
+        Math.max(
+          originalWidth,
+          originalHeight
+        )
+      );
+
+
+    const width =
+      Math.max(
+        1,
+        Math.round(
+          originalWidth * scale
+        )
+      );
+
+
+    const height =
+      Math.max(
+        1,
+        Math.round(
+          originalHeight * scale
+        )
+      );
+
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+
+    canvas.width =
+      width;
+
+    canvas.height =
+      height;
+
+
+    const ctx =
+      canvas.getContext(
+        "2d"
+      );
+
+
+    if(!ctx){
+
+      bitmap.close();
+
+      return null;
+    }
+
+
+    ctx.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+
+    bitmap.close();
+
+
+    /*
+      WebP preferred.
+    */
+
+    let dataURL =
+      canvas.toDataURL(
+        "image/webp",
+        .70
+      );
+
+
+    /*
+      Browser WebP support न करे तो JPEG।
+    */
+
+    if(
+      !dataURL.startsWith(
+        "data:image/webp"
+      )
+    ){
+
+      dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          .70
+        );
+    }
+
+
+    /*
+      History के लिए hard limit।
+    */
+
+    if(
+      dataURL.length >
+      MAX_HISTORY_IMAGE_CHARS
+    ){
+
+      const smallerCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      const smallerMax =
+        420;
+
+
+      const smallerScale =
+        Math.min(
+          1,
+          smallerMax /
+          Math.max(
+            originalWidth,
+            originalHeight
+          )
+        );
+
+
+      const smallWidth =
+        Math.max(
+          1,
+          Math.round(
+            originalWidth *
+            smallerScale
+          )
+        );
+
+
+      const smallHeight =
+        Math.max(
+          1,
+          Math.round(
+            originalHeight *
+            smallerScale
+          )
+        );
+
+
+      smallerCanvas.width =
+        smallWidth;
+
+      smallerCanvas.height =
+        smallHeight;
+
+
+      const smallerCtx =
+        smallerCanvas.getContext(
+          "2d"
+        );
+
+
+      if(!smallerCtx){
+        return null;
+      }
+
+
+      /*
+        Original bitmap बंद हो चुका है,
+        इसलिए current canvas से downscale करें।
+      */
+
+      smallerCtx.drawImage(
+        canvas,
+        0,
+        0,
+        smallWidth,
+        smallHeight
+      );
+
+
+      dataURL =
+        smallerCanvas.toDataURL(
+          "image/jpeg",
+          .62
+        );
+
+
+      if(
+        dataURL.length >
+        MAX_HISTORY_IMAGE_CHARS
+      ){
+
+        return null;
+      }
+    }
+
+
+    return dataURL;
+
+  }catch(error){
+
+    console.warn(
+      "History image compression failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   SAVE CREATION
+========================================================= */
+
+async function saveCreation(
+  imageData,
+  promptText
+){
+
+  if(!imageData){
+    return null;
+  }
+
+
+  const imageId =
+    makeImageId();
+
+
+  /*
+    Original image को localStorage में नहीं डालेंगे।
+    पहले छोटा history copy बनाएँगे।
+  */
+
+  let historyImage =
+    null;
+
+
+  try{
+
+    const blob =
+      await dataURLToBlob(
+        imageData
+      );
+
+
+    historyImage =
+      await blobToHistoryDataURL(
+        blob,
+        560
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Creation history conversion failed:",
+      error
+    );
+  }
+
+
+  /*
+    अगर compressed history नहीं बनी,
+    तो current session में full image रहेगी।
+    localStorage में नहीं जाएगी।
+  */
+
+  const record = {
+
+    id:
+      imageId,
+
+    image:
+      historyImage ||
+      imageData,
+
+    prompt:
+      String(
+        promptText || ""
+      ).slice(
+        0,
+        MAX_CREATION_PROMPT_CHARS
+      ),
+
+    time:
+      Date.now()
+  };
+
+
+  volatileCreations.unshift(
+    record
+  );
+
+
+  volatileCreations =
+    volatileCreations.slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+
+
+  /*
+    केवल compressed image storage में save करें।
+  */
+
+  if(historyImage){
+
+    const existing =
+      getStoredCreations();
+
+
+    const list =
+      [
+        {
+          ...record,
+          image:
+            historyImage
+        },
+        ...existing
+      ]
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+    if(
+      saveCreations(
+        list
+      )
+    ){
+
+      /*
+        Storage में successfully save हो गई,
+        इसलिए duplicate volatile copy हटा दें।
+      */
+
+      volatileCreations =
+        volatileCreations.filter(
+          item =>
+            item.id !== imageId
+        );
+    }
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+
+
+  return imageId;
+}
+
+
+/* =========================================================
+   RENDER CREATIONS
+========================================================= */
 
 function renderCreations(){
 
- const list=
-  read(KEYS.images,[]);
+  creationGrid.innerHTML = "";
 
- if(
-  !Array.isArray(list)||
-  !list.length
- ){
 
-  UI.creations.innerHTML=
-   '<div class="empty">अभी कोई image नहीं</div>';
+  const list =
+    getCreations()
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
 
-  return;
- }
 
- UI.creations.innerHTML=
-  list
-   .slice(
-    0,
-    LIMIT.imageHistory
-   )
-   .map(x=>`
+  if(!list.length){
 
-    <div class="creation">
+    const empty =
+      document.createElement(
+        "div"
+      );
 
-     <img
-      src="${escapeAttr(x.image||x.url)}"
-      data-image="${escapeAttr(x.image||x.url)}"
-      alt="Recent image"
-     >
+    empty.className =
+      "empty-history";
 
-    </div>
+    empty.textContent =
+      "अभी कोई image creation नहीं है।";
 
-   `)
-   .join("");
+    creationGrid.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "creation-card";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.src =
+      item.image;
+
+    img.alt =
+      item.prompt ||
+      "Creation";
+
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          item.image
+        )
+    );
+
+
+    const caption =
+      document.createElement(
+        "div"
+      );
+
+    caption.className =
+      "creation-prompt";
+
+    caption.textContent =
+      item.prompt ||
+      "Image";
+
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      caption
+    );
+
+
+    creationGrid.appendChild(
+      card
+    );
+  });
 }
 
 
-/* =========================
-   EXPORT
-========================= */
+/* =========================================================
+   LAZY CREATION LOAD
+========================================================= */
 
-function exportChat(c){
+function loadCreationsLazy(){
 
- if(!c)
-  return;
+  if(creationsLoaded){
+    renderCreations();
+    return;
+  }
 
- const data=
-  (c.messages||[])
-   .map(
-    m=>
-     `${String(m.role||"").toUpperCase()}:\n`+
-     `${m.content||""}\n`
-   )
-   .join("\n");
 
- download(
-  data,
-  safeName(
-   c.customTitle||
-   c.title||
-   "Aaru Chat"
-  )+".txt",
-  "text/plain"
- );
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
 }
 
-function exportCurrent(){
 
- const c=
-  chats.find(
-   x=>x.id===currentId
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
+function openImageViewer(src){
+
+  if(!src){
+    return;
+  }
+
+
+  viewerImg.src =
+    src;
+
+
+  imageViewer.classList.add(
+    "open"
+  );
+}
+
+
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
   );
 
- if(c)
-  exportChat(c);
+  viewerImg.removeAttribute(
+    "src"
+  );
 }
 
-function exportAll(){
 
- const data=
-  chats
-   .map(c=>
-    `===== ${
-     c.customTitle||
-     c.title||
-     "Chat"
-    } =====\n`+
+/* =========================================================
+   IMAGE RESPONSE NORMALIZATION
+========================================================= */
 
-    (c.messages||[])
-     .map(
-      m=>
-       `${m.role}: ${m.content||""}`
-     )
-     .join("\n")
-   )
-   .join("\n\n");
-
- download(
-  data,
-  "aaru-all-chats.txt",
-  "text/plain"
- );
-}
-
-function download(
- data,
- name,
- type
+function normalizeImageResult(
+  value
 ){
 
- const blob=
-  new Blob(
-   [data],
-   {type}
+  if(!value){
+    return null;
+  }
+
+
+  /*
+    Direct data URL.
+  */
+
+  if(
+    typeof value === "string"
+  ){
+
+    const s =
+      value.trim();
+
+
+    if(!s){
+      return null;
+    }
+
+
+    if(
+      s.startsWith(
+        "data:image/"
+      )
+    ){
+
+      return s;
+    }
+
+
+    /*
+      URL भी स्वीकार करें।
+    */
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      return s;
+    }
+
+
+    /*
+      Raw Base64।
+    */
+
+    if(
+      /^[A-Za-z0-9+/=\r\n]+$/.test(
+        s
+      )
+    ){
+
+      return (
+        "data:image/png;base64," +
+        s.replace(
+          /\s/g,
+          ""
+        )
+      );
+    }
+
+
+    return null;
+  }
+
+
+  /*
+    Array response।
+  */
+
+  if(
+    Array.isArray(value)
+  ){
+
+    for(
+      const item of value
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+
+    return null;
+  }
+
+
+  if(
+    typeof value === "object"
+  ){
+
+    const candidates = [
+
+      value.image,
+
+      value.image_url,
+
+      value.imageUrl,
+
+      value.url,
+
+      value.result,
+
+      value.data
+    ];
+
+
+    for(
+      const item of candidates
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+  selectedDocumentText = "";
+
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
   );
 
- const url=
-  URL.createObjectURL(blob);
-
- const a=
-  document.createElement("a");
-
- a.href=url;
- a.download=name;
-
- document.body.appendChild(a);
-
- a.click();
-
- a.remove();
-
- setTimeout(
-  ()=>URL.revokeObjectURL(url),
-  1000
- );
-}
-
-
-/* =========================
-   HELPERS
-========================= */
-
-function escape(v){
-
- return String(v||"")
-  .replace(
-   /[&<>"']/g,
-   m=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-   }[m])
+  photoPreviewImg.removeAttribute(
+    "src"
   );
 }
 
-function escapeAttr(v){
- return escape(v);
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+    "बैकग्राउंड बदल", "बैकग्राउंड हटा", "पृष्ठभूमि बदल", "पृष्ठभूमि हटा",
+    "इस फोटो", "इस तस्वीर", "इस इमेज", "इस चित्र", "इसमें बदलाव",
+    "इसमें बदल", "इसको एडिट", "इसे एडिट", "एडिट करो", "बदल दो",
+    "बैकग्राउंड", "पृष्ठभूमि", "रंग बदल", "कलर बदल", "कपड़े बदल",
+    "कपड़ा बदल", "कपड़े का रंग", "व्यक्ति हट", "पर्सन हट", "इंसान हट",
+    "चेहरा बदल", "बाल बदल", "आसमान बदल", "ऑब्जेक्ट हट", "चीज हट",
+    "हटा दो", "निकाल दो", "background change", "change background",
+    "remove background", "replace background", "edit this", "edit the photo",
+    "edit image", "change color", "change colour", "change clothes",
+    "change clothing", "change shirt", "change dress", "change outfit",
+    "remove person", "remove people", "remove a person", "remove object",
+    "remove someone", "erase person", "erase object", "replace sky",
+    "change hair", "change face", "add person", "add object",
+    "replace the background", "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+       s.includes("पृष्ठभूमि") ||
+       s.includes("background") ||
+       s.includes("बदल दो") ||
+       s.includes("रंग बदल") ||
+       s.includes("कलर बदल") ||
+       s.includes("कपड़े बदल") ||
+       s.includes("व्यक्ति हट") ||
+       s.includes("पर्सन हट") ||
+       s.includes("हटा दो") ||
+       s.includes("निकाल दो") ||
+       s.includes("replace") ||
+       s.includes("remove") ||
+       s.includes("erase") ||
+       s.includes("change color") ||
+       s.includes("change clothes")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
 }
 
-function safeName(v){
 
- return String(v||"")
-  .replace(
-   /[\\/:*?"<>|]/g,
-   "_"
-  )
-  .slice(0,60);
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
 }
 
-function markdown(v){
 
- let s=escape(v);
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
 
- s=s.replace(
-  /```([\s\S]*?)```/g,
-  "<pre><code>$1</code></pre>"
- );
+async function generateImage(
+  prompt
+){
 
- s=s.replace(
-  /\*\*(.*?)\*\*/g,
-  "<strong>$1</strong>"
- );
+  const payload = {
 
- s=s.replace(
-  /\*(.*?)\*/g,
-  "<em>$1</em>"
- );
+    prompt:
+      String(
+        prompt || ""
+      ).trim(),
 
- s=s.replace(
-  /`([^`]+)`/g,
-  "<code>$1</code>"
- );
+    ratio:
+      "1:1",
 
- return s
-  .split(/\n\n+/)
-  .map(
-   p=>
-    p.startsWith("<pre>")
-     ?p
-     :"<p>"+
-      p.replace(
-       /\n/g,
-       "<br>"
-      )+
-      "</p>"
-  )
-  .join("");
+    quality:
+      "standard"
+  };
+
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
+
+  return responseToImage(
+    response
+  );
 }
+
+
+/* =========================================================
+   CHAT IMAGE NORMALIZATION
+========================================================= */
+
+function normalizeChatResult(
+  data
+){
+
+  /*
+    Worker JSON object।
+  */
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    const text =
+      data.response ??
+      data.answer ??
+      data.text ??
+      data.message ??
+      data.output ??
+      data.content ??
+      "";
+
+
+    const image =
+      normalizeImageResult(
+        data.image ??
+        data.image_url ??
+        data.imageUrl ??
+        data.result?.image ??
+        null
+      );
+
+
+    applyWorkerMemoryResponse(data);
+
+    return {
+
+      text:
+        cleanAaruText(
+          text || ""
+        ),
+
+      image:
+        image,
+
+      memory_updates:
+        Array.isArray(data.memory_updates) ? data.memory_updates : [],
+
+      memory_engine:
+        data.memory_engine || CLIENT_MEMORY_ENGINE_VERSION
+    };
+  }
+
+
+  /*
+    Plain string response।
+  */
+
+  return {
+
+    text:
+      String(
+        data || ""
+      ),
+
+    image:
+      null
+  };
+}
+
+
+/* =========================================================
+   SMART MEMORY 3.0
+========================================================= */
+
+const MEMORY_STOPWORDS = new Set([
+  "और","या","लेकिन","यह","वह","एक","इस","उस","को","से","में","पर","के","की","का","कि","है","हैं","था","थे","थी","तो","भी","ही","अब","जब","तक","आप","तुम","मैं","हम","मुझे","मेरा","मेरी","करो","करना","करके","क्या","क्यों","कैसे","कौन","कब","कहाँ","लिए","साथ","बहुत","ज्यादा","कुछ","कोई",
+  "the","and","or","but","this","that","with","from","for","are","is","was","were","you","your","what","why","how","who","when","where","please","can","could","would","should","about"
+]);
+
+function memoryTokens(text){
+  return cleanAaruText(String(text || "").toLowerCase())
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .map(w => w.trim())
+    .filter(w => w.length >= 3 && !MEMORY_STOPWORDS.has(w))
+    .slice(0, 120);
+}
+
+function memoryKey(text){
+  return memoryTokens(text).slice(0, 18).join(" ");
+}
+
+function memoryImportance(item, index, total){
+  const text = cleanAaruText(String(item?.content || "")).trim();
+  if(!text) return 0;
+
+  let score = 1;
+  const lower = text.toLowerCase();
+
+  // User-stated information/preferences should survive longer.
+  if(item?.role === "user") score += 2;
+  if(/\b(मेरा|मेरी|मेरे|मैं|मुझे|हमारा|हमारी|i am|i'm|my|me|we|our|i like|i prefer|i want|i need)\b/i.test(lower)) score += 3;
+  if(/याद|remember|भूलना|always|हमेशा|पसंद|preference|prefer|project|परियोजना|बनाना|develop|developer|code|कोड/i.test(lower)) score += 2;
+  if(text.length > 80) score += 1;
+
+  // Slight recency bonus among the older messages.
+  score += Math.min(2, index / Math.max(1, total) * 2);
+  return score;
+}
+
+
+function normalizeSemanticMemory(list){
+  if(!Array.isArray(list)) return [];
+  return list.filter(m => m && typeof m.key === "string" && typeof m.value === "string").map(m => ({
+    id: String(m.id || makeMemoryId()),
+    type: String(m.type || "fact").slice(0,30),
+    key: cleanAaruText(m.key).trim().slice(0,140),
+    value: cleanAaruText(m.value).trim().slice(0,500),
+    source: String(m.source || "user").slice(0,20),
+    importance: Math.max(1, Math.min(10, Number(m.importance) || 5)),
+    updatedAt: Number(m.updatedAt) || Date.now()
+  })).filter(m => m.key && m.value).sort((a,b) => b.importance - a.importance || b.updatedAt - a.updatedAt).slice(0,MAX_SEMANTIC_MEMORIES);
+}
+function makeMemoryId(){ return "mem_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8); }
+function semanticMemoryKey(text){ return memoryTokens(text).slice(0,12).join(" "); }
+function extractSemanticMemories(list){
+  const out=[];
+  for(const item of (Array.isArray(list)?list:[])){
+    if(item?.role!=="user") continue;
+    const text=cleanAaruText(String(item.content||"")).replace(/\s+/g," ").trim();
+    if(!text || text.length<4) continue;
+    const patterns=[
+      [/^(?:मेरा नाम|my name is)\s+(.{1,100})$/i,"नाम","identity",7],
+      [/^(?:मुझे|i)\s+(?:पसंद है|पसंद हैं|like|prefer)\s+(.{2,180})$/i,"पसंद","preference",7],
+      [/^(?:मुझे|i)\s+(?:नापसंद है|dislike)\s+(.{2,180})$/i,"नापसंद","preference",7],
+      [/^(?:याद रखना|याद रखो|remember)[:\s]+(.{2,220})$/i,"याद रखने का निर्देश","instruction",9],
+      [/^(?:हमेशा|always)\s+(.{2,220})$/i,"स्थायी निर्देश","instruction",9]
+    ];
+    let matched=false;
+    for(const [re,label,type,importance] of patterns){
+      const m=text.match(re); if(!m) continue;
+      const value=m[1].trim();
+      out.push({key:label+" "+semanticMemoryKey(value),value,type,source:"user",importance,updatedAt:Date.now()});
+      matched=true; break;
+    }
+    if(!matched && /aaru ai|प्रोजेक्ट|परियोजना|बना रहा|बनाना है|worker|index|कोड|code/i.test(text) && text.length<=500){
+      out.push({key:"project "+semanticMemoryKey(text),value:text,type:"project",source:"user",importance:8,updatedAt:Date.now()});
+    }
+  }
+  return out;
+}
+function updateSemanticMemory(existing,list){
+  let mem=normalizeSemanticMemory(existing);
+  for(const item of extractSemanticMemories(list)){
+    const same=mem.findIndex(m => m.type===item.type && semanticMemoryKey(m.key)===semanticMemoryKey(item.key));
+    if(same>=0) mem[same]={...mem[same],...item,id:mem[same].id}; else mem.unshift({...item,id:makeMemoryId()});
+  }
+  const seen=new Set();
+  mem=mem.filter(m=>{const k=semanticMemoryKey(m.type+" "+m.key+" "+m.value); if(!k||seen.has(k)) return false; seen.add(k); return true;});
+  return normalizeSemanticMemory(mem);
+}
+function buildMemorySummaryFromSemanticMemory(mem){ return normalizeSemanticMemory(mem).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_MEMORY_SUMMARY_CHARS); }
+function getSemanticRelevantMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size||!semanticMemory.length) return "";
+  return semanticMemory.map(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return {...m,score:overlap*2+m.importance*.35};}).filter(m=>m.score>=2.5).sort((a,b)=>b.score-a.score).slice(0,8).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_RELEVANT_MEMORY_CHARS);
+}
+function forgetSemanticMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size) return 0; const before=semanticMemory.length;
+  semanticMemory=semanticMemory.filter(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return overlap<Math.max(1,Math.min(3,q.size));});
+  return before-semanticMemory.length;
+}
+function isForgetMemoryCommand(text){ return /^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b/i.test(String(text||"").trim()); }
+function getForgetTarget(text){ return String(text||"").replace(/^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b[:\s-]*/i,"").trim(); }
+function updateMemoryButton(){ const el=document.getElementById("memoryBtnText"); if(el) el.textContent=`स्मार्ट मेमोरी (${semanticMemory.length})`; }
+function showMemoryStatus(){ if(!semanticMemory.length){showToast("स्मार्ट मेमोरी में अभी कोई स्थायी तथ्य नहीं है।");return;} alert("Aaru की स्मार्ट मेमोरी:\n\n"+semanticMemory.slice(0,10).map(m=>`• ${m.key}: ${m.value}`).join("\n")+(semanticMemory.length>10?`\n\nऔर ${semanticMemory.length-10} यादें...`:"")); }
+
+function buildMemorySummary(list){
+  const all = Array.isArray(list) ? list : [];
+  const older = all.slice(0, -12);
+  if(!older.length) return "";
+
+  const candidates = older.map((item, index) => ({
+    item,
+    index,
+    score: memoryImportance(item, index, older.length),
+    text: cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim()
+  })).filter(x => x.text);
+
+  // Keep important user facts/preferences first, while retaining useful recent context.
+  candidates.sort((a,b) => b.score - a.score || b.index - a.index);
+
+  const seen = new Set();
+  const parts = [];
+  for(const x of candidates){
+    const key = memoryKey(x.text) || x.text.slice(0, 120).toLowerCase();
+    if(!key || seen.has(key)) continue;
+    seen.add(key);
+
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    const compact = x.text.slice(0, 360);
+    parts.push(`${label}: ${compact}`);
+
+    if(parts.join("\n").length >= MAX_MEMORY_SUMMARY_CHARS) break;
+  }
+
+  return parts.join("\n").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+}
+
+function getRelevantMemory(query){
+  const semantic = getSemanticRelevantMemory(query);
+  const qTokens = new Set(memoryTokens(query));
+  if(!qTokens.size || !messages.length) return semantic;
+
+  const older = messages.slice(0, -12);
+  const scored = older.map((item, index) => {
+    const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
+    const tokens = memoryTokens(text);
+    if(!text || !tokens.length) return null;
+
+    let overlap = 0;
+    const unique = new Set(tokens);
+    for(const token of unique){
+      if(qTokens.has(token)) overlap++;
+    }
+
+    // Phrase-level match is stronger than individual word overlap.
+    const qClean = cleanAaruText(String(query || "")).toLowerCase().replace(/\s+/g, " ").trim();
+    const tClean = text.toLowerCase();
+    const phraseBonus = qClean.length >= 8 && tClean.includes(qClean.slice(0, Math.min(50, qClean.length))) ? 6 : 0;
+
+    const importance = memoryImportance(item, index, older.length);
+    const recency = index / Math.max(1, older.length);
+    const score = overlap * 2 + phraseBonus + importance + recency;
+
+    return { item, index, score, text };
+  }).filter(Boolean)
+    .filter(x => x.score >= 3)
+    .sort((a,b) => b.score - a.score || b.index - a.index)
+    .slice(0, 8);
+
+  // Include the neighboring message when it helps preserve a user/assistant pair.
+  const selected = [];
+  const used = new Set();
+  for(const x of scored){
+    if(used.has(x.index)) continue;
+    used.add(x.index);
+    selected.push(x);
+
+    const neighborIndex = x.item?.role === "user" ? x.index + 1 : x.index - 1;
+    if(neighborIndex >= 0 && neighborIndex < older.length && selected.length < 8 && !used.has(neighborIndex)){
+      const neighbor = older[neighborIndex];
+      const nt = cleanAaruText(String(neighbor?.content || "")).replace(/\s+/g, " ").trim();
+      if(nt){
+        used.add(neighborIndex);
+        selected.push({ item: neighbor, index: neighborIndex, score: x.score - 0.5, text: nt });
+      }
+    }
+  }
+
+  selected.sort((a,b) => a.index - b.index);
+  const historical = selected.map(x => {
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    return `${label}: ${x.text.slice(0, 480)}`;
+  }).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+  return [semantic, historical].filter(Boolean).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+}
+
+function restoreChatMemory(chat){
+  semanticMemory = normalizeSemanticMemory(chat?.semanticMemory || []);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || String(chat?.memorySummary || "").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+  if(!memorySummary && messages.length > 12) memorySummary = buildMemorySummary(messages);
+  updateMemoryButton();
+}
+
+function applyWorkerMemoryResponse(data){
+  if(!data || typeof data !== "object") return;
+  const workerMemory = Array.isArray(data.memory) ? data.memory : [];
+  const updates = Array.isArray(data.memory_updates) ? data.memory_updates : [];
+
+  if(workerMemory.length){
+    semanticMemory = normalizeSemanticMemory(workerMemory).slice(0, MAX_SEMANTIC_MEMORIES);
+  }
+
+  for(const update of updates.slice(0, MAX_WORKER_MEMORY_UPDATES)){
+    const action = String(update?.action || "").toLowerCase();
+
+    if(action === "add" && update.memory){
+      const incoming = normalizeSemanticMemory([update.memory])[0];
+      if(incoming){
+        const same = semanticMemory.findIndex(m => m.type === incoming.type && semanticMemoryKey(m.key) === semanticMemoryKey(incoming.key));
+        if(same >= 0) semanticMemory[same] = {...semanticMemory[same], ...incoming};
+        else semanticMemory.unshift(incoming);
+      }
+    }
+
+    if(action === "update" && update.id){
+      const index = semanticMemory.findIndex(m => m.id === String(update.id));
+      if(index >= 0){
+        semanticMemory[index] = {...semanticMemory[index], value:String(update.new_value || semanticMemory[index].value || "").slice(0,500), updatedAt:Date.now()};
+      }
+    }
+
+    if(action === "delete" && update.target){
+      forgetSemanticMemory(String(update.target));
+    }
+  }
+
+  semanticMemory = normalizeSemanticMemory(semanticMemory).slice(0, MAX_SEMANTIC_MEMORIES);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || memorySummary;
+  updateMemoryButton();
+}
+
+/* =========================================================
+   CHAT API
+========================================================= */
+
+async function sendChatRequest(){
+
+  // GPT-6 Astra has a 1.05M-token context window. Keep a generous client window
+  // while retaining local-storage protection for mobile browsers.
+  // The current user message is already inside messages via handleSend().
+  const recentMessages =
+    messages.slice(-MAX_CONTEXT_MESSAGES).map(item => ({
+      role: item.role === "user" ? "user" : "assistant",
+      content: cleanAaruText(
+        String(item.content || "")
+      ).slice(0, MAX_MESSAGE_CHARS)
+    }));
+
+  const lastUserMessage =
+    messages
+      .slice()
+      .reverse()
+      .find(item => item.role === "user");
+
+  const currentQuery = lastUserMessage?.content || "";
+  const relevantMemory = getRelevantMemory(currentQuery);
+
+  const payload = {
+    message: currentQuery,
+    prompt: currentQuery,
+    messages: recentMessages,
+    memory_summary: memorySummary || buildMemorySummaryFromSemanticMemory(semanticMemory) || buildMemorySummary(messages),
+    relevant_memory: relevantMemory,
+    semantic_memory: semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES),
+    model: "gpt-6-astra",
+    api: "responses",
+    reasoning: { effort: window.AARU_HIGH_REASONING === false ? "medium" : ASTRA_REASONING_EFFORT },
+    reasoning_effort: window.AARU_HIGH_REASONING === false ? "medium" : ASTRA_REASONING_EFFORT,
+    image_options: {
+      ratio: document.getElementById("ratioV42")?.value || "1:1",
+      size: document.getElementById("sizeV42")?.value || "1024x1024",
+      quality: document.getElementById("qualityV42")?.value || "medium"
+    },
+    tool_choice: "auto",
+    intelligence_layer: CLIENT_INTELLIGENCE_VERSION,
+    orchestration: "astra-native",
+    client_version: CLIENT_INTELLIGENCE_VERSION,
+    memory_engine: CLIENT_MEMORY_ENGINE_VERSION,
+    reasoning_engine: CLIENT_REASONING_ENGINE_VERSION,
+    context_engine: {
+      version: "GPT-6-ASTRA-NATIVE",
+      active_topic: currentQuery.slice(0, 500),
+      recent_turns: recentMessages.slice(-8),
+      relevant_memory: relevantMemory.slice(0, 2600),
+      semantic_memory_count: semanticMemory.length
+    },
+    stream: true,
+    previous_response_id: previousResponseId || undefined,
+    conversation_state: previousResponseId ? "continuation" : "new-response",
+    composer: "native-unified-composer",
+    intent_routing: "model-selected",
+    frontend_routing: false,
+    client_capabilities: {
+      vision: !!selectedPhotoBase64,
+      document_text: !!selectedDocumentText,
+      responses_api: true,
+      native_tools: [
+        "web_search",
+        "file_search",
+        "image_generation",
+        "code_interpreter",
+        "computer_use",
+        "functions",
+        "mcp"
+      ],
+      web_search: true,
+      image_generation: true,
+      image_editing: true,
+      voice_input: !!recognition,
+      browser_tts: true
+    }
+  };
+
+  // Keep image generation / image understanding path unchanged.
+  if(selectedPhotoBase64){
+    payload.image_b64 =
+      await resizeImageDataURL(
+        selectedPhotoBase64,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }else{
+    /* Automatically use the latest generated image for edit commands. */
+    const latestEditReference =
+      await getLatestCreationReference(
+        lastUserMessage?.content || ""
+      );
+
+    if(latestEditReference){
+      payload.image_b64 =
+        await resizeImageDataURL(
+          latestEditReference,
+          MAX_MODEL_IMAGE_SIZE,
+          .76
+        );
+    }
+  }
+
+  // Keep PDF support unchanged.
+  if(selectedDocumentText){
+    payload.document_text =
+      selectedDocumentText.slice(0, 90000);
+  }
+
+  const response =
+    await fetch(API + "chat", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(payload)
+    });
+
+  const contentType =
+    (response.headers.get("content-type") || "")
+      .toLowerCase();
+
+  // Image response: do not modify the working image path.
+  if(contentType.startsWith("image/")){
+    const image =
+      await blobToDataURL(await response.blob());
+
+    if(!response.ok){
+      throw new Error("Chat image request failed.");
+    }
+
+    return {
+      text:"इमेज तैयार है।",
+      image
+    };
+  }
+
+  if(!response.ok){
+    const errText =
+      await response.text();
+
+    let errData = null;
+
+    try{
+      errData =
+        errText ? JSON.parse(errText) : null;
+    }catch{}
+
+    throw new Error(
+      errData?.error ||
+      errData?.message ||
+      errText ||
+      "Chat request failed."
+    );
+  }
+
+  const isStream =
+    contentType.includes("text/event-stream") &&
+    response.body;
+
+  // Non-stream response fallback.
+  if(!isStream){
+    const raw = await response.text();
+    let data = null;
+
+    try{
+      data = raw ? JSON.parse(raw) : null;
+    }catch{
+      return {
+        text:cleanAaruText(raw),
+        image:null
+      };
+    }
+
+    const normalized = normalizeChatResult(data);
+    previousResponseId = data?.response_id || data?.id || normalized?.response_id || previousResponseId;
+    lastToolsUsed = Array.isArray(data?.tools_used) ? data.tools_used : [];
+    return normalized;
+  }
+
+  hideTyping();
+
+  const row =
+    document.createElement("div");
+
+  row.className = "message assistant";
+  row.id = "streamingMessage";
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className = "bubble md";
+
+  bubble.innerHTML =
+    '<div class="typing"><span></span><span></span><span></span></div>';
+
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  scrollBottom();
+
+  let fullText = "";
+  let buffer = "";
+
+  // Performance: do not re-render DOM for every SSE chunk.
+  let renderPending = false;
+  let streamFinished = false;
+
+  function extractStreamText(obj){
+    if(obj == null) return "";
+    if(typeof obj === "string") return obj;
+
+    return (
+      obj.response ??
+      obj.text ??
+      obj.content ??
+      obj.delta ??
+      obj.output_text ??
+      obj.token ??
+      obj.choices?.[0]?.delta?.content ??
+      obj.choices?.[0]?.text ??
+      obj.result?.response ??
+      obj.result?.text ??
+      ""
+    );
+  }
+
+  function scheduleStreamRender(){
+    if(renderPending) return;
+
+    renderPending = true;
+
+    requestAnimationFrame(() => {
+      renderPending = false;
+
+      bubble.innerHTML =
+        renderMarkdown(fullText || "");
+
+      if(!streamFinished){
+        scrollBottom();
+      }
+    });
+  }
+
+  function consumeEvent(eventText){
+    const lines = eventText.split(/\n/);
+
+    for(const line of lines){
+      const trimmed = line.trim();
+
+      if(!trimmed || trimmed.startsWith(":")){
+        continue;
+      }
+
+      if(!trimmed.startsWith("data:")){
+        continue;
+      }
+
+      const dataText =
+        trimmed.slice(5).trim();
+
+      if(!dataText || dataText === "[DONE]"){
+        continue;
+      }
+
+      let value = dataText;
+
+      try{
+        const parsed = JSON.parse(dataText);
+        if(parsed?.response_id) previousResponseId = parsed.response_id;
+        if(Array.isArray(parsed?.tools_used)) lastToolsUsed = parsed.tools_used;
+        value = extractStreamText(parsed);
+      }catch{}
+
+      if(value){
+        const chunk =
+          cleanAaruChunk(String(value));
+
+        if(chunk){
+          fullText += chunk;
+          scheduleStreamRender();
+        }
+      }
+    }
+  }
+
+  const reader =
+    response.body.getReader();
+
+  const decoder =
+    new TextDecoder();
+
+  while(true){
+    const {value,done} =
+      await reader.read();
+
+    if(done) break;
+
+    buffer +=
+      decoder.decode(
+        value,
+        {stream:true}
+      );
+
+    const events =
+      buffer.split(/\n\n|\r\n\r\n/);
+
+    buffer =
+      events.pop() || "";
+
+    for(const event of events){
+      consumeEvent(event);
+    }
+  }
+
+  buffer += decoder.decode();
+
+  if(buffer.trim()){
+    consumeEvent(buffer);
+  }
+
+  // Make sure the final frame is rendered before returning.
+  streamFinished = true;
+
+  await new Promise(resolve =>
+    requestAnimationFrame(resolve)
+  );
+
+  bubble.innerHTML =
+    renderMarkdown(fullText || "");
+
+  scrollBottom();
+
+  row.remove();
+
+  return {
+    text:cleanAaruText(fullText),
+    image:null
+  };
+}
+
+
+/* =========================================================
+   HANDLE SEND
+   Unified composer: text + photo + image generation/editing
+========================================================= */
+
+async function handleSend(){
+
+  if(isBusy){
+    return;
+  }
+
+  const prompt =
+    promptEl.value.trim();
+
+  const hasPhoto =
+    !!selectedPhotoBase64;
+
+  const hasDocument =
+    !!selectedDocumentText;
+
+  /* ChatGPT-style: photo alone can be sent. */
+  if(!prompt && !hasPhoto && !hasDocument){
+    showToast(
+      "कुछ लिखें या photo जोड़ें।"
+    );
+    return;
+  }
+
+  ensureCurrentChat();
+
+  isBusy =
+    true;
+
+  sendBtn.disabled =
+    true;
+
+  const attachedPhoto =
+    selectedPhotoUrl;
+
+  if(hasDocument && !prompt){
+    promptEl.value = "इस PDF को पढ़कर समझाइए।";
+  }
+
+  const displayPrompt = prompt || (hasDocument ? "इस PDF को पढ़कर समझाइए।" : "इस तस्वीर को समझाइए।");
+
+  addUserMessage(
+    displayPrompt,
+    false,
+    attachedPhoto
+  );
+
+  if(isForgetMemoryCommand(displayPrompt)){
+    const target=getForgetTarget(displayPrompt);
+    const removed=target ? forgetSemanticMemory(target) : semanticMemory.length;
+    if(!target) semanticMemory=[];
+    saveCurrentChat();
+    addAssistantMessage(removed ? `ठीक है, ${removed} मेमोरी हटा दी गई।` : "ठीक है, मेमोरी हटा दी गई।", true);
+    promptEl.value=""; autoResize(); clearSelectedPhoto(); isBusy=false; sendBtn.disabled=false;
+    return;
+  }
+
+  semanticMemory=updateSemanticMemory(semanticMemory,[messages[messages.length-1]]);
+  saveCurrentChat();
+
+  promptEl.value =
+    "";
+
+  autoResize();
+  scrollBottom();
+
+  try{
+
+    showTyping();
+
+    /*
+      One unified route. Worker /chat automatically decides:
+      normal chat, Vision, image generation or image editing.
+    */
+    const result =
+      await sendChatRequest();
+
+    saveCurrentChat();
+
+    hideTyping();
+
+    if(result && result.image){
+
+      const imageId =
+        await saveCreation(
+          result.image,
+          prompt || "Image generation"
+        );
+
+      addAssistantMessage(
+        result.text ||
+        "🖼️ Image generated successfully.",
+        true,
+        imageId
+      );
+
+    }else{
+
+      const finalText =
+        cleanAaruText(
+          result?.text ||
+          "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।"
+        );
+
+      addAssistantMessage(
+        finalText,
+        true
+      );
+
+      if(voiceOutputEnabled && finalText){
+        speakAaru(finalText);
+      }
+    }
+
+    clearSelectedPhoto();
+
+  }catch(error){
+
+    console.error(
+      "Aaru request failed:",
+      error
+    );
+
+    hideTyping();
+
+    addAssistantMessage(
+      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      true
+    );
+
+    showToast(
+      error?.message ||
+      "Request failed"
+    );
+
+  }finally{
+
+    isBusy =
+      false;
+
+    sendBtn.disabled =
+      false;
+
+    scrollBottom();
+
+    try{
+      promptEl.focus();
+    }catch(error){}
+  }
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
 
 function autoResize(){
 
- UI.prompt.style.height="auto";
+  promptEl.style.height =
+    "auto";
 
- UI.prompt.style.height=
-  Math.min(
-   UI.prompt.scrollHeight,
-   150
-  )+"px";
+
+  promptEl.style.height =
+    Math.min(
+      promptEl.scrollHeight,
+      150
+    ) + "px";
 }
 
 
-/* =========================
-   EVENTS
-========================= */
-
-$("menu").onclick=
- ()=>toggleDrawer(true);
-
-$("closeDrawer").onclick=
- ()=>toggleDrawer(false);
-
-UI.overlay.onclick=
- ()=>toggleDrawer(false);
-
-$("newTop").onclick=
- ()=>createNewChat(false);
-
-$("newChat").onclick=
- ()=>createNewChat(true);
-
-$("chatSearch").oninput=e=>{
-
- searchQuery=
-  e.target.value||"";
-
- renderChats();
-};
-
-$("settingsBtn").onclick=()=>{
-
- toggleDrawer(false);
-
- toggleSettings(true);
-};
-
-$("closeSettings").onclick=
- ()=>toggleSettings(false);
-
-$("exportCurrent").onclick=
- exportCurrent;
-
-$("exportAll").onclick=
- exportAll;
-
-$("resetSettings").onclick=
- resetSettings;
-
-$("voiceOutput").onchange=e=>
- saveSetting(
-  "voiceOutput",
-  e.target.checked
- );
-
-$("voiceMode").onchange=e=>
- saveSetting(
-  "voiceMode",
-  e.target.checked
- );
-
-$("highReasoning").onchange=e=>
- saveSetting(
-  "highReasoning",
-  e.target.checked
- );
-
-$("voiceRate").onchange=e=>
- saveSetting(
-  "voiceRate",
-  e.target.value
- );
-
-$("fileBtn").onclick=
- ()=>UI.fileInput.click();
-
-UI.fileInput.onchange=
- async e=>{
-
-  await readFile(
-   e.target.files[0]
-  );
-
-  e.target.value="";
- };
-
-$("removeFile").onclick=()=>{
-
- selectedImage=null;
- selectedDocument="";
-
- UI.preview.classList.remove(
-  "show"
- );
-
- setTool("");
-};
-
-$("imageBtn").onclick=()=>{
-
- UI.imageControls.classList.toggle(
-  "open"
- );
-};
-
-$("ratio").onchange=
- e=>{
-
-  write(
-   "aaru_image_options_v4",
-   {
-    ratio:e.target.value,
-    size:$("size").value,
-    quality:$("quality").value
-   }
-  );
- };
-
-$("size").onchange=
- e=>{
-
-  write(
-   "aaru_image_options_v4",
-   {
-    ratio:$("ratio").value,
-    size:e.target.value,
-    quality:$("quality").value
-   }
-  );
- };
-
-$("quality").onchange=
- e=>{
-
-  write(
-   "aaru_image_options_v4",
-   {
-    ratio:$("ratio").value,
-    size:$("size").value,
-    quality:e.target.value
-   }
-  );
- };
-
-$("micBtn").onclick=
- startVoice;
-
-$("speakBtn").onclick=()=>{
-
- const last=
-  [...messages]
-   .reverse()
-   .find(
-    x=>x.role==="assistant"
-   );
-
- if(last)
-  speak(last.content);
-};
-
-UI.send.onclick=
- send;
-
-UI.prompt.addEventListener(
- "input",
- autoResize
+promptEl.addEventListener(
+  "input",
+  autoResize
 );
 
-UI.prompt.addEventListener(
- "keydown",
- e=>{
+
+/* =========================================================
+   ENTER
+========================================================= */
+
+promptEl.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" &&
+      !event.shiftKey
+    ){
+
+      event.preventDefault();
+
+      handleSend();
+    }
+  }
+);
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+sendBtn.addEventListener(
+  "click",
+  handleSend
+);
+
+
+/* =========================================================
+   VOICE OUTPUT
+========================================================= */
+
+function speakAaru(text){
+  if(!voiceOutputEnabled || !("speechSynthesis" in window) || !text) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(cleanAaruText(text));
+    u.lang = /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-US";
+    u.rate = .98;
+    speechSynthesis.speak(u);
+  }catch(error){
+    console.warn("Voice output failed:",error);
+  }
+}
+
+/* =========================================================
+   VOICE INPUT
+========================================================= */
+
+function startAaruVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    showToast("इस browser में Voice Input उपलब्ध नहीं है।");
+    return;
+  }
+  if(recognition){
+    try{ recognition.stop(); }catch(error){}
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = "hi-IN";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.onstart = () => {
+    document.getElementById("micBtn")?.classList.add("voice-active");
+    showToast("सुन रहा हूँ…");
+  };
+  recognition.onresult = event => {
+    const text = event.results?.[0]?.[0]?.transcript || "";
+    if(text){
+      promptEl.value = text;
+      autoResize();
+      promptEl.focus();
+    }
+  };
+  recognition.onerror = event => {
+    showToast("Voice error: " + (event.error || "unknown"));
+  };
+  recognition.onend = () => {
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  };
+  try{ recognition.start(); }
+  catch(error){
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  }
+}
+
+/* =========================================================
+   PDF READER
+========================================================= */
+
+async function extractPDFText(file){
+  const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({data}).promise;
+  let output = "";
+  for(let pageNo=1; pageNo<=pdf.numPages; pageNo++){
+    setToastProgress(`PDF पढ़ा जा रहा है… ${pageNo}/${pdf.numPages}`);
+    const page = await pdf.getPage(pageNo);
+    const content = await page.getTextContent();
+    const text = content.items.map(item => item.str || "").join(" ");
+    output += `\n\n--- Page ${pageNo} ---\n${text}`;
+    if(output.length >= 90000) break;
+  }
+  return output.trim().slice(0,90000);
+}
+
+function setToastProgress(text){
+  showToast(text);
+}
+
+async function handlePDFFile(file){
+  try{
+    selectedDocumentText = await extractPDFText(file);
+    if(!selectedDocumentText){
+      showToast("PDF में पढ़ने योग्य text नहीं मिला।");
+      return;
+    }
+    selectedPhotoBase64 = null;
+    selectedPhotoUrl = null;
+    photoPreview.classList.remove("show");
+    photoPreviewImg.src = "";
+    showToast(`PDF तैयार है: ${selectedDocumentText.length.toLocaleString()} अक्षर`);
+  }catch(error){
+    console.error("PDF failed:",error);
+    selectedDocumentText = "";
+    showToast("PDF पढ़ने में समस्या हुई।");
+  }
+}
+
+/* =========================================================
+   PHOTO BUTTON
+========================================================= */
+
+document
+  .getElementById("photoBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      photoInput.click();
+    }
+  );
+
+
+/* =========================================================
+   PHOTO UPLOAD
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if(!file){
+      return;
+    }
+
+
+    if(
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf")
+    ){
+      await handlePDFFile(file);
+      photoInput.value = "";
+      return;
+    }
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      showToast(
+        "कृपया image file चुनें।"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      const original =
+        await fileToDataURL(
+          file
+        );
+
+
+      /*
+        IMPORTANT:
+        Preview और API दोनों के लिए
+        छोटा image रखें।
+      */
+
+      const resized =
+        await resizeImageDataURL(
+          original,
+          MAX_MODEL_IMAGE_SIZE,
+          .80
+        );
+
+
+      selectedPhotoBase64 =
+        resized;
+
+
+      selectedPhotoUrl =
+        resized;
+
+
+      photoPreviewImg.src =
+        selectedPhotoUrl;
+
+
+      photoPreview.classList.add(
+        "show"
+      );
+
+
+      showToast(
+        "Photo तैयार है। अब सीधे Send दबाएँ या सवाल लिखें।"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Photo processing failed:",
+        error
+      );
+
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
+      );
+
+    }finally{
+
+      /*
+        Same file दोबारा select हो सके।
+      */
+
+      photoInput.value =
+        "";
+    }
+  });
+
+
+function fileToDataURL(file){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE PHOTO
+========================================================= */
+
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    clearSelectedPhoto
+  );
+
+
+/* =========================================================
+   VOICE BUTTONS
+========================================================= */
+
+document.getElementById("micBtn")?.addEventListener("click",startAaruVoice);
+
+document.getElementById("speakBtn")?.addEventListener("click",()=>{
+  voiceOutputEnabled = !voiceOutputEnabled;
+  const btn = document.getElementById("speakBtn");
+  if(btn) btn.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+  if(!voiceOutputEnabled && "speechSynthesis" in window){
+    speechSynthesis.cancel();
+  }
+});
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+function openDrawer(){
+
+  drawer.classList.add(
+    "open"
+  );
+
+  drawerOverlay.classList.add(
+    "open"
+  );
+
+
+  /*
+    Image history केवल drawer खोलने पर।
+  */
+
+  setTimeout(
+    loadCreationsLazy,
+    0
+  );
+}
+
+
+function closeDrawer(){
+
+  drawer.classList.remove(
+    "open"
+  );
+
+  drawerOverlay.classList.remove(
+    "open"
+  );
+}
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener(
+    "click",
+    openDrawer
+  );
+
+
+document
+  .getElementById("closeDrawer")
+  .addEventListener(
+    "click",
+    closeDrawer
+  );
+
+
+drawerOverlay.addEventListener(
+  "click",
+  closeDrawer
+);
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function startNewChat(){
+
+  if(isBusy){
+    return;
+  }
+
+
+  if(currentChatId){
+
+    saveCurrentChat();
+  }
+
+
+  createNewChat(
+    true
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+
+  clearSelectedPhoto();
+
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  setTimeout(
+    () =>
+      promptEl.focus(),
+    100
+  );
+}
+
+
+document
+  .getElementById("newChatBtn")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+document
+  .getElementById("newChatTop")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+/* =========================================================
+   VIEWER
+========================================================= */
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closeImageViewer
+  );
+
+
+imageViewer.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target === imageViewer
+    ){
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape"
+    ){
+
+      closeDrawer();
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   PAGE RECOVERY
+========================================================= */
+
+function recoverPage(){
+
+  const now =
+    Date.now();
+
 
   if(
-   e.key==="Enter"&&
-   !e.shiftKey
+    now -
+    lastPageShowRecovery <
+    300
   ){
 
-   e.preventDefault();
-
-   send();
+    return;
   }
- }
+
+
+  lastPageShowRecovery =
+    now;
+
+
+  try{
+
+    hideTyping();
+
+  }catch(error){}
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  try{
+
+    closeDrawer();
+
+    closeImageViewer();
+
+  }catch(error){}
+
+
+  try{
+
+    const current =
+      chats.find(
+        item =>
+          item.id ===
+          currentChatId
+      );
+
+
+    if(current){
+
+      messages =
+        Array.isArray(
+          current.messages
+        )
+          ? current.messages
+              .slice(
+                -MAX_MESSAGES_PER_CHAT
+              )
+          : [];
+    }
+
+
+    renderCurrentChat();
+
+    renderChatHistory();
+
+    updateModeButtons();
+
+    autoResize();
+
+  }catch(error){
+
+    console.error(
+      "Recovery failed:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   PAGESHOW
+========================================================= */
+
+window.addEventListener(
+  "pageshow",
+  event => {
+
+    if(!appReady){
+      return;
+    }
+
+
+    if(event.persisted){
+
+      recoverPage();
+
+      return;
+    }
+
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      setTimeout(
+        recoverPage,
+        50
+      );
+    }
+  }
 );
 
 
-/* =========================
-   CHAT LIST EVENTS
-========================= */
+/* =========================================================
+   VISIBILITY
+========================================================= */
 
-UI.chatList.addEventListener(
- "click",
- e=>{
+document.addEventListener(
+  "visibilitychange",
+  () => {
 
-  const open=
-   e.target.closest(
-    "[data-open]"
-   );
+    if(
+      document.visibilityState ===
+      "visible" &&
+      appReady
+    ){
 
-  const pin=
-   e.target.closest(
-    "[data-pin]"
-   );
+      setTimeout(
+        () => {
 
-  const rename=
-   e.target.closest(
-    "[data-rename]"
-   );
+          try{
 
-  const exp=
-   e.target.closest(
-    "[data-export]"
-   );
+            hideTyping();
 
-  const del=
-   e.target.closest(
-    "[data-delete]"
-   );
+            isBusy =
+              false;
 
-  if(open){
-   openChat(
-    open.dataset.open
-   );
-   return;
+            sendBtn.disabled =
+              false;
+
+          }catch(error){}
+
+        },
+        80
+      );
+    }
   }
+);
 
-  if(pin){
-   pinChat(
-    pin.dataset.pin
-   );
-   return;
-  }
 
-  if(rename){
-   renameChat(
-    rename.dataset.rename
-   );
-   return;
-  }
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
 
-  if(exp){
+function safeInitialLoad(){
 
-   const c=
-    chats.find(
-     x=>x.id===
-      exp.dataset.export
+  try{
+
+    loadChatHistory();
+
+  }catch(error){
+
+    console.error(
+      "Chat history load failed:",
+      error
     );
 
-   if(c)
-    exportChat(c);
+    chats = [];
 
-   return;
+    currentChatId =
+      null;
+
+    messages = [];
   }
 
-  if(del){
 
-   deleteChat(
-    del.dataset.delete
-   );
+  try{
+
+    if(!chats.length){
+
+      /*
+        Startup पर localStorage write नहीं।
+      */
+
+      createNewChat(
+        false
+      );
+
+    }else{
+
+      const latest =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )[0];
+
+
+      if(latest){
+
+        currentChatId =
+          latest.id;
+
+
+        messages =
+          Array.isArray(
+            latest.messages
+          )
+            ? latest.messages
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
+            : [];
+        restoreChatMemory(latest);
+      }
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "Chat initialization failed:",
+      error
+    );
+
+    chats = [];
+
+    messages = [];
+
+    currentChatId =
+      null;
+
+
+    createNewChat(
+      false
+    );
   }
- }
-);
 
 
-/* =========================
-   IMAGE VIEWER
-========================= */
+  /*
+    Chat पहले render।
+  */
 
-function openImage(src){
+  renderCurrentChat();
 
- if(!src)
-  return;
+  renderChatHistory();
 
- const w=
-  window.open();
 
- if(!w){
+  /*
+    Image history startup पर parse नहीं।
+  */
 
-  alert(
-   "Image खोलने के लिए popup allow करें।"
+  creationGrid.innerHTML =
+    `
+      <div class="empty-history">
+        Images देखने के लिए Menu खोलें।
+      </div>
+    `;
+
+
+  updateModeButtons();
+
+  autoResize();
+
+
+  setTimeout(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:"auto"
+        });
+
+      }catch(error){}
+
+    },
+    80
   );
 
-  return;
- }
 
- w.document.write(`
-  <html>
-  <head>
-   <title>Aaru AI Image</title>
-  </head>
-
-  <body
-   style="
-    margin:0;
-    background:#000;
-    display:grid;
-    place-items:center;
-    min-height:100vh;
-   "
-  >
-
-   <img
-    src="${escapeAttr(src)}"
-    style="
-     max-width:100%;
-     max-height:100vh;
-     object-fit:contain;
-    "
-   >
-
-  </body>
-  </html>
- `);
-
- w.document.close();
-}
-
-UI.messages.addEventListener(
- "click",
- e=>{
-
-  const img=
-   e.target.closest(
-    "[data-image]"
-   );
-
-  if(img)
-   openImage(
-    img.dataset.image
-   );
- }
-);
-
-UI.creations.addEventListener(
- "click",
- e=>{
-
-  const img=
-   e.target.closest(
-    "[data-image]"
-   );
-
-  if(img)
-   openImage(
-    img.dataset.image
-   );
- });
-
-
-/* =========================
-   IMAGE SETTINGS RESTORE
-========================= */
-
-function loadImageSettings(){
-
- const x=
-  read(
-   "aaru_image_options_v4",
-   null
-  );
-
- if(!x)
-  return;
-
- if(x.ratio)
-  $("ratio").value=x.ratio;
-
- if(x.size)
-  $("size").value=x.size;
-
- if(x.quality)
-  $("quality").value=x.quality;
+  appReady =
+    true;
 }
 
 
-/* =========================
-   PAGE EVENTS
-========================= */
+const memoryBtn = document.getElementById("memoryBtn");
+if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
 
-window.addEventListener(
- "beforeunload",
- saveCurrent
-);
-
-window.addEventListener(
- "error",
- e=>{
-  console.error(
-   "Aaru Error:",
-   e.error||
-   e.message
-  );
- }
-);
-
-window.addEventListener(
- "unhandledrejection",
- e=>{
-  console.error(
-   "Aaru Promise:",
-   e.reason
-  );
- }
-);
-
-
-/* =========================
+/* =========================================================
    START
-========================= */
+========================================================= */
 
-loadState();
+if(
+  document.readyState ===
+  "loading"
+){
 
-loadImageSettings();
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
+    }
+  );
 
-loadSettingsUI();
+}else{
 
-render();
-
-renderChats();
-
-renderCreations();
-
-autoResize();
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
 
 
-/* =========================
-   ASTRA INFO
-========================= */
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
 
-window.AARU_ASTRA_NATIVE=
- Object.freeze({
+window.addEventListener(
+  "error",
+  event => {
 
-  model:MODEL,
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
 
-  api:"responses",
 
-  toolChoice:"auto",
+window.addEventListener(
+  "unhandledrejection",
+  event => {
 
-  architecture:
-   "astra-native",
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
 
-  worker:API,
-
-  version:
-   "Compact 4 V4.1",
-
-  features:[
-   "memory",
-   "chat_search",
-   "chat_rename",
-   "chat_pin",
-   "chat_delete",
-   "chat_export",
-   "web_search_ui",
-   "image_controls",
-   "voice_input",
-   "voice_output",
-   "voice_mode",
-   "pdf_reader",
-   "vision",
-   "streaming",
-   "per_chat_response_id",
-   "tool_status"
-  ]
-
- });
 </script>
+  <script>
+/* =========================================================
+   COMPACT 4 V4.2 — VERIFIED FEATURE LAYER
+========================================================= */
+(function(){
+  "use strict";
+  const $=id=>document.getElementById(id);
+  let q="";
+  let cfg={voiceOutput:true,voiceMode:false,highReasoning:true,voiceRate:1};
+  try{cfg={...cfg,...JSON.parse(localStorage.getItem("aaru_v42_settings")||"{}")};}catch{}
+  function saveCfg(){try{localStorage.setItem("aaru_v42_settings",JSON.stringify(cfg));}catch{} window.AARU_HIGH_REASONING=cfg.highReasoning; if(typeof voiceOutputEnabled!=="undefined")voiceOutputEnabled=cfg.voiceOutput;}
+  function toggleSettings(open){$("settingsModalV42")?.classList.toggle("open",!!open);}
+  function exportChatV42(c){if(!c)return;const txt=(c.messages||[]).map(m=>`${String(m.role||"").toUpperCase()}:\n${m.content||""}`).join("\n\n");downloadV42(txt,(c.customTitle||c.title||"Aaru Chat")+".txt");}
+  function exportAllV42(){const txt=(chats||[]).map(c=>`===== ${c.customTitle||c.title||"Chat"} =====\n`+(c.messages||[]).map(m=>`${m.role}: ${m.content||""}`).join("\n")).join("\n\n");downloadV42(txt,"aaru-all-chats.txt");}
+  function downloadV42(txt,name){const b=new Blob([txt],{type:"text/plain;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name.replace(/[\\/:*?"<>|]/g,"_").slice(0,80);document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+  function enhanceHistory(){
+    const box=$("chatHistory"); if(!box)return;
+    [...box.children].forEach(row=>{
+      const title=row.querySelector(".chat-history-title")?.textContent||"";
+      const c=chats.find(x=>(x.customTitle||x.title||"नई चैट")===title);
+      if(!c)return;
+      const hay=[title,...(c.messages||[]).map(m=>m.content||"")].join(" ").toLowerCase();
+      row.style.display=!q||hay.includes(q)?"flex":"none";
+      if(c.pinned)row.style.background="#eee";
+      if(!row.querySelector(".v42-pin")){
+        const b=document.createElement("button"); b.className="v42-pin"; b.type="button"; b.textContent=c.pinned?"📌":"○"; b.title="Pin/Unpin";
+        b.onclick=e=>{e.stopPropagation();c.pinned=!c.pinned;c.updatedAt=Date.now();saveChatHistory();enhanceHistory();};
+        row.insertBefore(b,row.lastElementChild);
+      }
+      if(!row.querySelector(".v42-rename")){
+        const b=document.createElement("button"); b.className="v42-rename"; b.type="button"; b.textContent="✏️"; b.title="Rename";
+        b.onclick=e=>{e.stopPropagation();const n=prompt("चैट का नाम:",c.customTitle||c.title||"नई चैट");if(n!==null&&n.trim()){c.customTitle=n.trim().slice(0,80);c.title=c.customTitle;c.updatedAt=Date.now();saveChatHistory();renderChatHistory();enhanceHistory();}};
+        row.insertBefore(b,row.lastElementChild);
+      }
+      if(!row.querySelector(".v42-export")){
+        const b=document.createElement("button"); b.className="v42-export"; b.type="button"; b.textContent="⬇️"; b.title="Export";
+        b.onclick=e=>{e.stopPropagation();exportChatV42(c);};
+        row.insertBefore(b,row.lastElementChild);
+      }
+    });
+  }
 
-</body>
+  function bindV42(){
+    $("chatSearchV42")?.addEventListener("input",e=>{q=(e.target.value||"").toLowerCase();window.renderChatHistory?.();});
+    $("exportCurrentV42")?.addEventListener("click",()=>{const c=chats.find(x=>x.id===currentChatId);if(c)exportChatV42(c);});
+    $("exportAllV42")?.addEventListener("click",exportAllV42);
+    $("settingsBtnV42")?.addEventListener("click",()=>{closeDrawer();toggleSettings(true);});
+    $("closeSettingsV42")?.addEventListener("click",()=>toggleSettings(false));
+    $("settingsModalV42")?.addEventListener("click",e=>{if(e.target.id==="settingsModalV42")toggleSettings(false);});
+    $("resetSettingsV42")?.addEventListener("click",()=>{cfg={voiceOutput:true,voiceMode:false,highReasoning:true,voiceRate:1};sync();showToast("Settings reset हो गईं।");});
+    $("voiceOutputV42")?.addEventListener("change",e=>{cfg.voiceOutput=e.target.checked;saveCfg();});
+    $("voiceModeV42")?.addEventListener("change",e=>{cfg.voiceMode=e.target.checked;saveCfg();});
+    $("highReasoningV42")?.addEventListener("change",e=>{cfg.highReasoning=e.target.checked;saveCfg();});
+    $("voiceRateV42")?.addEventListener("change",e=>{cfg.voiceRate=Number(e.target.value)||1;saveCfg();});
+    $("imageControlsBtnV42")?.addEventListener("click",()=>$("imageControlsV42")?.classList.toggle("open"));
+    ["ratioV42","sizeV42","qualityV42"].forEach(id=>$(id)?.addEventListener("change",()=>{try{localStorage.setItem("aaru_v42_image_options",JSON.stringify({ratio:$("ratioV42").value,size:$("sizeV42").value,quality:$("qualityV42").value}));}catch{}}));
+    const box=$("chatHistory");
+    if(box){
+      new MutationObserver(()=>enhanceHistory()).observe(box,{childList:true,subtree:true});
+      enhanceHistory();
+    }
+    sync();
+  }
+  function sync(){$("voiceOutputV42")&&($("voiceOutputV42").checked=cfg.voiceOutput);$("voiceModeV42")&&($("voiceModeV42").checked=cfg.voiceMode);$("highReasoningV42")&&($("highReasoningV42").checked=cfg.highReasoning);$("voiceRateV42")&&($("voiceRateV42").value=String(cfg.voiceRate));saveCfg();}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bindV42,{once:true});else bindV42();
+  window.AARU_COMPACT_V42=Object.freeze({version:"4.2",verifiedLayer:true});
+})();
+</script>
+  <script>
+/* GPT-6 Astra Native Composer runtime marker.
+   The browser never contains the OpenAI API key; the Worker is the secure gateway.
+   The model, Responses API, reasoning and native tool selection are Worker-side.
+*/
+window.AARU_ASTRA_NATIVE = Object.freeze({
+  model: "gpt-6-astra",
+  api: "responses",
+  toolChoice: "auto",
+  intentRouting: "model-selected"
+});
+</script>
+ </body>
 </html>
