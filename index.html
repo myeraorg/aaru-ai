@@ -702,6 +702,133 @@ main{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* =========================================================
+   AARU MOBILE CONTRAST + VISIBILITY FIX
+   Keep the existing Native Unified Composer architecture.
+   These overrides only repair readability on dark surfaces.
+========================================================= */
+
+/* Dark assistant/error bubbles must use light text. */
+.message.assistant .bubble{
+  color:#f7f9fc;
+}
+
+.message.user .bubble{
+  color:#ffffff;
+}
+
+.message.system .bubble{
+  color:#f7f9fc;
+}
+
+/* Markdown inside assistant messages inherits the readable color. */
+.message.assistant .md,
+.message.assistant .md p,
+.message.assistant .md li,
+.message.assistant .md h1,
+.message.assistant .md h2,
+.message.assistant .md h3,
+.message.assistant .md blockquote{
+  color:#f7f9fc;
+}
+
+/* Drawer is dark, so all drawer controls/text must be light. */
+.drawer{
+  color:#f7f9fc;
+}
+
+.drawer-title,
+.drawer-action,
+.chat-history-title,
+.chat-history-meta,
+.section-title,
+.empty-history,
+.creation-prompt{
+  color:#f7f9fc;
+}
+
+.drawer-action{
+  color:#f7f9fc;
+}
+
+.delete-chat,
+.close-drawer{
+  color:#f7f9fc;
+}
+
+/* Dark composer: input and icons must be visible. */
+.composer{
+  color:#f7f9fc;
+}
+
+#prompt{
+  color:#f7f9fc;
+  -webkit-text-fill-color:#f7f9fc;
+  caret-color:#f7f9fc;
+}
+
+#prompt::placeholder{
+  color:#d7dce7;
+  opacity:.78;
+}
+
+.icon-btn{
+  color:#f7f9fc;
+  -webkit-text-fill-color:#f7f9fc;
+}
+
+.remove-photo{
+  color:#ffffff;
+}
+
+.close-viewer{
+  color:#ffffff;
+}
+
+.toast{
+  color:#ffffff;
+}
+
+/* Keep links readable on dark assistant bubbles. */
+.message.assistant .md a{
+  color:#8db8ff;
+}
+
+/* Compact mobile composer so it does not cover the conversation. */
+@media(max-width:600px){
+  .composer-shell{
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .composer{
+    padding:6px;
+    border-radius:16px;
+  }
+
+  .input-row{
+    gap:6px;
+  }
+
+  .icon-btn{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+  }
+
+  #prompt{
+    min-height:38px;
+    max-height:96px;
+    padding:8px 6px;
+    font-size:15px;
+  }
+
+  .chat-wrap{
+    padding-bottom:112px;
+  }
+}
+
 </style>
 </head>
 
