@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="hi">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" name="viewport"/>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+
 <title>Aaru AI — GPT-6 Astra • Native Unified Composer</title>
+
 <style>
 *{
   box-sizing:border-box;
@@ -893,89 +895,5135 @@ body,.app,main{
 
 </style>
 </head>
+
 <body>
+
 <div class="app">
+
 <header class="header">
-<button aria-label="Menu" class="menu-btn" id="menuBtn">
+
+<button class="menu-btn" id="menuBtn" aria-label="Menu">
 ☰
 </button>
+
 <div class="brand">
 <div class="brand-name">Aaru AI</div>
 <div class="brand-sub">GPT-6 Astra • Native Unified Composer</div>
 </div>
-<button aria-label="New Chat" class="new-chat-top" id="newChatTop">
+
+<button class="new-chat-top" id="newChatTop" aria-label="New Chat">
 ＋
 </button>
+
 </header>
+
+
 <div class="drawer-overlay" id="drawerOverlay"></div>
+
+
 <aside class="drawer" id="drawer">
+
 <div class="drawer-head">
+
 <div class="drawer-title">
 Aaru AI
 </div>
+
 <button class="close-drawer" id="closeDrawer">
 ×
 </button>
+
 </div>
+
+
 <div class="drawer-body">
+
 <button class="drawer-action" id="newChatBtn">
 <span>＋</span>
 <span>नई चैट</span>
 </button>
+
 <button class="drawer-action" id="deleteAllBtn">
 <span>🗑️</span>
 <span>सभी चैट डिलीट करें</span>
 </button>
+
+
 <div class="section-title">
 Recent Chats
 </div>
+
 <div class="chat-history" id="chatHistory"></div>
+
+
 <div class="section-title">
 Recent Creations
 </div>
+
 <div class="creation-grid" id="creationGrid"></div>
+
 </div>
+
 </aside>
+
+
 <main>
+
 <div class="chat-wrap">
+
 <div class="messages" id="messages"></div>
+
 </div>
+
 </main>
+
+
 <div class="composer-shell">
+
 <div class="composer">
+
 <div class="photo-preview" id="photoPreview">
-<img alt="Selected image" id="photoPreviewImg"/>
+
+<img id="photoPreviewImg" alt="Selected image">
+
 <button class="remove-photo" id="removePhoto">
 ×
 </button>
+
 </div>
+
+
 <div class="input-row">
+
 <button class="icon-btn" id="photoBtn" title="Photo / PDF">
 📎
 </button>
+
 <button class="icon-btn" id="micBtn" title="Voice Input">
 🎙️
 </button>
-<textarea autocomplete="off" id="prompt" placeholder="Aaru से कुछ भी पूछें..." rows="1" spellcheck="true"></textarea>
+
+<textarea
+id="prompt"
+rows="1"
+placeholder="Aaru से कुछ भी पूछें..."
+autocomplete="off"
+spellcheck="true"></textarea>
+
 <button class="icon-btn" id="speakBtn" title="Voice Output">
 🔊
 </button>
+
 <button class="icon-btn send-btn" id="sendBtn" title="Send">
 ➤
 </button>
+
 </div>
+
+
+
+
 </div>
+
 </div>
+
 </div>
-<input accept="image/*,.pdf,application/pdf" id="photoInput" type="file"/>
+
+
+<input
+type="file"
+id="photoInput"
+accept="image/*,.pdf,application/pdf">
+
+
 <div class="image-viewer" id="imageViewer">
+
 <button class="close-viewer" id="closeViewer">
 ×
 </button>
-<img alt="Image preview" id="viewerImg"/>
-</div>
-<div class="toast" id="toast"></div>
-<script defer="True" src="./aaru-app.js"></script>
 
+<img id="viewerImg" alt="Image preview">
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+"use strict";
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API =
+  "https://aaru-ai-api.myera-org.workers.dev/";
+
+
+const CHAT_LIST_KEY =
+  "aaru_chat_history_v2";
+
+
+const OLD_CHAT_KEY =
+  "aaru_chat_messages";
+
+
+const IMAGE_KEY =
+  "aaru_history";
+
+
+const MAX_SAVED_CHATS = 8;
+const MAX_MESSAGES_PER_CHAT = 1000;
+const MAX_CONTEXT_MESSAGES = 240;
+const ASTRA_REASONING_EFFORT = "high";
+const ASTRA_FAST_REASONING_EFFORT = "low";
+const ASTRA_NORMAL_REASONING_EFFORT = "medium";
+const MAX_MESSAGE_CHARS = 4000;
+const MEMORY_SUMMARY_KEY = "aaru_smart_memory_v1";
+const MEMORY_V3_KEY = "aaru_smart_memory_v3";
+const MAX_MEMORY_SUMMARY_CHARS = 3200;
+const MAX_RELEVANT_MEMORY_CHARS = 2600;
+const MAX_SEMANTIC_MEMORIES = 80;
+const CLIENT_INTELLIGENCE_VERSION = "GPT-6-ASTRA-NATIVE";
+const CLIENT_REASONING_ENGINE_VERSION = "GPT-6-ASTRA";
+const CLIENT_MEMORY_ENGINE_VERSION = "6.0";
+const MAX_WORKER_MEMORY_UPDATES = 40;
+const CHAT_REQUEST_TIMEOUT_MS = 60000;
+const CHAT_RETRY_DELAY_MS = 700;
+
+const MAX_SAVED_CREATIONS = 4;
+const MAX_CREATION_PROMPT_CHARS = 300;
+const MAX_HISTORY_IMAGE_CHARS = 420000;
+
+
+/*
+  Image reference preprocessing is kept client-side only to reduce payload size.
+  Actual image generation/editing is selected and executed by the Worker.
+*/
+const MAX_MODEL_IMAGE_SIZE = 511;
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let chats = [];
+let currentChatId = null;
+let messages = [];
+let memorySummary = "";
+let semanticMemory = [];
+
+let selectedPhotoBase64 = null;
+let selectedPhotoUrl = null;
+let selectedDocumentText = "";
+let voiceOutputEnabled = true;
+let recognition = null;
+
+let isBusy = false;
+let previousResponseId = null;
+let lastToolsUsed = [];
+let activeStream = null;
+
+let volatileCreations = [];
+
+let creationsLoaded = false;
+
+let appReady = false;
+
+let lastPageShowRecovery = 0;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const messagesEl =
+  document.getElementById("messages");
+
+const promptEl =
+  document.getElementById("prompt");
+
+const sendBtn =
+  document.getElementById("sendBtn");
+
+const photoInput =
+  document.getElementById("photoInput");
+
+const photoPreview =
+  document.getElementById("photoPreview");
+
+const photoPreviewImg =
+  document.getElementById("photoPreviewImg");
+
+const chatHistoryEl =
+  document.getElementById("chatHistory");
+
+const creationGrid =
+  document.getElementById("creationGrid");
+
+const drawer =
+  document.getElementById("drawer");
+
+const drawerOverlay =
+  document.getElementById("drawerOverlay");
+
+const imageViewer =
+  document.getElementById("imageViewer");
+
+const viewerImg =
+  document.getElementById("viewerImg");
+
+const toastEl =
+  document.getElementById("toast");
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function makeChatId(){
+
+  return "chat_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,9);
+}
+
+
+function makeImageId(){
+
+  return "img_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,10);
+}
+
+
+function showToast(text){
+
+  toastEl.textContent =
+    String(text || "");
+
+  toastEl.classList.add("show");
+
+  clearTimeout(showToast.timer);
+
+  showToast.timer =
+    setTimeout(() => {
+
+      toastEl.classList.remove(
+        "show"
+      );
+
+    },2200);
+}
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+/* =========================================================
+   MARKDOWN RENDERER
+   IMPORTANT: UNCHANGED
+========================================================= */
+
+function cleanAaruText(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<div\s*>/gi,"\n")
+    .replace(/<\/div\s*>/gi,"\n")
+    .replace(/\r\n/g,"\n")
+    .replace(/\r/g,"\n")
+    .replace(/\*\*(.*?)\*\*/gs,"$1")
+    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,"$1")
+    .replace(/\n{3,}/g,"\n\n")
+    .trim();
+}
+
+function cleanAaruChunk(text){
+  return String(text ?? "")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/\*\*/g,"")
+    .replace(/(?<!\*)\*(?!\*)/g,"");
+}
+
+function inlineMarkdown(text){
+
+  let s =
+    escapeHTML(text);
+
+  s =
+    s.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
+
+  s =
+    s.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+  s =
+    s.replace(
+      /\*\*([^*]+)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /__([^_]+)__/g,
+      "<strong>$1</strong>"
+    );
+
+  s =
+    s.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      "<em>$1</em>"
+    );
+
+  s =
+    s.replace(
+      /(?<!_)_([^_]+)_(?!_)/g,
+      "<em>$1</em>"
+    );
+
+  return s;
+}
+
+
+function renderMarkdown(text){
+
+  const source = cleanAaruText(text);
+
+  const lines =
+    source.split("\n");
+
+  let html = "";
+
+  let inCode = false;
+
+  let codeBuffer = [];
+
+  let inUl = false;
+
+  let inOl = false;
+
+  let paragraph = [];
+
+
+  function closeLists(){
+
+    if(inUl){
+
+      html += "</ul>";
+
+      inUl = false;
+    }
+
+    if(inOl){
+
+      html += "</ol>";
+
+      inOl = false;
+    }
+  }
+
+
+  function flushParagraph(buffer){
+
+    if(!buffer.length){
+      return;
+    }
+
+    const value =
+      buffer.join("\n")
+        .trim();
+
+    if(!value){
+      return;
+    }
+
+    html +=
+      "<p>" +
+      inlineMarkdown(
+        value.replace(
+          /\n/g,
+          "<br>"
+        )
+      ) +
+      "</p>";
+  }
+
+
+  for(let i=0;i<lines.length;i++){
+
+    const line =
+      lines[i];
+
+
+    if(
+      line.trim()
+        .startsWith("```")
+    ){
+
+      if(inCode){
+
+        html +=
+          "<pre><code>" +
+          escapeHTML(
+            codeBuffer.join("\n")
+          ) +
+          "</code></pre>";
+
+        codeBuffer = [];
+
+        inCode = false;
+
+      }else{
+
+        flushParagraph(
+          paragraph
+        );
+
+        paragraph = [];
+
+        closeLists();
+
+        inCode = true;
+      }
+
+      continue;
+    }
+
+
+    if(inCode){
+
+      codeBuffer.push(
+        line
+      );
+
+      continue;
+    }
+
+
+    if(!line.trim()){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      continue;
+    }
+
+
+    const h3 =
+      line.match(
+        /^###\s+(.+)$/
+      );
+
+    const h2 =
+      line.match(
+        /^##\s+(.+)$/
+      );
+
+    const h1 =
+      line.match(
+        /^#\s+(.+)$/
+      );
+
+
+    if(h1){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h1>" +
+        inlineMarkdown(h1[1]) +
+        "</h1>";
+
+      continue;
+    }
+
+
+    if(h2){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h2>" +
+        inlineMarkdown(h2[1]) +
+        "</h2>";
+
+      continue;
+    }
+
+
+    if(h3){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<h3>" +
+        inlineMarkdown(h3[1]) +
+        "</h3>";
+
+      continue;
+    }
+
+
+    const ul =
+      line.match(
+        /^\s*[-*+]\s+(.+)$/
+      );
+
+    const ol =
+      line.match(
+        /^\s*\d+[.)]\s+(.+)$/
+      );
+
+
+    if(ul){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inOl){
+
+        html += "</ol>";
+
+        inOl = false;
+      }
+
+      if(!inUl){
+
+        html += "<ul>";
+
+        inUl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ul[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    if(ol){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      if(inUl){
+
+        html += "</ul>";
+
+        inUl = false;
+      }
+
+      if(!inOl){
+
+        html += "<ol>";
+
+        inOl = true;
+      }
+
+      html +=
+        "<li>" +
+        inlineMarkdown(ol[1]) +
+        "</li>";
+
+      continue;
+    }
+
+
+    const quote =
+      line.match(
+        /^\s*>\s?(.*)$/
+      );
+
+
+    if(quote){
+
+      flushParagraph(
+        paragraph
+      );
+
+      paragraph = [];
+
+      closeLists();
+
+      html +=
+        "<blockquote>" +
+        inlineMarkdown(quote[1]) +
+        "</blockquote>";
+
+      continue;
+    }
+
+
+    paragraph.push(
+      line
+    );
+  }
+
+
+  if(inCode){
+
+    html +=
+      "<pre><code>" +
+      escapeHTML(
+        codeBuffer.join("\n")
+      ) +
+      "</code></pre>";
+  }
+
+
+  flushParagraph(
+    paragraph
+  );
+
+  closeLists();
+
+  return html;
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function storageAvailable(){
+
+  try{
+
+    const storage =
+      window.localStorage;
+
+    if(!storage){
+      return false;
+    }
+
+    const key =
+      "__aaru_test__";
+
+    storage.setItem(
+      key,
+      "1"
+    );
+
+    storage.removeItem(
+      key
+    );
+
+    return true;
+
+  }catch(error){
+
+    return false;
+  }
+}
+
+
+const HAS_STORAGE =
+  storageAvailable();
+
+
+function safeGet(key){
+
+  if(!HAS_STORAGE){
+    return null;
+  }
+
+  try{
+
+    return localStorage.getItem(
+      key
+    );
+
+  }catch(error){
+
+    return null;
+  }
+}
+
+
+function safeSet(key,value){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+  try{
+
+    localStorage.setItem(
+      key,
+      value
+    );
+
+    return true;
+
+  }catch(error){
+
+    console.warn(
+      "Storage write failed:",
+      key,
+      error
+    );
+
+    return false;
+  }
+}
+
+
+function safeRemove(key){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+  try{
+
+    localStorage.removeItem(
+      key
+    );
+
+  }catch(error){}
+}
+
+
+/* =========================================================
+   CHAT NORMALIZE
+========================================================= */
+
+function normalizeChat(chat){
+
+  if(!chat){
+    return null;
+  }
+
+  const id =
+    String(chat.id || "");
+
+  if(!id){
+    return null;
+  }
+
+
+  const raw =
+    Array.isArray(chat.messages)
+      ? chat.messages
+      : [];
+
+  const savedMemory =
+    String(chat.memorySummary || "").trim();
+
+  const savedSemanticMemory =
+    Array.isArray(chat.semanticMemory) ? chat.semanticMemory : [];
+
+
+  const normalized =
+    raw
+      .slice(-MAX_MESSAGES_PER_CHAT)
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content ??
+              item.text ??
+              ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  let title =
+    String(
+      chat.title || ""
+    )
+    .trim()
+    .slice(0,80);
+
+
+  if(!title){
+
+    const firstUser =
+      normalized.find(
+        item =>
+          item.role === "user"
+      );
+
+    title =
+      firstUser
+        ? firstUser.content
+            .replace(/\s+/g," ")
+            .slice(0,80)
+        : "नई चैट";
+  }
+
+
+  return {
+
+    id,
+
+    title:
+      title || "नई चैट",
+
+    messages:
+      normalized,
+
+    semanticMemory:
+      normalizeSemanticMemory(savedSemanticMemory),
+
+    responseId:
+      String(chat.responseId || chat.previousResponseId || "").slice(0,200) || null,
+
+    createdAt:
+      Number(
+        chat.createdAt
+      ) || Date.now(),
+
+    updatedAt:
+      Number(
+        chat.updatedAt
+      ) || Date.now()
+  };
+}
+
+
+/* =========================================================
+   LOAD CHAT HISTORY
+========================================================= */
+
+function loadChatHistory(){
+
+  chats = [];
+
+  const raw =
+    safeGet(
+      CHAT_LIST_KEY
+    );
+
+
+  if(raw){
+
+    try{
+
+      const parsed =
+        JSON.parse(raw);
+
+      if(Array.isArray(parsed)){
+
+        const seen =
+          new Set();
+
+        chats =
+          parsed
+            .map(normalizeChat)
+            .filter(Boolean)
+            .filter(chat => {
+
+              if(seen.has(chat.id)){
+                return false;
+              }
+
+              seen.add(chat.id);
+
+              return true;
+            })
+            .sort(
+              (a,b) =>
+                (b.updatedAt || 0) -
+                (a.updatedAt || 0)
+            )
+            .slice(
+              0,
+              MAX_SAVED_CHATS
+            );
+      }
+
+    }catch(error){
+
+      console.warn(
+        "Chat history corrupted:",
+        error
+      );
+
+      safeRemove(
+        CHAT_LIST_KEY
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+    पुराने storage की migration।
+  */
+
+  const oldRaw =
+    safeGet(
+      OLD_CHAT_KEY
+    );
+
+
+  if(oldRaw){
+
+    try{
+
+      const old =
+        JSON.parse(
+          oldRaw
+        );
+
+      if(
+        Array.isArray(old) &&
+        old.length
+      ){
+
+        const now =
+          Date.now();
+
+        const migrated =
+          normalizeChat({
+
+            id:
+              makeChatId(),
+
+            title:
+              "पुरानी चैट",
+
+            messages:
+              old,
+
+            createdAt:
+              now,
+
+            updatedAt:
+              now
+          });
+
+
+        if(migrated){
+          chats = [migrated];
+        }
+      }
+
+    }catch(error){}
+
+    safeRemove(
+      OLD_CHAT_KEY
+    );
+  }
+}
+
+
+/* =========================================================
+   SAVE CHAT HISTORY
+========================================================= */
+
+function saveChatHistory(){
+
+  if(!HAS_STORAGE){
+    return;
+  }
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  /*
+    पहले सामान्य save।
+  */
+
+  if(
+    safeSet(
+      CHAT_LIST_KEY,
+      JSON.stringify(sorted)
+    )
+  ){
+
+    chats = sorted;
+
+    return;
+  }
+
+
+  /*
+    Storage quota भरने पर कम chats।
+  */
+
+  for(
+    const count of [6,4,3,2,1]
+  ){
+
+    const smaller =
+      sorted.slice(
+        0,
+        count
+      );
+
+    if(
+      safeSet(
+        CHAT_LIST_KEY,
+        JSON.stringify(smaller)
+      )
+    ){
+
+      chats = sorted;
+
+      return;
+    }
+  }
+
+
+  /*
+    Last resort:
+    image history हटाकर chat बचाएँ।
+  */
+
+  safeRemove(
+    IMAGE_KEY
+  );
+
+
+  const emergency =
+    sorted.slice(
+      0,
+      3
+    );
+
+
+  safeSet(
+    CHAT_LIST_KEY,
+    JSON.stringify(
+      emergency
+    )
+  );
+
+  chats = sorted;
+}
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function createNewChat(
+  persist = true
+){
+
+  const now =
+    Date.now();
+
+
+  const chat = {
+
+    id:
+      makeChatId(),
+
+    title:
+      "नई चैट",
+
+    messages:
+      [],
+
+    semanticMemory:
+      [],
+
+    responseId:
+      null,
+
+    createdAt:
+      now,
+
+    updatedAt:
+      now
+  };
+
+
+  chats.unshift(
+    chat
+  );
+
+
+  chats =
+    chats
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      )
+      .slice(
+        0,
+        MAX_SAVED_CHATS
+      );
+
+
+  currentChatId =
+    chat.id;
+
+  messages = [];
+  semanticMemory = [];
+  memorySummary = "";
+  previousResponseId = null;
+  lastToolsUsed = [];
+  updateMemoryButton();
+
+
+  if(persist){
+
+    saveChatHistory();
+  }
+
+
+  return chat;
+}
+
+
+/* =========================================================
+   ENSURE CURRENT CHAT
+========================================================= */
+
+function ensureCurrentChat(){
+
+  if(currentChatId){
+
+    const existing =
+      chats.find(
+        chat =>
+          chat.id === currentChatId
+      );
+
+    if(existing){
+      return existing;
+    }
+  }
+
+
+  return createNewChat(
+    true
+  );
+}
+
+
+/* =========================================================
+   SAVE CURRENT CHAT
+========================================================= */
+
+function saveCurrentChat(){
+
+  const chat =
+    ensureCurrentChat();
+
+
+  semanticMemory = updateSemanticMemory(semanticMemory, messages);
+  chat.semanticMemory = semanticMemory.slice(0, MAX_SEMANTIC_MEMORIES);
+  chat.memorySummary = buildMemorySummary(messages);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || chat.memorySummary;
+
+  chat.responseId =
+    previousResponseId || null;
+
+  chat.messages =
+    messages
+      .slice(
+        -MAX_MESSAGES_PER_CHAT
+      )
+      .map(item => {
+
+        const result = {
+
+          role:
+            item.role === "user"
+              ? "user"
+              : "assistant",
+
+          content:
+            String(
+              item.content || ""
+            ).slice(
+              0,
+              MAX_MESSAGE_CHARS
+            )
+        };
+
+
+        if(item.imageId){
+
+          result.imageId =
+            String(
+              item.imageId
+            ).slice(
+              0,
+              100
+            );
+        }
+
+
+        return result;
+      });
+
+
+  const firstUser =
+    chat.messages.find(
+      item =>
+        item.role === "user"
+    );
+
+
+  chat.title =
+    firstUser
+      ? firstUser.content
+          .replace(/\s+/g," ")
+          .slice(0,80)
+      : "नई चैट";
+
+
+  chat.updatedAt =
+    Date.now();
+
+
+  saveChatHistory();
+
+  renderChatHistory();
+}
+
+
+/* =========================================================
+   RENDER CURRENT CHAT
+========================================================= */
+
+function renderCurrentChat(){
+
+  messagesEl.innerHTML = "";
+
+
+  const list =
+    Array.isArray(messages)
+      ? messages.slice(
+          -MAX_MESSAGES_PER_CHAT
+        )
+      : [];
+
+
+  if(!list.length){
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    if(item.role === "user"){
+
+      addUserMessage(
+        item.content,
+        false
+      );
+
+    }else{
+
+      addAssistantMessage(
+        item.content,
+        false,
+        item.imageId || null
+      );
+    }
+  });
+}
+
+
+/* =========================================================
+   USER MESSAGE
+========================================================= */
+
+function addUserMessage(
+  text,
+  persist = true,
+  imageUrl = null
+){
+
+  const value =
+    String(text || "");
+
+  messages.push({
+    role:
+      "user",
+    content:
+      value
+  });
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message user";
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+  if(imageUrl){
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.className =
+      "attached-user-image";
+
+    img.src =
+      imageUrl;
+
+    img.alt =
+      "Attached image";
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          imageUrl
+        )
+    );
+
+    bubble.appendChild(
+      img
+    );
+  }
+
+  if(value){
+
+    const textNode =
+      document.createElement(
+        "div"
+      );
+
+    textNode.textContent =
+      value;
+
+    bubble.appendChild(
+      textNode
+    );
+  }
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+  if(persist){
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   ASSISTANT MESSAGE
+========================================================= */
+
+function addAssistantMessage(
+  text,
+  persist = true,
+  imageId = null
+){
+
+  const value =
+    String(text || "");
+
+
+  const record = {
+
+    role:
+      "assistant",
+
+    content:
+      value
+  };
+
+
+  if(imageId){
+
+    record.imageId =
+      imageId;
+  }
+
+
+  messages.push(
+    record
+  );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble md";
+
+
+  bubble.innerHTML =
+    renderMarkdown(
+      value
+    );
+
+
+  if(imageId){
+
+    const creation =
+      findCreationById(
+        imageId
+      );
+
+
+    if(creation?.image){
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.className =
+        "generated-image";
+
+      img.src =
+        creation.image;
+
+      img.alt =
+        creation.prompt ||
+        "Generated image";
+
+
+      img.addEventListener(
+        "click",
+        () =>
+          openImageViewer(
+            creation.image
+          )
+      );
+
+
+      bubble.appendChild(
+        img
+      );
+
+
+      const note =
+        document.createElement(
+          "div"
+        );
+
+      note.className =
+        "image-note";
+
+      note.textContent =
+        "Image generated successfully.";
+
+      bubble.appendChild(
+        note
+      );
+    }
+  }
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  if(persist){
+
+    saveCurrentChat();
+  }
+}
+
+
+/* =========================================================
+   TYPING
+========================================================= */
+
+function showTyping(){
+
+  hideTyping();
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "message assistant";
+
+  row.id =
+    "typingMessage";
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "bubble";
+
+
+  bubble.innerHTML = `
+    <div class="typing">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+
+
+  row.appendChild(
+    bubble
+  );
+
+  messagesEl.appendChild(
+    row
+  );
+
+
+  scrollBottom();
+}
+
+
+function hideTyping(){
+
+  const item =
+    document.getElementById(
+      "typingMessage"
+    );
+
+  if(item){
+    item.remove();
+  }
+}
+
+function startStreamingMessage(){
+  hideTyping();
+  const row=document.createElement("div"); row.className="message assistant"; row.id="streamingMessage";
+  const bubble=document.createElement("div"); bubble.className="bubble md";
+  const text=document.createElement("div"); text.className="stream-text";
+  const status=document.createElement("div"); status.className="stream-status";
+  bubble.append(text,status); row.appendChild(bubble); messagesEl.appendChild(row);
+  activeStream={row,bubble,text,status,buffer:"",tools:new Set(),response:null}; scrollBottom(); return activeStream;
+}
+function setStreamStatus(value){ if(activeStream?.status) activeStream.status.textContent=String(value||""); }
+function handleStreamEvent(type,data){
+  if(!activeStream) startStreamingMessage();
+  const t=String(type||""); const it=String(data?.type||""); const combined=(t+" "+it).toLowerCase();
+  const map=[["web_search","🔎 वेब पर देख रहा हूँ…"],["file_search","📄 फ़ाइल देख रहा हूँ…"],["code_interpreter","⚙️ विश्लेषण कर रहा हूँ…"],["image_generation","🎨 इमेज तैयार कर रहा हूँ…"],["computer","🖥️ काम कर रहा हूँ…"]];
+  for(const [key,label] of map) if(combined.includes(key)){activeStream.tools.add(key);setStreamStatus(label);break;}
+  if(t.includes("output_text.delta")){ const delta=typeof data?.delta==="string"?data.delta:""; if(delta){activeStream.buffer+=delta;activeStream.text.textContent=activeStream.buffer;setStreamStatus("");scrollBottom();} }
+  if(t.includes("output_text.done") && !activeStream.buffer && typeof data?.text==="string"){activeStream.buffer=data.text;activeStream.text.textContent=activeStream.buffer;}
+  if(t==="response.completed" || it==="response.completed"){activeStream.response=data?.response||data;setStreamStatus("");}
+  if(t==="response.failed" || t==="response.incomplete") setStreamStatus("");
+}
+function parseSSEEventBlock(block){
+  const lines=String(block||"").split(/\r?\n/); let event=""; const dataLines=[];
+  for(const line of lines){if(line.startsWith("event:")) event=line.slice(6).trim();else if(line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());}
+  const raw=dataLines.join("\n"); if(!raw||raw==="[DONE]") return {event,data:null};
+  try{return {event,data:JSON.parse(raw)};}catch{return {event,data:null};}
+}
+async function consumeAstraStream(response){
+  const stream=startStreamingMessage(); if(!response.body) throw new Error("Streaming response body unavailable.");
+  const reader=response.body.getReader(); const decoder=new TextDecoder(); let pending="";
+  try{while(true){const {value,done}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const blocks=pending.split(/\r?\n\r?\n/);pending=blocks.pop()||"";for(const block of blocks){const p=parseSSEEventBlock(block);if(p.data)handleStreamEvent(p.event,p.data);}}pending+=decoder.decode();if(pending.trim()){const p=parseSSEEventBlock(pending);if(p.data)handleStreamEvent(p.event,p.data);}}finally{try{reader.releaseLock();}catch(error){}}
+  const d=stream.response; const text=cleanAaruText(stream.buffer||extractResponseTextClient(d)); const image=extractImageFromResponseClient(d); const tools=[...stream.tools];
+  for(const item of d?.output||[]){const type=String(item?.type||"").toLowerCase();if(type.includes("web_search"))tools.push("web_search");if(type.includes("file_search"))tools.push("file_search");if(type.includes("code_interpreter"))tools.push("code_interpreter");if(type.includes("image_generation"))tools.push("image_generation");}
+  lastToolsUsed=[...new Set(tools)]; if(d?.id){previousResponseId=String(d.id).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;} if(!text&&!image)throw new Error("Aaru ने खाली streaming response दिया।"); return {text,image,tools_used:lastToolsUsed,response_id:d?.id||null};
+}
+function extractResponseTextClient(data){if(typeof data?.output_text==="string")return data.output_text;const chunks=[];for(const item of data?.output||[]){if(item?.type!=="message")continue;for(const c of item?.content||[])if(c?.type==="output_text"&&typeof c.text==="string")chunks.push(c.text);}return chunks.join("\n");}
+function extractImageFromResponseClient(data){for(const item of data?.output||[]){if(item?.type==="image_generation_call"&&item?.result){const result=String(item.result);return result.startsWith("data:image/")?result:`data:image/png;base64,${result}`;}}return null;}
+function removeStreamingMessage(){const item=document.getElementById("streamingMessage");if(item)item.remove();activeStream=null;}
+
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollBottom(){
+
+  requestAnimationFrame(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:
+            "smooth"
+        });
+
+      }catch(error){}
+    }
+  );
+}
+
+
+/* =========================================================
+   CHAT HISTORY UI
+========================================================= */
+
+function formatTime(timestamp){
+
+  if(!timestamp){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      timestamp
+    ).toLocaleString(
+      "hi-IN",
+      {
+        day:"2-digit",
+        month:"short",
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  }catch(error){
+
+    return "";
+  }
+}
+
+
+function renderChatHistory(){
+
+  chatHistoryEl.innerHTML = "";
+
+
+  const sorted =
+    chats
+      .slice()
+      .sort(
+        (a,b) =>
+          (b.updatedAt || 0) -
+          (a.updatedAt || 0)
+      );
+
+
+  if(!sorted.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई पुरानी चैट नहीं है।";
+
+    chatHistoryEl.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  sorted.forEach(item => {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "chat-history-item" +
+      (
+        item.id === currentChatId
+          ? " active"
+          : ""
+      );
+
+
+    const info =
+      document.createElement(
+        "div"
+      );
+
+    info.className =
+      "chat-history-info";
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "chat-history-title";
+
+    title.textContent =
+      item.title ||
+      "नई चैट";
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "chat-history-meta";
+
+
+    meta.textContent =
+      (
+        Array.isArray(
+          item.messages
+        )
+          ? item.messages.length
+          : 0
+      ) +
+      " messages • " +
+      formatTime(
+        item.updatedAt
+      );
+
+
+    info.appendChild(
+      title
+    );
+
+    info.appendChild(
+      meta
+    );
+
+
+    const deleteBtn =
+      document.createElement(
+        "button"
+      );
+
+    deleteBtn.className =
+      "delete-chat";
+
+    deleteBtn.type =
+      "button";
+
+    deleteBtn.textContent =
+      "🗑️";
+
+    deleteBtn.title =
+      "इस चैट को डिलीट करें";
+
+
+    deleteBtn.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        deleteChat(
+          item.id
+        );
+      }
+    );
+
+
+    row.appendChild(
+      info
+    );
+
+    row.appendChild(
+      deleteBtn
+    );
+
+
+    row.addEventListener(
+      "click",
+      () => {
+
+        openChat(
+          item.id
+        );
+
+        closeDrawer();
+      }
+    );
+
+
+    chatHistoryEl.appendChild(
+      row
+    );
+  });
+}
+
+
+/* =========================================================
+   OPEN CHAT
+========================================================= */
+
+function openChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  currentChatId =
+    chat.id;
+
+
+  messages =
+    Array.isArray(
+      chat.messages
+    )
+      ? chat.messages
+          .slice(
+            -MAX_MESSAGES_PER_CHAT
+          )
+      : [];
+
+  previousResponseId =
+    chat.responseId || null;
+
+  lastToolsUsed = [];
+
+
+  isBusy =
+    false;
+
+  sendBtn.disabled =
+    false;
+
+
+  hideTyping();
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  scrollBottom();
+}
+
+
+/* =========================================================
+   DELETE CHAT
+========================================================= */
+
+function deleteChat(id){
+
+  const chat =
+    chats.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!chat){
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      `क्या आप "${chat.title || "इस चैट"}" को डिलीट करना चाहते हैं?`
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats =
+    chats.filter(
+      item =>
+        item.id !== id
+    );
+
+
+  if(currentChatId === id){
+
+    currentChatId =
+      null;
+
+    messages = [];
+
+    createNewChat(
+      true
+    );
+
+    renderCurrentChat();
+
+  }else{
+
+    saveChatHistory();
+  }
+
+
+  renderChatHistory();
+
+  showToast(
+    "चैट डिलीट कर दी गई।"
+  );
+}
+
+
+/* =========================================================
+   DELETE ALL
+========================================================= */
+
+function deleteAllChats(){
+
+  if(!chats.length){
+
+    showToast(
+      "डिलीट करने के लिए कोई चैट नहीं है।"
+    );
+
+    return;
+  }
+
+
+  const ok =
+    confirm(
+      "क्या आप सभी पुरानी चैट permanently डिलीट करना चाहते हैं?"
+    );
+
+
+  if(!ok){
+    return;
+  }
+
+
+  chats = [];
+
+  currentChatId =
+    null;
+
+  messages = [];
+
+
+  safeRemove(
+    CHAT_LIST_KEY
+  );
+
+  safeRemove(
+    OLD_CHAT_KEY
+  );
+
+
+  createNewChat(
+    false
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  showToast(
+    "सभी चैट डिलीट कर दी गईं।"
+  );
+}
+
+
+/* =========================================================
+   IMAGE HISTORY
+========================================================= */
+
+function getStoredCreations(){
+
+  if(!HAS_STORAGE){
+    return [];
+  }
+
+
+  const raw =
+    safeGet(
+      IMAGE_KEY
+    );
+
+
+  if(!raw){
+    return [];
+  }
+
+
+  try{
+
+    const parsed =
+      JSON.parse(
+        raw
+      );
+
+
+    if(!Array.isArray(parsed)){
+      return [];
+    }
+
+
+    return parsed
+      .filter(
+        item =>
+          item &&
+          typeof item.image === "string"
+      )
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Image history invalid:",
+      error
+    );
+
+    safeRemove(
+      IMAGE_KEY
+    );
+
+    return [];
+  }
+}
+
+
+/* =========================================================
+   CREATIONS
+========================================================= */
+
+function getCreations(){
+
+  const stored =
+    getStoredCreations();
+
+
+  const all = [
+    ...volatileCreations,
+    ...stored
+  ];
+
+
+  const seen =
+    new Set();
+
+
+  return all
+    .filter(item => {
+
+      if(
+        !item ||
+        !item.image ||
+        !item.id
+      ){
+        return false;
+      }
+
+
+      if(
+        seen.has(
+          item.id
+        )
+      ){
+        return false;
+      }
+
+
+      seen.add(
+        item.id
+      );
+
+      return true;
+    })
+    .sort(
+      (a,b) =>
+        (b.time || b.createdAt || 0) -
+        (a.time || a.createdAt || 0)
+    )
+    .slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+}
+
+
+function findCreationById(id){
+
+  if(!id){
+    return null;
+  }
+
+
+  const volatile =
+    volatileCreations.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(volatile){
+    return volatile;
+  }
+
+
+  return getStoredCreations()
+    .find(
+      item =>
+        item.id === id
+    ) || null;
+}
+
+
+/* =========================================================
+   SAVE CREATIONS
+========================================================= */
+
+function saveCreations(list){
+
+  if(!HAS_STORAGE){
+    return false;
+  }
+
+
+  try{
+
+    const clean =
+      list
+        .filter(
+          item =>
+            item &&
+            item.image &&
+            item.image.length <=
+              MAX_HISTORY_IMAGE_CHARS
+        )
+        .slice(
+          0,
+          MAX_SAVED_CREATIONS
+        );
+
+
+    return safeSet(
+      IMAGE_KEY,
+      JSON.stringify(
+        clean
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Creation save failed:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   IMAGE BLOB HELPERS
+========================================================= */
+
+async function dataURLToBlob(
+  dataURL
+){
+
+  if(!dataURL){
+    throw new Error(
+      "Image data missing"
+    );
+  }
+
+
+  /*
+    data:image/...;base64,...
+  */
+
+  if(
+    dataURL.startsWith(
+      "data:"
+    )
+  ){
+
+    const parts =
+      dataURL.split(",");
+
+    const header =
+      parts[0];
+
+    const body =
+      parts.slice(1).join(",");
+
+
+    const mime =
+      (
+        header.match(
+          /data:([^;]+)/
+        ) || []
+      )[1] ||
+      "image/png";
+
+
+    const binary =
+      atob(body);
+
+
+    const bytes =
+      new Uint8Array(
+        binary.length
+      );
+
+
+    for(
+      let i=0;
+      i<binary.length;
+      i++
+    ){
+
+      bytes[i] =
+        binary.charCodeAt(i);
+    }
+
+
+    return new Blob(
+      [bytes],
+      {
+        type:mime
+      }
+    );
+  }
+
+
+  const response =
+    await fetch(
+      dataURL
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Image fetch failed"
+    );
+  }
+
+
+  return response.blob();
+}
+
+
+async function blobToDataURL(
+  blob
+){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        blob
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESIZE
+   IMPORTANT FOR FLUX.2 KLEIN REFERENCE IMAGE
+========================================================= */
+
+async function resizeImageDataURL(
+  dataURL,
+  maxSize = MAX_MODEL_IMAGE_SIZE,
+  quality = .78
+){
+
+  if(!dataURL){
+    return null;
+  }
+
+
+  const img =
+    new Image();
+
+
+  await new Promise(
+    (resolve,reject) => {
+
+      img.onload =
+        resolve;
+
+      img.onerror =
+        reject;
+
+      img.src =
+        dataURL;
+    }
+  );
+
+
+  const sourceWidth =
+    img.naturalWidth ||
+    img.width;
+
+
+  const sourceHeight =
+    img.naturalHeight ||
+    img.height;
+
+
+  if(
+    !sourceWidth ||
+    !sourceHeight
+  ){
+
+    return dataURL;
+  }
+
+
+  const scale =
+    Math.min(
+      1,
+      maxSize /
+      Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+
+  const width =
+    Math.max(
+      1,
+      Math.round(
+        sourceWidth * scale
+      )
+    );
+
+
+  const height =
+    Math.max(
+      1,
+      Math.round(
+        sourceHeight * scale
+      )
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  if(!ctx){
+    return dataURL;
+  }
+
+
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    JPEG reference image काफी छोटा रहेगा।
+  */
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    quality
+  );
+}
+
+
+/* =========================================================
+   HISTORY IMAGE
+========================================================= */
+
+async function blobToHistoryDataURL(
+  blob,
+  maxSize = 560
+){
+
+  try{
+
+    const bitmap =
+      await createImageBitmap(
+        blob
+      );
+
+
+    /*
+      IMPORTANT:
+      dimensions close() से पहले save करें।
+    */
+
+    const originalWidth =
+      bitmap.width;
+
+    const originalHeight =
+      bitmap.height;
+
+
+    const scale =
+      Math.min(
+        1,
+        maxSize /
+        Math.max(
+          originalWidth,
+          originalHeight
+        )
+      );
+
+
+    const width =
+      Math.max(
+        1,
+        Math.round(
+          originalWidth * scale
+        )
+      );
+
+
+    const height =
+      Math.max(
+        1,
+        Math.round(
+          originalHeight * scale
+        )
+      );
+
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+
+    canvas.width =
+      width;
+
+    canvas.height =
+      height;
+
+
+    const ctx =
+      canvas.getContext(
+        "2d"
+      );
+
+
+    if(!ctx){
+
+      bitmap.close();
+
+      return null;
+    }
+
+
+    ctx.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+
+    bitmap.close();
+
+
+    /*
+      WebP preferred.
+    */
+
+    let dataURL =
+      canvas.toDataURL(
+        "image/webp",
+        .70
+      );
+
+
+    /*
+      Browser WebP support न करे तो JPEG।
+    */
+
+    if(
+      !dataURL.startsWith(
+        "data:image/webp"
+      )
+    ){
+
+      dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          .70
+        );
+    }
+
+
+    /*
+      History के लिए hard limit।
+    */
+
+    if(
+      dataURL.length >
+      MAX_HISTORY_IMAGE_CHARS
+    ){
+
+      const smallerCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      const smallerMax =
+        420;
+
+
+      const smallerScale =
+        Math.min(
+          1,
+          smallerMax /
+          Math.max(
+            originalWidth,
+            originalHeight
+          )
+        );
+
+
+      const smallWidth =
+        Math.max(
+          1,
+          Math.round(
+            originalWidth *
+            smallerScale
+          )
+        );
+
+
+      const smallHeight =
+        Math.max(
+          1,
+          Math.round(
+            originalHeight *
+            smallerScale
+          )
+        );
+
+
+      smallerCanvas.width =
+        smallWidth;
+
+      smallerCanvas.height =
+        smallHeight;
+
+
+      const smallerCtx =
+        smallerCanvas.getContext(
+          "2d"
+        );
+
+
+      if(!smallerCtx){
+        return null;
+      }
+
+
+      /*
+        Original bitmap बंद हो चुका है,
+        इसलिए current canvas से downscale करें।
+      */
+
+      smallerCtx.drawImage(
+        canvas,
+        0,
+        0,
+        smallWidth,
+        smallHeight
+      );
+
+
+      dataURL =
+        smallerCanvas.toDataURL(
+          "image/jpeg",
+          .62
+        );
+
+
+      if(
+        dataURL.length >
+        MAX_HISTORY_IMAGE_CHARS
+      ){
+
+        return null;
+      }
+    }
+
+
+    return dataURL;
+
+  }catch(error){
+
+    console.warn(
+      "History image compression failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   SAVE CREATION
+========================================================= */
+
+async function saveCreation(
+  imageData,
+  promptText
+){
+
+  if(!imageData){
+    return null;
+  }
+
+
+  const imageId =
+    makeImageId();
+
+
+  /*
+    Original image को localStorage में नहीं डालेंगे।
+    पहले छोटा history copy बनाएँगे।
+  */
+
+  let historyImage =
+    null;
+
+
+  try{
+
+    const blob =
+      await dataURLToBlob(
+        imageData
+      );
+
+
+    historyImage =
+      await blobToHistoryDataURL(
+        blob,
+        560
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Creation history conversion failed:",
+      error
+    );
+  }
+
+
+  /*
+    अगर compressed history नहीं बनी,
+    तो current session में full image रहेगी।
+    localStorage में नहीं जाएगी।
+  */
+
+  const record = {
+
+    id:
+      imageId,
+
+    image:
+      historyImage ||
+      imageData,
+
+    prompt:
+      String(
+        promptText || ""
+      ).slice(
+        0,
+        MAX_CREATION_PROMPT_CHARS
+      ),
+
+    time:
+      Date.now()
+  };
+
+
+  volatileCreations.unshift(
+    record
+  );
+
+
+  volatileCreations =
+    volatileCreations.slice(
+      0,
+      MAX_SAVED_CREATIONS
+    );
+
+
+  /*
+    केवल compressed image storage में save करें।
+  */
+
+  if(historyImage){
+
+    const existing =
+      getStoredCreations();
+
+
+    const list =
+      [
+        {
+          ...record,
+          image:
+            historyImage
+        },
+        ...existing
+      ]
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+    if(
+      saveCreations(
+        list
+      )
+    ){
+
+      /*
+        Storage में successfully save हो गई,
+        इसलिए duplicate volatile copy हटा दें।
+      */
+
+      volatileCreations =
+        volatileCreations.filter(
+          item =>
+            item.id !== imageId
+        );
+    }
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+
+
+  return imageId;
+}
+
+
+/* =========================================================
+   RENDER CREATIONS
+========================================================= */
+
+function renderCreations(){
+
+  creationGrid.innerHTML = "";
+
+
+  const list =
+    getCreations()
+      .slice(
+        0,
+        MAX_SAVED_CREATIONS
+      );
+
+
+  if(!list.length){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "empty-history";
+
+    empty.textContent =
+      "अभी कोई image creation नहीं है।";
+
+    creationGrid.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  list.forEach(item => {
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "creation-card";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.src =
+      item.image;
+
+    img.alt =
+      item.prompt ||
+      "Creation";
+
+
+    img.addEventListener(
+      "click",
+      () =>
+        openImageViewer(
+          item.image
+        )
+    );
+
+
+    const caption =
+      document.createElement(
+        "div"
+      );
+
+    caption.className =
+      "creation-prompt";
+
+    caption.textContent =
+      item.prompt ||
+      "Image";
+
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      caption
+    );
+
+
+    creationGrid.appendChild(
+      card
+    );
+  });
+}
+
+
+/* =========================================================
+   LAZY CREATION LOAD
+========================================================= */
+
+function loadCreationsLazy(){
+
+  if(creationsLoaded){
+    renderCreations();
+    return;
+  }
+
+
+  creationsLoaded =
+    true;
+
+
+  renderCreations();
+}
+
+
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
+function openImageViewer(src){
+
+  if(!src){
+    return;
+  }
+
+
+  viewerImg.src =
+    src;
+
+
+  imageViewer.classList.add(
+    "open"
+  );
+}
+
+
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+  viewerImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   IMAGE RESPONSE NORMALIZATION
+========================================================= */
+
+function normalizeImageResult(
+  value
+){
+
+  if(!value){
+    return null;
+  }
+
+
+  /*
+    Direct data URL.
+  */
+
+  if(
+    typeof value === "string"
+  ){
+
+    const s =
+      value.trim();
+
+
+    if(!s){
+      return null;
+    }
+
+
+    if(
+      s.startsWith(
+        "data:image/"
+      )
+    ){
+
+      return s;
+    }
+
+
+    /*
+      URL भी स्वीकार करें।
+    */
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      return s;
+    }
+
+
+    /*
+      Raw Base64।
+    */
+
+    if(
+      /^[A-Za-z0-9+/=\r\n]+$/.test(
+        s
+      )
+    ){
+
+      return (
+        "data:image/png;base64," +
+        s.replace(
+          /\s/g,
+          ""
+        )
+      );
+    }
+
+
+    return null;
+  }
+
+
+  /*
+    Array response।
+  */
+
+  if(
+    Array.isArray(value)
+  ){
+
+    for(
+      const item of value
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+
+    return null;
+  }
+
+
+  if(
+    typeof value === "object"
+  ){
+
+    const candidates = [
+
+      value.image,
+
+      value.image_url,
+
+      value.imageUrl,
+
+      value.url,
+
+      value.result,
+
+      value.data
+    ];
+
+
+    for(
+      const item of candidates
+    ){
+
+      const found =
+        normalizeImageResult(
+          item
+        );
+
+      if(found){
+        return found;
+      }
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================================================
+   RAW IMAGE RESPONSE -> DATA URL
+========================================================= */
+
+async function responseToImage(
+  response
+){
+
+  const contentType =
+    (
+      response.headers.get(
+        "content-type"
+      ) || ""
+    ).toLowerCase();
+
+
+  /*
+    Worker अगर सीधे image/png,
+    image/jpeg या image/webp लौटाता है।
+  */
+
+  if(
+    contentType.startsWith(
+      "image/"
+    )
+  ){
+
+    const blob =
+      await response.blob();
+
+
+    return blobToDataURL(
+      blob
+    );
+  }
+
+
+  /*
+    JSON response।
+  */
+
+  const text =
+    await response.text();
+
+
+  let data = null;
+
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : null;
+
+  }catch(error){
+
+    throw new Error(
+      text ||
+      "Image response पढ़ा नहीं जा सका।"
+    );
+  }
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.response ||
+      "Image request failed."
+    );
+  }
+
+
+  const image =
+    normalizeImageResult(
+      data
+    );
+
+
+  if(!image){
+
+    throw new Error(
+      "Image response में image नहीं मिली।"
+    );
+  }
+
+
+  return image;
+}
+
+
+/* =========================================================
+   CLEAR PHOTO
+========================================================= */
+
+function clearSelectedPhoto(){
+  selectedDocumentText = "";
+
+
+  selectedPhotoBase64 =
+    null;
+
+  selectedPhotoUrl =
+    null;
+
+  photoInput.value =
+    "";
+
+  photoPreview.classList.remove(
+    "show"
+  );
+
+  photoPreviewImg.removeAttribute(
+    "src"
+  );
+}
+
+
+/* =========================================================
+   GET LATEST CREATION AS EDIT REFERENCE
+========================================================= */
+
+function looksLikePreviousImageEdit(
+  prompt
+){
+
+  const s =
+    String(
+      prompt || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  if(!s){
+    return false;
+  }
+
+
+  /*
+    Strong edit phrases।
+  */
+
+  const strongPhrases = [
+    "बैकग्राउंड बदल", "बैकग्राउंड हटा", "पृष्ठभूमि बदल", "पृष्ठभूमि हटा",
+    "इस फोटो", "इस तस्वीर", "इस इमेज", "इस चित्र", "इसमें बदलाव",
+    "इसमें बदल", "इसको एडिट", "इसे एडिट", "एडिट करो", "बदल दो",
+    "बैकग्राउंड", "पृष्ठभूमि", "रंग बदल", "कलर बदल", "कपड़े बदल",
+    "कपड़ा बदल", "कपड़े का रंग", "व्यक्ति हट", "पर्सन हट", "इंसान हट",
+    "चेहरा बदल", "बाल बदल", "आसमान बदल", "ऑब्जेक्ट हट", "चीज हट",
+    "हटा दो", "निकाल दो", "background change", "change background",
+    "remove background", "replace background", "edit this", "edit the photo",
+    "edit image", "change color", "change colour", "change clothes",
+    "change clothing", "change shirt", "change dress", "change outfit",
+    "remove person", "remove people", "remove a person", "remove object",
+    "remove someone", "erase person", "erase object", "replace sky",
+    "change hair", "change face", "add person", "add object",
+    "replace the background", "remove the background"
+  ];
+
+
+  if(
+    strongPhrases.some(
+      phrase =>
+        s.includes(
+          phrase
+        )
+    )
+  ){
+
+    return true;
+  }
+
+
+  /*
+    छोटे natural edit commands।
+  */
+
+  if(
+    s.length <= 50 &&
+    (
+      s.includes("बैकग्राउंड") ||
+       s.includes("पृष्ठभूमि") ||
+       s.includes("background") ||
+       s.includes("बदल दो") ||
+       s.includes("रंग बदल") ||
+       s.includes("कलर बदल") ||
+       s.includes("कपड़े बदल") ||
+       s.includes("व्यक्ति हट") ||
+       s.includes("पर्सन हट") ||
+       s.includes("हटा दो") ||
+       s.includes("निकाल दो") ||
+       s.includes("replace") ||
+       s.includes("remove") ||
+       s.includes("erase") ||
+       s.includes("change color") ||
+       s.includes("change clothes")
+    )
+  ){
+
+    return true;
+  }
+
+
+  return false;
+}
+
+
+async function getLatestCreationReference(
+  prompt
+){
+
+  if(
+    !looksLikePreviousImageEdit(
+      prompt
+    )
+  ){
+
+    return null;
+  }
+
+
+  const latest =
+    getCreations()[0];
+
+
+  if(
+    !latest ||
+    !latest.image
+  ){
+
+    return null;
+  }
+
+
+  try{
+
+    return await resizeImageDataURL(
+      latest.image,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Latest creation reference failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   GENERATE IMAGE
+========================================================= */
+
+async function generateImage(
+  prompt
+){
+
+  const payload = {
+
+    prompt:
+      String(
+        prompt || ""
+      ).trim(),
+
+    ratio:
+      "1:1",
+
+    quality:
+      "standard"
+  };
+
+
+  /*
+    सबसे पहले manually selected photo।
+  */
+
+  let reference =
+    selectedPhotoBase64;
+
+
+  /*
+    अगर photo selected नहीं है,
+    और command previous image edit जैसी है,
+    तो latest creation reference लें।
+  */
+
+  if(!reference){
+
+    reference =
+      await getLatestCreationReference(
+        prompt
+      );
+  }
+
+
+  /*
+    IMPORTANT:
+    FLUX.2 Klein को भेजने से ठीक पहले
+    image को <512x512 रखें।
+  */
+
+  if(reference){
+
+    payload.image_b64 =
+      await resizeImageDataURL(
+        reference,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }
+
+
+  const response =
+    await fetch(
+      API + "image",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  /*
+    यह raw PNG और JSON दोनों संभालेगा।
+  */
+
+  return responseToImage(
+    response
+  );
+}
+
+
+/* =========================================================
+   CHAT IMAGE NORMALIZATION
+========================================================= */
+
+function normalizeChatResult(
+  data
+){
+
+  /*
+    Worker JSON object।
+  */
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    const text =
+      data.response ??
+      data.answer ??
+      data.text ??
+      data.message ??
+      data.output ??
+      data.content ??
+      "";
+
+
+    const image =
+      normalizeImageResult(
+        data.image ??
+        data.image_url ??
+        data.imageUrl ??
+        data.result?.image ??
+        null
+      );
+
+
+    applyWorkerMemoryResponse(data);
+
+    return {
+
+      text:
+        cleanAaruText(
+          text || ""
+        ),
+
+      image:
+        image,
+
+      memory_updates:
+        Array.isArray(data.memory_updates) ? data.memory_updates : [],
+
+      memory_engine:
+        data.memory_engine || CLIENT_MEMORY_ENGINE_VERSION
+    };
+  }
+
+
+  /*
+    Plain string response।
+  */
+
+  return {
+
+    text:
+      String(
+        data || ""
+      ),
+
+    image:
+      null
+  };
+}
+
+
+/* =========================================================
+   SMART MEMORY 3.0
+========================================================= */
+
+const MEMORY_STOPWORDS = new Set([
+  "और","या","लेकिन","यह","वह","एक","इस","उस","को","से","में","पर","के","की","का","कि","है","हैं","था","थे","थी","तो","भी","ही","अब","जब","तक","आप","तुम","मैं","हम","मुझे","मेरा","मेरी","करो","करना","करके","क्या","क्यों","कैसे","कौन","कब","कहाँ","लिए","साथ","बहुत","ज्यादा","कुछ","कोई",
+  "the","and","or","but","this","that","with","from","for","are","is","was","were","you","your","what","why","how","who","when","where","please","can","could","would","should","about"
+]);
+
+function memoryTokens(text){
+  return cleanAaruText(String(text || "").toLowerCase())
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .map(w => w.trim())
+    .filter(w => w.length >= 3 && !MEMORY_STOPWORDS.has(w))
+    .slice(0, 120);
+}
+
+function memoryKey(text){
+  return memoryTokens(text).slice(0, 18).join(" ");
+}
+
+function memoryImportance(item, index, total){
+  const text = cleanAaruText(String(item?.content || "")).trim();
+  if(!text) return 0;
+
+  let score = 1;
+  const lower = text.toLowerCase();
+
+  // User-stated information/preferences should survive longer.
+  if(item?.role === "user") score += 2;
+  if(/\b(मेरा|मेरी|मेरे|मैं|मुझे|हमारा|हमारी|i am|i'm|my|me|we|our|i like|i prefer|i want|i need)\b/i.test(lower)) score += 3;
+  if(/याद|remember|भूलना|always|हमेशा|पसंद|preference|prefer|project|परियोजना|बनाना|develop|developer|code|कोड/i.test(lower)) score += 2;
+  if(text.length > 80) score += 1;
+
+  // Slight recency bonus among the older messages.
+  score += Math.min(2, index / Math.max(1, total) * 2);
+  return score;
+}
+
+
+function normalizeSemanticMemory(list){
+  if(!Array.isArray(list)) return [];
+  return list.filter(m => m && typeof m.key === "string" && typeof m.value === "string").map(m => ({
+    id: String(m.id || makeMemoryId()),
+    type: String(m.type || "fact").slice(0,30),
+    key: cleanAaruText(m.key).trim().slice(0,140),
+    value: cleanAaruText(m.value).trim().slice(0,500),
+    source: String(m.source || "user").slice(0,20),
+    importance: Math.max(1, Math.min(10, Number(m.importance) || 5)),
+    updatedAt: Number(m.updatedAt) || Date.now()
+  })).filter(m => m.key && m.value).sort((a,b) => b.importance - a.importance || b.updatedAt - a.updatedAt).slice(0,MAX_SEMANTIC_MEMORIES);
+}
+function makeMemoryId(){ return "mem_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8); }
+function semanticMemoryKey(text){ return memoryTokens(text).slice(0,12).join(" "); }
+function extractSemanticMemories(list){
+  const out=[];
+  for(const item of (Array.isArray(list)?list:[])){
+    if(item?.role!=="user") continue;
+    const text=cleanAaruText(String(item.content||"")).replace(/\s+/g," ").trim();
+    if(!text || text.length<4) continue;
+    const patterns=[
+      [/^(?:मेरा नाम|my name is)\s+(.{1,100})$/i,"नाम","identity",7],
+      [/^(?:मुझे|i)\s+(?:पसंद है|पसंद हैं|like|prefer)\s+(.{2,180})$/i,"पसंद","preference",7],
+      [/^(?:मुझे|i)\s+(?:नापसंद है|dislike)\s+(.{2,180})$/i,"नापसंद","preference",7],
+      [/^(?:याद रखना|याद रखो|remember)[:\s]+(.{2,220})$/i,"याद रखने का निर्देश","instruction",9],
+      [/^(?:हमेशा|always)\s+(.{2,220})$/i,"स्थायी निर्देश","instruction",9]
+    ];
+    let matched=false;
+    for(const [re,label,type,importance] of patterns){
+      const m=text.match(re); if(!m) continue;
+      const value=m[1].trim();
+      out.push({key:label+" "+semanticMemoryKey(value),value,type,source:"user",importance,updatedAt:Date.now()});
+      matched=true; break;
+    }
+    if(!matched && /aaru ai|प्रोजेक्ट|परियोजना|बना रहा|बनाना है|worker|index|कोड|code/i.test(text) && text.length<=500){
+      out.push({key:"project "+semanticMemoryKey(text),value:text,type:"project",source:"user",importance:8,updatedAt:Date.now()});
+    }
+  }
+  return out;
+}
+function updateSemanticMemory(existing,list){
+  let mem=normalizeSemanticMemory(existing);
+  for(const item of extractSemanticMemories(list)){
+    const same=mem.findIndex(m => m.type===item.type && semanticMemoryKey(m.key)===semanticMemoryKey(item.key));
+    if(same>=0) mem[same]={...mem[same],...item,id:mem[same].id}; else mem.unshift({...item,id:makeMemoryId()});
+  }
+  const seen=new Set();
+  mem=mem.filter(m=>{const k=semanticMemoryKey(m.type+" "+m.key+" "+m.value); if(!k||seen.has(k)) return false; seen.add(k); return true;});
+  return normalizeSemanticMemory(mem);
+}
+function buildMemorySummaryFromSemanticMemory(mem){ return normalizeSemanticMemory(mem).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_MEMORY_SUMMARY_CHARS); }
+function getSemanticRelevantMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size||!semanticMemory.length) return "";
+  return semanticMemory.map(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return {...m,score:overlap*2+m.importance*.35};}).filter(m=>m.score>=2.5).sort((a,b)=>b.score-a.score).slice(0,8).map(m=>`[${m.type}] ${m.key}: ${m.value}`).join("\n").slice(0,MAX_RELEVANT_MEMORY_CHARS);
+}
+function forgetSemanticMemory(query){
+  const q=new Set(memoryTokens(query)); if(!q.size) return 0; const before=semanticMemory.length;
+  semanticMemory=semanticMemory.filter(m=>{let overlap=0;for(const t of new Set(memoryTokens(m.key+" "+m.value))) if(q.has(t)) overlap++;return overlap<Math.max(1,Math.min(3,q.size));});
+  return before-semanticMemory.length;
+}
+function isForgetMemoryCommand(text){ return /^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b/i.test(String(text||"").trim()); }
+function getForgetTarget(text){ return String(text||"").replace(/^(भूल जाओ|भूल जाएं|भूल जाइए|याद मत रखो|forget this|forget that|forget it|delete memory|remove memory)\b[:\s-]*/i,"").trim(); }
+function updateMemoryButton(){ const el=document.getElementById("memoryBtnText"); if(el) el.textContent=`स्मार्ट मेमोरी (${semanticMemory.length})`; }
+function showMemoryStatus(){ if(!semanticMemory.length){showToast("स्मार्ट मेमोरी में अभी कोई स्थायी तथ्य नहीं है।");return;} alert("Aaru की स्मार्ट मेमोरी:\n\n"+semanticMemory.slice(0,10).map(m=>`• ${m.key}: ${m.value}`).join("\n")+(semanticMemory.length>10?`\n\nऔर ${semanticMemory.length-10} यादें...`:"")); }
+
+function buildMemorySummary(list){
+  const all = Array.isArray(list) ? list : [];
+  const older = all.slice(0, -12);
+  if(!older.length) return "";
+
+  const candidates = older.map((item, index) => ({
+    item,
+    index,
+    score: memoryImportance(item, index, older.length),
+    text: cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim()
+  })).filter(x => x.text);
+
+  // Keep important user facts/preferences first, while retaining useful recent context.
+  candidates.sort((a,b) => b.score - a.score || b.index - a.index);
+
+  const seen = new Set();
+  const parts = [];
+  for(const x of candidates){
+    const key = memoryKey(x.text) || x.text.slice(0, 120).toLowerCase();
+    if(!key || seen.has(key)) continue;
+    seen.add(key);
+
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    const compact = x.text.slice(0, 360);
+    parts.push(`${label}: ${compact}`);
+
+    if(parts.join("\n").length >= MAX_MEMORY_SUMMARY_CHARS) break;
+  }
+
+  return parts.join("\n").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+}
+
+function getRelevantMemory(query){
+  const semantic = getSemanticRelevantMemory(query);
+  const qTokens = new Set(memoryTokens(query));
+  if(!qTokens.size || !messages.length) return semantic;
+
+  const older = messages.slice(0, -12);
+  const scored = older.map((item, index) => {
+    const text = cleanAaruText(String(item?.content || "")).replace(/\s+/g, " ").trim();
+    const tokens = memoryTokens(text);
+    if(!text || !tokens.length) return null;
+
+    let overlap = 0;
+    const unique = new Set(tokens);
+    for(const token of unique){
+      if(qTokens.has(token)) overlap++;
+    }
+
+    // Phrase-level match is stronger than individual word overlap.
+    const qClean = cleanAaruText(String(query || "")).toLowerCase().replace(/\s+/g, " ").trim();
+    const tClean = text.toLowerCase();
+    const phraseBonus = qClean.length >= 8 && tClean.includes(qClean.slice(0, Math.min(50, qClean.length))) ? 6 : 0;
+
+    const importance = memoryImportance(item, index, older.length);
+    const recency = index / Math.max(1, older.length);
+    const score = overlap * 2 + phraseBonus + importance + recency;
+
+    return { item, index, score, text };
+  }).filter(Boolean)
+    .filter(x => x.score >= 3)
+    .sort((a,b) => b.score - a.score || b.index - a.index)
+    .slice(0, 8);
+
+  // Include the neighboring message when it helps preserve a user/assistant pair.
+  const selected = [];
+  const used = new Set();
+  for(const x of scored){
+    if(used.has(x.index)) continue;
+    used.add(x.index);
+    selected.push(x);
+
+    const neighborIndex = x.item?.role === "user" ? x.index + 1 : x.index - 1;
+    if(neighborIndex >= 0 && neighborIndex < older.length && selected.length < 8 && !used.has(neighborIndex)){
+      const neighbor = older[neighborIndex];
+      const nt = cleanAaruText(String(neighbor?.content || "")).replace(/\s+/g, " ").trim();
+      if(nt){
+        used.add(neighborIndex);
+        selected.push({ item: neighbor, index: neighborIndex, score: x.score - 0.5, text: nt });
+      }
+    }
+  }
+
+  selected.sort((a,b) => a.index - b.index);
+  const historical = selected.map(x => {
+    const label = x.item?.role === "user" ? "यूज़र" : "Aaru";
+    return `${label}: ${x.text.slice(0, 480)}`;
+  }).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+  return [semantic, historical].filter(Boolean).join("\n").slice(0, MAX_RELEVANT_MEMORY_CHARS);
+}
+
+function restoreChatMemory(chat){
+  semanticMemory = normalizeSemanticMemory(chat?.semanticMemory || []);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || String(chat?.memorySummary || "").slice(0, MAX_MEMORY_SUMMARY_CHARS);
+  if(!memorySummary && messages.length > 12) memorySummary = buildMemorySummary(messages);
+  updateMemoryButton();
+}
+
+function applyWorkerMemoryResponse(data){
+  if(!data || typeof data !== "object") return;
+  const workerMemory = Array.isArray(data.memory) ? data.memory : [];
+  const updates = Array.isArray(data.memory_updates) ? data.memory_updates : [];
+
+  if(workerMemory.length){
+    semanticMemory = normalizeSemanticMemory(workerMemory).slice(0, MAX_SEMANTIC_MEMORIES);
+  }
+
+  for(const update of updates.slice(0, MAX_WORKER_MEMORY_UPDATES)){
+    const action = String(update?.action || "").toLowerCase();
+
+    if(action === "add" && update.memory){
+      const incoming = normalizeSemanticMemory([update.memory])[0];
+      if(incoming){
+        const same = semanticMemory.findIndex(m => m.type === incoming.type && semanticMemoryKey(m.key) === semanticMemoryKey(incoming.key));
+        if(same >= 0) semanticMemory[same] = {...semanticMemory[same], ...incoming};
+        else semanticMemory.unshift(incoming);
+      }
+    }
+
+    if(action === "update" && update.id){
+      const index = semanticMemory.findIndex(m => m.id === String(update.id));
+      if(index >= 0){
+        semanticMemory[index] = {...semanticMemory[index], value:String(update.new_value || semanticMemory[index].value || "").slice(0,500), updatedAt:Date.now()};
+      }
+    }
+
+    if(action === "delete" && update.target){
+      forgetSemanticMemory(String(update.target));
+    }
+  }
+
+  semanticMemory = normalizeSemanticMemory(semanticMemory).slice(0, MAX_SEMANTIC_MEMORIES);
+  memorySummary = buildMemorySummaryFromSemanticMemory(semanticMemory) || memorySummary;
+  updateMemoryButton();
+}
+
+/* =========================================================
+   CHAT API
+========================================================= */
+
+function getConversationReasoningEffort(text){
+  const q=cleanAaruText(text).toLowerCase(); if(!q)return ASTRA_FAST_REASONING_EFFORT;
+  if(/(latest|current|today|tonight|now|live|recent|news|search|web|price|weather|score|election|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|खोज|सर्च|कीमत|मौसम|स्कोर|चुनाव)/i.test(q))return ASTRA_REASONING_EFFORT;
+  const fast=/^(hi|hello|hey|hola|namaste|नमस्ते|हाय|हेलो|कैसे हो|कैसी हो|क्या हाल है|धन्यवाद|thanks|thank you|ok|okay|ठीक है|ओके|bye|बाय|good morning|good night|शुभ प्रभात|शुभ रात्रि)[!?.,\s]*$/i;
+  if(fast.test(q))return ASTRA_FAST_REASONING_EFFORT; const complex=/(calculate|calculation|analy[sz]e|compare|research|explain|code|debug|कैलकुलेट|गणना|विश्लेषण|तुलना|रिसर्च|समझाओ|समझाइए|कोड|डिबग)/i;
+  if(q.length<=45&&!complex.test(q))return ASTRA_FAST_REASONING_EFFORT; return complex.test(q)?ASTRA_REASONING_EFFORT:ASTRA_NORMAL_REASONING_EFFORT;
+}
+function shouldUseDeepContext(text){const q=cleanAaruText(text).toLowerCase();if(/(latest|current|today|now|live|recent|news|search|web|price|weather|score|अभी|आज|ताज़ा|ताजा|लेटेस्ट|करंट|समाचार|न्यूज़|न्यूज|सर्च|खोज|कीमत|मौसम|स्कोर)/i.test(q))return true;if(q.length<=80&&/^(hi|hello|hey|namaste|नमस्ते|हाय|हेलो|कैसे हो|क्या हाल है|thanks|thank you|धन्यवाद|ok|okay|ठीक है|ओके|bye|बाय)/i.test(q))return false;return true;}
+
+async function fetchChatWithRecovery(payload){
+
+  let lastError = null;
+
+  for(let attempt = 0; attempt < 2; attempt++){
+
+    const controller =
+      new AbortController();
+
+    const timer =
+      setTimeout(
+        () => controller.abort(),
+        CHAT_REQUEST_TIMEOUT_MS
+      );
+
+    try{
+
+      const response =
+        await fetch(API + "chat",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(payload),
+          signal:controller.signal
+        });
+
+      clearTimeout(timer);
+
+      if(
+        response.ok ||
+        attempt === 1 ||
+        ![502,503,504].includes(response.status)
+      ){
+        return response;
+      }
+
+      lastError =
+        new Error("Worker temporarily unavailable.");
+
+    }catch(error){
+
+      clearTimeout(timer);
+      lastError = error;
+
+      const retryable =
+        error?.name === "AbortError" ||
+        error instanceof TypeError;
+
+      if(!retryable || attempt === 1){
+        throw error;
+      }
+    }
+
+    await new Promise(resolve =>
+      setTimeout(resolve, CHAT_RETRY_DELAY_MS)
+    );
+  }
+
+  throw lastError || new Error("Chat request failed.");
+}
+
+
+async function sendChatRequest(){
+
+  const recentMessages =
+    messages.slice(-MAX_CONTEXT_MESSAGES).map(item => ({
+      role:item.role === "user" ? "user" : "assistant",
+      content:cleanAaruText(
+        String(item.content || "")
+      ).slice(0,MAX_MESSAGE_CHARS)
+    }));
+
+  const lastUserMessage =
+    messages.slice().reverse().find(item => item.role === "user");
+
+  const currentQuery =
+    cleanAaruText(lastUserMessage?.content || "");
+
+  const relevantMemory=getRelevantMemory(currentQuery);
+  const fastConversation=!shouldUseDeepContext(currentQuery);
+  const payload={
+    message:currentQuery,
+    messages:fastConversation?recentMessages.slice(-12):recentMessages,
+    memory_summary:fastConversation?"":(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages)),
+    relevant_memory:fastConversation?"":relevantMemory,
+    reasoning_effort:getConversationReasoningEffort(currentQuery),
+    stream:true,
+    previous_response_id:previousResponseId||undefined
+  };
+
+  if(selectedPhotoBase64){
+    payload.image_b64 =
+      await resizeImageDataURL(
+        selectedPhotoBase64,
+        MAX_MODEL_IMAGE_SIZE,
+        .76
+      );
+  }else{
+    const latestEditReference =
+      await getLatestCreationReference(currentQuery);
+
+    if(latestEditReference){
+      payload.image_b64 =
+        await resizeImageDataURL(
+          latestEditReference,
+          MAX_MODEL_IMAGE_SIZE,
+          .76
+        );
+    }
+  }
+
+  if(selectedDocumentText){
+    payload.document_text =
+      selectedDocumentText.slice(0,90000);
+  }
+
+  const response =
+    await fetchChatWithRecovery(payload);
+
+  const contentType=(response.headers.get("content-type")||"").toLowerCase();
+  if(contentType.includes("text/event-stream"))return await consumeAstraStream(response);
+  if(contentType.startsWith("image/"))return {text:"इमेज तैयार है।",image:await blobToDataURL(await response.blob())};
+  const raw=await response.text(); let data=null;
+  try{data=raw?JSON.parse(raw):null;}catch{if(!response.ok)throw new Error(raw||"Chat request failed.");if(raw.trim())return {text:cleanAaruText(raw),image:null};throw new Error("Worker ने खाली response दिया।");}
+  if(!response.ok)throw new Error(data?.error||data?.message||data?.detail||"Chat request failed.");
+  const normalized=normalizeChatResult(data); const nextResponseId=data?.response_id||data?.id||null;
+  if(nextResponseId){previousResponseId=String(nextResponseId).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;}
+  lastToolsUsed=Array.isArray(data?.tools_used)?data.tools_used:[];
+  if(!normalized?.text&&!normalized?.image)throw new Error("Aaru ने खाली response दिया।"); return normalized;
+}
+
+/* =========================================================
+   HANDLE SEND
+   Unified composer: text + photo + image generation/editing
+========================================================= */
+
+async function handleSend(){
+
+  if(isBusy){
+    return;
+  }
+
+  const prompt =
+    promptEl.value.trim();
+
+  const hasPhoto =
+    !!selectedPhotoBase64;
+
+  const hasDocument =
+    !!selectedDocumentText;
+
+  /* ChatGPT-style: photo alone can be sent. */
+  if(!prompt && !hasPhoto && !hasDocument){
+    showToast(
+      "कुछ लिखें या photo जोड़ें।"
+    );
+    return;
+  }
+
+  ensureCurrentChat();
+
+  isBusy =
+    true;
+
+  sendBtn.disabled =
+    true;
+
+  const attachedPhoto =
+    selectedPhotoUrl;
+
+  if(hasDocument && !prompt){
+    promptEl.value = "इस PDF को पढ़कर समझाइए।";
+  }
+
+  const displayPrompt = prompt || (hasDocument ? "इस PDF को पढ़कर समझाइए।" : "इस तस्वीर को समझाइए।");
+
+  addUserMessage(
+    displayPrompt,
+    false,
+    attachedPhoto
+  );
+
+  if(isForgetMemoryCommand(displayPrompt)){
+    const target=getForgetTarget(displayPrompt);
+    const removed=target ? forgetSemanticMemory(target) : semanticMemory.length;
+    if(!target) semanticMemory=[];
+    saveCurrentChat();
+    addAssistantMessage(removed ? `ठीक है, ${removed} मेमोरी हटा दी गई।` : "ठीक है, मेमोरी हटा दी गई।", true);
+    promptEl.value=""; autoResize(); clearSelectedPhoto(); isBusy=false; sendBtn.disabled=false;
+    return;
+  }
+
+  semanticMemory=updateSemanticMemory(semanticMemory,[messages[messages.length-1]]);
+  saveCurrentChat();
+
+  promptEl.value =
+    "";
+
+  autoResize();
+  scrollBottom();
+
+  try{
+
+    showTyping();
+
+    /*
+      One unified route. Worker /chat automatically decides:
+      normal chat, Vision, image generation or image editing.
+    */
+    const result =
+      await sendChatRequest();
+
+    saveCurrentChat();
+
+    removeStreamingMessage();
+    hideTyping();
+
+    if(result && result.image){
+
+      const imageId =
+        await saveCreation(
+          result.image,
+          prompt || "Image generation"
+        );
+
+      addAssistantMessage(
+        result.text ||
+        "🖼️ Image generated successfully.",
+        true,
+        imageId
+      );
+
+    }else{
+
+      const finalText =
+        cleanAaruText(
+          result?.text ||
+          "माफ़ कीजिए, इस समय मुझे जवाब तैयार करने में समस्या हुई।"
+        );
+
+      addAssistantMessage(
+        finalText,
+        true
+      );
+
+      if(voiceOutputEnabled && finalText){
+        speakAaru(finalText);
+      }
+    }
+
+    clearSelectedPhoto();
+
+  }catch(error){
+
+    console.error(
+      "Aaru request failed:",
+      error
+    );
+
+    removeStreamingMessage();
+    hideTyping();
+
+    addAssistantMessage(
+      "⚠️ अभी request पूरी नहीं हो सकी। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      true
+    );
+
+    showToast(
+      error?.name === "AbortError"
+        ? "Request में समय लग रहा है। फिर कोशिश करें।"
+        : (error?.message || "Request failed")
+    );
+
+  }finally{
+
+    isBusy =
+      false;
+
+    sendBtn.disabled =
+      false;
+
+    scrollBottom();
+
+    try{
+      promptEl.focus();
+    }catch(error){}
+  }
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+function autoResize(){
+
+  promptEl.style.height =
+    "auto";
+
+
+  promptEl.style.height =
+    Math.min(
+      promptEl.scrollHeight,
+      150
+    ) + "px";
+}
+
+
+promptEl.addEventListener(
+  "input",
+  autoResize
+);
+
+
+/* =========================================================
+   ENTER
+========================================================= */
+
+promptEl.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" &&
+      !event.shiftKey
+    ){
+
+      event.preventDefault();
+
+      handleSend();
+    }
+  }
+);
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+sendBtn.addEventListener(
+  "click",
+  handleSend
+);
+
+
+/* =========================================================
+   VOICE OUTPUT
+========================================================= */
+
+function speakAaru(text){
+  if(!voiceOutputEnabled || !("speechSynthesis" in window) || !text) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(cleanAaruText(text));
+    u.lang = /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-US";
+    u.rate = .98;
+    speechSynthesis.speak(u);
+  }catch(error){
+    console.warn("Voice output failed:",error);
+  }
+}
+
+/* =========================================================
+   VOICE INPUT
+========================================================= */
+
+function startAaruVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    showToast("इस browser में Voice Input उपलब्ध नहीं है।");
+    return;
+  }
+  if(recognition){
+    try{ recognition.stop(); }catch(error){}
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = "hi-IN";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.onstart = () => {
+    document.getElementById("micBtn")?.classList.add("voice-active");
+    showToast("सुन रहा हूँ…");
+  };
+  recognition.onresult = event => {
+    const text = event.results?.[0]?.[0]?.transcript || "";
+    if(text){
+      promptEl.value = text;
+      autoResize();
+      promptEl.focus();
+    }
+  };
+  recognition.onerror = event => {
+    showToast("Voice error: " + (event.error || "unknown"));
+  };
+  recognition.onend = () => {
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  };
+  try{ recognition.start(); }
+  catch(error){
+    recognition = null;
+    document.getElementById("micBtn")?.classList.remove("voice-active");
+  }
+}
+
+/* =========================================================
+   PDF READER
+========================================================= */
+
+async function extractPDFText(file){
+  const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({data}).promise;
+  let output = "";
+  for(let pageNo=1; pageNo<=pdf.numPages; pageNo++){
+    setToastProgress(`PDF पढ़ा जा रहा है… ${pageNo}/${pdf.numPages}`);
+    const page = await pdf.getPage(pageNo);
+    const content = await page.getTextContent();
+    const text = content.items.map(item => item.str || "").join(" ");
+    output += `\n\n--- Page ${pageNo} ---\n${text}`;
+    if(output.length >= 90000) break;
+  }
+  return output.trim().slice(0,90000);
+}
+
+function setToastProgress(text){
+  showToast(text);
+}
+
+async function handlePDFFile(file){
+  try{
+    selectedDocumentText = await extractPDFText(file);
+    if(!selectedDocumentText){
+      showToast("PDF में पढ़ने योग्य text नहीं मिला।");
+      return;
+    }
+    selectedPhotoBase64 = null;
+    selectedPhotoUrl = null;
+    photoPreview.classList.remove("show");
+    photoPreviewImg.src = "";
+    showToast(`PDF तैयार है: ${selectedDocumentText.length.toLocaleString()} अक्षर`);
+  }catch(error){
+    console.error("PDF failed:",error);
+    selectedDocumentText = "";
+    showToast("PDF पढ़ने में समस्या हुई।");
+  }
+}
+
+/* =========================================================
+   PHOTO BUTTON
+========================================================= */
+
+document
+  .getElementById("photoBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      photoInput.click();
+    }
+  );
+
+
+/* =========================================================
+   PHOTO UPLOAD
+========================================================= */
+
+photoInput.addEventListener(
+  "change",
+  async event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if(!file){
+      return;
+    }
+
+
+    if(
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf")
+    ){
+      await handlePDFFile(file);
+      photoInput.value = "";
+      return;
+    }
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      showToast(
+        "कृपया image file चुनें।"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      const original =
+        await fileToDataURL(
+          file
+        );
+
+
+      /*
+        IMPORTANT:
+        Preview और API दोनों के लिए
+        छोटा image रखें।
+      */
+
+      const resized =
+        await resizeImageDataURL(
+          original,
+          MAX_MODEL_IMAGE_SIZE,
+          .80
+        );
+
+
+      selectedPhotoBase64 =
+        resized;
+
+
+      selectedPhotoUrl =
+        resized;
+
+
+      photoPreviewImg.src =
+        selectedPhotoUrl;
+
+
+      photoPreview.classList.add(
+        "show"
+      );
+
+
+      showToast(
+        "Photo तैयार है। अब सीधे Send दबाएँ या सवाल लिखें।"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Photo processing failed:",
+        error
+      );
+
+
+      showToast(
+        "Photo पढ़ने में समस्या हुई।"
+      );
+
+    }finally{
+
+      /*
+        Same file दोबारा select हो सके।
+      */
+
+      photoInput.value =
+        "";
+    }
+  });
+
+
+function fileToDataURL(file){
+
+  return new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE PHOTO
+========================================================= */
+
+document
+  .getElementById("removePhoto")
+  .addEventListener(
+    "click",
+    clearSelectedPhoto
+  );
+
+
+/* =========================================================
+   VOICE BUTTONS
+========================================================= */
+
+document.getElementById("micBtn")?.addEventListener("click",startAaruVoice);
+
+document.getElementById("speakBtn")?.addEventListener("click",()=>{
+  voiceOutputEnabled = !voiceOutputEnabled;
+  const btn = document.getElementById("speakBtn");
+  if(btn) btn.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+  if(!voiceOutputEnabled && "speechSynthesis" in window){
+    speechSynthesis.cancel();
+  }
+});
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+function openDrawer(){
+
+  drawer.classList.add(
+    "open"
+  );
+
+  drawerOverlay.classList.add(
+    "open"
+  );
+
+
+  /*
+    Image history केवल drawer खोलने पर।
+  */
+
+  setTimeout(
+    loadCreationsLazy,
+    0
+  );
+}
+
+
+function closeDrawer(){
+
+  drawer.classList.remove(
+    "open"
+  );
+
+  drawerOverlay.classList.remove(
+    "open"
+  );
+}
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener(
+    "click",
+    openDrawer
+  );
+
+
+document
+  .getElementById("closeDrawer")
+  .addEventListener(
+    "click",
+    closeDrawer
+  );
+
+
+drawerOverlay.addEventListener(
+  "click",
+  closeDrawer
+);
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function startNewChat(){
+
+  if(isBusy){
+    return;
+  }
+
+
+  if(currentChatId){
+
+    saveCurrentChat();
+  }
+
+
+  createNewChat(
+    true
+  );
+
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+
+  clearSelectedPhoto();
+
+
+  closeDrawer();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"auto"
+  });
+
+
+  setTimeout(
+    () =>
+      promptEl.focus(),
+    100
+  );
+}
+
+
+document
+  .getElementById("newChatBtn")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+document
+  .getElementById("newChatTop")
+  .addEventListener(
+    "click",
+    startNewChat
+  );
+
+
+/* =========================================================
+   VIEWER
+========================================================= */
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closeImageViewer
+  );
+
+
+imageViewer.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target === imageViewer
+    ){
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape"
+    ){
+
+      closeDrawer();
+
+      closeImageViewer();
+    }
+  }
+);
+
+
+/* =========================================================
+   PAGE RECOVERY
+========================================================= */
+
+function recoverPage(){
+
+  const now =
+    Date.now();
+
+
+  if(
+    now -
+    lastPageShowRecovery <
+    300
+  ){
+
+    return;
+  }
+
+
+  lastPageShowRecovery =
+    now;
+
+
+  if(!isBusy){
+    try{
+      hideTyping();
+    }catch(error){}
+
+    sendBtn.disabled =
+      false;
+  }
+
+
+  try{
+
+    closeDrawer();
+
+    closeImageViewer();
+
+  }catch(error){}
+
+
+  try{
+
+    const current =
+      chats.find(
+        item =>
+          item.id ===
+          currentChatId
+      );
+
+
+    if(current){
+
+      messages =
+        Array.isArray(
+          current.messages
+        )
+          ? current.messages
+              .slice(
+                -MAX_MESSAGES_PER_CHAT
+              )
+          : [];
+    }
+
+
+    renderCurrentChat();
+
+    renderChatHistory();
+
+    updateModeButtons();
+
+    autoResize();
+
+  }catch(error){
+
+    console.error(
+      "Recovery failed:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   PAGESHOW
+========================================================= */
+
+window.addEventListener(
+  "pageshow",
+  event => {
+
+    if(!appReady){
+      return;
+    }
+
+
+    if(event.persisted){
+
+      recoverPage();
+
+      return;
+    }
+
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      setTimeout(
+        recoverPage,
+        50
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   VISIBILITY
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState ===
+      "visible" &&
+      appReady
+    ){
+
+      setTimeout(
+        () => {
+
+          try{
+
+            if(!isBusy){
+              hideTyping();
+              sendBtn.disabled = false;
+            }
+
+          }catch(error){}
+
+        },
+        80
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+function safeInitialLoad(){
+
+  try{
+
+    loadChatHistory();
+
+  }catch(error){
+
+    console.error(
+      "Chat history load failed:",
+      error
+    );
+
+    chats = [];
+
+    currentChatId =
+      null;
+
+    messages = [];
+  }
+
+
+  try{
+
+    if(!chats.length){
+
+      /*
+        Startup पर localStorage write नहीं।
+      */
+
+      createNewChat(
+        false
+      );
+
+    }else{
+
+      const latest =
+        chats
+          .slice()
+          .sort(
+            (a,b) =>
+              (b.updatedAt || 0) -
+              (a.updatedAt || 0)
+          )[0];
+
+
+      if(latest){
+
+        currentChatId =
+          latest.id;
+
+
+        messages =
+          Array.isArray(
+            latest.messages
+          )
+            ? latest.messages
+                .slice(
+                  -MAX_MESSAGES_PER_CHAT
+                )
+            : [];
+        restoreChatMemory(latest);
+      }
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "Chat initialization failed:",
+      error
+    );
+
+    chats = [];
+
+    messages = [];
+
+    currentChatId =
+      null;
+
+
+    createNewChat(
+      false
+    );
+  }
+
+
+  /*
+    Chat पहले render।
+  */
+
+  renderCurrentChat();
+
+  renderChatHistory();
+
+
+  /*
+    Image history startup पर parse नहीं।
+  */
+
+  creationGrid.innerHTML =
+    `
+      <div class="empty-history">
+        Images देखने के लिए Menu खोलें।
+      </div>
+    `;
+
+
+  updateModeButtons();
+
+  autoResize();
+
+
+  setTimeout(
+    () => {
+
+      try{
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:"auto"
+        });
+
+      }catch(error){}
+
+    },
+    80
+  );
+
+
+  appReady =
+    true;
+}
+
+
+const memoryBtn = document.getElementById("memoryBtn");
+if(memoryBtn) memoryBtn.addEventListener("click", showMemoryStatus);
+
+/* =========================================================
+   START
+========================================================= */
+
+if(
+  document.readyState ===
+  "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    safeInitialLoad,
+    {
+      once:true
+    }
+  );
+
+}else{
+
+  setTimeout(
+    safeInitialLoad,
+    0
+  );
+}
+
+
+/* =========================================================
+   GLOBAL ERROR LOG
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "Aaru AI error:",
+      event.error ||
+      event.message
+    );
+  }
+);
+
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.error(
+      "Aaru AI promise error:",
+      event.reason
+    );
+  }
+);
+
+</script>
+
+<script>
+/* GPT-6 Astra Native Composer runtime marker.
+   The browser never contains the OpenAI API key; the Worker is the secure gateway.
+   The model, Responses API, reasoning and native tool selection are Worker-side.
+*/
+window.AARU_ASTRA_NATIVE = Object.freeze({
+  model: "gpt-6-astra",
+  api: "responses",
+  toolChoice: "auto",
+  intentRouting: "model-selected"
+});
+</script>
 </body>
 </html>
