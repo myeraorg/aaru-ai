@@ -984,6 +984,11 @@ Aaru AI
 <span>सभी चैट डिलीट करें</span>
 </button>
 
+<button class="drawer-action" id="themeToggleBtn" type="button" aria-label="थीम बदलें">
+<span id="themeToggleIcon">☀️</span>
+<span id="themeToggleText">Bright Theme</span>
+</button>
+
 
 <div class="section-title">
 Recent Chats
@@ -997,6 +1002,26 @@ Recent Creations
 </div>
 
 <div class="creation-grid" id="creationGrid"></div>
+
+<div class="drawer-spacer"></div>
+
+<div class="section-title">Account & Privacy</div>
+
+<button class="drawer-action" id="accountBtn" type="button">
+<span>👤</span>
+<span><b>Account</b><small class="drawer-action-sub">Guest Mode / Login / Sign up</small></span>
+</button>
+
+<button class="drawer-action" id="privacyBtn" type="button">
+<span>🛡️</span>
+<span><b>Privacy & Security</b><small class="drawer-action-sub">Data और privacy controls</small></span>
+</button>
+
+<div class="support-block" id="supportBlock">
+  <div class="support-title">🆘 Help & Support</div>
+  <div class="support-text">Aaru से जुड़ी किसी समस्या के लिए हमें ईमेल करें।</div>
+  <a class="support-mail" href="mailto:myera.org@gmail.com?subject=Aaru%20AI%20Help%20%26%20Support">myera.org@gmail.com</a>
+</div>
 
 </div>
 
@@ -1087,6 +1112,38 @@ type="file"
 id="photoInput"
 accept="image/*,.pdf,application/pdf">
 
+
+<!-- AARU ACCOUNT / PRIVACY FOUNDATION -->
+<div class="aaru-modal-backdrop" id="accountModalBackdrop" aria-hidden="true">
+  <section class="aaru-account-modal" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+    <button class="aaru-modal-close" id="accountModalClose" type="button" aria-label="Close">×</button>
+    <div class="aaru-account-icon">👤</div>
+    <h2 id="accountModalTitle">Aaru Account</h2>
+    <p class="aaru-account-sub">Privacy-first account foundation</p>
+    <div class="aaru-account-status" id="accountStatus">Guest Mode active</div>
+    <div class="aaru-account-actions">
+      <button id="guestModeBtn" type="button">👤 Continue as Guest</button>
+      <button id="loginBtn" type="button">🔐 Login</button>
+      <button id="signupBtn" type="button">✨ Create Account</button>
+    </div>
+    <div class="aaru-auth-note" id="authNote">Guest Mode works locally. Secure Login/Signup will use server-side authentication when the authentication Worker is enabled; this UI never stores passwords locally.</div>
+  </section>
+</div>
+
+<div class="aaru-modal-backdrop" id="privacyModalBackdrop" aria-hidden="true">
+  <section class="aaru-privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+    <button class="aaru-modal-close" id="privacyModalClose" type="button" aria-label="Close">×</button>
+    <div class="aaru-account-icon">🛡️</div>
+    <h2 id="privacyModalTitle">Privacy & Security</h2>
+    <div class="privacy-list">
+      <div><b>Guest data</b><span>Guest chat/history stays on this device unless you explicitly use a server feature.</span></div>
+      <div><b>Passwords</b><span>Aaru does not save passwords in localStorage.</span></div>
+      <div><b>Account isolation</b><span>Authenticated user data must be isolated server-side by verified identity.</span></div>
+      <div><b>Delete data</b><span>Account deletion/data deletion will be available with the secure authentication backend.</span></div>
+    </div>
+    <button class="privacy-ok" id="privacyOkBtn" type="button">समझ गया</button>
+  </section>
+</div>
 
 <div class="image-viewer" id="imageViewer">
 
@@ -5596,6 +5653,22 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
    Unified composer: text + photo + image generation/editing
 ========================================================= */
 
+/* =========================================================
+   OFFLINE CREATOR ATTRIBUTION
+   Must work even when Worker/API credits are unavailable.
+========================================================= */
+function getCreatorAttributionResponse(query){
+  const q=String(query||"").toLowerCase().trim();
+  if(!q) return null;
+  const compact=q.replace(/[\u200c\u200d\u200b]/g,"").replace(/[?؟!।,.，。！？]+/g," ").replace(/\s+/g," ").trim();
+  const hasSelf=/(\b(you|u|your|yourself|aaru|ai|bot|assistant)\b|तुम|आप|तुम्हारा|आपका|तुमको|आपको|तुम्हें|मुझे|आय़रू|aaru)/i.test(compact);
+  const creatorIntent=/(\bwho\s+(?:made|make|created|create|built|build|developed|designed|invented|authored)\b|\bwho\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\bwhat\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:made|created|built|developed|designed|invented)\s+by\b|who\s+madeby|who\s+make\s+you|who\s+made\s+you|who\s+created\s+you|who\s+built\s+you|who\s+developed\s+you|who\s+designed\s+you|तुम्हें किसने बनाया|तुमको किसने बनाया|आपको किसने बनाया|आपको किसने बनाया है|तुम्हें किसने बनाया है|तुम्हारा निर्माता कौन|आपका निर्माता कौन|तुम्हारा रचयिता कौन|आपका रचयिता कौन|तुम्हारा बनाने वाला कौन|आपका बनाने वाला कौन|किसने बनाया|किसने बनाया है|किसने बनाया था|निर्माता कौन|बनाने वाला कौन|बनाया किसने|कोण बनवलं|कोणी बनवलं|কে বানিয়েছে|কে তোমাকে বানিয়েছে|কে আপনাকে বানিয়েছে|કોણે બનાવ્યું|તમને કોણે બનાવ્યા|யார் உன்னை உருவாக்கினார்|உன்னை யார் உருவாக்கினார்|ఎవరు నిన్ను తయారు చేశారు|ನಿನ್ನನ್ನು ಯಾರು ತಯಾರಿಸಿದರು|ನಿನ್ನನ್ನು ಯಾರು ನಿರ್ಮಿಸಿದರು|നിന്നെ ആരാണ് ഉണ്ടാക്കിയത്|ਤੁਹਾਨੂੰ ਕਿਸਨੇ ਬਣਾਇਆ|کس نے بنایا|آپ کو کس نے بنایا|من صنعك|من أنشأك|من طورك|кто тебя создал|кто тебя сделал|кто разработал|кто тебя разработал|誰があなたを作った|あなたを誰が作った|誰があなたを開発した|누가 너를 만들었|谁创造了你|谁制作了你|谁开发了你|quem criou você|quem te criou|quem fez você|qui t a créé|qui t'a créé|wer hat dich gemacht|wer hat dich erstellt|quién te creó|quién te hizo|quien te creo)/i.test(compact);
+  if(creatorIntent && (hasSelf || /\b(who made|who make|who created|who create|who built|who build|creator|maker)\b/i.test(compact) || /किसने बनाया|निर्माता|रचयिता|बनाने वाला|কে বানিয়েছে|કોણે બનાવ્યું|யார்|ఎవరు|ಯಾರು|ആരാണ്|ਕਿਸਨੇ|کس نے|من صنعك|кто|誰|누가|谁|quem|qui|wer hat|quién|quien/i.test(compact))){
+    return "मुझे अभिषेक त्रिपाठी जी बिहार वाले ने बनाया है।";
+  }
+  return null;
+}
+
 async function handleSend(options={}){
 
   const fromVoice=!!options?.fromVoice;
@@ -5647,6 +5720,23 @@ async function handleSend(options={}){
     false,
     attachedPhoto
   );
+
+  /* Creator attribution is a local, zero-credit response. */
+  const creatorReply=getCreatorAttributionResponse(displayPrompt);
+  if(creatorReply && !hasPhoto && !hasDocument){
+    saveCurrentChat();
+    addAssistantMessage(creatorReply,true);
+    if(voiceOutputEnabled && creatorReply) speakAaru(creatorReply);
+    promptEl.value="";
+    autoResize();
+    clearSelectedPhoto();
+    isBusy=false;
+    sendBtn.disabled=false;
+    if(fromVoice){ voiceListening=false; updateVoiceStatus("",false); }
+    scrollBottom();
+    try{ promptEl.focus(); }catch(_){}
+    return;
+  }
 
   if(isForgetMemoryCommand(displayPrompt)){
     const target=getForgetTarget(displayPrompt);
@@ -7358,6 +7448,132 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 
 
+<!-- AARU LAUNCH AUDIT: THEME + OFFLINE CREATOR ATTRIBUTION -->
+<style id="aaruPrivacySupportStyles">
+.drawer-spacer{height:10px;flex:1 0 10px;min-height:10px}
+.drawer-action-sub{display:block;font-size:9px;font-weight:500;opacity:.58;margin-top:2px}
+.support-block{margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
+.support-title{font-size:13px;font-weight:800}.support-text{margin-top:4px;font-size:10px;line-height:1.45;opacity:.65}.support-mail{display:inline-block;margin-top:7px;color:#60a5fa;text-decoration:none;font-size:11px;font-weight:800;word-break:break-word}.support-mail:hover{text-decoration:underline}
+.aaru-modal-backdrop{position:fixed;inset:0;z-index:30000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);opacity:0;visibility:hidden;pointer-events:none;transition:.18s ease}
+.aaru-modal-backdrop.open{opacity:1;visibility:visible;pointer-events:auto}
+.aaru-account-modal,.aaru-privacy-modal{position:relative;width:min(430px,100%);border-radius:22px;padding:22px;background:#151821;color:#fff;border:1px solid rgba(255,255,255,.10);box-shadow:0 25px 80px rgba(0,0,0,.35)}
+.aaru-modal-close{position:absolute;right:12px;top:12px;width:36px;height:36px;border:0;border-radius:11px;background:#252a36;color:#fff;font-size:22px;cursor:pointer}
+.aaru-account-icon{font-size:30px}.aaru-account-modal h2,.aaru-privacy-modal h2{margin:8px 0 2px;font-size:22px}.aaru-account-sub{margin:0 0 14px;font-size:11px;opacity:.55}.aaru-account-status{padding:10px 12px;border-radius:12px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);font-size:12px;font-weight:800}
+.aaru-account-actions{display:grid;gap:9px;margin-top:14px}.aaru-account-actions button,.privacy-ok{border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:12px;background:#222733;color:#fff;text-align:left;font-weight:800;cursor:pointer}.aaru-account-actions button:hover,.privacy-ok:hover{background:#2b3140}.aaru-auth-note{margin-top:13px;font-size:10px;line-height:1.5;opacity:.58}.privacy-list{display:grid;gap:9px;margin-top:14px}.privacy-list>div{padding:10px 11px;border-radius:12px;background:#202530;border:1px solid rgba(255,255,255,.07)}.privacy-list b{display:block;font-size:11px}.privacy-list span{display:block;margin-top:3px;font-size:10px;line-height:1.45;opacity:.62}.privacy-ok{width:100%;margin-top:13px;text-align:center}
+html[data-aaru-theme="light"] .aaru-account-modal,html[data-aaru-theme="light"] .aaru-privacy-modal{background:#fff;color:#172033;border-color:#dce3eb}
+html[data-aaru-theme="light"] .aaru-modal-close{background:#f1f5f9;color:#172033;border:1px solid #dce3eb}
+html[data-aaru-theme="light"] .aaru-account-status{background:#f0fdf4;border-color:#bbf7d0}
+html[data-aaru-theme="light"] .aaru-account-actions button,html[data-aaru-theme="light"] .privacy-ok{background:#f8fafc;color:#172033;border-color:#dce3eb}
+html[data-aaru-theme="light"] .aaru-account-actions button:hover,html[data-aaru-theme="light"] .privacy-ok:hover{background:#eef2f7}
+html[data-aaru-theme="light"] .privacy-list>div{background:#f8fafc;border-color:#e2e8f0}
+html[data-aaru-theme="light"] .support-block{background:#f8fafc;border-color:#dce3eb}
+html[data-aaru-theme="light"] .support-text{color:#475569}
+@media(max-width:600px){.aaru-account-modal,.aaru-privacy-modal{padding:19px;border-radius:19px}.aaru-modal-backdrop{padding:12px}.support-block{margin-bottom:4px}}
+</style>
+<style id="aaruLaunchThemeStyles">
+/* The original UI is dark by default. Theme variables below make both modes explicit. */
+html[data-aaru-theme="light"],html[data-aaru-theme="light"] body{background:#f7f9fc!important;color:#172033!important}
+html[data-aaru-theme="light"] .header{background:rgba(255,255,255,.96)!important;color:#172033!important;border-bottom:1px solid rgba(20,35,60,.10)!important;backdrop-filter:blur(14px)!important}
+html[data-aaru-theme="light"] .brand-name,html[data-aaru-theme="light"] .brand-sub{color:#172033!important}
+html[data-aaru-theme="light"] .menu-btn,html[data-aaru-theme="light"] .new-chat-top,html[data-aaru-theme="light"] .close-drawer{background:#eef2f7!important;color:#172033!important;border:1px solid #dce3eb!important}
+html[data-aaru-theme="light"] .drawer{background:#fff!important;color:#172033!important;border-right:1px solid #e2e8f0!important}
+html[data-aaru-theme="light"] .drawer-head{border-bottom:1px solid #e2e8f0!important}
+html[data-aaru-theme="light"] .drawer-title,html[data-aaru-theme="light"] .section-title,html[data-aaru-theme="light"] .chat-history-title,html[data-aaru-theme="light"] .chat-history-meta,html[data-aaru-theme="light"] .drawer-action,html[data-aaru-theme="light"] .empty-history,html[data-aaru-theme="light"] .delete-chat{color:#172033!important}
+html[data-aaru-theme="light"] .drawer-action{background:#f8fafc!important;border:1px solid #dce3eb!important}
+html[data-aaru-theme="light"] .drawer-action:hover,html[data-aaru-theme="light"] .chat-history-item:hover,html[data-aaru-theme="light"] .chat-history-item.active{background:#eef2f7!important}
+html[data-aaru-theme="light"] .message.user .bubble,html[data-aaru-theme="light"] .message.assistant .bubble,html[data-aaru-theme="light"] .message.system .bubble{background:#fff!important;color:#172033!important;border:1px solid #e2e8f0!important}
+html[data-aaru-theme="light"] .md,html[data-aaru-theme="light"] .md *{color:#172033!important}
+html[data-aaru-theme="light"] .md a{color:#155eef!important}
+html[data-aaru-theme="light"] .md blockquote{border-left-color:#94a3b8!important;background:#f8fafc!important}
+html[data-aaru-theme="light"] .md code,html[data-aaru-theme="light"] .md pre{background:#f1f5f9!important;color:#172033!important;border-color:#dce3eb!important}
+html[data-aaru-theme="light"] .composer-shell{background:#f7f9fc!important}
+html[data-aaru-theme="light"] .composer{background:#fff!important;border:1px solid #dce3eb!important;box-shadow:0 8px 35px rgba(15,23,42,.10)!important}
+html[data-aaru-theme="light"] #prompt{color:#172033!important;caret-color:#172033!important}
+html[data-aaru-theme="light"] #prompt::placeholder{color:#64748b!important}
+html[data-aaru-theme="light"] .icon-btn{background:#f8fafc!important;color:#172033!important;border:1px solid #dce3eb!important}
+html[data-aaru-theme="light"] .icon-btn:hover{background:#eef2f7!important}
+html[data-aaru-theme="light"] .send-btn{background:#172033!important;color:#fff!important;border-color:#172033!important}
+html[data-aaru-theme="light"] .send-btn:hover{background:#334155!important}
+html[data-aaru-theme="light"] .remove-photo{background:#172033!important;color:#fff!important}
+html[data-aaru-theme="light"] .image-viewer{background:#fff!important}
+html[data-aaru-theme="light"] .close-viewer{background:#f8fafc!important;color:#172033!important;border:1px solid #dce3eb!important}
+html[data-aaru-theme="light"] .toast{background:#172033!important;color:#fff!important;border:1px solid #172033!important}
+html[data-aaru-theme="light"] .voice-active{background:#172033!important;color:#fff!important}
+html[data-aaru-theme="light"] .pdf-status,html[data-aaru-theme="light"] .image-note{color:#475569!important}
+html[data-aaru-theme="light"] .creation-card{background:#fff!important;border-color:#e2e8f0!important}
+html[data-aaru-theme="light"] .creation-prompt{color:#172033!important}
+html[data-aaru-theme="light"] .aaru-plus-menu{background:rgba(255,255,255,.98)!important;color:#111827!important;border-color:#dce3eb!important}
+html[data-aaru-theme="light"] .aaru-plus-head strong,html[data-aaru-theme="light"] .aaru-plus-item{color:#111827!important}
+html[data-aaru-theme="light"] .aaru-plus-item:hover,html[data-aaru-theme="light"] .aaru-plus-item:focus{background:#f1f5f9!important}
+html[data-aaru-theme="light"] .aaru-plus-item>span:first-child{background:#f8fafc!important;border-color:#e2e8f0!important}
+html[data-aaru-theme="light"] .aaru-v30-smartbar button,html[data-aaru-theme="light"] .aaru-v30-prompt-tools button{background:#fff!important;color:#334155!important;border-color:#d7dee8!important}
+html[data-aaru-theme="light"] .aaru-v30-quality-note{background:#f8fafc!important;border-color:#e2e8f0!important;color:#64748b!important}
+html[data-aaru-theme="light"] .typing span{background:#172033!important}
+
+/* Dark mode */
+html[data-aaru-theme="dark"] .theme-light-only{display:none!important}
+html[data-aaru-theme="light"] .theme-dark-only{display:none!important}
+
+.aaru-theme-choice{display:flex!important;align-items:center;gap:8px}
+.aaru-theme-choice-icon{width:24px;flex:0 0 24px;text-align:center}
+.aaru-theme-choice-text{display:flex;flex-direction:column;gap:1px}
+.aaru-theme-choice-text small{font-size:9px;opacity:.6}
+</style>
+<script id="aaruPrivacySupportScript">
+(function(){
+  "use strict";
+  const GUEST_KEY="aaru_guest_mode_v1";
+  const accountModal=document.getElementById("accountModalBackdrop");
+  const privacyModal=document.getElementById("privacyModalBackdrop");
+  const status=document.getElementById("accountStatus");
+  function openModal(el){if(!el)return;el.classList.add("open");el.setAttribute("aria-hidden","false")}
+  function closeModal(el){if(!el)return;el.classList.remove("open");el.setAttribute("aria-hidden","true")}
+  function guestActive(){try{return localStorage.getItem(GUEST_KEY)!=="false"}catch(_){return true}}
+  function setGuest(){try{localStorage.setItem(GUEST_KEY,"true")}catch(_){} if(status)status.textContent="Guest Mode active";closeModal(accountModal);try{window.toast?.("Guest Mode चालू है")}catch(_){} }
+  document.getElementById("accountBtn")?.addEventListener("click",()=>openModal(accountModal));
+  document.getElementById("privacyBtn")?.addEventListener("click",()=>openModal(privacyModal));
+  document.getElementById("accountModalClose")?.addEventListener("click",()=>closeModal(accountModal));
+  document.getElementById("privacyModalClose")?.addEventListener("click",()=>closeModal(privacyModal));
+  document.getElementById("privacyOkBtn")?.addEventListener("click",()=>closeModal(privacyModal));
+  document.getElementById("guestModeBtn")?.addEventListener("click",setGuest);
+  document.getElementById("loginBtn")?.addEventListener("click",()=>{
+    if(status)status.textContent="Secure Login backend required";
+    const note=document.getElementById("authNote");
+    if(note)note.textContent="Login UI is ready, but no fake authentication is used. Secure server-side auth must be connected before accepting real passwords.";
+  });
+  document.getElementById("signupBtn")?.addEventListener("click",()=>{
+    if(status)status.textContent="Secure Signup backend required";
+    const note=document.getElementById("authNote");
+    if(note)note.textContent="Signup UI is ready, but no fake account is created. A real Worker/database/session system must be connected before production account creation.";
+  });
+  accountModal?.addEventListener("click",e=>{if(e.target===accountModal)closeModal(accountModal)});
+  privacyModal?.addEventListener("click",e=>{if(e.target===privacyModal)closeModal(privacyModal)});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal(accountModal);closeModal(privacyModal)}});
+  if(status)status.textContent=guestActive()?"Guest Mode active":"Account session active";
+})();
+</script>
+<script id="aaruLaunchThemeScript">
+(function(){
+  "use strict";
+  const KEY="aaru_theme_v1";
+  const root=document.documentElement;
+  const btn=document.getElementById("themeToggleBtn");
+  const icon=document.getElementById("themeToggleIcon");
+  const text=document.getElementById("themeToggleText");
+  function applyTheme(theme,save=true){
+    theme=theme==="light"?"light":"dark";
+    root.setAttribute("data-aaru-theme",theme);
+    if(save){try{localStorage.setItem(KEY,theme)}catch(_){}}
+    if(icon) icon.textContent=theme==="dark"?"☀️":"🌙";
+    if(text) text.textContent=theme==="dark"?"Bright Theme":"Dark Theme";
+    if(btn) btn.setAttribute("aria-label",theme==="dark"?"Bright Theme पर जाएँ":"Dark Theme पर जाएँ");
+  }
+  let saved="dark";
+  try{saved=localStorage.getItem(KEY)||"dark"}catch(_){}
+  applyTheme(saved,false);
+  btn?.addEventListener("click",()=>{applyTheme(root.getAttribute("data-aaru-theme")==="dark"?"light":"dark",true)});
+})();
+</script>
 <!-- AARU VIDEO CREATION STUDIO 3.0 UX LAYER -->
 <style id="aaruVideoStudio30Styles">
 .aaru-plus-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto}
