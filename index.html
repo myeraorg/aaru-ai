@@ -5,7 +5,7 @@
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Intelligent Interaction v5 — v13 — v26 Multi-Step Agent Workflow</title>
+<title>Aaru AI — GPT-6 Astra • Native Unified Composer • Refresh Duplicate Fix v27</title>
 
 <style>
 *{
@@ -894,6 +894,7 @@ body,.app,main{
 }
 
 </style>
+<!-- AARU v27: refresh-safe chat rendering + legacy duplicate repair. Worker/API unchanged. -->
 </head>
 
 <body>
@@ -2255,6 +2256,54 @@ function normalizeChat(chat){
    LOAD CHAT HISTORY
 ========================================================= */
 
+/*
+  AARU REFRESH-DUPLICATE REPAIR
+  renderCurrentChat() must never mutate the messages array.
+  Older builds accidentally appended every rendered message back into
+  messages, causing the saved conversation to double on each refresh.
+*/
+function collapseRepeatedMessageSequence(list){
+  if(!Array.isArray(list) || list.length < 2) return Array.isArray(list) ? list : [];
+  const n=list.length;
+  const key=item=>JSON.stringify({
+    role:item?.role==="user"?"user":"assistant",
+    content:String(item?.content||""),
+    imageId:item?.imageId||null
+  });
+  const keys=list.map(key);
+
+  // Find the shortest exact period only when the ENTIRE array is repeated.
+  for(let period=1; period<=Math.floor(n/2); period++){
+    if(n % period !== 0) continue;
+    let repeated=true;
+    for(let i=period;i<n;i++){
+      if(keys[i] !== keys[i%period]){
+        repeated=false;
+        break;
+      }
+    }
+    if(repeated) return list.slice(0,period);
+  }
+  return list;
+}
+
+function repairChatHistoryDuplicates(){
+  let changed=false;
+  chats = (Array.isArray(chats)?chats:[]).map(chat=>{
+    if(!chat || !Array.isArray(chat.messages)) return chat;
+    const repaired=collapseRepeatedMessageSequence(chat.messages);
+    if(repaired.length !== chat.messages.length){
+      changed=true;
+      return Object.assign({},chat,{messages:repaired,updatedAt:Date.now()});
+    }
+    return chat;
+  });
+  if(changed){
+    try{ saveChatHistory(); }catch(_){}
+  }
+  return changed;
+}
+
 function loadChatHistory(){
 
   chats = [];
@@ -2300,6 +2349,9 @@ function loadChatHistory(){
               0,
               MAX_SAVED_CHATS
             );
+
+        // Repair legacy refresh-duplication before the first render.
+        repairChatHistoryDuplicates();
       }
 
     }catch(error){
@@ -2671,6 +2723,7 @@ function saveCurrentChat(){
 ========================================================= */
 
 function renderCurrentChat(){
+  /* IMPORTANT: rendering is read-only; never append rendered items to messages. */
 
   messagesEl.innerHTML = "";
 
@@ -2695,7 +2748,9 @@ function renderCurrentChat(){
 
       addUserMessage(
         item.content,
-        false
+        false,
+        null,
+        true
       );
 
     }else{
@@ -2703,7 +2758,8 @@ function renderCurrentChat(){
       addAssistantMessage(
         item.content,
         false,
-        item.imageId || null
+        item.imageId || null,
+        true
       );
     }
   });
@@ -2717,18 +2773,21 @@ function renderCurrentChat(){
 function addUserMessage(
   text,
   persist = true,
-  imageUrl = null
+  imageUrl = null,
+  renderOnly = false
 ){
 
   const value =
     String(text || "");
 
-  messages.push({
-    role:
-      "user",
-    content:
-      value
-  });
+  if(!renderOnly){
+    messages.push({
+      role:
+        "user",
+      content:
+        value
+    });
+  }
 
   const row =
     document.createElement(
@@ -2811,7 +2870,8 @@ function addUserMessage(
 function addAssistantMessage(
   text,
   persist = true,
-  imageId = null
+  imageId = null,
+  renderOnly = false
 ){
 
   const value =
@@ -2835,9 +2895,11 @@ function addAssistantMessage(
   }
 
 
-  messages.push(
-    record
-  );
+  if(!renderOnly){
+    messages.push(
+      record
+    );
+  }
 
 
   const row =
