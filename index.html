@@ -5049,6 +5049,7 @@ async function generateImage(
       API + "image",
       {
         method:"POST",
+        credentials:"include",
 
         headers:{
           "Content-Type":
@@ -5462,6 +5463,7 @@ async function fetchChatWithRecovery(payload){
       const response =
         await fetch(API + "chat",{
           method:"POST",
+          credentials:"include",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify(payload),
           signal:controller.signal
@@ -7574,6 +7576,138 @@ html[data-aaru-theme="light"] .theme-dark-only{display:none!important}
   btn?.addEventListener("click",()=>{applyTheme(root.getAttribute("data-aaru-theme")==="dark"?"light":"dark",true)});
 })();
 </script>
+
+<style id="aaruRealAuthStyles">
+.aaru-auth-real{margin-top:12px;padding:12px;border:1px solid #dbe4ee;border-radius:16px;background:rgba(248,250,252,.92)}
+.aaru-auth-real[hidden]{display:none!important}.aaru-auth-tabs{display:flex;gap:7px;margin-bottom:10px}.aaru-auth-tab{flex:1;border:1px solid #dbe4ee;background:#fff;border-radius:10px;padding:8px;font-weight:700;font-size:11px;cursor:pointer}.aaru-auth-tab.active{background:#eef4ff;border-color:#b9cff8}.aaru-auth-form{display:grid;gap:9px}.aaru-auth-form[hidden]{display:none}.aaru-auth-form label{display:grid;gap:4px;font-size:10px;font-weight:700;color:#475569}.aaru-auth-form input{width:100%;box-sizing:border-box;border:1px solid #cfd8e3;border-radius:10px;padding:10px 11px;background:#fff;color:#111827;font-size:13px;outline:none}.aaru-auth-form input:focus{border-color:#7aa2e8;box-shadow:0 0 0 3px rgba(59,130,246,.10)}.aaru-auth-submit{border:0;border-radius:11px;padding:10px;background:#111827;color:#fff;font-weight:800;cursor:pointer}.aaru-auth-submit:disabled{opacity:.55;cursor:wait}.aaru-auth-error{min-height:16px;font-size:10px;color:#b42318}.aaru-auth-user{display:grid;gap:9px}.aaru-auth-user-card{padding:10px;border-radius:11px;background:#fff;border:1px solid #dbe4ee;font-size:11px}.aaru-auth-user-card b{display:block;font-size:12px}.aaru-auth-secondary{border:1px solid #cfd8e3;background:#fff;color:#111827;border-radius:10px;padding:9px;font-weight:700;cursor:pointer}.aaru-auth-danger{border-color:#efb4b4;color:#b42318}.aaru-auth-back{border:0;background:transparent;padding:2px 0;color:#475569;font-size:10px;cursor:pointer;text-align:left}
+</style>
+<script id="aaruRealAuthFrontendScript">
+(function(){
+  "use strict";
+  const API="https://aaru-ai-api.myera-org.workers.dev/";
+  const accountModal=document.getElementById("accountModalBackdrop");
+  const accountSection=accountModal?.querySelector(".aaru-account-modal");
+  const status=document.getElementById("accountStatus");
+  const note=document.getElementById("authNote");
+  if(!accountSection) return;
+  const state={authenticated:false,user:null,busy:false,csrf:""};
+  const $=id=>document.getElementById(id);
+  function setStatus(text){if(status)status.textContent=text}
+  function setNote(text){if(note)note.textContent=text}
+  function readCookie(name){
+    try{
+      const parts=document.cookie.split(";").map(x=>x.trim());
+      const hit=parts.find(x=>x.startsWith(name+"="));
+      return hit?decodeURIComponent(hit.slice(name.length+1)):"";
+    }catch(_){return ""}
+  }
+  async function request(path,options={}){
+    const opts={...options,credentials:"include",headers:{"Content-Type":"application/json",...(options.headers||{})}};
+    if(opts.method && opts.method!="GET" && opts.method!="HEAD" && opts.method!="OPTIONS"){
+      const csrf=state.csrf||readCookie("__Host-aaru_csrf");
+      if(csrf) opts.headers["X-Aaru-CSRF"]=csrf;
+    }
+    const res=await fetch(API+String(path).replace(/^\//,""),opts);
+    let data=null;try{data=await res.json()}catch(_){data={}}
+    if(!res.ok || data?.ok===false){
+      const e=new Error(data?.error||data?.message||("Request failed ("+res.status+")"));e.status=res.status;e.data=data;throw e;
+    }
+    return data;
+  }
+  function ensureAuthUI(){
+    if($("aaruRealAuthBox")) return;
+    const box=document.createElement("div");box.className="aaru-auth-real";box.id="aaruRealAuthBox";box.hidden=true;
+    box.innerHTML=`
+      <div class="aaru-auth-tabs" id="aaruAuthTabs">
+        <button type="button" class="aaru-auth-tab active" data-auth-tab="login">Login</button>
+        <button type="button" class="aaru-auth-tab" data-auth-tab="signup">Create Account</button>
+      </div>
+      <form class="aaru-auth-form" id="aaruLoginForm" autocomplete="on">
+        <label>Email<input id="aaruLoginEmail" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254"></label>
+        <label>Password<input id="aaruLoginPassword" name="password" type="password" autocomplete="current-password" required minlength="10" maxlength="128"></label>
+        <div class="aaru-auth-error" id="aaruLoginError" aria-live="polite"></div>
+        <button class="aaru-auth-submit" id="aaruLoginSubmit" type="submit">Login securely</button>
+      </form>
+      <form class="aaru-auth-form" id="aaruSignupForm" autocomplete="on" hidden>
+        <label>Email<input id="aaruSignupEmail" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254"></label>
+        <label>Password<input id="aaruSignupPassword" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128"></label>
+        <div class="aaru-auth-error" id="aaruSignupError" aria-live="polite"></div>
+        <button class="aaru-auth-submit" id="aaruSignupSubmit" type="submit">Create securely</button>
+      </form>
+      <div class="aaru-auth-user" id="aaruAuthUser" hidden>
+        <div class="aaru-auth-user-card"><b id="aaruAuthUserEmail">Authenticated</b><span id="aaruAuthUserId"></span></div>
+        <button type="button" class="aaru-auth-secondary" id="aaruLogoutBtn">Log out</button>
+        <button type="button" class="aaru-auth-secondary aaru-auth-danger" id="aaruDeleteBtn">Delete account</button>
+      </div>`;
+    accountSection.appendChild(box);
+    box.querySelectorAll("[data-auth-tab]").forEach(btn=>btn.addEventListener("click",()=>showAuthTab(btn.dataset.authTab)));
+    $("aaruLoginForm").addEventListener("submit",e=>{e.preventDefault();login()});
+    $("aaruSignupForm").addEventListener("submit",e=>{e.preventDefault();signup()});
+    $("aaruLogoutBtn").addEventListener("click",logout);
+    $("aaruDeleteBtn").addEventListener("click",deleteAccount);
+  }
+  function showAuthTab(tab){
+    ensureAuthUI();
+    const isLogin=tab!=="signup";
+    $("aaruLoginForm").hidden=!isLogin;$("aaruSignupForm").hidden=isLogin;$("aaruAuthUser").hidden=true;
+    document.querySelectorAll("#aaruAuthTabs .aaru-auth-tab").forEach(b=>b.classList.toggle("active",(b.dataset.authTab==="login")===isLogin));
+    $("aaruRealAuthBox").hidden=false;
+    setStatus(isLogin?"Secure Login":"Create Account");
+    setNote("Real server-side authentication • password is never stored in localStorage.");
+  }
+  function showUser(){
+    ensureAuthUI();
+    $("aaruLoginForm").hidden=true;$("aaruSignupForm").hidden=true;$("aaruAuthUser").hidden=false;$("aaruAuthTabs").hidden=true;
+    $("aaruAuthUserEmail").textContent=state.user?.email||"Authenticated account";
+    $("aaruAuthUserId").textContent=state.user?.id?"Account ID: "+state.user.id:"";
+    $("aaruRealAuthBox").hidden=false;
+    setStatus("Signed in");setNote("Real authenticated session is active. Your password is not stored in this browser.");
+  }
+  function showGuest(){
+    ensureAuthUI();$("aaruRealAuthBox").hidden=true;$("aaruAuthTabs").hidden=false;state.authenticated=false;state.user=null;state.csrf="";
+    setStatus("Guest Mode active");setNote("Guest Mode works locally. Login/Create Account uses the deployed server-side authentication Worker.");
+  }
+  async function restoreSession(){
+    ensureAuthUI();
+    try{
+      const data=await request("auth/session",{method:"GET"});
+      if(data.authenticated && data.user){state.authenticated=true;state.user=data.user;state.csrf=String(data.csrf||"");showUser();}
+      else showGuest();
+    }catch(_){showGuest();setNote("Guest Mode active. Account session could not be restored right now.")}
+  }
+  function clearErrors(){["aaruLoginError","aaruSignupError"].forEach(id=>{if($(id))$(id).textContent=""})}
+  function setBusy(form,button,busy){state.busy=busy;if(form)form.querySelectorAll("input,button").forEach(x=>x.disabled=busy);if(button)button.textContent=busy?"Please wait…":(button.id==="aaruLoginSubmit"?"Login securely":"Create securely")}
+  async function login(){
+    if(state.busy)return;clearErrors();const form=$("aaruLoginForm"),btn=$("aaruLoginSubmit");setBusy(form,btn,true);
+    try{const data=await request("auth/login",{method:"POST",body:JSON.stringify({email:$("aaruLoginEmail").value.trim(),password:$("aaruLoginPassword").value})});state.authenticated=true;state.user=data.user||null;state.csrf=String(data.csrf||"");$("aaruLoginPassword").value="";showUser();try{window.toast?.("Login सफल हुआ")}catch(_){}
+    }catch(e){$("aaruLoginError").textContent=e.message||"Login failed"}
+    finally{setBusy(form,btn,false)}
+  }
+  async function signup(){
+    if(state.busy)return;clearErrors();const form=$("aaruSignupForm"),btn=$("aaruSignupSubmit");setBusy(form,btn,true);
+    try{const data=await request("auth/signup",{method:"POST",body:JSON.stringify({email:$("aaruSignupEmail").value.trim(),password:$("aaruSignupPassword").value})});state.authenticated=true;state.user=data.user||null;state.csrf=String(data.csrf||"");$("aaruSignupPassword").value="";showUser();try{window.toast?.("Account बन गया और session शुरू हो गया")}catch(_){}
+    }catch(e){$("aaruSignupError").textContent=e.message||"Signup failed"}
+    finally{setBusy(form,btn,false)}
+  }
+  async function logout(){
+    if(state.busy)return;
+    try{await request("auth/logout",{method:"POST",body:"{}"})}catch(e){setNote(e.message||"Logout failed");return}
+    showGuest();state.csrf="";try{localStorage.setItem("aaru_guest_mode_v1","true")}catch(_){}try{window.toast?.("Logout सफल हुआ")}catch(_){ }
+  }
+  async function deleteAccount(){
+    if(state.busy)return;
+    if(!confirm("क्या आप अपना Aaru account स्थायी रूप से delete करना चाहते हैं?"))return;
+    try{await request("auth/delete",{method:"POST",body:"{}"});showGuest();state.csrf="";try{localStorage.setItem("aaru_guest_mode_v1","true")}catch(_){}try{window.toast?.("Account delete हो गया")}catch(_){}
+    }catch(e){setNote(e.message||"Account deletion failed")}
+  }
+  document.getElementById("loginBtn")?.addEventListener("click",()=>{ensureAuthUI();showAuthTab("login")});
+  document.getElementById("signupBtn")?.addEventListener("click",()=>{ensureAuthUI();showAuthTab("signup")});
+  document.getElementById("guestModeBtn")?.addEventListener("click",()=>showGuest());
+  ensureAuthUI();restoreSession();
+  window.AaruAuth={restoreSession,login,signup,logout,deleteAccount,get state(){return {...state}}};
+})();
+</script>
+
 <!-- AARU VIDEO CREATION STUDIO 3.0 UX LAYER -->
 <style id="aaruVideoStudio30Styles">
 .aaru-plus-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto}
