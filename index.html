@@ -664,9 +664,44 @@ main{
 }
 
 
+/* =========================================================
+   NATURAL VOICE MODE UI
+========================================================= */
 .voice-active{
   background:#ef4444 !important;
   color:#fff !important;
+  box-shadow:0 0 0 5px rgba(239,68,68,.12);
+  animation:aaruMicPulse 1.35s ease-in-out infinite;
+}
+
+.voice-auto-status{
+  display:none;
+  align-items:center;
+  gap:7px;
+  margin:0 8px 6px;
+  padding:7px 10px;
+  border-radius:12px;
+  background:rgba(40,100,232,.08);
+  color:#2864e8;
+  font-size:11px;
+  line-height:1.25;
+}
+
+.voice-auto-status.show{
+  display:flex;
+}
+
+.voice-auto-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#2864e8;
+  box-shadow:0 0 0 4px rgba(40,100,232,.10);
+}
+
+@keyframes aaruMicPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.055);}
 }
 
 .pdf-status{
@@ -994,13 +1029,18 @@ Recent Creations
 </div>
 
 
+<div class="voice-auto-status" id="voiceAutoStatus" aria-live="polite">
+  <span class="voice-auto-dot"></span>
+  <span id="voiceAutoStatusText">आवाज़ सुन रहा हूँ…</span>
+</div>
+
 <div class="input-row">
 
 <button class="icon-btn" id="photoBtn" title="Photo / PDF">
 📎
 </button>
 
-<button class="icon-btn" id="micBtn" title="Voice Input">
+<button class="icon-btn" id="micBtn" title="Voice Input — बोलें, अपने-आप भेजा जाएगा" aria-label="Voice Input — बोलें, अपने-आप भेजा जाएगा">
 🎙️
 </button>
 
@@ -1512,6 +1552,8 @@ let selectedPhotoBase64 = null;
 let selectedPhotoUrl = null;
 let selectedDocumentText = "";
 let voiceOutputEnabled = true;
+let voiceAutoSendEnabled = true;
+let voiceListening = false;
 let recognition = null;
 
 let isBusy = false;
@@ -5543,7 +5585,9 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
    Unified composer: text + photo + image generation/editing
 ========================================================= */
 
-async function handleSend(){
+async function handleSend(options={}){
+
+  const fromVoice=!!options?.fromVoice;
 
   if(isBusy){
     return;
@@ -5551,6 +5595,10 @@ async function handleSend(){
 
   const prompt =
     promptEl.value.trim();
+
+  if(fromVoice){
+    updateVoiceStatus("⏳ Aaru जवाब तैयार कर रहा है…",true);
+  }
 
   const hasPhoto =
     !!selectedPhotoBase64;
@@ -5596,6 +5644,7 @@ async function handleSend(){
     saveCurrentChat();
     addAssistantMessage(removed ? `ठीक है, ${removed} मेमोरी हटा दी गई।` : "ठीक है, मेमोरी हटा दी गई।", true);
     promptEl.value=""; autoResize(); clearSelectedPhoto(); isBusy=false; sendBtn.disabled=false;
+    if(fromVoice){ voiceListening=false; updateVoiceStatus("",false); }
     return;
   }
 
@@ -5661,6 +5710,10 @@ async function handleSend(){
       if(voiceOutputEnabled && finalText){
         speakAaru(finalText);
       }
+      if(fromVoice){
+        voiceListening=false;
+        updateVoiceStatus("",false);
+      }
     }
 
     clearSelectedPhoto();
@@ -5701,6 +5754,11 @@ async function handleSend(){
 
     sendBtn.disabled =
       false;
+
+    if(fromVoice){
+      voiceListening=false;
+      updateVoiceStatus("",false);
+    }
 
     scrollBottom();
 
@@ -5767,99 +5825,164 @@ sendBtn.addEventListener(
 
 
 /* =========================================================
-   VOICE OUTPUT
+   NATURAL VOICE MODE
+   Browser-native speech recognition + speech synthesis.
+   Voice input auto-sends when speech ends; no Send click required.
 ========================================================= */
+
+function updateVoiceStatus(text,show=true){
+  const box=document.getElementById("voiceAutoStatus");
+  const label=document.getElementById("voiceAutoStatusText");
+  if(label) label.textContent=String(text||"");
+  if(box) box.classList.toggle("show",!!show);
+}
+
+function stopAaruSpeaking(){
+  if("speechSynthesis" in window){
+    try{ speechSynthesis.cancel(); }catch(_){}
+  }
+}
 
 function speakAaru(text){
   if(!voiceOutputEnabled || !("speechSynthesis" in window) || !text) return;
   try{
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(cleanAaruText(text));
-    u.lang = /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-US";
-    u.rate = .98;
+    stopAaruSpeaking();
+    const clean=cleanAaruText(text);
+    const u=new SpeechSynthesisUtterance(clean);
+    u.lang=/[\u0900-\u097F]/.test(clean) ? "hi-IN" : "en-US";
+    u.rate=.98;
+    u.pitch=1;
+    u.volume=1;
+
+    // Prefer a matching installed language voice when available.
+    try{
+      const voices=speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+      const prefix=u.lang.toLowerCase().split("-")[0];
+      const preferred=voices.find(v => String(v.lang||"").toLowerCase()===u.lang.toLowerCase())
+        || voices.find(v => String(v.lang||"").toLowerCase().startsWith(prefix));
+      if(preferred) u.voice=preferred;
+    }catch(_){}
+
+    u.onstart=()=>updateVoiceStatus("🔊 Aaru जवाब बोल रहा है…",true);
+    u.onend=()=>{
+      if(!voiceListening) updateVoiceStatus("",false);
+    };
+    u.onerror=()=>{
+      if(!voiceListening) updateVoiceStatus("",false);
+    };
     speechSynthesis.speak(u);
   }catch(error){
     console.warn("Voice output failed:",error);
   }
 }
 
-/* =========================================================
-   VOICE INPUT
-========================================================= */
-
 function startAaruVoice(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micBtn = document.getElementById("micBtn");
+  const SR=window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn=document.getElementById("micBtn");
 
   if(!SR){
     showToast("इस browser में Voice Input उपलब्ध नहीं है। Chrome में microphone permission जाँचें।");
     return;
   }
 
+  // Tapping the mic again cancels listening.
   if(recognition){
-    try{ recognition.abort ? recognition.abort() : recognition.stop(); }catch(error){}
-    recognition = null;
+    voiceListening=false;
+    try{ recognition.abort ? recognition.abort() : recognition.stop(); }catch(_){}
+    recognition=null;
     micBtn?.classList.remove("voice-active");
+    updateVoiceStatus("",false);
     showToast("Voice Input बंद कर दिया गया।");
     return;
   }
 
-  let started = false;
-  const rec = new SR();
-  recognition = rec;
-  rec.lang = "hi-IN";
-  rec.interimResults = false;
-  rec.continuous = false;
-  rec.maxAlternatives = 1;
+  voiceListening=true;
+  let started=false;
+  let resultCaptured=false;
+  const rec=new SR();
+  recognition=rec;
+  // Hindi is the default because Aaru's primary UI language is Hindi.
+  // The browser may still expose multilingual recognition depending on device/browser.
+  rec.lang="hi-IN";
+  rec.interimResults=false;
+  rec.continuous=false;
+  rec.maxAlternatives=1;
 
-  rec.onstart = () => {
-    started = true;
-    if(recognition !== rec) return;
+  rec.onstart=()=>{
+    started=true;
+    if(recognition!==rec) return;
     micBtn?.classList.add("voice-active");
-    showToast("🎙️ सुन रहा हूँ… बोलिए।");
+    updateVoiceStatus("🎙️ सुन रहा हूँ… बोलिए।",true);
   };
 
-  rec.onresult = event => {
-    if(recognition !== rec) return;
-    const text = event.results?.[0]?.[0]?.transcript?.trim() || "";
-    if(text){
-      promptEl.value = text;
-      autoResize();
+  rec.onresult=event=>{
+    if(recognition!==rec) return;
+    const text=event.results?.[0]?.[0]?.transcript?.trim() || "";
+    if(!text || resultCaptured) return;
+    resultCaptured=true;
+    promptEl.value=text;
+    autoResize();
+    updateVoiceStatus("⚡ आपकी बात समझी — अपने-आप भेज रहा हूँ…",true);
+
+    // Auto-send is deliberately gated by the voice result, so manual Send
+    // remains unchanged for normal text input.
+    if(voiceAutoSendEnabled){
+      // Send immediately from the captured final transcript. Do not wait for
+      // recognition.onend(), because some browsers fire onend first and clear
+      // the recognition handle before a delayed callback can run.
+      voiceListening=false;
+      try{ rec.abort(); }catch(_){}
+      if(recognition===rec) recognition=null;
+      micBtn?.classList.remove("voice-active");
+      handleSend({fromVoice:true});
+    }else{
       promptEl.focus();
-      showToast("आवाज़ को टेक्स्ट में बदल दिया गया।");
     }
   };
 
-  rec.onerror = event => {
-    if(recognition !== rec) return;
-    const code = String(event?.error || "unknown").toLowerCase();
-    const message =
-      code === "not-allowed" || code === "service-not-allowed"
+  rec.onerror=event=>{
+    if(recognition!==rec) return;
+    const code=String(event?.error||"unknown").toLowerCase();
+    const message=
+      code==="not-allowed" || code==="service-not-allowed"
         ? "⚠️ Microphone permission की अनुमति दें।"
-        : code === "no-speech"
+        : code==="no-speech"
           ? "⚠️ कोई आवाज़ नहीं मिली। फिर से बोलें।"
-          : code === "audio-capture"
+          : code==="audio-capture"
             ? "⚠️ Microphone उपलब्ध नहीं है।"
-            : code === "network"
+            : code==="network"
               ? "⚠️ Voice service/network में समस्या है।"
-              : "⚠️ Voice Input में समस्या हुई। फिर कोशिश करें।";
+              : "⚠️ Voice Input में समस्या हुई।";
     showToast(message.replace(/^⚠️\s*/,""));
+    voiceListening=false;
+    recognition=null;
+    micBtn?.classList.remove("voice-active");
+    updateVoiceStatus("",false);
   };
 
-  rec.onend = () => {
-    if(recognition === rec) recognition = null;
+  rec.onend=()=>{
+    if(recognition===rec) recognition=null;
     micBtn?.classList.remove("voice-active");
-    if(started) setTimeout(() => { try{ promptEl.focus(); }catch(error){} }, 0);
+
+    // If no result was captured, end this one-shot voice turn cleanly.
+    if(!resultCaptured){
+      voiceListening=false;
+      updateVoiceStatus("",false);
+      if(started) setTimeout(()=>{ try{ promptEl.focus(); }catch(_){} },0);
+    }
   };
 
   try{
     rec.start();
   }catch(error){
-    if(recognition === rec) recognition = null;
+    if(recognition===rec) recognition=null;
+    voiceListening=false;
     micBtn?.classList.remove("voice-active");
+    updateVoiceStatus("",false);
     showToast("Voice Input शुरू नहीं हो सका। फिर कोशिश करें।");
   }
 }
+
 /* =========================================================
    PDF READER
 ========================================================= */
@@ -6093,7 +6216,11 @@ document.getElementById("micBtn")?.addEventListener("click",startAaruVoice);
 document.getElementById("speakBtn")?.addEventListener("click",()=>{
   voiceOutputEnabled = !voiceOutputEnabled;
   const btn = document.getElementById("speakBtn");
-  if(btn) btn.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+  if(btn){
+    btn.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+    btn.setAttribute("aria-pressed",String(voiceOutputEnabled));
+    btn.title = voiceOutputEnabled ? "Voice Output On" : "Voice Output Off";
+  }
   if(!voiceOutputEnabled && "speechSynthesis" in window){
     speechSynthesis.cancel();
   }
