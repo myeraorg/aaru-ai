@@ -7059,7 +7059,7 @@ window.AARU_ASTRA_NATIVE = Object.freeze({
 </script>
 
 
-<!-- AARU VIDEO STUDIO FINAL: 7-step production UX; Worker/API unchanged; 4/8/12 sec fixed. -->
+<!-- AARU VIDEO STUDIO 2.0 FINAL: 7-step production UX; Worker/API unchanged; 4/8/12 sec fixed. -->
 <style id="aaruVideoStudioFinalStyles">
 .aaru-vs-front-fab{position:fixed;right:18px;bottom:92px;z-index:8500;display:flex;align-items:center;gap:10px;border:1px solid rgba(20,30,50,.14);border-radius:18px;padding:12px 16px;background:#fff;color:#111;box-shadow:0 14px 38px rgba(0,0,0,.16);font:700 13px/1 system-ui,-apple-system,sans-serif;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.aaru-vs-front-fab:hover{transform:translateY(-2px);box-shadow:0 18px 46px rgba(0,0,0,.21)}.aaru-vs-front-icon{font-size:20px}.aaru-vs-front-text{display:flex;flex-direction:column;gap:3px;text-align:left}.aaru-vs-front-title{font-size:13px}.aaru-vs-front-sub{font-size:10px;font-weight:500;opacity:.58}
 .aaru-vs-overlay{position:fixed;inset:0;z-index:9900;background:rgba(15,23,42,.42);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:12px}.aaru-vs-overlay.open{display:flex}.aaru-vs-panel{width:min(1120px,100%);height:min(94dvh,900px);overflow:auto;background:#fff;color:#111827;border:1px solid #dbe2ea;border-radius:22px;box-shadow:0 28px 90px rgba(15,23,42,.24)}
@@ -7148,5 +7148,78 @@ window.AaruVideoStudio={open,close,createVideo,loadJobs,remix,playJob};
 })();
 </script>
 <!-- AARU VIDEO STUDIO FINAL END -->
+
+<!-- AARU VIDEO STUDIO 2.0 FINAL 7-STEP: workspace, versions, remix controls, prompt library, queue, organization, polish. Worker/API unchanged. -->
+<style id="aaruVideoStudio20Styles">
+.aaru-v20-bar{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.aaru-v20-btn{border:1px solid #cfd8e3;background:#fff;color:#0f172a;border-radius:10px;padding:8px 10px;cursor:pointer;font:700 11px system-ui}.aaru-v20-btn:hover{background:#eef2f7}.aaru-v20-btn.primary{background:#0f172a;color:#fff;border-color:#0f172a}.aaru-v20-btn.danger{color:#991b1b}.aaru-v20-panel{margin-top:9px;border:1px solid #dfe6ee;background:#fff;border-radius:12px;padding:10px}.aaru-v20-panel[hidden]{display:none}.aaru-v20-title{font-size:11px;font-weight:800;color:#475569;margin-bottom:7px}.aaru-v20-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.aaru-v20-item{border:1px solid #e2e8f0;border-radius:10px;padding:8px;background:#f8fafc}.aaru-v20-item strong{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.aaru-v20-meta{font-size:9px;color:#64748b;margin-top:3px;line-height:1.4}.aaru-v20-search{width:100%;box-sizing:border-box;border:1px solid #cfd8e3;border-radius:9px;padding:8px;font:inherit;margin-bottom:7px}.aaru-v20-empty{font-size:10px;color:#64748b;padding:8px;text-align:center}.aaru-v20-tag{display:inline-block;border:1px solid #d8e0e9;border-radius:999px;padding:3px 7px;margin:2px;font-size:9px;background:#fff}.aaru-v20-status{font-size:10px;color:#475569;line-height:1.45;margin-top:7px;white-space:pre-wrap}.aaru-v20-queue{display:flex;flex-direction:column;gap:6px}.aaru-v20-qitem{display:flex;align-items:center;gap:7px;border:1px solid #e2e8f0;border-radius:9px;padding:7px;background:#f8fafc}.aaru-v20-qitem span{flex:1;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.aaru-v20-qitem small{font-size:9px;color:#64748b}.aaru-v20-select{border:1px solid #cfd8e3;border-radius:9px;padding:7px;background:#fff;font:inherit}.aaru-v20-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.aaru-v20-controls button{width:100%}
+@media(max-width:760px){.aaru-v20-grid{grid-template-columns:1fr}.aaru-v20-controls{grid-template-columns:1fr 1fr}}
+</style>
+<script>
+(()=>{
+"use strict";
+function boot(){
+ const $=id=>document.getElementById(id); const prompt=$('aaruVideoPrompt'); const project=$('aaruVideoProject'); const jobs=$('aaruVideoJobs');
+ if(!prompt||!project||!jobs||document.getElementById('aaruVideo20Workspace')) return;
+ const KEY='aaru_video_studio_20';
+ const safeLoad=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(_){return{}}};
+ const safeSave=v=>{try{localStorage.setItem(KEY,JSON.stringify(v))}catch(_){}};
+ let db=safeLoad(); db.versions=Array.isArray(db.versions)?db.versions:[]; db.library=Array.isArray(db.library)?db.library:[]; db.queue=Array.isArray(db.queue)?db.queue:[]; db.tags=db.tags&&typeof db.tags==='object'?db.tags:{};
+ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const api=()=>window.AaruVideoStudio||{};
+ const params=()=>({prompt:prompt.value.trim(),model:$('aaruVideoModel')?.value||'sora-2',seconds:$('aaruVideoSeconds')?.value||'4',size:$('aaruVideoSize')?.value||'720x1280'});
+ const current=()=>{try{return JSON.parse(localStorage.getItem('aaru_video_studio_v2')||'{}').current||null}catch(_){return null}};
+ const renderVersions=filter=>{const el=$('aaruV20Versions');if(!el)return;let a=db.versions.slice().reverse();if(filter)a=a.filter(x=>(x.prompt+' '+x.id).toLowerCase().includes(filter.toLowerCase()));el.innerHTML=a.length?a.map(x=>`<div class="aaru-v20-item"><strong>${esc(x.label||x.id)}</strong><div class="aaru-v20-meta">${esc(x.id)} • ${esc(x.model||'')} • ${esc(x.seconds||'')}s • ${esc(x.size||'')}<br>${esc(x.createdAt||'')}</div><div class="aaru-v20-bar"><button class="aaru-v20-btn" data-v20-load="${esc(x.id)}">Load</button><button class="aaru-v20-btn danger" data-v20-del-version="${esc(x.id)}">Delete</button></div></div>`).join(''):'<div class="aaru-v20-empty">No saved versions yet.</div>'};
+ const renderLibrary=filter=>{const el=$('aaruV20Library');if(!el)return;let a=db.library.slice().reverse();if(filter)a=a.filter(x=>(x.prompt+' '+(x.tags||[]).join(' ')).toLowerCase().includes(filter.toLowerCase()));el.innerHTML=a.length?a.map(x=>`<div class="aaru-v20-item"><strong>${esc(x.name||'Prompt')}</strong><div class="aaru-v20-meta">${esc(x.prompt)}<br>${(x.tags||[]).map(t=>`<span class="aaru-v20-tag">${esc(t)}</span>`).join('')}</div><div class="aaru-v20-bar"><button class="aaru-v20-btn" data-v20-use-prompt="${esc(x.id)}">Use Prompt</button><button class="aaru-v20-btn danger" data-v20-del-prompt="${esc(x.id)}">Delete</button></div></div>`).join(''):'<div class="aaru-v20-empty">Prompt library is empty.</div>'};
+ const renderQueue=()=>{const el=$('aaruV20Queue');if(!el)return;el.innerHTML=db.queue.length?db.queue.map((x,i)=>`<div class="aaru-v20-qitem"><span>${esc(x.prompt)}</span><small>${esc(x.model)} • ${esc(x.seconds)}s</small><button class="aaru-v20-btn danger" data-v20-qdel="${i}">×</button></div>`).join(''):'<div class="aaru-v20-empty">Queue empty.</div>'};
+ const renderWorkspace=()=>{const el=$('aaruV20Workspace');if(!el)return;const c=current();el.innerHTML=c?.id?`<div class="aaru-v20-item"><strong>${esc(c.id)}</strong><div class="aaru-v20-meta">${esc(c.status||'')} • ${esc(c.model||'')} • ${esc(c.seconds||'')}s • ${esc(c.size||'')}<br>Current workspace video</div></div>`:'<div class="aaru-v20-empty">No active video. Create or select a video to populate the workspace.</div>'};
+ const addVersion=()=>{const c=current();if(!c?.id){alert('पहले कोई video select करें।');return}const id=c.id;db.versions=db.versions.filter(x=>x.id!==id);db.versions.push({id,prompt:c.prompt||prompt.value,model:c.model||$('aaruVideoModel')?.value,seconds:c.seconds||$('aaruVideoSeconds')?.value,size:c.size||$('aaruVideoSize')?.value,label:'Version '+(db.versions.length+1),createdAt:new Date().toLocaleString()});db.versions=db.versions.slice(-30);safeSave(db);renderVersions();renderWorkspace()};
+ const addPrompt=()=>{const q=prompt.value.trim();if(!q){alert('पहले prompt लिखें।');return}const name=window.prompt('Prompt का नाम दें:',q.slice(0,36));if(!name)return;const tags=window.prompt('Tags (comma separated):','cinematic,video')||'';db.library=db.library.filter(x=>x.prompt!==q);db.library.push({id:'p_'+Date.now(),name,prompt:q,tags:tags.split(',').map(x=>x.trim()).filter(Boolean).slice(0,8),createdAt:new Date().toLocaleString()});db.library=db.library.slice(-50);safeSave(db);renderLibrary()};
+ const addQueue=()=>{const q=params();if(!q.prompt){alert('पहले prompt लिखें।');return}db.queue.push({...q,createdAt:Date.now()});db.queue=db.queue.slice(-20);safeSave(db);renderQueue()};
+ const runQueue=async()=>{const f=api().createVideo;if(typeof f!=='function'){alert('Video engine available नहीं है।');return}if(!db.queue.length){alert('Queue empty है।');return}const item=db.queue.shift();safeSave(db);renderQueue();prompt.value=item.prompt;$('aaruVideoModel').value=item.model;$('aaruVideoSeconds').value=item.seconds;$('aaruVideoSize').value=item.size;$('aaruVideoPromptCount').textContent=prompt.value.length;await f();if(db.queue.length) setTimeout(runQueue,500)};
+ const remixPreset=(text)=>{const base=prompt.value.trim();prompt.value=(base?base+' ':'')+text;prompt.dispatchEvent(new Event('input',{bubbles:true}))};
+ const workspace=document.createElement('div');workspace.id='aaruVideo20Workspace';workspace.className='aaru-vs-card';workspace.innerHTML=`<div class="aaru-vs-label">2.0 • ADVANCED PROJECT WORKSPACE</div><div class="aaru-v20-controls"><button class="aaru-v20-btn" data-v20-action="version">💾 Save Version</button><button class="aaru-v20-btn" data-v20-action="prompt">📚 Save Prompt</button><button class="aaru-v20-btn" data-v20-action="queue">➕ Queue Job</button><button class="aaru-v20-btn primary" data-v20-action="runqueue">▶ Run Queue</button></div><div id="aaruV20Workspace" class="aaru-v20-panel"></div><div class="aaru-v20-status">Workspace keeps the current video, saved versions and queued generations together. Worker/API remains unchanged.</div>`;
+ const promptCard=prompt.closest('.aaru-vs-card'); if(promptCard) promptCard.parentNode.insertBefore(workspace,promptCard.nextElementSibling);
+ const remix=document.createElement('div');remix.className='aaru-vs-card';remix.innerHTML=`<div class="aaru-vs-label">2.0 • ADVANCED REMIX CONTROLS</div><div class="aaru-v20-bar"><button class="aaru-v20-btn" data-v20-remix="motion">🎥 More camera motion</button><button class="aaru-v20-btn" data-v20-remix="light">💡 Change lighting</button><button class="aaru-v20-btn" data-v20-remix="style">🎨 Change visual style</button><button class="aaru-v20-btn" data-v20-remix="pace">⚡ Change pacing</button><button class="aaru-v20-btn" data-v20-remix="detail">✨ Add detail</button></div><div class="aaru-v20-status">Controls build a precise remix instruction into the prompt; the existing Worker remix endpoint performs the actual generation.</div>`;
+ const previewCard=$('aaruVideoPlayer')?.closest('.aaru-vs-card');if(previewCard) previewCard.parentNode.insertBefore(remix,previewCard);
+ const library=document.createElement('div');library.className='aaru-vs-card';library.innerHTML=`<div class="aaru-vs-label">2.0 • REFERENCE & PROMPT LIBRARY</div><input class="aaru-v20-search" id="aaruV20PromptSearch" placeholder="Search saved prompts…"><div id="aaruV20Library" class="aaru-v20-grid"></div>`;
+ if(promptCard) promptCard.parentNode.insertBefore(library,workspace.nextElementSibling);
+ const versions=document.createElement('div');versions.className='aaru-vs-card';versions.innerHTML=`<div class="aaru-vs-label">2.0 • VIDEO VERSION SYSTEM</div><input class="aaru-v20-search" id="aaruV20VersionSearch" placeholder="Search versions…"><div id="aaruV20Versions" class="aaru-v20-grid"></div>`;
+ if(previewCard) previewCard.parentNode.insertBefore(versions,previewCard.nextElementSibling);
+ const queue=document.createElement('div');queue.className='aaru-vs-card';queue.innerHTML=`<div class="aaru-vs-label">2.0 • SMART JOB QUEUE</div><div id="aaruV20Queue" class="aaru-v20-queue"></div><div class="aaru-v20-bar"><button class="aaru-v20-btn primary" data-v20-action="runqueue2">▶ Run Next</button><button class="aaru-v20-btn danger" data-v20-action="clearqueue">Clear Queue</button></div>`;
+ if(jobs) jobs.parentNode.insertBefore(queue,jobs);
+ document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-v20-action]');
+  if(a){
+   const x=a.dataset.v20Action;
+   if(x==='version')addVersion();
+   if(x==='prompt')addPrompt();
+   if(x==='queue')addQueue();
+   if(x==='runqueue'||x==='runqueue2')runQueue();
+   if(x==='clearqueue'){db.queue=[];safeSave(db);renderQueue();}
+  }
+  const r=e.target.closest('[data-v20-remix]');
+  if(r){
+   const m={motion:'Increase smooth cinematic camera motion while preserving the subject and composition.',light:'Change to richer cinematic lighting with natural highlights and realistic shadows.',style:'Apply a refined cinematic visual style while preserving subject identity and scene continuity.',pace:'Adjust the pacing to feel more dynamic and purposeful with natural motion timing.',detail:'Add realistic environmental texture, fine details and richer atmosphere without changing the main subject.'};
+   remixPreset(m[r.dataset.v20Remix]||'');
+  }
+  const u=e.target.closest('[data-v20-use-prompt]');
+  if(u){const x=db.library.find(v=>v.id===u.dataset.v20UsePrompt);if(x){prompt.value=x.prompt;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();}}
+  const d=e.target.closest('[data-v20-del-prompt]');
+  if(d){db.library=db.library.filter(v=>v.id!==d.dataset.v20DelPrompt);safeSave(db);renderLibrary();}
+  const lv=e.target.closest('[data-v20-load]');
+  if(lv){const x=db.versions.find(v=>v.id===lv.dataset.v20Load);if(x){prompt.value=x.prompt||'';$('aaruVideoModel').value=x.model||'sora-2';$('aaruVideoSeconds').value=x.seconds||'4';$('aaruVideoSize').value=x.size||'720x1280';prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();}}
+  const dv=e.target.closest('[data-v20-del-version]');
+  if(dv){db.versions=db.versions.filter(v=>v.id!==dv.dataset.v20DelVersion);safeSave(db);renderVersions();}
+  const qd=e.target.closest('[data-v20-qdel]');
+  if(qd){db.queue.splice(Number(qd.dataset.v20Qdel),1);safeSave(db);renderQueue();}
+ });
+ $('aaruV20PromptSearch').addEventListener('input',e=>renderLibrary(e.target.value));$('aaruV20VersionSearch').addEventListener('input',e=>renderVersions(e.target.value));
+ renderWorkspace();renderVersions();renderLibrary();renderQueue();
+ window.AaruVideoStudio20={addVersion,addPrompt,addQueue,runQueue,renderWorkspace};
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
 </body>
 </html>
