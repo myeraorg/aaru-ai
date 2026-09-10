@@ -7472,6 +7472,44 @@ html[data-aaru-theme="light"] .support-block{background:#f8fafc;border-color:#dc
 html[data-aaru-theme="light"] .support-text{color:#475569}
 @media(max-width:600px){.aaru-account-modal,.aaru-privacy-modal{padding:19px;border-radius:19px}.aaru-modal-backdrop{padding:12px}.support-block{margin-bottom:4px}}
 </style>
+<style id="aaruPremiumAuthUX">
+html.aaru-modal-lock,body.aaru-modal-lock{overflow:hidden!important;overscroll-behavior:none!important}
+.aaru-modal-backdrop{padding:clamp(10px,3vw,24px);overscroll-behavior:contain;-webkit-tap-highlight-color:transparent}
+.aaru-modal-backdrop.open{animation:aaruBackdropIn .18s ease both}
+.aaru-account-modal,.aaru-privacy-modal{width:min(430px,calc(100vw - 24px));max-height:min(78dvh,680px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;transform:translateY(8px) scale(.985);opacity:.01;transition:transform .22s cubic-bezier(.2,.8,.2,1),opacity .16s ease,box-shadow .22s ease}
+.aaru-modal-backdrop.open .aaru-account-modal,.aaru-modal-backdrop.open .aaru-privacy-modal{transform:translateY(0) scale(1);opacity:1;box-shadow:0 28px 90px rgba(0,0,0,.48)}
+.aaru-modal-close{z-index:3;display:grid;place-items:center;width:38px;height:38px;right:10px;top:10px;border:1px solid rgba(255,255,255,.10);transition:transform .15s ease,background .15s ease}
+.aaru-modal-close:active{transform:scale(.91)}
+.aaru-account-modal h2,.aaru-privacy-modal h2{padding-right:42px}
+.aaru-account-actions button,.privacy-ok,.aaru-auth-submit,.aaru-auth-secondary{min-height:44px;touch-action:manipulation;transition:transform .15s ease,background .15s ease,border-color .15s ease,box-shadow .15s ease}
+.aaru-account-actions button:active,.privacy-ok:active,.aaru-auth-submit:active,.aaru-auth-secondary:active{transform:scale(.985)}
+.aaru-auth-real{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.10);animation:aaruAuthIn .2s ease both}
+.aaru-auth-tabs{position:sticky;top:0;z-index:2;padding-bottom:8px;background:linear-gradient(rgba(21,24,33,.98),rgba(21,24,33,.88),transparent)}
+.aaru-auth-tab{color:#fff;background:#202531;border-color:rgba(255,255,255,.10);min-height:40px}
+.aaru-auth-tab.active{color:#fff;background:#30394a;border-color:rgba(255,255,255,.22);box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.aaru-auth-form label{color:rgba(255,255,255,.72);font-size:10px}
+.aaru-auth-form input{min-height:44px;background:#10131a;color:#fff;border-color:rgba(255,255,255,.13);font-size:14px}
+.aaru-auth-form input:focus{border-color:#7aa2e8;box-shadow:0 0 0 3px rgba(96,165,250,.13)}
+.aaru-auth-submit{background:#fff;color:#111827;font-size:12px}
+.aaru-auth-secondary{background:#202531;color:#fff;border-color:rgba(255,255,255,.12)}
+.aaru-auth-user-card{background:#10131a;color:#fff;border-color:rgba(255,255,255,.10)}
+.aaru-auth-danger{color:#ffb4b4!important;border-color:rgba(248,113,113,.32)!important}
+.aaru-auth-error{font-size:10px;color:#ff9b9b}
+@keyframes aaruBackdropIn{from{opacity:.7}to{opacity:1}}
+@keyframes aaruAuthIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+html[data-aaru-theme="light"] .aaru-auth-real{background:#f8fafc;border-color:#dbe4ee}
+html[data-aaru-theme="light"] .aaru-auth-tabs{background:linear-gradient(rgba(255,255,255,.98),rgba(255,255,255,.88),transparent)}
+html[data-aaru-theme="light"] .aaru-auth-tab{color:#172033;background:#fff;border-color:#dbe4ee}
+html[data-aaru-theme="light"] .aaru-auth-tab.active{color:#172033;background:#eef4ff;border-color:#b9cff8}
+html[data-aaru-theme="light"] .aaru-auth-form label{color:#475569}
+html[data-aaru-theme="light"] .aaru-auth-form input{background:#fff;color:#111827;border-color:#cfd8e3}
+html[data-aaru-theme="light"] .aaru-auth-submit{background:#172033;color:#fff}
+html[data-aaru-theme="light"] .aaru-auth-secondary{background:#fff;color:#172033;border-color:#cfd8e3}
+html[data-aaru-theme="light"] .aaru-auth-user-card{background:#fff;color:#172033;border-color:#dbe4ee}
+html[data-aaru-theme="light"] .aaru-auth-error{color:#b42318}
+@media(max-width:600px){.aaru-modal-backdrop{align-items:flex-end;padding:8px}.aaru-account-modal,.aaru-privacy-modal{width:100%;max-height:min(72dvh,620px);border-radius:22px 22px 16px 16px;padding:16px;transform:translateY(18px)}.aaru-account-modal h2,.aaru-privacy-modal h2{font-size:20px}.aaru-account-actions{gap:7px;margin-top:11px}.aaru-account-actions button{min-height:46px}.aaru-auth-real{padding:10px;margin-top:9px}.aaru-auth-form{gap:7px}.aaru-auth-form input,.aaru-auth-submit{min-height:46px}}
+@media(prefers-reduced-motion:reduce){.aaru-modal-backdrop,.aaru-account-modal,.aaru-privacy-modal,.aaru-auth-real{animation:none!important;transition:none!important}}
+</style>
 <style id="aaruLaunchThemeStyles">
 /* The original UI is dark by default. Theme variables below make both modes explicit. */
 html[data-aaru-theme="light"],html[data-aaru-theme="light"] body{background:#f7f9fc!important;color:#172033!important}
@@ -7528,8 +7566,11 @@ html[data-aaru-theme="light"] .theme-dark-only{display:none!important}
   const accountModal=document.getElementById("accountModalBackdrop");
   const privacyModal=document.getElementById("privacyModalBackdrop");
   const status=document.getElementById("accountStatus");
-  function openModal(el){if(!el)return;el.classList.add("open");el.setAttribute("aria-hidden","false")}
-  function closeModal(el){if(!el)return;el.classList.remove("open");el.setAttribute("aria-hidden","true")}
+  let lockedModalCount=0;
+  function lockBody(){if(lockedModalCount++===0){document.documentElement.classList.add("aaru-modal-lock");document.body.classList.add("aaru-modal-lock")}}
+  function unlockBody(){lockedModalCount=Math.max(0,lockedModalCount-1);if(!lockedModalCount){document.documentElement.classList.remove("aaru-modal-lock");document.body.classList.remove("aaru-modal-lock")}}
+  function openModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.classList.add("open");el.setAttribute("aria-hidden","false");if(!wasOpen)lockBody();requestAnimationFrame(()=>el.querySelector("button,.aaru-auth-tab,input")?.focus())}
+  function closeModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.classList.remove("open");el.setAttribute("aria-hidden","true");if(wasOpen)unlockBody()}
   function guestActive(){try{return localStorage.getItem(GUEST_KEY)!=="false"}catch(_){return true}}
   function setGuest(){try{localStorage.setItem(GUEST_KEY,"true")}catch(_){} if(status)status.textContent="Guest Mode active";closeModal(accountModal);try{window.toast?.("Guest Mode चालू है")}catch(_){} }
   document.getElementById("accountBtn")?.addEventListener("click",()=>openModal(accountModal));
