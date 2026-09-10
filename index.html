@@ -1,3 +1,4 @@
+<!-- AARU RC4 CHATFIX: SAFE JSON RESPONSE MODE -->
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -5610,7 +5611,8 @@ async function sendChatRequest(){
     client_adaptive_continuity: !!adaptiveBehavior.continuity,
     client_adaptive_confidence: Number(adaptiveBehavior.confidence || .72),
     client_behavior_hint: typeof window.aaruV19GetBehaviorHint === "function" ? window.aaruV19GetBehaviorHint(adaptiveBehavior) : "",
-    stream:true,
+    // SAFE CHAT MODE: use JSON response instead of browser-side SSE parsing.
+    stream:false,
     previous_response_id:previousResponseId||undefined
   };
 
