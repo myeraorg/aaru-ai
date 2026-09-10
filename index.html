@@ -932,7 +932,7 @@ body,.app,main{
 <!-- AARU v31 FINAL REPAIRED: read-only rendering + legacy duplicate-history repair; Worker/API unchanged. -->
 </head>
 
-<body>
+<body data-aaru-booting="true">
 
 <div class="app">
 
@@ -1114,7 +1114,7 @@ accept="image/*,.pdf,application/pdf">
 
 
 <!-- AARU ACCOUNT / PRIVACY FOUNDATION -->
-<div class="aaru-modal-backdrop" id="accountModalBackdrop" aria-hidden="true">
+<div class="aaru-modal-backdrop" id="accountModalBackdrop" aria-hidden="true" hidden>
   <section class="aaru-account-modal" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
     <button class="aaru-modal-close" id="accountModalClose" type="button" aria-label="Close">×</button>
     <div class="aaru-account-icon">👤</div>
@@ -1130,7 +1130,7 @@ accept="image/*,.pdf,application/pdf">
   </section>
 </div>
 
-<div class="aaru-modal-backdrop" id="privacyModalBackdrop" aria-hidden="true">
+<div class="aaru-modal-backdrop" id="privacyModalBackdrop" aria-hidden="true" hidden>
   <section class="aaru-privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
     <button class="aaru-modal-close" id="privacyModalClose" type="button" aria-label="Close">×</button>
     <div class="aaru-account-icon">🛡️</div>
@@ -6587,7 +6587,7 @@ function recoverPage(){
 
     renderChatHistory();
 
-    updateModeButtons();
+    if(typeof updateModeButtons === "function") updateModeButtons();
 
     autoResize();
 
@@ -6782,7 +6782,7 @@ function safeInitialLoad(){
     `;
 
 
-  updateModeButtons();
+  if(typeof updateModeButtons === "function") updateModeButtons();
 
   autoResize();
 
@@ -6809,6 +6809,7 @@ function safeInitialLoad(){
 
   appReady =
     true;
+  try{document.body.dataset.aaruBooting="false";}catch(_){}
 }
 
 
@@ -7473,7 +7474,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .drawer-action-sub{display:block;font-size:9px;font-weight:500;opacity:.58;margin-top:2px}
 .support-block{margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
 .support-title{font-size:13px;font-weight:800}.support-text{margin-top:4px;font-size:10px;line-height:1.45;opacity:.65}.support-mail{display:inline-block;margin-top:7px;color:#60a5fa;text-decoration:none;font-size:11px;font-weight:800;word-break:break-word}.support-mail:hover{text-decoration:underline}
-.aaru-modal-backdrop{position:fixed;inset:0;z-index:30000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);opacity:0;visibility:hidden;pointer-events:none;transition:.18s ease}
+.aaru-modal-backdrop[hidden]{display:none!important}.aaru-modal-backdrop{position:fixed;inset:0;z-index:30000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);opacity:0;visibility:hidden;pointer-events:none;transition:.18s ease}
 .aaru-modal-backdrop.open{opacity:1;visibility:visible;pointer-events:auto}
 .aaru-account-modal,.aaru-privacy-modal{position:relative;width:min(430px,100%);border-radius:22px;padding:22px;background:#151821;color:#fff;border:1px solid rgba(255,255,255,.10);box-shadow:0 25px 80px rgba(0,0,0,.35)}
 .aaru-modal-close{position:absolute;right:12px;top:12px;width:36px;height:36px;border:0;border-radius:11px;background:#252a36;color:#fff;font-size:22px;cursor:pointer}
@@ -7586,8 +7587,8 @@ html[data-aaru-theme="light"] .theme-dark-only{display:none!important}
   let lockedModalCount=0;
   function lockBody(){if(lockedModalCount++===0){document.documentElement.classList.add("aaru-modal-lock");document.body.classList.add("aaru-modal-lock")}}
   function unlockBody(){lockedModalCount=Math.max(0,lockedModalCount-1);if(!lockedModalCount){document.documentElement.classList.remove("aaru-modal-lock");document.body.classList.remove("aaru-modal-lock")}}
-  function openModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.classList.add("open");el.setAttribute("aria-hidden","false");if(!wasOpen)lockBody();requestAnimationFrame(()=>el.querySelector("button,.aaru-auth-tab,input")?.focus())}
-  function closeModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.classList.remove("open");el.setAttribute("aria-hidden","true");if(wasOpen)unlockBody()}
+  function openModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.hidden=false;el.classList.add("open");el.setAttribute("aria-hidden","false");if(!wasOpen)lockBody();requestAnimationFrame(()=>el.querySelector("button,.aaru-auth-tab,input")?.focus())}
+  function closeModal(el){if(!el)return;const wasOpen=el.classList.contains("open");el.classList.remove("open");el.setAttribute("aria-hidden","true");el.hidden=true;if(wasOpen)unlockBody()}
   function guestActive(){try{return localStorage.getItem(GUEST_KEY)!=="false"}catch(_){return true}}
   function setGuest(){try{localStorage.setItem(GUEST_KEY,"true")}catch(_){} if(status)status.textContent="Guest Mode active";closeModal(accountModal);try{window.toast?.("Guest Mode चालू है")}catch(_){} }
   document.getElementById("accountBtn")?.addEventListener("click",()=>openModal(accountModal));
