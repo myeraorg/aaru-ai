@@ -5537,7 +5537,10 @@ async function sendChatRequest(){
 
   const relevantMemory=getRelevantMemory(currentQuery);
   const interaction=getAaruInteractionProfile(currentQuery);
-const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
+  const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function"
+    ? window.aaruV9BuildConversationState(messages,currentQuery)
+    : window.aaruV8GetTopicState(messages,currentQuery));
+  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
   const multimodalState=(typeof window.aaruV13BuildMultimodalState === "function"
     ? window.aaruV13BuildMultimodalState({
         query:currentQuery,
@@ -5560,7 +5563,6 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
   const persistentBridge=(typeof window.aaruV10BuildContextBridge === "function"
     ? window.aaruV10BuildContextBridge(currentChatId,messages,currentQuery)
     : {summary:"",topics:"",recentTurns:[],mode:"none"});
-  const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function" ? window.aaruV9BuildConversationState(messages,currentQuery) : window.aaruV8GetTopicState(messages,currentQuery));
   const fastConversation=interaction.mode==="fast" && !shouldUseDeepContext(currentQuery) && !adaptiveTopic.continuity;
   const adaptiveMessages=(typeof window.aaruV9SelectLongContext === "function" ? window.aaruV9SelectLongContext(messages,currentQuery) : window.aaruV8BuildAdaptiveContext(messages,currentQuery));
   const contextMessages=fastConversation
