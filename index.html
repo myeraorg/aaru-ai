@@ -5123,6 +5123,15 @@ function normalizeChatResult(
       image:
         image,
 
+      fallback:
+        data?.fallback === true,
+
+      fallback_provider:
+        data?.fallback_provider || null,
+
+      fallback_reason:
+        data?.fallback_reason || null,
+
       memory_updates:
         Array.isArray(data.memory_updates) ? data.memory_updates : [],
 
@@ -5644,10 +5653,16 @@ const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!s
     error.code=data?.code||data?.error?.code||null;
     throw error;
   }
-  const normalized=normalizeChatResult(data); const nextResponseId=data?.response_id||data?.id||null;
+  const normalized=normalizeChatResult(data);
+  const nextResponseId=data?.fallback===true ? null : (data?.response_id||data?.id||null);
   if(nextResponseId){previousResponseId=String(nextResponseId).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;}
   lastToolsUsed=Array.isArray(data?.tools_used)?data.tools_used:[];
-  if(!normalized?.text&&!normalized?.image)throw new Error("Aaru ने खाली response दिया।"); return normalized;
+  if(!normalized?.text&&!normalized?.image){
+    const fallbackText=data?.reply||data?.response||data?.text||"";
+    if(fallbackText){normalized.text=cleanAaruText(fallbackText);}
+  }
+  if(!normalized?.text&&!normalized?.image)throw new Error("Aaru ने खाली response दिया।");
+  return normalized;
 }
 
 /* =========================================================
@@ -5832,7 +5847,7 @@ async function handleSend(options={}){
     hideTyping();
 
     const rawError=String(error?.message||"");
-    const quotaError=Number(error?.status||0)===429 || /(quota|credit|billing|insufficient|exceeded.*(quota|limit)|rate.?limit)/i.test(rawError);
+    const quotaError=Number(error?.status||0)===402 || Number(error?.status||0)===429 || /(quota|credit|billing|insufficient|exhausted|balance|payment required|exceeded.*(quota|limit)|rate.?limit)/i.test(rawError);
     const networkError=error?.name === "TypeError" || /network|failed to fetch|load failed|offline/i.test(rawError);
     const timeoutError=error?.name === "AbortError";
 
