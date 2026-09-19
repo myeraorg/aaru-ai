@@ -5112,7 +5112,11 @@ function normalizeChatResult(
       );
 
 
-    applyWorkerMemoryResponse(data);
+    try{
+      applyWorkerMemoryResponse(data);
+    }catch(memoryError){
+      console.warn("Aaru memory response skipped:", memoryError);
+    }
 
     return {
 
