@@ -1563,6 +1563,9 @@ window.addEventListener("pagehide",aaruLifecycleSave);
 const API =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
+const AARU_HTML_BUILD =
+  "CORS-READY-REVERIFIED-2026-09-22";
+
 
 const CHAT_LIST_KEY =
   "aaru_chat_history_v2";
@@ -5112,6 +5115,7 @@ function normalizeChatResult(
       );
 
 
+    /* Worker memory must never be able to break a successful chat response. */
     try{
       applyWorkerMemoryResponse(data);
     }catch(memoryError){
@@ -5477,8 +5481,13 @@ async function fetchChatWithRecovery(payload){
       const response =
         await fetch(API + "chat",{
           method:"POST",
+          mode:"cors",
           credentials:"include",
-          headers:{"Content-Type":"application/json"},
+          cache:"no-store",
+          headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          },
           body:JSON.stringify(payload),
           signal:controller.signal
         });
@@ -5545,18 +5554,18 @@ async function sendChatRequest(){
   const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function"
     ? window.aaruV9BuildConversationState(messages,currentQuery)
     : window.aaruV8GetTopicState(messages,currentQuery));
-  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoBase64,!!selectedDocumentText);
+  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
   const multimodalState=(typeof window.aaruV13BuildMultimodalState === "function"
     ? window.aaruV13BuildMultimodalState({
         query:currentQuery,
-        hasImage:!!selectedPhotoBase64,
+        hasImage:!!selectedPhotoDataURL,
         hasPDF:!!selectedDocumentText,
         followup:interaction.followup || adaptiveTopic.followup
       })
     : {mode:"text",attachment:"",followup:false,continuity:false});
   const taskPlan=(typeof window.aaruV14BuildTaskPlan === "function"
     ? window.aaruV14BuildTaskPlan(currentQuery,{
-        hasImage:!!selectedPhotoBase64,
+        hasImage:!!selectedPhotoDataURL,
         hasPDF:!!selectedDocumentText,
         multimodalMode:multimodalState.mode
       })
