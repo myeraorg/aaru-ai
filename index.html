@@ -467,7 +467,7 @@ main{
   position:fixed;
   left:0;
   right:0;
-  bottom:var(--aaru-keyboard-offset,0px);
+  bottom:0;
   z-index:120;
   padding:8px 10px calc(8px + env(safe-area-inset-bottom));
   background:linear-gradient(
@@ -838,14 +838,6 @@ body,.app,main{
 
 .composer-shell{
   background:#000 !important;
-  position:fixed !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:var(--aaru-keyboard-offset,0px) !important;
-  width:100% !important;
-  transform:translateZ(0);
-  -webkit-transform:translateZ(0);
-  contain:layout paint;
 }
 
 .composer{
@@ -3204,20 +3196,24 @@ function removeStreamingMessage(){const item=document.getElementById("streamingM
 ========================================================= */
 
 function scrollBottom(){
-  requestAnimationFrame(() => {
-    try{
-      const last = messagesEl?.lastElementChild;
-      if(last){
-        last.scrollIntoView({behavior:"smooth",block:"end"});
-      }else{
-        window.scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"});
-      }
-    }catch(error){
+
+  requestAnimationFrame(
+    () => {
+
       try{
-        window.scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"});
-      }catch(_){}
+
+        window.scrollTo({
+          top:
+            document.documentElement
+              .scrollHeight,
+
+          behavior:
+            "smooth"
+        });
+
+      }catch(error){}
     }
-  });
+  );
 }
 
 
@@ -5116,7 +5112,11 @@ function normalizeChatResult(
       );
 
 
-    applyWorkerMemoryResponse(data);
+    try{
+      applyWorkerMemoryResponse(data);
+    }catch(memoryError){
+      console.warn("Aaru memory response skipped:", memoryError);
+    }
 
     return {
 
@@ -5545,18 +5545,18 @@ async function sendChatRequest(){
   const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function"
     ? window.aaruV9BuildConversationState(messages,currentQuery)
     : window.aaruV8GetTopicState(messages,currentQuery));
-  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
+  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoBase64,!!selectedDocumentText);
   const multimodalState=(typeof window.aaruV13BuildMultimodalState === "function"
     ? window.aaruV13BuildMultimodalState({
         query:currentQuery,
-        hasImage:!!selectedPhotoDataURL,
+        hasImage:!!selectedPhotoBase64,
         hasPDF:!!selectedDocumentText,
         followup:interaction.followup || adaptiveTopic.followup
       })
     : {mode:"text",attachment:"",followup:false,continuity:false});
   const taskPlan=(typeof window.aaruV14BuildTaskPlan === "function"
     ? window.aaruV14BuildTaskPlan(currentQuery,{
-        hasImage:!!selectedPhotoDataURL,
+        hasImage:!!selectedPhotoBase64,
         hasPDF:!!selectedDocumentText,
         multimodalMode:multimodalState.mode
       })
@@ -5686,8 +5686,8 @@ function getCreatorAttributionResponse(query){
   const q=String(query||"").toLowerCase().trim();
   if(!q) return null;
   const compact=q.replace(/[\u200c\u200d\u200b]/g,"").replace(/[?؟!।,.，。！？]+/g," ").replace(/\s+/g," ").trim();
-  const hasSelf=/(\b(you|u|your|yourself|aaru|ai|bot|assistant|tum|tumhe|tumko|tumne|aap|aapko|aapne|tumhara|tumhari|aapka|aapki)\b|तुम|आप|तुम्हारा|आपका|तुमको|आपको|तुम्हें|मुझे|आय़रू|aaru)/i.test(compact);
-  const creatorIntent=/(\bwho\s+(?:made|make|created|create|built|build|developed|designed|invented|authored)\b|\bwho\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\bwhat\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:made|created|built|developed|designed|invented)\s+by\b|who\s+madeby|who\s+make\s+you|who\s+made\s+you|who\s+created\s+you|who\s+built\s+you|who\s+developed\s+you|who\s+designed\s+you|tumhe\s+kisne\s+banaya|tumhe\s+kisne\s+bnaya|tumko\s+kisne\s+banaya|tumko\s+kisne\s+bnaya|aapko\s+kisne\s+banaya|aapko\s+kisne\s+bnaya|tumne\s+kisne\s+banaya|kisne\s+banaya\s+hai|kisne\s+banaya|तुम्हें किसने बनाया|तुमको किसने बनाया|आपको किसने बनाया|आपको किसने बनाया है|तुम्हें किसने बनाया है|तुम्हारा निर्माता कौन|आपका निर्माता कौन|तुम्हारा रचयिता कौन|आपका रचयिता कौन|तुम्हारा बनाने वाला कौन|आपका बनाने वाला कौन|किसने बनाया|किसने बनाया है|किसने बनाया था|निर्माता कौन|बनाने वाला कौन|बनाया किसने|कोण बनवलं|कोणी बनवलं|কে বানিয়েছে|কে তোমাকে বানিয়েছে|কে আপনাকে বানিয়েছে|કોણે બનાવ્યું|તમને કોણે બનાવ્યા|யார் உன்னை உருவாக்கினார்|உன்னை யார் உருவாக்கினார்|ఎవరు నిన్ను తయారు చేశారు|ನಿನ್ನನ್ನು ಯಾರು ತಯಾರಿಸಿದರು|ನಿನ್ನನ್ನು ಯಾರು ನಿರ್ಮಿಸಿದರು|നിന്നെ ആരാണ് ഉണ്ടാക്കിയത്|ਤੁਹਾਨੂੰ ਕਿਸਨੇ ਬਣਾਇਆ|کس نے بنایا|آپ کو کس نے بنایا|من صنعك|من أنشأك|من طورك|кто тебя создал|кто тебя сделал|кто разработал|кто тебя разработал|誰があなたを作った|あなたを誰が作った|誰があなたを開発した|누가 너를 만들었|谁创造了你|谁制作了你|谁开发了你|quem criou você|quem te criou|quem fez você|qui t a créé|qui t'a créé|wer hat dich gemacht|wer hat dich erstellt|quién te creó|quién te hizo|quien te creo)/i.test(compact);
+  const hasSelf=/(\b(you|u|your|yourself|aaru|ai|bot|assistant)\b|तुम|आप|तुम्हारा|आपका|तुमको|आपको|तुम्हें|मुझे|आय़रू|aaru)/i.test(compact);
+  const creatorIntent=/(\bwho\s+(?:made|make|created|create|built|build|developed|designed|invented|authored)\b|\bwho\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\bwhat\s+(?:is|was)\s+(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:your|the)\s+(?:creator|maker|developer|owner|inventor|designer|author)\b|\b(?:made|created|built|developed|designed|invented)\s+by\b|who\s+madeby|who\s+make\s+you|who\s+made\s+you|who\s+created\s+you|who\s+built\s+you|who\s+developed\s+you|who\s+designed\s+you|तुम्हें किसने बनाया|तुमको किसने बनाया|आपको किसने बनाया|आपको किसने बनाया है|तुम्हें किसने बनाया है|तुम्हारा निर्माता कौन|आपका निर्माता कौन|तुम्हारा रचयिता कौन|आपका रचयिता कौन|तुम्हारा बनाने वाला कौन|आपका बनाने वाला कौन|किसने बनाया|किसने बनाया है|किसने बनाया था|निर्माता कौन|बनाने वाला कौन|बनाया किसने|कोण बनवलं|कोणी बनवलं|কে বানিয়েছে|কে তোমাকে বানিয়েছে|কে আপনাকে বানিয়েছে|કોણે બનાવ્યું|તમને કોણે બનાવ્યા|யார் உன்னை உருவாக்கினார்|உன்னை யார் உருவாக்கினார்|ఎవరు నిన్ను తయారు చేశారు|ನಿನ್ನನ್ನು ಯಾರು ತಯಾರಿಸಿದರು|ನಿನ್ನನ್ನು ಯಾರು ನಿರ್ಮಿಸಿದರು|നിന്നെ ആരാണ് ഉണ്ടാക്കിയത്|ਤੁਹਾਨੂੰ ਕਿਸਨੇ ਬਣਾਇਆ|کس نے بنایا|آپ کو کس نے بنایا|من صنعك|من أنشأك|من طورك|кто тебя создал|кто тебя сделал|кто разработал|кто тебя разработал|誰があなたを作った|あなたを誰が作った|誰があなたを開発した|누가 너를 만들었|谁创造了你|谁制作了你|谁开发了你|quem criou você|quem te criou|quem fez você|qui t a créé|qui t'a créé|wer hat dich gemacht|wer hat dich erstellt|quién te creó|quién te hizo|quien te creo)/i.test(compact);
   if(creatorIntent && (hasSelf || /\b(who made|who make|who created|who create|who built|who build|creator|maker)\b/i.test(compact) || /किसने बनाया|निर्माता|रचयिता|बनाने वाला|কে বানিয়েছে|કોણે બનાવ્યું|யார்|ఎవరు|ಯಾರು|ആരാണ്|ਕਿਸਨੇ|کس نے|من صنعك|кто|誰|누가|谁|quem|qui|wer hat|quién|quien/i.test(compact))){
     return "मुझे अभिषेक त्रिपाठी जी बिहार वाले ने बनाया है।";
   }
@@ -5723,44 +5723,6 @@ async function handleSend(options={}){
     return;
   }
 
-  const displayPrompt = prompt || (hasDocument ? "इस PDF को पढ़कर समझाइए।" : "इस तस्वीर को समझाइए।");
-
-  /* Creator attribution is deliberately resolved before chat state/network work.
-     This guarantees typed attribution questions work even when the Worker/API fails. */
-  let creatorReply = null;
-  try{
-    creatorReply = getCreatorAttributionResponse(displayPrompt);
-  }catch(_){
-    creatorReply = null;
-  }
-
-  if(creatorReply && !hasPhoto && !hasDocument){
-    try{
-      ensureCurrentChat();
-      isBusy = true;
-      sendBtn.disabled = true;
-      addUserMessage(displayPrompt,false,null);
-      saveCurrentChat();
-      addAssistantMessage(creatorReply,true);
-      if(voiceOutputEnabled) speakAaru(creatorReply);
-      promptEl.value="";
-      autoResize();
-      clearSelectedPhoto();
-      scrollBottom();
-    }catch(error){
-      console.warn("Local creator reply recovery:",error);
-    }finally{
-      isBusy=false;
-      sendBtn.disabled=false;
-      if(fromVoice){
-        voiceListening=false;
-        updateVoiceStatus("",false);
-      }
-      try{ promptEl.focus(); }catch(_){}
-    }
-    return;
-  }
-
   ensureCurrentChat();
 
   isBusy =
@@ -5776,11 +5738,30 @@ async function handleSend(options={}){
     promptEl.value = "इस PDF को पढ़कर समझाइए।";
   }
 
+  const displayPrompt = prompt || (hasDocument ? "इस PDF को पढ़कर समझाइए।" : "इस तस्वीर को समझाइए।");
+
   addUserMessage(
     displayPrompt,
     false,
     attachedPhoto
   );
+
+  /* Creator attribution is a local, zero-credit response. */
+  const creatorReply=getCreatorAttributionResponse(displayPrompt);
+  if(creatorReply && !hasPhoto && !hasDocument){
+    saveCurrentChat();
+    addAssistantMessage(creatorReply,true);
+    if(voiceOutputEnabled && creatorReply) speakAaru(creatorReply);
+    promptEl.value="";
+    autoResize();
+    clearSelectedPhoto();
+    isBusy=false;
+    sendBtn.disabled=false;
+    if(fromVoice){ voiceListening=false; updateVoiceStatus("",false); }
+    scrollBottom();
+    try{ promptEl.focus(); }catch(_){}
+    return;
+  }
 
   if(isForgetMemoryCommand(displayPrompt)){
     const target=getForgetTarget(displayPrompt);
@@ -5913,31 +5894,6 @@ async function handleSend(options={}){
   }
 }
 
-
-/* =========================================================
-   MOBILE VIEWPORT / FIXED COMPOSER
-========================================================= */
-(function(){
-  const root=document.documentElement;
-  function syncComposerViewport(){
-    try{
-      const vv=window.visualViewport;
-      if(!vv){
-        root.style.setProperty("--aaru-keyboard-offset","0px");
-        return;
-      }
-      const offset=Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      root.style.setProperty("--aaru-keyboard-offset", Math.round(offset)+"px");
-    }catch(_){}
-  }
-  syncComposerViewport();
-  window.addEventListener("resize",syncComposerViewport,{passive:true});
-  window.addEventListener("orientationchange",()=>setTimeout(syncComposerViewport,120),{passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener("resize",syncComposerViewport,{passive:true});
-    window.visualViewport.addEventListener("scroll",syncComposerViewport,{passive:true});
-  }
-})();
 
 /* =========================================================
    TEXTAREA
