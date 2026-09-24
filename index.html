@@ -1563,9 +1563,6 @@ window.addEventListener("pagehide",aaruLifecycleSave);
 const API =
   "https://aaru-ai-api.myera-org.workers.dev/";
 
-const AARU_HTML_BUILD =
-  "CORS-READY-REVERIFIED-2026-09-22";
-
 
 const CHAT_LIST_KEY =
   "aaru_chat_history_v2";
@@ -5115,7 +5112,6 @@ function normalizeChatResult(
       );
 
 
-    /* Worker memory must never be able to break a successful chat response. */
     try{
       applyWorkerMemoryResponse(data);
     }catch(memoryError){
@@ -5481,13 +5477,8 @@ async function fetchChatWithRecovery(payload){
       const response =
         await fetch(API + "chat",{
           method:"POST",
-          mode:"cors",
           credentials:"include",
-          cache:"no-store",
-          headers:{
-            "Content-Type":"application/json",
-            "Accept":"application/json"
-          },
+          headers:{"Content-Type":"application/json"},
           body:JSON.stringify(payload),
           signal:controller.signal
         });
@@ -5529,156 +5520,316 @@ async function fetchChatWithRecovery(payload){
 
 
 async function sendChatRequest(){
-
-  const recentMessages =
-    messages.slice(-MAX_CONTEXT_MESSAGES).map(item => ({
-      role:item.role === "user" ? "user" : "assistant",
-      content:cleanAaruText(
-        String(item.content || "")
-      ).slice(0,MAX_MESSAGE_CHARS)
-    }));
-
-  const lastUserMessage =
-    messages.slice().reverse().find(item => item.role === "user");
-
-  const currentQuery =
-    cleanAaruText(lastUserMessage?.content || "");
-
-  const adaptiveBehavior=(typeof window.aaruV19GetAdaptiveProfile === "function"
-    ? window.aaruV19GetAdaptiveProfile(currentQuery,messages)
-    : {verbosity:"balanced",tone:"natural",reasoning:"auto",continuity:false,confidence:.72});
-  window.AARU_V19_LAST_PROFILE=adaptiveBehavior;
-
-  const relevantMemory=getRelevantMemory(currentQuery);
-  const interaction=getAaruInteractionProfile(currentQuery);
-  const adaptiveTopic=(typeof window.aaruV9BuildConversationState === "function"
-    ? window.aaruV9BuildConversationState(messages,currentQuery)
-    : window.aaruV8GetTopicState(messages,currentQuery));
-  const toolPlan=window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoDataURL,!!selectedDocumentText);
-  const multimodalState=(typeof window.aaruV13BuildMultimodalState === "function"
-    ? window.aaruV13BuildMultimodalState({
-        query:currentQuery,
-        hasImage:!!selectedPhotoDataURL,
-        hasPDF:!!selectedDocumentText,
-        followup:interaction.followup || adaptiveTopic.followup
-      })
-    : {mode:"text",attachment:"",followup:false,continuity:false});
-  const taskPlan=(typeof window.aaruV14BuildTaskPlan === "function"
-    ? window.aaruV14BuildTaskPlan(currentQuery,{
-        hasImage:!!selectedPhotoDataURL,
-        hasPDF:!!selectedDocumentText,
-        multimodalMode:multimodalState.mode
-      })
-    : {active:false,complexity:"simple",steps:[],strategy:"direct",modelMayReplan:true});
-  const workflowState=(typeof window.aaruV15PrepareExecution === "function"
-    ? window.aaruV15PrepareExecution(currentQuery,taskPlan)
-    : null);
-  window.AARU_V15_LAST_WORKFLOW=workflowState;
-  const persistentBridge=(typeof window.aaruV10BuildContextBridge === "function"
-    ? window.aaruV10BuildContextBridge(currentChatId,messages,currentQuery)
-    : {summary:"",topics:"",recentTurns:[],mode:"none"});
-  const fastConversation=interaction.mode==="fast" && !shouldUseDeepContext(currentQuery) && !adaptiveTopic.continuity;
-  const adaptiveMessages=(typeof window.aaruV9SelectLongContext === "function" ? window.aaruV9SelectLongContext(messages,currentQuery) : window.aaruV8BuildAdaptiveContext(messages,currentQuery));
-  const contextMessages=fastConversation
-    ? recentMessages.slice(-12)
-    : adaptiveMessages.map(item => ({
-        role:item.role === "user" ? "user" : "assistant",
-        content:cleanAaruText(String(item.content||"")).slice(0,MAX_MESSAGE_CHARS)
-      }));
-  const adaptiveMemory=fastConversation
-    ? ""
-    : (typeof window.aaruV9CompactText === "function"
-      ? window.aaruV9CompactText(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS)
-      : window.aaruV8CompactMemory(memorySummary||buildMemorySummaryFromSemanticMemory(semanticMemory)||buildMemorySummary(messages),MAX_MEMORY_SUMMARY_CHARS));
-  const payload={
-    message:currentQuery,
-    messages:contextMessages,
-    memory_summary:adaptiveMemory,
-    relevant_memory:fastConversation?"":relevantMemory,
-    reasoning_effort:interaction.mode==="deep" || adaptiveTopic.continuity ? ASTRA_REASONING_EFFORT : getConversationReasoningEffort(currentQuery),
-    client_intent:interaction.intent,
-    client_followup:interaction.followup || adaptiveTopic.followup,
-    client_tool_hint:interaction.tool_hint,
-    client_tool_plan:window.aaruV12ToolHint(toolPlan),
-    client_task_plan:typeof window.aaruV14CompactTaskPlan === "function" ? window.aaruV14CompactTaskPlan(taskPlan) : "",
-    client_task_complexity:taskPlan.complexity,
-    client_task_strategy:taskPlan.strategy,
-    client_task_active:!!taskPlan.active,
-    client_task_model_replan:taskPlan.modelMayReplan!==false,
-    client_workflow_version:window.AARU_V15_VERSION||"",
-    client_workflow_state:typeof window.aaruV15CompactState === "function" ? window.aaruV15CompactState(workflowState) : "",
-    client_workflow_execution:typeof window.aaruV15GetExecutionHint === "function" ? window.aaruV15GetExecutionHint(workflowState) : "",
-    client_multimodal_mode:multimodalState.mode,
-    client_attachment_type:multimodalState.attachment||"",
-    client_topic:adaptiveTopic.topic.join(" ").slice(0,500),
-    client_context_mode:fastConversation ? "fast" : (adaptiveTopic.continuity ? "continuity" : "adaptive"),
-    client_context_count:contextMessages.length,
-    client_persistent_state: persistentBridge.mode,
-    client_persistent_topics: persistentBridge.topics,
-    client_persistent_summary: fastConversation ? "" : persistentBridge.summary,
-    client_persistent_message_count: persistentBridge.messageCount || messages.length,
-    client_adaptive_version: window.AARU_V19_VERSION || "",
-    client_adaptive_verbosity: adaptiveBehavior.verbosity,
-    client_adaptive_tone: adaptiveBehavior.tone,
-    client_adaptive_reasoning: adaptiveBehavior.reasoning,
-    client_adaptive_continuity: !!adaptiveBehavior.continuity,
-    client_adaptive_confidence: Number(adaptiveBehavior.confidence || .72),
-    client_behavior_hint: typeof window.aaruV19GetBehaviorHint === "function" ? window.aaruV19GetBehaviorHint(adaptiveBehavior) : "",
-    // SAFE CHAT MODE: use JSON response instead of browser-side SSE parsing.
-    stream:false,
-    previous_response_id:previousResponseId||undefined
+  /*
+    RC5 CHAT RECOVERY:
+    Keep the full /chat contract, but isolate optional client-side
+    learning/planning modules so one broken enhancement cannot prevent
+    the actual Worker POST request from being sent.
+  */
+  const safe = (fn, fallback) => {
+    try{
+      const value = fn();
+      return value === undefined || value === null ? fallback : value;
+    }catch(error){
+      console.warn("Aaru optional client module skipped:", error);
+      return fallback;
+    }
   };
 
-  if(selectedPhotoBase64){
-    payload.image_b64 =
-      await resizeImageDataURL(
-        selectedPhotoBase64,
-        MAX_MODEL_IMAGE_SIZE,
-        .76
-      );
-  }else{
-    const latestEditReference =
-      await getLatestCreationReference(currentQuery);
+  const recentMessages = messages.slice(-MAX_CONTEXT_MESSAGES).map(item => ({
+    role:item.role === "user" ? "user" : "assistant",
+    content:cleanAaruText(String(item.content || "")).slice(0,MAX_MESSAGE_CHARS)
+  }));
 
-    if(latestEditReference){
-      payload.image_b64 =
-        await resizeImageDataURL(
-          latestEditReference,
-          MAX_MODEL_IMAGE_SIZE,
-          .76
-        );
+  const lastUserMessage = messages.slice().reverse().find(item => item.role === "user");
+  const currentQuery = cleanAaruText(lastUserMessage?.content || "");
+
+  /* Core values are deliberately simple and cannot block the request. */
+  let interaction = {
+    intent:"chat",
+    mode:"normal",
+    followup:false,
+    tool_hint:"none"
+  };
+  let adaptiveBehavior = {
+    verbosity:"balanced",
+    tone:"natural",
+    reasoning:"auto",
+    continuity:false,
+    confidence:.72
+  };
+  let adaptiveTopic = {
+    topic:[],
+    followup:false,
+    continuity:false
+  };
+  let relevantMemory = "";
+  let toolPlan = null;
+  let multimodalState = {
+    mode:selectedPhotoBase64 ? "image" : (selectedDocumentText ? "document" : "text"),
+    attachment:selectedPhotoBase64 ? "image" : (selectedDocumentText ? "pdf" : ""),
+    followup:false,
+    continuity:false
+  };
+  let taskPlan = {
+    active:false,
+    complexity:"simple",
+    steps:[],
+    strategy:"direct",
+    modelMayReplan:true
+  };
+  let workflowState = null;
+  let persistentBridge = {
+    summary:"",
+    topics:"",
+    recentTurns:[],
+    mode:"none",
+    messageCount:messages.length
+  };
+
+  /* Optional modules: never allowed to stop the real network request. */
+  if(typeof window.aaruV19GetAdaptiveProfile === "function"){
+    adaptiveBehavior=safe(
+      () => window.aaruV19GetAdaptiveProfile(currentQuery,messages),
+      adaptiveBehavior
+    ) || adaptiveBehavior;
+  }
+
+  interaction=safe(
+    () => getAaruInteractionProfile(currentQuery),
+    interaction
+  ) || interaction;
+
+  if(typeof window.aaruV9BuildConversationState === "function"){
+    adaptiveTopic=safe(
+      () => window.aaruV9BuildConversationState(messages,currentQuery),
+      adaptiveTopic
+    ) || adaptiveTopic;
+  }else if(typeof window.aaruV8GetTopicState === "function"){
+    adaptiveTopic=safe(
+      () => window.aaruV8GetTopicState(messages,currentQuery),
+      adaptiveTopic
+    ) || adaptiveTopic;
+  }
+
+  relevantMemory=safe(
+    () => getRelevantMemory(currentQuery),
+    ""
+  ) || "";
+
+  if(typeof window.aaruV12GetToolPlan === "function"){
+    toolPlan=safe(
+      () => window.aaruV12GetToolPlan(currentQuery,!!selectedPhotoBase64,!!selectedDocumentText),
+      null
+    );
+  }
+
+  if(typeof window.aaruV13BuildMultimodalState === "function"){
+    multimodalState=safe(
+      () => window.aaruV13BuildMultimodalState({
+        query:currentQuery,
+        hasImage:!!selectedPhotoBase64,
+        hasPDF:!!selectedDocumentText,
+        followup:!!interaction.followup || !!adaptiveTopic.followup
+      }),
+      multimodalState
+    ) || multimodalState;
+  }
+
+  if(typeof window.aaruV14BuildTaskPlan === "function"){
+    taskPlan=safe(
+      () => window.aaruV14BuildTaskPlan(currentQuery,{
+        hasImage:!!selectedPhotoBase64,
+        hasPDF:!!selectedDocumentText,
+        multimodalMode:multimodalState.mode
+      }),
+      taskPlan
+    ) || taskPlan;
+  }
+
+  if(typeof window.aaruV15PrepareExecution === "function"){
+    workflowState=safe(
+      () => window.aaruV15PrepareExecution(currentQuery,taskPlan),
+      null
+    );
+  }
+
+  if(typeof window.aaruV10BuildContextBridge === "function"){
+    persistentBridge=safe(
+      () => window.aaruV10BuildContextBridge(currentChatId,messages,currentQuery),
+      persistentBridge
+    ) || persistentBridge;
+  }else if(typeof window.aaruV8GetTopicState === "function"){
+    persistentBridge=safe(
+      () => window.aaruV8GetTopicState(messages,currentQuery),
+      persistentBridge
+    ) || persistentBridge;
+  }
+
+  const fastConversation =
+    interaction.mode === "fast" &&
+    !safe(() => shouldUseDeepContext(currentQuery),true) &&
+    !adaptiveTopic.continuity;
+
+  let adaptiveMessages = recentMessages;
+  if(!fastConversation){
+    if(typeof window.aaruV9SelectLongContext === "function"){
+      adaptiveMessages=safe(
+        () => window.aaruV9SelectLongContext(messages,currentQuery),
+        messages
+      ) || messages;
+    }else if(typeof window.aaruV8BuildAdaptiveContext === "function"){
+      adaptiveMessages=safe(
+        () => window.aaruV8BuildAdaptiveContext(messages,currentQuery),
+        messages
+      ) || messages;
     }
   }
 
-  if(selectedDocumentText){
-    payload.document_text =
-      selectedDocumentText.slice(0,90000);
+  const contextMessages = fastConversation
+    ? recentMessages.slice(-12)
+    : (Array.isArray(adaptiveMessages) ? adaptiveMessages : messages)
+        .map(item => ({
+          role:item.role === "user" ? "user" : "assistant",
+          content:cleanAaruText(String(item.content || "")).slice(0,MAX_MESSAGE_CHARS)
+        }));
+
+  const adaptiveMemory = fastConversation
+    ? ""
+    : safe(
+        () => typeof window.aaruV9CompactText === "function"
+          ? window.aaruV9CompactText(
+              memorySummary || buildMemorySummaryFromSemanticMemory(semanticMemory) || buildMemorySummary(messages),
+              MAX_MEMORY_SUMMARY_CHARS
+            )
+          : (typeof window.aaruV8CompactMemory === "function"
+              ? window.aaruV8CompactMemory(
+                  memorySummary || buildMemorySummaryFromSemanticMemory(semanticMemory) || buildMemorySummary(messages),
+                  MAX_MEMORY_SUMMARY_CHARS
+                )
+              : String(memorySummary || "").slice(0,MAX_MEMORY_SUMMARY_CHARS)),
+        ""
+      ) || "";
+
+  const reasoningEffort = safe(
+    () => interaction.mode === "deep" || adaptiveTopic.continuity
+      ? ASTRA_REASONING_EFFORT
+      : getConversationReasoningEffort(currentQuery),
+    ASTRA_NORMAL_REASONING_EFFORT
+  );
+
+  /*
+    IMPORTANT: payload construction itself is now guarded. Even if an
+    optional enhancement is malformed, the Worker POST still happens.
+  */
+  const payload = {
+    message:currentQuery,
+    messages:contextMessages,
+    memory_summary:adaptiveMemory,
+    relevant_memory:fastConversation ? "" : relevantMemory,
+    reasoning_effort:reasoningEffort,
+    client_intent:interaction.intent || "chat",
+    client_followup:!!interaction.followup || !!adaptiveTopic.followup,
+    client_tool_hint:interaction.tool_hint || "none",
+    client_tool_plan:safe(
+      () => typeof window.aaruV12ToolHint === "function" ? window.aaruV12ToolHint(toolPlan) : "",
+      ""
+    ),
+    client_task_plan:safe(
+      () => typeof window.aaruV14CompactTaskPlan === "function" ? window.aaruV14CompactTaskPlan(taskPlan) : "",
+      ""
+    ),
+    client_task_complexity:taskPlan.complexity || "simple",
+    client_task_strategy:taskPlan.strategy || "direct",
+    client_task_active:!!taskPlan.active,
+    client_task_model_replan:taskPlan.modelMayReplan !== false,
+    client_workflow_version:window.AARU_V15_VERSION || "",
+    client_workflow_state:safe(
+      () => typeof window.aaruV15CompactState === "function" ? window.aaruV15CompactState(workflowState) : "",
+      ""
+    ),
+    client_workflow_execution:safe(
+      () => typeof window.aaruV15GetExecutionHint === "function" ? window.aaruV15GetExecutionHint(workflowState) : "",
+      ""
+    ),
+    client_multimodal_mode:multimodalState.mode || "text",
+    client_attachment_type:multimodalState.attachment || "",
+    client_topic:Array.isArray(adaptiveTopic.topic) ? adaptiveTopic.topic.join(" ").slice(0,500) : "",
+    client_context_mode:fastConversation ? "fast" : (adaptiveTopic.continuity ? "continuity" : "adaptive"),
+    client_context_count:contextMessages.length,
+    client_persistent_state:persistentBridge.mode || "none",
+    client_persistent_topics:persistentBridge.topics || "",
+    client_persistent_summary:fastConversation ? "" : (persistentBridge.summary || ""),
+    client_persistent_message_count:persistentBridge.messageCount || messages.length,
+    client_adaptive_version:window.AARU_V19_VERSION || "",
+    client_adaptive_verbosity:adaptiveBehavior.verbosity || "balanced",
+    client_adaptive_tone:adaptiveBehavior.tone || "natural",
+    client_adaptive_reasoning:adaptiveBehavior.reasoning || "auto",
+    client_adaptive_continuity:!!adaptiveBehavior.continuity,
+    client_adaptive_confidence:Number(adaptiveBehavior.confidence || .72),
+    client_behavior_hint:safe(
+      () => typeof window.aaruV19GetBehaviorHint === "function" ? window.aaruV19GetBehaviorHint(adaptiveBehavior) : "",
+      ""
+    ),
+    stream:false,
+    previous_response_id:previousResponseId || undefined
+  };
+
+  /* Optional attachment processing must not block ordinary text chat. */
+  if(selectedPhotoBase64){
+    payload.image_b64=await resizeImageDataURL(
+      selectedPhotoBase64,
+      MAX_MODEL_IMAGE_SIZE,
+      .76
+    );
+  }else if(selectedDocumentText){
+    payload.document_text=selectedDocumentText.slice(0,90000);
   }
 
-  const response =
-    await fetchChatWithRecovery(payload);
+  /* ONE real network request path. */
+  window.__AARU_LAST_CHAT_PAYLOAD_AT__=Date.now();
+  window.__AARU_LAST_CHAT_PAYLOAD__={message:currentQuery,contextCount:contextMessages.length,hasImage:!!payload.image_b64,hasDocument:!!payload.document_text};
+  const response=await fetchChatWithRecovery(payload);
 
-  const contentType=(response.headers.get("content-type")||"").toLowerCase();
+  const contentType=(response.headers.get("content-type") || "").toLowerCase();
   if(contentType.includes("text/event-stream"))return await consumeAstraStream(response);
-  if(contentType.startsWith("image/"))return {text:"इमेज तैयार है।",image:await blobToDataURL(await response.blob())};
-  const raw=await response.text(); let data=null;
-  try{data=raw?JSON.parse(raw):null;}catch{if(!response.ok)throw new Error(raw||"Chat request failed.");if(raw.trim())return {text:cleanAaruText(raw),image:null};throw new Error("Worker ने खाली response दिया।");}
+  if(contentType.startsWith("image/"))return {
+    text:"इमेज तैयार है।",
+    image:await blobToDataURL(await response.blob())
+  };
+
+  const raw=await response.text();
+  let data=null;
+  try{
+    data=raw ? JSON.parse(raw) : null;
+  }catch{
+    if(!response.ok)throw new Error(raw || "Chat request failed.");
+    if(raw.trim())return {text:cleanAaruText(raw),image:null};
+    throw new Error("Worker ने खाली response दिया।");
+  }
+
   if(!response.ok){
-    const message=data?.error||data?.message||data?.detail||`Chat request failed (${response.status})`;
+    const message=data?.error || data?.message || data?.detail || `Chat request failed (${response.status})`;
     const error=new Error(String(message));
     error.status=response.status;
-    error.code=data?.code||data?.error?.code||null;
+    error.code=data?.code || data?.error?.code || null;
     throw error;
   }
+
   const normalized=normalizeChatResult(data);
-  const nextResponseId=data?.fallback===true ? null : (data?.response_id||data?.id||null);
-  if(nextResponseId){previousResponseId=String(nextResponseId).slice(0,200);const chat=chats.find(item=>item.id===currentChatId);if(chat)chat.responseId=previousResponseId;}
-  lastToolsUsed=Array.isArray(data?.tools_used)?data.tools_used:[];
-  if(!normalized?.text&&!normalized?.image){
-    const fallbackText=data?.reply||data?.response||data?.text||"";
-    if(fallbackText){normalized.text=cleanAaruText(fallbackText);}
+  const nextResponseId=data?.fallback===true ? null : (data?.response_id || data?.id || null);
+  if(nextResponseId){
+    previousResponseId=String(nextResponseId).slice(0,200);
+    const chat=chats.find(item=>item.id===currentChatId);
+    if(chat)chat.responseId=previousResponseId;
   }
-  if(!normalized?.text&&!normalized?.image)throw new Error("Aaru ने खाली response दिया।");
+  lastToolsUsed=Array.isArray(data?.tools_used) ? data.tools_used : [];
+
+  if(!normalized?.text && !normalized?.image){
+    const fallbackText=data?.reply || data?.response || data?.text || "";
+    if(fallbackText)normalized.text=cleanAaruText(fallbackText);
+  }
+  if(!normalized?.text && !normalized?.image)throw new Error("Aaru ने खाली response दिया।");
   return normalized;
 }
 
