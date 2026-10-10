@@ -2347,6 +2347,10 @@ function normalizeChat(chat){
     semanticMemory:
       normalizeSemanticMemory(savedSemanticMemory),
 
+    /* Preserve the compact summary across reloads/chat switches. */
+    memorySummary:
+      savedMemory.slice(0, MAX_MEMORY_SUMMARY_CHARS),
+
     responseId:
       String(chat.responseId || chat.previousResponseId || "").slice(0,200) || null,
 
@@ -7374,21 +7378,20 @@ window.AARU_ASTRA_NATIVE = Object.freeze({
     };
   };
 
-  /* Non-invasive recovery wrapper: retries only transient failures and never retries quota/auth errors. */
+  /*
+    Record recovery diagnostics without adding a second retry loop.
+    The core fetchChatWithRecovery already retries transient failures;
+    wrapping it with another retry loop could multiply paid requests.
+  */
   const original=window.fetchChatWithRecovery;
   if(typeof original==="function" && !original.__AARU_V18_WRAPPED){
     const wrapped=async function(payload){
-      let attempt=0;
-      while(true){
-        try{return await original.call(this,payload)}
-        catch(error){
-          const plan=window.aaruV18BuildRecoveryPlan(error,attempt);
-          window.aaruV18RecordRecovery(plan,error);
-          if(!plan.retryable)throw error;
-          attempt++;
-          const delay=500*attempt;
-          await new Promise(resolve=>setTimeout(resolve,delay));
-        }
+      try{
+        return await original.call(this,payload);
+      }catch(error){
+        const plan=window.aaruV18BuildRecoveryPlan(error,0);
+        window.aaruV18RecordRecovery(plan,error);
+        throw error;
       }
     };
     wrapped.__AARU_V18_WRAPPED=true;
